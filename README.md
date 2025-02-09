@@ -67,7 +67,7 @@ Workload Limits
 - This prevents TAs from exceeding reasonable workloads.
 
 #### Data Management
-Stored Information
+#### Stored Information
 - Students Table (Student ID, Name, TA status, MS/PhD status)
 - Staff Table (Personnel ID, Name, Role)
 - Courses Table (Course offerings, Instructor details)
@@ -82,7 +82,7 @@ Stored Information
   - Total TA workload per course
   - Exam distribution list of students for each classroom
     
-##### Technology Stack
+#### Technology Stack
 - Backend: not decided
 - Frontend: not decided
 - Database: MySQL
