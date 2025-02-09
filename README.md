@@ -7,7 +7,7 @@ The “TA Management System” is a web application developed as part of the CS3
 
 This system aims to “reduce administrative workload” by automating proctoring assignments and balancing workloads among TAs, ensuring fairness and efficiency.
 
-## Core Features
+## Core Features
 TA Duties Management
 TAs perform a variety of tasks, including:
 - Assisting with assigned courses
@@ -20,18 +20,18 @@ TAs perform a variety of tasks, including:
 The system ensures that “TA workloads are balanced” by tracking their completed and approved (by the instructor) tasks and prioritizing proctoring assignments for TAs with lower workloads.
 
 Proctoring Assignment Workflow
-Exam proctoring duties are assigned with priority given to TAs with the least workload. This ensures an even distribution of responsibilities.
+Exam proctoring duties are assigned with priority to TAs with the least workload. This ensures an even distribution of responsibilities.
 
 Proctoring assignments can be done in two ways:
-The information of how many TA’s are needed should be entered by the authorized staff and choose whether the assignments should be automatic or manual.
+The information on how many TAs are needed should be entered by the authorized staff and choose whether the assignments should be automatic or manual.
 1. Automatic Assignment:  
    - The system prioritizes assigning **TAs of that course** first.
-   - If additional proctors are needed(if the required number of TAs can not be taken from that course), **other TAs from the department** are assigned with Dean’s office.
+   - If additional proctors are needed(if the required number of TAs can not be taken from that course), **other TAs from the department** are assigned to the Dean’s office.
    - TAs who **have no proctoring duties on the day before/after** the exam receive priority.
 
 Special Restrictions Used to Filter TAs for Proctoring Assignments
-The course assigned to the TA is MS/PHD level and assistant meets that condition
-TA taking that course as an student can not be proctor
+The course assigned to the TA is MS/PhD level and the assistant meets that condition
+TA taking that course as a student can not be a proctor
 TA has an exam as the student during the exam time/date
 TA is on leave near the exam time
 2. Manual Assignment:  
@@ -41,7 +41,7 @@ TA is on leave near the exam time
 
 TA Duty Workflow
 - TAs log their completed tasks (e.g., grading, lab sessions, office hours) and duration time.
-- The course instructor receives a notification and can approve/reject the task posted by TA.
+- The course instructor receives a notification and can approve/reject the task posted by the TA.
 - Once approved, the recorded hours needed to complete the task are added to the TA's total workload.
 
 TA Leave Management
@@ -60,9 +60,9 @@ Proctor Swap System
 
 #### Dean’s Office Oversight
 - The Dean’s Office can assign proctoring duties for exams scheduled by themselves across multiple departments.
-- The Dean’s Office can choose from which departments TAs will be selected for proctoring duties scheduled by themselves.
+- The Dean’s Office can choose departments TAs will be selected for proctoring duties scheduled by themselves.
 Workload Limits
-- Cap can be set on maximum hours a TA can work in a semester and the assigning process should be set not to exceed this workload.
+- Cap can be set on the maximum hours a TA can work in a semester and the assigning process should be set not to exceed this workload.
 - This prevents TAs from exceeding reasonable workloads.
 
 Data Management
@@ -75,12 +75,11 @@ Stored Information
 - System Logs (All activities: logins, assignments, swaps, etc.)
 
 Import & Export Functionality
-- Data (students, faculty, courses) can be imported via Excel spreadsheets.
+- Data (students, faculty, courses) can be imported via Excel spreadsheets. Different types of reports can be downloaded by users considering their roles.
 - The system provides reports on:
- - Total proctoring per semester
+  - Total proctoring per semester
   - Total TA workload per course
-  - Exam assignment statistics
-  - 
+  - Exam distribution list of students for each classroom
 Technology Stack
 - Backend: not decided
 - Frontend: not decided
@@ -88,10 +87,12 @@ Technology Stack
 - Hosting: Apache2 on Linux servers
 
 Actors in the System
-1. Teaching Assistants (TAs)
-2. Course Instructors
-3. Department Staff & Coordinators
-4. Dean’s Office Administrators
+Teaching Assistant (TA) 
+Faculty Member
+Department Staff 
+Department Chair 
+Dean’s Office 
+Admin
 
 Key Objectives & Benefits
 Automated workload balancing for TAs  
@@ -102,8 +103,9 @@ Comprehensive data reporting for administrators
 
 This system ensures efficient TA management, minimizing manual workload for faculty while improving fairness and transparency in TA duty assignments.
 
-Emiralp İlgen 22203114
-Perhat Amanlyyev 22201007
-İlmay Taş 22201715
-Anıl Keskin 22201915
-Simay Uygur 22203328
+Emiralp İlgen 		22203114
+Perhat Amanlyyev 	22201007
+İlmay Taş 		   22201715
+Anıl Keskin 		22201915
+Simay Uygur 		22203328
+
