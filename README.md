@@ -108,7 +108,7 @@ This system ensures efficient TA management, minimizing manual workload for facu
 #### Group Members
 * Emiralp İlgen 		22203114
 * Perhat Amanlyyev 	22201007
-* İlmay Taş 		   22201715
-* Anıl Keskin 		22201915
-* Simay Uygur 		22203328
+* İlmay Taş 		    22201715
+* Anıl Keskin 		  22201915
+* Simay Uygur 		  22203328
 
