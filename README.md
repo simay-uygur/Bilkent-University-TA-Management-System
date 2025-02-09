@@ -16,6 +16,7 @@ TAs perform a variety of tasks, including:
 - Leading recitation sessions
 - Holding office hours
 - Exam proctoring duties
+  TAs have their own schedule to see their courses and additional changes during the semester.
 
 The system ensures that “TA workloads are balanced” by tracking their completed and approved (by the instructor) tasks and prioritizing proctoring assignments for TAs with lower workloads.
 
@@ -80,19 +81,20 @@ Stored Information
   - Total proctoring per semester
   - Total TA workload per course
   - Exam distribution list of students for each classroom
-Technology Stack
+    
+##### Technology Stack
 - Backend: not decided
 - Frontend: not decided
 - Database: MySQL
 - Hosting: Apache2 on Linux servers
 
 #### Actors in the System
-Teaching Assistant (TA) 
-Faculty Member
-Department Staff 
-Department Chair 
-Dean’s Office 
-Admin
+- Teaching Assistant (TA) 
+- Faculty Member
+- Department Staff 
+- Department Chair 
+- Dean’s Office 
+- Admin
 
 #### Key Objectives & Benefits
 * Automated workload balancing for TAs  
