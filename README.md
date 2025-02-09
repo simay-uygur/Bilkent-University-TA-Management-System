@@ -2,7 +2,7 @@
 
 ## *TA Management System*
 ### *Overview*
-The *TA Management System* is a web application developed as part of the CS319 - Fall 2024 project at *Bilkent University. It is designed to streamline the workload management and scheduling of **Teaching Assistants (TAs)* by efficiently assigning *TA duties, exam proctoring tasks, and reporting workload statistics*.
+The *TA Management System* is a web application developed as part of the CS319 - Fall 2024 project at Bilkent University. It is designed to streamline the workload management and scheduling of **Teaching Assistants (TAs)* by efficiently assigning *TA duties, exam proctoring tasks, and reporting workload statistics*.
 
 This system aims to *reduce administrative workload* by automating proctoring assignments and balancing workloads among TAs, ensuring fairness and efficiency.
 
@@ -21,7 +21,7 @@ TAs perform a variety of tasks, including:
 The system ensures that *TA workloads are balanced* by tracking their completed tasks and prioritizing proctoring assignments for TAs with *lower workloads*.
 
 ### *Proctoring Assignment Workflow*
-Exam proctoring duties are assigned with priority given to TAs with the least workload. This ensures an **even distribution of responsibilities*.
+Exam proctoring duties are assigned with priority given to TAs with the least workload. This ensures an *even distribution of responsibilities*.
 
 Proctoring assignments can be done in two ways:
 
