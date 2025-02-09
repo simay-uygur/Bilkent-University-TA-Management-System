@@ -24,6 +24,7 @@ The system ensures that *TA workloads are balanced* by tracking their completed 
 Exam proctoring duties are assigned with *priority given to TAs with the least workload. This ensures an **even distribution of responsibilities*.
 
 Proctoring assignments can be done in two ways:
+
 1.⁠ ⁠*Automatic Assignment*:  
    - The system prioritizes assigning *TAs of that course* first.
    - If additional proctors are needed, *other TAs from the department* are assigned.
