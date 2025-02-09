@@ -21,7 +21,7 @@ TAs perform a variety of tasks, including:
 The system ensures that *TA workloads are balanced* by tracking their completed tasks and prioritizing proctoring assignments for TAs with *lower workloads*.
 
 ### *Proctoring Assignment Workflow*
-Exam proctoring duties are assigned with *priority given to TAs with the least workload. This ensures an **even distribution of responsibilities*.
+Exam proctoring duties are assigned with priority given to TAs with the least workload. This ensures an **even distribution of responsibilities*.
 
 Proctoring assignments can be done in two ways:
 
