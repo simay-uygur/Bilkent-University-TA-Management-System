@@ -27,18 +27,19 @@ The information on how many TAs are needed should be entered by the authorized s
    - The system prioritizes assigning **TAs of that course** first.
    - If additional proctors are needed(if the required number of TAs can not be taken from that course), **other TAs from the department** are assigned to the Dean’s office.
    - TAs who **have no proctoring duties on the day before/after** the exam receive priority.
-
-        
+             
 Special Restrictions Used to Filter TAs for Proctoring Assignments
 The course assigned to the TA is MS/PhD level and the assistant meets that condition
 TA taking that course as a student can not be a proctor
 TA has an exam as the student during the exam time/date
 TA is on leave near the exam time
 
+
 However, If no enough number of TAs are found, system will ask for overriding restrictions:
-     -Consecutive days or same day.
-     -Break MS/PHD restrictions... etc
-     -TA's from other departments via Dean's office.
+  Consecutive days or same day,
+  Breaking MS/PHD restrictions,
+  TA's from other departments via Dean's office etc.
+  
 2. Manual Assignment:  
    - Faculty or authorized staff can **manually assign** TAs based on availability and exam requirements.
    - Options of **exam requirements** by which TAs will be selected for proctoring
