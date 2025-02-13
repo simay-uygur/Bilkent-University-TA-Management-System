@@ -30,7 +30,7 @@ The information on how many TAs are needed should be entered by the authorized s
              
 Special Restrictions Used to Filter TAs for Proctoring Assignments  
 The course assigned to the TA is MS/PhD level and the assistant meets that condition  
-*TA taking that course as a student can not be a proctor  
+TA taking that course as a student can not be a proctor  
 TA has an exam as the student during the exam time/date  
 TA is on leave near the exam time  
 
