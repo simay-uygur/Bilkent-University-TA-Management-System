@@ -36,9 +36,9 @@ TA is on leave near the exam time
 
 
 However, If no enough number of TAs are found, system will ask for overriding restrictions:
-  Consecutive days or same day,
-  Breaking MS/PHD restrictions,
-  TA's from other departments via Dean's office etc.
+Consecutive days or same day,
+Breaking MS/PHD restrictions,
+TA's from other departments via Dean's office etc.
   
 2. Manual Assignment:  
    - Faculty or authorized staff can **manually assign** TAs based on availability and exam requirements.
