@@ -1,0 +1,5 @@
+# .gitignore içeriğini buraya ekleyin
+node_modules
+*.log
+../.env
+# ...diğer kurallar...

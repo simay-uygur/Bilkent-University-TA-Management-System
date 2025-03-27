@@ -27,7 +27,7 @@ services:
   db:
     image: mysql:8
     ports:
-      - "3306:3306"
+      - "3307:3306"
     environment:
       - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
       - MYSQL_DATABASE=${MYSQL_DATABASE}
@@ -45,4 +45,6 @@ volumes:
 networks:
   shared_network:
     driver: bridge
+
+
 
