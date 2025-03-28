@@ -22,10 +22,12 @@ import lombok.RequiredArgsConstructor;
 public class UserServImpl implements UserServ{
 
     @Autowired 
-    private final UserRepo repo; 
+    private UserRepo repo; 
 
     @Autowired
-    private final TARepo taRepo;
+    private TARepo taRepo;
+
+    @Autowired
     private final BCryptPasswordEncoder encoder ;
     
     @Override
@@ -48,7 +50,7 @@ public User createUser(User u) {
         case DEANS_OFFICE -> {
             }
 
-        case TEACHING_ASSISTANT -> {
+        case TA -> {
                 if (u instanceof TA) {
                     TA ta = (TA) u;
                     return taRepo.save(ta); 
