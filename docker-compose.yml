@@ -1,8 +1,12 @@
-version: '3.8'
-
 services:
   backend:
-    build: ./backend
+    build:
+      context: ./backend
+    working_dir: /app
+    volumes:
+      - ./backend:/app        # ← sadece backend klasörünü bağla
+      - ~/.m2:/root/.m2
+    command: ["./mvnw", "spring-boot:run"]
     ports:
       - "8080:8080"
     environment:
@@ -10,10 +14,12 @@ services:
       - SPRING_DATASOURCE_USERNAME=${SPRING_DATASOURCE_USERNAME}
       - SPRING_DATASOURCE_PASSWORD=${SPRING_DATASOURCE_PASSWORD}
       - SPRING_JPA_HIBERNATE_DDL_AUTO=${SPRING_JPA_HIBERNATE_DDL_AUTO}
+      - SPRING_DEVTOOLS_RESTART_ENABLED=true
     depends_on:
       - db
     networks:
       - shared_network
+    restart: unless-stopped
 
   frontend:
     build: ./frontend
@@ -45,6 +51,7 @@ volumes:
 networks:
   shared_network:
     driver: bridge
+
 
 
 
