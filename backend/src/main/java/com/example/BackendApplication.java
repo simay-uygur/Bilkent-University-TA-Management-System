@@ -1,9 +1,9 @@
 package com.example;
 
-import jakarta.annotation.PostConstruct;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
+import jakarta.annotation.PostConstruct;
 @SpringBootApplication
 public class BackendApplication {
     public static void main(String[] args) {
@@ -16,3 +16,4 @@ public class BackendApplication {
         System.out.println("🔍 DB URL from Spring: " + System.getProperty("spring.datasource.url"));
     }
 }
+
