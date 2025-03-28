@@ -35,7 +35,7 @@ public class logController {
     UserServ serv ;
 
     private final AuthenticationManager authenticationManager;
-    
+/*
     @PostMapping("/api/signUp")
     public ResponseEntity<User> createUser(@RequestBody User u) 
     {
@@ -51,6 +51,21 @@ public class logController {
             throw new IncorrectWebMailException() ;
         return new ResponseEntity<>(serv.createUser(u), HttpStatus.CREATED) ;
         //return ResponseEntity.created(URI.create("/signIn/{id}")).body(serv.createUser(u)) ;
+    }*/
+
+    @PostMapping("/api/signUp")
+    public ResponseEntity<User> createUser(@RequestBody User u) {
+        User user_to_check = serv.getUserById(u.getId());
+        if (user_to_check != null) {
+            throw new UserExistsExc(u.getId());
+        }
+
+        String check_mail = u.getName().toLowerCase() + "." + u.getSurname().toLowerCase() + "@ug.bilkent.edu.tr";
+        if (!check_mail.equals(u.getWebmail().toLowerCase())) {
+            throw new IncorrectWebMailException();
+        }
+
+        return new ResponseEntity<>(serv.createUser(u), HttpStatus.CREATED);
     }
 
     @PostMapping("/api/signIn")
