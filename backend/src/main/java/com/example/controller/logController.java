@@ -1,6 +1,7 @@
 package com.example.controller;
 
 import java.util.List;
+import java.util.Objects;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -38,13 +39,15 @@ public class logController {
     @PostMapping("/api/signUp")
     public ResponseEntity<User> createUser(@RequestBody User u) 
     {
+        //System.out.println("role: " + u.getRole() + "id: " + u.getId());
+        User user_to_check = serv.getUserById(u.getId());
         if (serv.getUserById(u.getId()) != null)
             throw new UserExistsExc(u.getId()) ;
         String check_mail = u.getName().toLowerCase() + 
                             "." + 
                             u.getSurname().toLowerCase() + 
                             "@ug.bilkent.edu.tr";
-        if (!check_mail.matches(u.getWebmail()))
+        if (!check_mail.matches(u.getWebmail().toLowerCase()) && !Objects.equals(user_to_check.getId(), u.getId()))
             throw new IncorrectWebMailException() ;
         return new ResponseEntity<>(serv.createUser(u), HttpStatus.CREATED) ;
         //return ResponseEntity.created(URI.create("/signIn/{id}")).body(serv.createUser(u)) ;
@@ -81,3 +84,13 @@ public class logController {
     }
     
 }
+/*{
+    "role" : "TA",
+    "isDeleted" : false,
+    "id" : 1, incr
+    "password" : "1", incr
+    "name" : "q",
+    "surname" : "e",
+    "webmail" : "q.e@ug.bilkent.edu.tr",
+    "type" : "TA"
+} */
