@@ -1,11 +1,12 @@
 FROM eclipse-temurin:21-jdk-alpine
-
 WORKDIR /app
 
-COPY . .
+# JAR yerine direkt kaynak kodunu kopyala
+COPY . /app
 
+# Geliştirme için Maven wrapper kullan (ya da gradle)
 RUN ./mvnw clean package -DskipTests
 
-CMD ["java", "--enable-preview", "-jar", "target/demo1-0.0.1-SNAPSHOT.jar"]
+EXPOSE 8080
 
-
+CMD ["./mvnw", "spring-boot:run"]
