@@ -38,5 +38,14 @@ public class Course {
     @Embedded
     private List<Event> exams ;
 
-    
+    /*@OneToMany(
+        fetch = FetchType.LAZY,
+        cascade = {CascadeType.PERSIST, CascadeType.MERGE} // course -> deleted => tasks are deleted
+    )
+    @JoinTable( // creates a table for one to many relationship
+        name = "course_tasks",
+        joinColumns = @JoinColumn(name = "task_id"),
+        inverseJoinColumns = @JoinColumn(name = "course_id") // creates in ta table field for tasks 
+    )
+    private Set<Task> course_tasks_list = new HashSet<Task>();  */  
 }

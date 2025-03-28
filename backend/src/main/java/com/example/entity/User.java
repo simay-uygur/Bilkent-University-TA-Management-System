@@ -1,6 +1,8 @@
 package com.example.entity;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonSubTypes;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -23,7 +25,12 @@ import lombok.Setter;
 @AllArgsConstructor
 //do not write table to user class
 @JsonInclude(JsonInclude.Include.NON_DEFAULT)
-public abstract class User {
+@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "type")
+@JsonSubTypes({
+    @JsonSubTypes.Type(value = TA.class, name = "TA"),
+    //@JsonSubTypes.Type(value = Admin.class, name = "ADMIN")
+})
+public class User {
     @Id
     @Column(name = "id", unique = true, updatable = false, nullable = false)
     private Long id ;

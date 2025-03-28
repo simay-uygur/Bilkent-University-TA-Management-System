@@ -39,4 +39,15 @@ public class Date {
     public boolean isAfter(Date other) {
         return other.isBefore(this);
     }
+
+    public Date currenDate() {
+        java.time.LocalDateTime now = java.time.LocalDateTime.now();
+        Date currentDate = new Date();
+        currentDate.setDay(now.getDayOfMonth());
+        currentDate.setMonth(now.getMonthValue());
+        currentDate.setYear(now.getYear());
+        currentDate.setHour(now.getHour());
+        currentDate.setMinute(now.getMinute());
+        return currentDate;
+    }
 }
