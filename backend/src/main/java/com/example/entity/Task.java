@@ -1,42 +1,45 @@
 package com.example.entity;
 
-import java.util.HashSet;
-import java.util.Set;
-
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonSubTypes;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
-import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.ManyToMany;
-import jakarta.persistence.Table;
+import jakarta.persistence.Inheritance;
+import jakarta.persistence.InheritanceType;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
 @Getter
 @Setter
-//@Table(name = "task_table", uniqueConstraints = @UniqueConstraint(columnNames = {"course_id", "task_id"}))
-@Table(name = "task_table")
+@Inheritance(strategy = InheritanceType.TABLE_PER_CLASS) // if it is not included it will add every user with different roles to the same table in mysql. table per class means for each class(ta,deans office) there is their own table 
+@JsonInclude(JsonInclude.Include.NON_DEFAULT)
+@NoArgsConstructor
+@AllArgsConstructor
+@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "type")
+@JsonSubTypes({
+    @JsonSubTypes.Type(value = PublicTask.class, name = "PUBLIC"),
+    @JsonSubTypes.Type(value = PrivateTask.class, name = "PRIVATE")
+})
 public class Task {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY) // auto id generation
+    @GeneratedValue(strategy = GenerationType.TABLE) // auto id generation
     @Column(name = "task_id", unique = true, updatable = false, nullable = false)
     private int task_id;
 
-    /*@ManyToOne // when using relationships needs to know who // changes did not save in visual paradigm ))))))
+    /*@ManyToOne // when using relationships needs to know who 
     @JoinColumn(name = "course_id")
     private Course course; //many to one*/
-
-    @ManyToMany(mappedBy="ta_tasks_list",fetch = FetchType.LAZY) // mappedby means that the other side is the owner of the relationship(TA)
-    @JsonIgnore
-    private Set<TA> tas_list = new HashSet<TA>(); //many to many
 
     /*@ManyToMany(mappedBy="section_tasks_list",fetch = FetchType.LAZY)
     private List<Section> sections_list ; //many to many*/
@@ -45,31 +48,26 @@ public class Task {
     @Column(name = "duration", unique = false, updatable = true, nullable = false)
     private Event duration;
 
-    @Column(name = "required_tas", unique = false, updatable = true, nullable = false)
-    private int requiredTAs;
-
-    @Column(name = "size_of_tas", unique = false, updatable = true, nullable = false)
-    private int amount_of_tas;
-
     @Column(name = "is_time_passed", unique = false, updatable = true, nullable = false)
     private boolean isTimePassed;
 
     @Column(name = "workload", unique = false, updatable = true, nullable = false)
     private int workload; 
 
-    @Column(name = "amount_of_workers", unique = false, updatable = true, nullable = false)
-    private int size; 
-
-    @Column(name = "type", unique = false, updatable = true, nullable = false)
+    @Column(name = "task_type", unique = false, updatable = true, nullable = false)
     @Enumerated(EnumType.STRING)
-    private TaskType type;
+    private TaskType task_type;
     
     @Column(name = "status", unique = false, updatable = true, nullable = false)
     @Enumerated(EnumType.STRING)
-    private TaskState status;
+    private TaskState status = TaskState.UNKNOWN;
+
+    /*@Column(name = "access_type", unique = false, updatable = true, nullable = false)
+    @Enumerated(EnumType.STRING)
+    private TaskAccessType accessType ;*/
 
     //Method to check if task is still active
     public boolean isTaskActive() {
-        return duration.isOngoing();
+        return duration != null && duration.isOngoing();
     }
 }
