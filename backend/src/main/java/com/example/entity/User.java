@@ -21,10 +21,9 @@ import lombok.Setter;
 @Getter
 @Setter
 @Inheritance(strategy = InheritanceType.TABLE_PER_CLASS) // if it is not included it will add every user with different roles to the same table in mysql. table per class means for each class(ta,deans office) there is their own table 
+@JsonInclude(JsonInclude.Include.NON_DEFAULT)
 @NoArgsConstructor
 @AllArgsConstructor
-//do not write table to user class
-@JsonInclude(JsonInclude.Include.NON_DEFAULT)
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "type")
 @JsonSubTypes({
     @JsonSubTypes.Type(value = TA.class, name = "TA"),

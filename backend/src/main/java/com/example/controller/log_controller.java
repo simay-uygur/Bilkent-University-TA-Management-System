@@ -29,13 +29,13 @@ import lombok.RequiredArgsConstructor;
 // better to use different controllers for each role, because the logic for each role is different
 @RestController
 @RequiredArgsConstructor
-public class logController {
+public class log_controller {
     
     @Autowired
     UserServ serv ;
 
     private final AuthenticationManager authenticationManager;
-/*
+    
     @PostMapping("/api/signUp")
     public ResponseEntity<User> createUser(@RequestBody User u) 
     {
@@ -51,21 +51,6 @@ public class logController {
             throw new IncorrectWebMailException() ;
         return new ResponseEntity<>(serv.createUser(u), HttpStatus.CREATED) ;
         //return ResponseEntity.created(URI.create("/signIn/{id}")).body(serv.createUser(u)) ;
-    }*/
-
-    @PostMapping("/api/signUp")
-    public ResponseEntity<User> createUser(@RequestBody User u) {
-        User user_to_check = serv.getUserById(u.getId());
-        if (user_to_check != null) {
-            throw new UserExistsExc(u.getId());
-        }
-
-        String check_mail = u.getName().toLowerCase() + "." + u.getSurname().toLowerCase() + "@ug.bilkent.edu.tr";
-        if (!check_mail.equals(u.getWebmail().toLowerCase())) {
-            throw new IncorrectWebMailException();
-        }
-
-        return new ResponseEntity<>(serv.createUser(u), HttpStatus.CREATED);
     }
 
     @PostMapping("/api/signIn")
@@ -101,11 +86,10 @@ public class logController {
 }
 /*{
     "role" : "TA",
-    "isDeleted" : false,
-    "id" : 1, incr
-    "password" : "1", incr
-    "name" : "q",
-    "surname" : "e",
-    "webmail" : "q.e@ug.bilkent.edu.tr",
+    "id" : 1, 
+    "password" : "1", 
+    "name" : "ta",
+    "surname" : "1",
+    "webmail" : "ta.1@ug.bilkent.edu.tr",
     "type" : "TA"
 } */
