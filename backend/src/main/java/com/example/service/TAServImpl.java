@@ -9,6 +9,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.example.entity.PrivateTask;
+import com.example.entity.PublicTask;
 import com.example.entity.TA;
 import com.example.entity.Task;
 import com.example.exception.UserNotFoundExc;
@@ -26,6 +28,9 @@ public class TAServImpl implements TAServ {
 
     @Autowired
     private TaskRepo taskRepo;
+
+    @Autowired
+    private TaskServ taskServ;
     
     @Override
     public TA getTAById(Long id){
@@ -89,7 +94,12 @@ public class TAServImpl implements TAServ {
             throw new RuntimeException("TA with ID " + ta_id + " not found.");
         }  
         TA ta = taOptional.get();
-        for (Task task : ta.getTa_tasks_list()) {
+        for (Task task : ta.getTa_public_tasks_list()) {
+            if (task.getTask_id() == task_id) {
+                return task;
+            }
+        }
+        for (Task task : ta.getTa_private_tasks_list()) {
             if (task.getTask_id() == task_id) {
                 return task;
             }
@@ -100,36 +110,32 @@ public class TAServImpl implements TAServ {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public Task assignTask(Task task, Long id) {
-        /*if (task.getTas_list() == null || task.getTas_list().isEmpty()) {
-            throw new RuntimeException("Task must be assigned to at least one TA.");
-        }
-
         TA existingTA = repo.findById(id)
         .orElseThrow(() -> new RuntimeException("TA with ID " + id + " does not exist."));
         
-        existingTA.getTa_tasks_list().add(task);
-        
-        task.getTas_list().add(existingTA);
-        repo.save(existingTA);
-        return taskRepo.save(task);*/
-        TA existingTA = repo.findById(id)
-        .orElseThrow(() -> new RuntimeException("TA with ID " + id + " does not exist."));
-    
-        if(task.getTas_list() == null) {
-            task.setTas_list(new HashSet<>());
+        if (!taskServ.checkAndUpdateStatusTask(task)) {
+            throw new RuntimeException("Task with ID " + task.getTask_id() + " is not active! Please check duration!"); // or can be warning that user set incorrect duration!!!!!
         }
         
-        //task.getTas_list().add(existingTA);
-        
-        existingTA.getTa_tasks_list().add(task);
-        
-        repo.save(existingTA);
-        for (Task tas : existingTA.getTa_tasks_list()) {
-            if (tas.getTask_id() == task.getTask_id()) {
-                return tas;
+        if (task instanceof PublicTask publicTask)
+        {
+            if(publicTask.getTas_list() == null) {
+                publicTask.setTas_list(new HashSet<>());
             }
+            publicTask.addTA();
+            publicTask.getTas_list().add(existingTA);
+            existingTA.getTa_public_tasks_list().add(publicTask);
+            repo.saveAndFlush(existingTA);
+            return publicTask;
         }
-        throw new RuntimeException("Task with ID " + task.getTask_id() + " not found.");
+        else
+        {
+            PrivateTask privateTask = (PrivateTask) task;
+            privateTask.setTa_owner(existingTA);
+            existingTA.getTa_private_tasks_list().add(privateTask);
+            repo.saveAndFlush(existingTA);
+            return privateTask;
+        }
     }
     
     @Override
@@ -139,10 +145,19 @@ public class TAServImpl implements TAServ {
             throw new RuntimeException("TA with ID " + ta_id + " not found.");
         }
         TA ta = taOptional.get();
-        for (Task task : ta.getTa_tasks_list()) {
+        for (PublicTask task : ta.getTa_public_tasks_list()) {
             if (task.getTask_id() == task_id) {
-                ta.getTa_tasks_list().remove(task);
+                ta.getTa_public_tasks_list().remove(task);
                 task.getTas_list().remove(ta);
+                repo.save(ta);
+                taskRepo.save(task);
+                return true;
+            }
+        }
+        for (PrivateTask task : ta.getTa_private_tasks_list()) {
+            if (task.getTask_id() == task_id) {
+                ta.getTa_private_tasks_list().remove(task);
+                task.setTa_owner(null);
                 repo.save(ta);
                 taskRepo.save(task);
                 return true;
@@ -155,7 +170,10 @@ public class TAServImpl implements TAServ {
     public Set<Task> getAllTasks(Long id) {
         TA existingTA = repo.findById(id)
             .orElseThrow(() -> new RuntimeException("TA with ID " + id + " does not exist."));
-        return existingTA.getTa_tasks_list();
+        Set<Task> tasks = new HashSet<>();
+        tasks.addAll(existingTA.getTa_public_tasks_list());
+        tasks.addAll(existingTA.getTa_private_tasks_list());
+        return tasks;
     }
 
     private void mark_deleted(TA ta) {
@@ -163,7 +181,8 @@ public class TAServImpl implements TAServ {
             throw new IllegalStateException("User already deleted");
         }
         ta.setDeleted(true);
-        ta.getTa_tasks_list().clear();
+        ta.getTa_public_tasks_list().clear();
+        ta.getTa_private_tasks_list().clear();
     }
 
     private void delete(TA ta){

@@ -19,6 +19,7 @@ import com.example.entity.Task;
 import com.example.exception.UserNotFoundExc;
 import com.example.service.TAServ;
 import com.example.service.TaskServ;
+import com.example.service.UserServ;
 
 import lombok.RequiredArgsConstructor;
 
@@ -29,8 +30,27 @@ public class TA_controller {
     @Autowired
     private TAServ serv;
 
+    private UserServ userServ;
+
     @Autowired
     private TaskServ taskServ;
+
+    /*@PostMapping("/api/ta/signUp")
+    public ResponseEntity<TA> createTA(@RequestBody TA ta) 
+    {
+        //System.out.println("role: " + u.getRole() + "id: " + u.getId());
+        TA ta_to_check = serv.getTAById(ta.getId());
+        if (ta_to_check != null)
+            throw new UserExistsExc(ta.getId()) ;
+        String check_mail = ta.getName().toLowerCase() + 
+                            "." + 
+                            ta.getSurname().toLowerCase() + 
+                            "@ug.bilkent.edu.tr";
+        if (!check_mail.matches(ta_to_check.getWebmail().toLowerCase()) && !Objects.equals(ta_to_check.getId(), ta_to_check.getId()))
+            throw new IncorrectWebMailException() ;
+        return new ResponseEntity<>((TA) userServ.createUser(ta), HttpStatus.CREATED) ;
+        //return ResponseEntity.created(URI.create("/signIn/{id}")).body(serv.createUser(u)) ;
+    } // method should be sent to Admin controller*/
 
     @GetMapping("/api/ta/all")
     public List<TA> getAllTAs() 
@@ -76,16 +96,16 @@ public class TA_controller {
     @DeleteMapping("/api/ta/{ta_id}/task/{task_id}")
     public ResponseEntity<?> deleteTaskById(@PathVariable("ta_id") Long ta_id, @PathVariable("task_id") int task_id) 
     {
-        serv.deleteTaskById(task_id, ta_id);
-        return new ResponseEntity<>(HttpStatus.OK);
+        return new ResponseEntity<>(serv.deleteTaskById(task_id, ta_id),HttpStatus.OK);
     }
 
     @PutMapping("api/ta/{id}")
     public ResponseEntity<?> restoreTA(@PathVariable Long id) {
         return new ResponseEntity<>(serv.restoreTAById(id), HttpStatus.OK);
-    } // method should be sent to Admin controller
+    } 
 }
 /*{
+  "task_type" : "Lab",
   "duration": {
     "start": {
       "day": 28,
@@ -103,9 +123,6 @@ public class TA_controller {
     }
   },
   "requiredTAs": 2,
-  "amount_of_tas": 1,
   "workload": 4,
-  "size": 1,
-  "type": "Lab",
-  "status": "PENDING"
-} */
+  "type": "PUBLIC"
+}*/
