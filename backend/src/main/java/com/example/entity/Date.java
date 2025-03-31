@@ -16,8 +16,7 @@ public class Date {
     private int month;
     @Column(nullable = false)
     private int year;
-    
-    
+
     @Column(nullable = false)
     private int hour;
 
