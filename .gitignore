@@ -2,3 +2,10 @@ docker-compose.yml
 demo1/
 .env
 ./.idea
+.idea
+db-dump
+./db-dump
+/.idea/
+/db-dump/
+.idea/
+db-dump/
