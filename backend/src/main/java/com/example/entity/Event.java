@@ -33,6 +33,7 @@ public class Event {
     private Date finish;
 
     // Utility method to check if event is ongoing
+    // i dont think it checks whether the event is ongoing or not because it only checks first if the start is before current time
     public boolean isOngoing() {
         Date current = new Date().currenDate();
         return (current.isAfter(start) || current.isBefore(start)) && current.isBefore(finish);
