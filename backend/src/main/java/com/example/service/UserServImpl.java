@@ -34,44 +34,45 @@ public class UserServImpl implements UserServ{
     public List<User> getAllUsers(){
         return repo.findAll();
     }
+
     @Override
-public User createUser(User u) {
-    if (repo.findById(u.getId()).isPresent()) {
-        throw new UserExistsExc(u.getId());
-    }
+    public User createUser(User u) {
+        if (repo.findById(u.getId()).isPresent()) {
+            throw new UserExistsExc(u.getId());
+        }
 
-    String hashedPass = encoder.encode(u.getPassword());
-    u.setPassword(hashedPass);
+        String hashedPass = encoder.encode(u.getPassword());
+        u.setPassword(hashedPass);
 
-    switch (u.getRole()) {
-        case ADMIN -> {
-            }
-
-        case DEANS_OFFICE -> {
-            }
-
-        case TA -> {
-                if (u instanceof TA) {
-                    TA ta = (TA) u;
-                    return taRepo.save(ta); 
-                } else {
-                    throw new IllegalArgumentException("User is not a TA instance.");
+        switch (u.getRole()) {
+            case ADMIN -> {
                 }
-            }
 
-        case FACULTY_MEMBER -> {
-            }
+            case DEANS_OFFICE -> {
+                }
 
-        case DEPARTMENT_STAFF -> {
-            }
+            case TA -> {
+                    if (u instanceof TA) {
+                        TA ta = (TA) u;
+                        return taRepo.save(ta);
+                    } else {
+                        throw new IllegalArgumentException("User is not a TA instance.");
+                    }
+                }
 
-        case DEPARTMENT_CHAIR -> {
-            }
+            case FACULTY_MEMBER -> {
+                }
 
-        default -> throw new IllegalArgumentException("Unsupported role: " + u.getRole());
+            case DEPARTMENT_STAFF -> {
+                }
+
+            case DEPARTMENT_CHAIR -> {
+                }
+
+            default -> throw new IllegalArgumentException("Unsupported role: " + u.getRole());
+        }
+        return null;
     }
-    return null;
-}
     
     @Override
     public void deleteUser(User u) {

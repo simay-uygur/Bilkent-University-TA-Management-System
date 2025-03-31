@@ -15,7 +15,7 @@ import lombok.Setter;
 @Entity
 @Getter
 @Setter
-public class Course {
+public class Course { //why all features have updatable=true? i think some of them should not be updatable especially ids
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id; 
@@ -49,3 +49,35 @@ public class Course {
     )
     private Set<Task> course_tasks_list = new HashSet<Task>();  */  
 }
+
+/*
+
+@Entity
+@Getter
+@Setter
+public class Course {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @NotNull(message = "PhD status cannot be null")
+    @Column(name = "phd_status")
+    private Boolean PHD_status = false;
+
+    @NotNull(message = "MS status cannot be null")
+    @Column(name = "ms_status")
+    private Boolean MS_status = false;
+
+    @NotEmpty(message = "Course department cannot be empty")
+    @Column(name = "course_dep")
+    private String course_dep;
+
+    @NotNull(message = "Course ID cannot be null")
+    @Column(name = "course_id")
+    private Long course_id;
+
+    @OneToMany(mappedBy = "course", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<Event> exams;
+}
+
+ */

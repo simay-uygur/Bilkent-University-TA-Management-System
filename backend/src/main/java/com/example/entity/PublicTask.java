@@ -36,6 +36,7 @@ public class PublicTask extends Task{
     @JsonIgnore
     private Set<TA> tas_list = new HashSet<TA>(); //many to many
 
+    //why those just add or subtract from the number
     public boolean addTA(){
         if (amount_of_tas < requiredTAs) {
             amount_of_tas++;
