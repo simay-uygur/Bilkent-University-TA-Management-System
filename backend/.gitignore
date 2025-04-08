@@ -46,3 +46,6 @@ build/
 target
 
 .env
+
+
+.db-dump
