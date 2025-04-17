@@ -1,68 +1,50 @@
 // src/components/LeaveRequestForm.tsx
-import React, { useEffect, useState, FormEvent } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import axios from 'axios';
-import {
-  fetchScheduleItem,
-  ScheduleItem,
-  submitLeaveRequest,
-  LeaveRequestPayload
-} from '../api';
+
+import React, { useState, FormEvent } from 'react';
+import { useNavigate } from 'react-router-dom';
 import styles from './LeaveRequestForm.module.css';
 
+interface ScheduleItem {
+  id: string;
+  task: string;
+  date: string;       // ISO date
+  timeRange: string;  // "HH:MM – HH:MM"
+}
+
+// **Mock data** for convenience
+const mockItem: ScheduleItem = {
+  id: '1',
+  task: 'Proctoring – CS101',
+  date: '2025-04-20',
+  timeRange: '08:00 – 10:00',
+};
+
 const LeaveRequestForm: React.FC = () => {
-  const { scheduleId } = useParams<{ scheduleId: string }>();
-  const navigate       = useNavigate();
-
-  const [item, setItem]       = useState<ScheduleItem | null>(null);
-  const [startTime, setStartTime] = useState<string>('');
-  const [endTime, setEndTime]     = useState<string>('');
-  const [excuse, setExcuse]       = useState<string>('Personal');
-  const [message, setMessage]     = useState<string>('');
+  const navigate = useNavigate();
+  const [item]     = useState<ScheduleItem>(mockItem);
+  const [startTime, setStartTime] = useState(item.timeRange.split(' – ')[0]);
+  const [endTime,   setEndTime]   = useState(item.timeRange.split(' – ')[1]);
+  const [excuse,    setExcuse]    = useState('Personal');
+  const [message,   setMessage]   = useState<string>('');
   const [attachment, setAttachment] = useState<File | null>(null);
-  const [error, setError]         = useState<string>('');
-
-  useEffect(() => {
-    if (scheduleId) {
-      fetchScheduleItem(scheduleId).then(r => {
-        setItem(r.data);
-        // prefill times if you like:
-        setStartTime(item?.timeRange.split(' – ')[0] || '');
-        setEndTime(item?.timeRange.split(' – ')[1] || '');
-      });
-    }
-  }, [scheduleId]);
 
   const handleFile = (e: React.ChangeEvent<HTMLInputElement>) => {
     setAttachment(e.target.files?.[0] ?? null);
   };
 
-  const handleSubmit = async (e: FormEvent) => {
+  const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
-    if (!scheduleId) return;
-    setError('');
-    try {
-      const payload: LeaveRequestPayload = {
-        scheduleId,
-        startTime,
-        endTime,
-        excuse,
-        message,
-      };
-      await submitLeaveRequest(payload, attachment);
-      navigate('/dashboard', { replace: true });
-    } catch (err) {
-      if (axios.isAxiosError(err)) {
-        setError(err.response?.data?.message ?? 'Submission failed');
-      } else {
-        setError((err as Error).message);
-      }
-    }
+    // For now just log and navigate back
+    console.log({
+      scheduleId: item.id,
+      startTime,
+      endTime,
+      excuse,
+      message,
+      attachment,
+    });
+    navigate('/dashboard', { replace: true });
   };
-
-  if (!item) {
-    return <p className={styles.loading}>Loading…</p>;
-  }
 
   return (
     <div className={styles.container}>
@@ -100,10 +82,7 @@ const LeaveRequestForm: React.FC = () => {
 
           <div className={styles.field}>
             <label>Excuse</label>
-            <select
-              value={excuse}
-              onChange={e => setExcuse(e.target.value)}
-            >
+            <select value={excuse} onChange={e => setExcuse(e.target.value)}>
               <option>Personal</option>
               <option>Medical</option>
               <option>Academic</option>
@@ -123,9 +102,8 @@ const LeaveRequestForm: React.FC = () => {
           <div className={styles.field}>
             <label>Attachment (optional)</label>
             <input type="file" onChange={handleFile} />
+            {attachment && <p>Selected file: {attachment.name}</p>}
           </div>
-
-          {error && <p className={styles.error}>{error}</p>}
 
           <button type="submit" className={styles.submitBtn}>
             Submit Request
