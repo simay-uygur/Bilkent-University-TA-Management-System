@@ -160,15 +160,14 @@ public class TaskServImpl implements TaskServ {
         }
 
         // Create composite ID
-        TA_TaskId id = new TA_TaskId(task_id, ta.getId());
         
         // Check if assignment already exists
-        if (taTaskRepo.existsById(id)) {
+        if (taTaskRepo.exists(task_id, ta.getId())) {
             throw new GeneralExc("TA is already assigned to this task");
         }
 
         // Create new TA_Task relationship
-        TA_Task taTask = new TA_Task(task, ta, task.getAccess_type(), id);
+        TA_Task taTask = new TA_Task(task, ta, task.getAccess_type());
         
         // Update task side
         task.setAmount_of_tas(task.getAmount_of_tas() + 1);
@@ -204,7 +203,7 @@ public class TaskServImpl implements TaskServ {
         }
 
         TA_TaskId id = new TA_TaskId(task_id,ta.getId()) ;
-        Optional<TA_Task> tas_taskOptional = taTaskRepo.findById(id);
+        Optional<TA_Task> tas_taskOptional = taTaskRepo.findByTaskIdAndTaId(task_id, ta.getId());
         if (tas_taskOptional.isEmpty()) {
             throw new GeneralExc("TA not assigned to task");
         }
@@ -217,7 +216,7 @@ public class TaskServImpl implements TaskServ {
         taRepo.saveAndFlush(ta);
         taTaskRepo.saveAndFlush(taTask);
 
-        tas_taskOptional = taTaskRepo.findById(id);
+        tas_taskOptional = taTaskRepo.findByTaskIdAndTaId(task_id, ta.getId());
         if (tas_taskOptional.isEmpty()) {
             throw new NoPersistExc("Unassignment");
         }
