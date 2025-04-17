@@ -1,0 +1,85 @@
+/* LeaveRequestForm.module.css */
+.container {
+    min-height: 100vh;
+    background: #EFF6FF;
+    font-family: 'Inter', sans-serif;
+  }
+  
+  .header {
+    display: flex;
+    align-items: center;
+    background: #2563EB;
+    color: white;
+    padding: 0.5rem 1rem;
+  }
+  
+  .backBtn {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 1rem;
+    margin-right: 1rem;
+    cursor: pointer;
+  }
+  
+  .title {
+    font-size: 1.25rem;
+    font-weight: 600;
+  }
+  
+  .formCard {
+    background: white;
+    max-width: 500px;
+    margin: 2rem auto;
+    padding: 1.5rem;
+    border-radius: 0.5rem;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+  }
+  
+  .field {
+    margin-bottom: 1rem;
+  }
+  
+  .field label {
+    display: block;
+    font-size: 0.875rem;
+    margin-bottom: 0.25rem;
+    color: #374151;
+  }
+  
+  .field input[type="time"],
+  .field select,
+  .field textarea,
+  .field input[type="file"] {
+    width: 100%;
+    padding: 0.5rem;
+    border: 1px solid #D1D5DB;
+    border-radius: 0.375rem;
+    box-sizing: border-box;
+  }
+  
+  .error {
+    color: #DC2626;
+    font-size: 0.875rem;
+    margin-bottom: 1rem;
+  }
+  
+  .submitBtn {
+    background: #2563EB;
+    color: white;
+    border: none;
+    padding: 0.75rem 1rem;
+    border-radius: 0.375rem;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+  
+  .submitBtn:hover {
+    background: #1E40AF;
+  }
+  
+  .loading {
+    padding: 2rem;
+    text-align: center;
+  }
+  
