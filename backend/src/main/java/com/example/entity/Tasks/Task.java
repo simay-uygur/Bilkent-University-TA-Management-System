@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.example.entity.General.Event;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
 import jakarta.persistence.CascadeType;
@@ -39,13 +40,6 @@ public class Task {
     @GeneratedValue(strategy = GenerationType.TABLE) // auto id generation
     @Column(name = "task_id", unique = true, updatable = true, nullable = false)
     private int task_id;
-
-    /*@ManyToOne // when using relationships needs to know who 
-    @JoinColumn(name = "course_id")
-    private Course course; //many to one*/
-
-    /*@ManyToMany(mappedBy="section_tasks_list",fetch = FetchType.LAZY)
-    private List<Section> sections_list ; //many to many*/
     
     @Embedded
     @Column(name = "duration", unique = false, updatable = true, nullable = false)
@@ -69,15 +63,12 @@ public class Task {
     @Enumerated(EnumType.STRING)
     private TaskAccessType access_type;
 
-    /*@Column(name = "access_type", unique = false, updatable = true, nullable = false)
-    @Enumerated(EnumType.STRING)
-    private TaskAccessType accessType ;*/
-
     //Method to check if task is still active
     public boolean isTaskActive() {
         return duration != null && duration.isOngoing();
     }
 
+    @JsonIgnore
     @OneToMany(mappedBy = "task", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<TA_Task> tas_list = new ArrayList<>(); 
     //new class(TA_task) one to many, public task one to many
