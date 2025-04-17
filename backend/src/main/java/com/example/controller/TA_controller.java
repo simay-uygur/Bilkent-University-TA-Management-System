@@ -11,7 +11,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.entity.Actors.TA;
@@ -89,9 +88,13 @@ public class TA_controller {
         return serv.getAllTasks(id);
     }
     
-    @PostMapping("/api/ta/{id}/task")
-    public ResponseEntity<?> createTask(@RequestBody Task task, @PathVariable Long id) 
+    @PostMapping("/api/ta/{id}/task/{task_id}")
+    public ResponseEntity<?> createTask(@PathVariable Long id, @PathVariable int task_id) 
     {
+        Task task = taskServ.getTaskById(task_id);
+        if (task == null) {
+            throw new GeneralExc("Task with ID " + task_id + " not found.");
+        }
         if (task.getAccess_type() == TaskAccessType.PRIVATE && task.getRequiredTAs() > 1) {
             throw new GeneralExc("Private tasks can only have one TA assigned.");
         }
@@ -137,5 +140,5 @@ public class TA_controller {
   },
   "requiredTAs": 2,
   "workload": 4,
-  "type": "PUBLIC"
+  "access_type": "PUBLIC"
 }*/

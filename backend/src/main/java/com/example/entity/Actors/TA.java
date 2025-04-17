@@ -34,25 +34,6 @@ import lombok.Setter;
 @AllArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_DEFAULT)
 public class TA extends User{
-    
-    /*@ManyToMany(
-        fetch = FetchType.LAZY,
-        cascade = {CascadeType.PERSIST, CascadeType.MERGE} // many to many oldukca ornek bir ta silindi ondo task da silinir ama bu task 
-    )
-    @JoinTable( // creates a table for many to many relationship
-        name = "ta_public_tasks",
-        joinColumns = @JoinColumn(name = "ta_id"),
-        inverseJoinColumns = @JoinColumn(name = "task_id") // creates in ta table field for tasks 
-    )
-    private Set<PublicTask> ta_public_tasks_list = new HashSet<PublicTask>(); 
-    // new class(TA_task) one to many, public task one to many 
-    @OneToMany(
-        mappedBy = "ta_owner", // the other side of thek relationship is the owner of the relationship
-        fetch = FetchType.LAZY,
-        cascade = {CascadeType.PERSIST, CascadeType.MERGE} // many to many oldukca, ornek bir ta silindi ondo task da silinir ama bu task 
-    )
-    private Set<PrivateTask> ta_private_tasks_list = new HashSet<PrivateTask>(); */
-
     @Column(name = "academic_level", unique = false, updatable = true, nullable = false)
     @Enumerated(EnumType.STRING)
     private AcademicLevelType academic_level ; 

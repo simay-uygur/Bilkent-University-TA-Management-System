@@ -14,7 +14,6 @@ import com.example.entity.General.Date;
 import com.example.entity.Schedule.Schedule;
 import com.example.entity.Schedule.ScheduleItem;
 import com.example.entity.Tasks.TA_Task;
-import com.example.entity.Tasks.TA_TaskId;
 import com.example.entity.Tasks.Task;
 import com.example.exception.GeneralExc;
 import com.example.exception.NoPersistExc;
@@ -120,8 +119,7 @@ public class TAServImpl implements TAServ {
                 return task;
             }
         }*/
-        TA_TaskId taTaskId = new TA_TaskId(task_id, ta_id);
-        Optional<TA_Task> optTaTask = taTaskRepo.findById(taTaskId);
+        Optional<TA_Task> optTaTask = taTaskRepo.findByTaskIdAndTaId(task_id, ta_id);
         TA_Task taTask = optTaTask.orElseThrow(() -> new TaskNotFoundExc(task_id));
         return taTask.getTask();
     }
