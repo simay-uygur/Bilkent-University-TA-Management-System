@@ -41,13 +41,13 @@ public class AppExceptionHandler {
 
     @ExceptionHandler(GeneralExc.class)
     public ResponseEntity<Map<String, String>> handleUserNotFoundException(GeneralExc ex) {
-        return ResponseEntity.status(HttpStatus.NO_CONTENT)
+        return ResponseEntity.status(HttpStatus.CONFLICT)
                 .body(Map.of("error", ex.getMessage()));
     }
 
     @ExceptionHandler(NoPersistExc.class)
     public ResponseEntity<Map<String, String>> handleUserNotFoundException(NoPersistExc ex) {
-        return ResponseEntity.status(HttpStatus.NO_CONTENT)
+        return ResponseEntity.status(HttpStatus.CONFLICT)
                 .body(Map.of("error", ex.getMessage()));
     }
 

@@ -1,16 +1,17 @@
 package com.example.entity.Tasks;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import com.example.entity.General.Event;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
-import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -77,9 +78,8 @@ public class Task {
         return duration != null && duration.isOngoing();
     }
 
-    @OneToMany
-    (mappedBy = "task", fetch = FetchType.LAZY)
-    private List<TA_Task> tas_list; //ta that owns the task
+    @OneToMany(mappedBy = "task", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<TA_Task> tas_list = new ArrayList<>(); 
     //new class(TA_task) one to many, public task one to many
 
     @Column(name = "required_tas", unique = false, updatable = true, nullable = false)
@@ -89,6 +89,8 @@ public class Task {
     private int amount_of_tas = 0;
 
     public boolean addTA(){
+        if (tas_list == null) // Check if tas_list is null before initializing
+            tas_list = new ArrayList<>(); // Initialize the list if it's null
         if (amount_of_tas < requiredTAs) {
             amount_of_tas++;
             return true;

@@ -1,5 +1,6 @@
 package com.example.service;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
@@ -149,29 +150,44 @@ public class TaskServImpl implements TaskServ {
 
     @Override
     public boolean assignTA(int task_id, TA ta) {
-        Optional<Task> taskOptional = taskRepo.findById(task_id);
-        if (taskOptional.isEmpty()) {
-            throw new TaskNotFoundExc(task_id);
-        }
-
-        Task task = (Task) taskOptional.get();
+        // Find existing entities
+        Task task = taskRepo.findById(task_id)
+                .orElseThrow(() -> new TaskNotFoundExc(task_id));
+        
+        // Check task limits
         if (task.getAmount_of_tas() == task.getRequiredTAs()) {
             throw new TaskLimitExc();
         }
 
-        TA_TaskId id = new TA_TaskId(task_id,ta.getId()) ;
-        TA_Task tas_task = new TA_Task(task, ta, task.getAccess_type(), id) ;
-        task.getTas_list().add(tas_task);
-        ta.getTa_tasks().add(tas_task);
-        task.addTA();
+        // Create composite ID
+        TA_TaskId id = new TA_TaskId(task_id, ta.getId());
+        
+        // Check if assignment already exists
+        if (taTaskRepo.existsById(id)) {
+            throw new GeneralExc("TA is already assigned to this task");
+        }
+
+        // Create new TA_Task relationship
+        TA_Task taTask = new TA_Task(task, ta, task.getAccess_type(), id);
+        
+        // Update task side
+        task.setAmount_of_tas(task.getAmount_of_tas() + 1);
+        if (task.getTas_list() == null) {
+            task.setTas_list(new ArrayList<>());
+        }
+        task.getTas_list().add(taTask);
+        
+        // Update TA side
+        if (ta.getTa_tasks() == null) {
+            ta.setTa_tasks(new ArrayList<>());
+        }
+        ta.getTa_tasks().add(taTask);
+        
+        // Save all entities
         taskRepo.saveAndFlush(task);
         taRepo.saveAndFlush(ta);
-        taTaskRepo.saveAndFlush(tas_task);
-
-        Optional<TA_Task> tas_taskOptional = taTaskRepo.findById(id);
-        if (tas_taskOptional.isEmpty()) {
-            throw new NoPersistExc("Assignment");
-        }
+        taTaskRepo.saveAndFlush(taTask);
+        
         return true;
     }
 
