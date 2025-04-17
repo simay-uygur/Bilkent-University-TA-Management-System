@@ -1,0 +1,51 @@
+/* TADashboard.module.css */
+.header {
+    background: #2563EB;
+    height: 56px;
+    display: flex;
+    align-items: center;
+    padding: 0 1rem;
+    box-sizing: border-box;
+    color: #FFFFFF;
+    font-size: 1.25rem;
+    font-weight: 600;
+  }
+  
+  .container {
+    padding: 1rem;
+    background: #EFF6FF;
+    min-height: calc(100vh - 56px);
+  }
+  
+  .section {
+    margin-bottom: 2rem;
+  }
+  
+  .section h2 {
+    font-size: 1.25rem;
+    margin-bottom: 1rem;
+    color: #111827;
+  }
+  
+  .table {
+    width: 100%;
+    border-collapse: collapse;
+    background: #FFFFFF;
+  }
+  
+  .table th,
+  .table td {
+    border: 1px solid #E5E7EB;
+    padding: 0.5rem 1rem;
+    text-align: left;
+  }
+  
+  .section input {
+    width: 100%;
+    padding: 0.5rem 1rem;
+    margin-bottom: 1rem;
+    border: 1px solid #D1D5DB;
+    border-radius: 0.5rem;
+    box-sizing: border-box;
+  }
+  
