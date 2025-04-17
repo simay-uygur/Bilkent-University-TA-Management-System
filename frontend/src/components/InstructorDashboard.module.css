@@ -1,0 +1,81 @@
+/* InstructorDashboard.module.css */
+.header {
+    background: #2563EB;
+    height: 56px;
+    display: flex;
+    align-items: center;
+    padding: 0 1rem;
+    box-sizing: border-box;
+    color: #FFFFFF;
+    font-size: 1.25rem;
+    font-weight: 600;
+  }
+  
+  .container {
+    padding: 1rem;
+    background: #EFF6FF;
+    min-height: calc(100vh - 56px);
+  }
+  
+  .card {
+    background: #FFFFFF;
+    border-radius: 0.5rem;
+    padding: 1rem;
+    margin-bottom: 1rem;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+  }
+  
+  .cardHeader {
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    color: #111827;
+  }
+  
+  .tagMust {
+    display: inline-block;
+    background: #D1FAE5;
+    color: #065F46;
+    padding: 0.25rem 0.5rem;
+    border-radius: 0.25rem;
+    margin-right: 0.5rem;
+    font-size: 0.875rem;
+  }
+  
+  .tagAvoid {
+    display: inline-block;
+    background: #FEE2E2;
+    color: #991B1B;
+    padding: 0.25rem 0.5rem;
+    border-radius: 0.25rem;
+    margin-right: 0.5rem;
+    font-size: 0.875rem;
+  }
+  
+  .assignRow {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+  }
+  
+  .assignRow select {
+    flex: 1;
+    padding: 0.5rem 1rem;
+    border: 1px solid #D1D5DB;
+    border-radius: 0.5rem;
+  }
+  
+  .assignRow button {
+    background: #2563EB;
+    color: #FFFFFF;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 0.5rem;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+  
+  .assignRow button:hover {
+    background: #1E40AF;
+  }
+  

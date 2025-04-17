@@ -1,0 +1,129 @@
+/* LoginPage.module.css */
+
+/* ───────────────── Design Tokens ───────────────── */
+:root {
+    /* Colors */
+    --nav-bg:           #2563EB;   /* deep blue header */
+    --nav-text:         #FFFFFF;   /* header text */
+    --bg-page:          #EFF6FF;   /* light blue page */
+    --bg-card:          #FFFFFF;   /* white card */
+    --text-default:     #111827;   /* dark text */
+    --text-muted:       #6B7280;   /* grey text */
+    --error-color:      #DC2626;   /* red */
+  
+    /* Typography */
+    --font-base:        'Inter', sans-serif;
+    --fs-nav-title:    1.25rem;
+    --fs-title:         1.5rem;
+    --fs-label:         0.875rem;
+    --fs-input:         1rem;
+  
+    /* Spacing & Radius */
+    --radius-card:      0.5rem;
+    --spacing-sm:       0.5rem;
+    --spacing-md:       1rem;
+    --spacing-lg:       2rem;
+  }
+  
+  /* ───────────────── Page & Header ───────────────── */
+  .header {
+    width: 100%;
+    height: 56px;
+    background-color: var(--nav-bg);
+    display: flex;
+    align-items: center;
+    padding: 0 var(--spacing-lg);
+    box-sizing: border-box;
+  }
+  
+  .headerTitle {
+    font-size: var(--fs-nav-title);
+    font-weight: 600;
+    color: var(--nav-text);
+  }
+  
+  .container {
+    min-height: calc(100vh - 56px);  /* below header */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--bg-page);
+    font-family: var(--font-base);
+    padding: var(--spacing-lg) 0;
+    box-sizing: border-box;
+  }
+  
+  /* ───────────────── Login Card ───────────────── */
+  .card {
+    width: 100%;
+    max-width: 400px;
+    background-color: var(--bg-card);
+    padding: var(--spacing-lg);
+    border-radius: var(--radius-card);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    box-sizing: border-box;
+  }
+  
+  .title {
+    font-size: var(--fs-title);
+    font-weight: 600;
+    color: var(--text-default);
+    text-align: center;
+    margin-bottom: var(--spacing-lg);
+  }
+  
+  /* ───────────────── Form Styles ───────────────── */
+  .form {
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .formGroup {
+    margin-bottom: var(--spacing-md);
+  }
+  
+  .label {
+    display: block;
+    font-size: var(--fs-label);
+    margin-bottom: var(--spacing-sm);
+    color: var(--text-muted);
+  }
+  
+  .input {
+    width: 100%;
+    padding: var(--spacing-sm) var(--spacing-md);
+    font-size: var(--fs-input);
+    border: 1px solid #D1D5DB;
+    border-radius: var(--radius-card);
+    box-sizing: border-box;
+  }
+  
+  .input:focus {
+    outline: none;
+    border-color: var(--nav-bg);
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.3);
+  }
+  
+  /* ───────────────── Errors & Button ───────────────── */
+  .error {
+    font-size: var(--fs-label);
+    color: var(--error-color);
+    margin-bottom: var(--spacing-md);
+  }
+  
+  .button {
+    padding: var(--spacing-sm);
+    font-size: var(--fs-input);
+    font-weight: 500;
+    color: #FFFFFF;
+    background-color: var(--nav-bg);
+    border: none;
+    border-radius: var(--radius-card);
+    cursor: pointer;
+    transition: background-color 0.2s ease-in-out;
+  }
+  
+  .button:hover {
+    background-color: #1E40AF; /* slightly darker */
+  }
+  

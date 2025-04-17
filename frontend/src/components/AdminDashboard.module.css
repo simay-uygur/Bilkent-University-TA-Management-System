@@ -1,0 +1,61 @@
+/* AdminDashboard.module.css */
+.header {
+    background: #2563EB;
+    height: 56px;
+    display: flex;
+    align-items: center;
+    padding: 0 1rem;
+    box-sizing: border-box;
+    color: #FFFFFF;
+    font-size: 1.25rem;
+    font-weight: 600;
+  }
+  
+  .container {
+    padding: 1rem;
+    background: #EFF6FF;
+    min-height: calc(100vh - 56px);
+  }
+  
+  .table {
+    width: 100%;
+    border-collapse: collapse;
+    background: #FFFFFF;
+  }
+  
+  .table th,
+  .table td {
+    border: 1px solid #E5E7EB;
+    padding: 0.5rem 1rem;
+    text-align: left;
+  }
+  
+  .btnApprove {
+    background: #10B981;
+    color: #FFFFFF;
+    border: none;
+    padding: 0.5rem 1rem;
+    margin-right: 0.5rem;
+    border-radius: 0.5rem;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+  
+  .btnApprove:hover {
+    background: #059669;
+  }
+  
+  .btnReject {
+    background: #EF4444;
+    color: #FFFFFF;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 0.5rem;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+  
+  .btnReject:hover {
+    background: #DC2626;
+  }
+  
