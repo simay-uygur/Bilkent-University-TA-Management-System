@@ -18,6 +18,7 @@ import com.example.entity.Actors.TA;
 import com.example.entity.General.Date;
 import com.example.entity.Tasks.Task;
 import com.example.entity.Tasks.TaskAccessType;
+import com.example.exception.GeneralExc;
 import com.example.exception.UserNotFoundExc;
 import com.example.service.TAServ;
 import com.example.service.TaskServ;
@@ -73,8 +74,6 @@ public class TA_controller {
         if (serv.getTAById(id) == null)
             throw new UserNotFoundExc(id);
         serv.deleteTAById(id);
-        TA a = serv.getTAById(id);
-        System.out.println("ta2: " + a.isDeleted());
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     } // method should be sent to Admin controller
 
@@ -91,14 +90,13 @@ public class TA_controller {
     }
     
     @PostMapping("/api/ta/{id}/task")
-    public Task createTask(@RequestBody Task task, @PathVariable Long id, @PathVariable String type) 
+    public ResponseEntity<HttpStatus> createTask(@RequestBody Task task, @PathVariable Long id) 
     {
-        TaskAccessType taskType = TaskAccessType.valueOf(type.toUpperCase());
-        if (taskType == null) {
-            throw new IllegalArgumentException("Invalid task type: " + type);
+        if (task.getAccess_type() == TaskAccessType.PRIVATE && task.getRequiredTAs() > 1) {
+            throw new GeneralExc("Private tasks can only have one TA assigned.");
         }
-        serv.assignTask(task, id, taskType);
-        return serv.getTaskById(task.getTask_id(), id);
+        serv.assignTask(task, id);
+        return new ResponseEntity<>(HttpStatus.CREATED);
     }
     
     @DeleteMapping("/api/ta/{ta_id}/task/{task_id}")

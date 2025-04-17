@@ -11,11 +11,11 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.example.repo.TARepo;
-import com.example.service.TaskServ;
 import com.example.entity.Actors.TA;
 import com.example.entity.Tasks.Task;
 import com.example.entity.Tasks.TaskAccessType;
+import com.example.repo.TARepo;
+import com.example.service.TaskServ;
 
 import lombok.RequiredArgsConstructor;
 
@@ -97,7 +97,7 @@ public class Task_controller {
         TaskAccessType taskType = TaskAccessType.valueOf(type.toUpperCase());
         TA ta = taRepo.findById(ta_id)
                 .orElseThrow(() -> new RuntimeException("TA with ID " + ta_id + " not found."));
-        return new ResponseEntity<>(taskServ.assignTA(task_id, ta, taskType),HttpStatus.OK);
+        return new ResponseEntity<>(taskServ.assignTA(task_id, ta),HttpStatus.OK);
     }   
 
     @PutMapping("/api/task/{task_id}/unassign/{ta_id}")
