@@ -13,42 +13,22 @@ import com.example.entity.Tasks.TA_TaskId;
 
 @Repository
 public interface TA_TaskRepo extends JpaRepository<TA_Task, TA_TaskId> {
+
     // Custom query to find by composite ID
-    @Query("SELECT tat FROM TA_Task tat WHERE tat.task.task_id = :taskId AND tat.ta.id = :taId")
+    @Query("SELECT tat FROM TA_Task tat WHERE tat.task.task_id = :task_id AND tat.ta_owner.id = :ta_id")
     Optional<TA_Task> findByTaskIdAndTaId(
-        @Param("taskId") int taskId,
-        @Param("taId") Long taId
+        @Param("task_id") int task_id,
+        @Param("ta_id") Long ta_id
     );
-    
+
     // Alternative using the embedded ID directly
     Optional<TA_Task> findById(TA_TaskId id);
 
-    //Query to get all tas tasks in a list
-    @Query("SELECT tat FROM TA_Task tat WHERE tat.ta.id = :taId")
-    List<TA_Task> findAllByTaId(@Param("taId") Long taId);
+    // Query to get all tasks for a specific TA
+    @Query("SELECT tat FROM TA_Task tat WHERE tat.ta_owner.id = :ta_id")
+    List<TA_Task> findAllByTaId(@Param("ta_id") Long ta_id);
 
-    //Query to get all tasks of a specific type for a TA
-    @Query("SELECT tat FROM TA_Task tat WHERE tat.ta.id = :taId AND tat.task.taskType = :taskType")
-    List<TA_Task> findAllByTaIdAndTaskType(@Param("taId") Long taId, @Param("taskType") String taskType);
-
-    //Query to get all tasks of a specific type for a TA and a specific date
-    @Query("SELECT tat FROM TA_Task tat WHERE tat.ta.id = :taId AND tat.task.taskType = :taskType AND tat.task.startDate <= :date AND tat.task.endDate >= :date")
-    List<TA_Task> findAllByTaIdAndTaskTypeAndDate(
-        @Param("taId") Long taId,
-        @Param("taskType") String taskType,
-        @Param("date") String date
-    );
-
-    //Query to get all tasks of a specific type for a TA and a specific date range
-    @Query("SELECT tat FROM TA_Task tat WHERE tat.ta.id = :taId AND tat.task.taskType = :taskType AND tat.task.startDate <= :endDate AND tat.task.endDate >= :startDate")
-    List<TA_Task> findAllByTaIdAndTaskTypeAndDateRange(
-        @Param("taId") Long taId,
-        @Param("taskType") String taskType,
-        @Param("startDate") String startDate,
-        @Param("endDate") String endDate
-    );
-
-    //Query to get all pending tasks for a TA
-    @Query("SELECT tat FROM TA_Task tat WHERE tat.ta.id = :taId AND tat.task.taskType = 'PENDING'")
-    List<TA_Task> findAllPendingTasksByTaId(@Param("taId") Long taId);
+    // Query to get all pending tasks for a TA
+    @Query("SELECT tat FROM TA_Task tat WHERE tat.ta_owner.id = :ta_id AND tat.task.status = 'PENDING'")
+    List<TA_Task> findAllPendingTasksByTaId(@Param("ta_id") Long ta_id);
 }
