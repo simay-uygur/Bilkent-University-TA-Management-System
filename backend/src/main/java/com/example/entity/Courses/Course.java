@@ -5,12 +5,10 @@ import java.util.List;
 import java.util.Set;
 
 import org.hibernate.annotations.DynamicUpdate;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import com.example.entity.General.AcademicLevelType;
 import com.example.entity.General.Event;
 import com.example.entity.General.Student;
-import com.example.repo.CourseRepo;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
 import jakarta.persistence.CascadeType;
@@ -48,18 +46,16 @@ public class Course {
     @Transient
     private String course_code ; 
 
-    @Autowired
-    private CourseRepo CourseRepo; // to access the course repository
+    
 
     // cs-319. id -> 'c' + 's' + 319 -> 319319
     @PrePersist
     private void setCourseId() {
         if (this.course_code != null)
             this.course_id = code_to_id(this.course_code);
-        checkPrerequisites(); // check if the prerequisites are valid
     }
 
-    private int code_to_id(String to_convert){
+    public int code_to_id(String to_convert){
         if (to_convert != null){
             String[] parts = this.course_code.split("-");
             String prefix = parts[0]; // 'cs'
@@ -113,17 +109,6 @@ public class Course {
     @NotEmpty(message = "The field can not be empty!")
     private List<String> prereq_list;
     // do not use join table
-
-    private void checkPrerequisites() {
-        if (prereq_list != null) {
-            for (String prereq : prereq_list){
-                int code = code_to_id(prereq); // converts course code to id
-                if (CourseRepo.findById(code).isEmpty()) {
-                    throw new IllegalArgumentException("Prerequisite course not found: " + prereq);
-                }
-            }
-        }
-    }
 
     @OneToMany(
         mappedBy = "course", // the other side of the relationship is the owner of the relationship
