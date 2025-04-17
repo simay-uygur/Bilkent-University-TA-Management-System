@@ -2,9 +2,10 @@ package com.example.service;
 
 import java.util.HashSet;
 
-import com.example.entity.TA;
-import com.example.entity.Task;
-import com.example.entity.User;
+import com.example.entity.Actors.TA;
+import com.example.entity.Actors.User;
+import com.example.entity.Courses.Course;
+import com.example.entity.Tasks.Task;
 
 public interface AdminServ {
     public HashSet<Task> getAllApprovedTasks();
@@ -39,4 +40,7 @@ public interface AdminServ {
       public boolean updateAdmin(Admin admin); Admin admin
       public boolean restoreAdmin(Admin admin);
     */
+
+    public boolean createCourse(Course c);
+    public boolean updateCourse(Course c);
 }

@@ -7,7 +7,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
-import com.example.entity.Task;
+import com.example.entity.Tasks.Task;
 
 @Repository
 public interface TaskRepo extends JpaRepository<Task, Integer>{

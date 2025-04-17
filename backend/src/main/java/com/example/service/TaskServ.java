@@ -4,8 +4,9 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import com.example.entity.TA;
-import com.example.entity.Task;
+import com.example.entity.Actors.TA;
+import com.example.entity.Tasks.Task;
+import com.example.entity.Tasks.TaskAccessType;
 
 public interface TaskServ {
     public Task createTask(Task task);
@@ -16,7 +17,7 @@ public interface TaskServ {
     public List<Task> getAllTasks();
     public boolean updateTask(Task task);
     public TA getTAById(int task_id, Long ta_id);
-    public boolean assignTA(int task_id, TA ta);
+    public boolean assignTA(int task_id, TA ta, TaskAccessType type);
     public boolean unassignTA(int task_id, TA ta);
     public Set<TA> getTAsByTaskId(int task_id);
     public boolean approveTask(int task_id);

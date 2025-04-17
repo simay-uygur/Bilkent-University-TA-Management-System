@@ -3,8 +3,12 @@ package com.example.service;
 import java.util.List;
 import java.util.Set;
 
-import com.example.entity.TA;
-import com.example.entity.Task;
+import com.example.entity.Actors.TA;
+import com.example.entity.General.Date;
+import com.example.entity.Schedule.Schedule;
+import com.example.entity.Schedule.ScheduleItem;
+import com.example.entity.Tasks.Task;
+import com.example.entity.Tasks.TaskAccessType;
 
 public interface TAServ {
     public List<TA> getAllTAs();
@@ -12,7 +16,9 @@ public interface TAServ {
     public TA getTAById(Long id);
     public Task getTaskById(int task_id, Long ta_id);
     public Set<Task> getAllTasks(Long id);
-    public Task assignTask(Task task, Long id);
+    public boolean assignTask(Task task, Long id, TaskAccessType type);
     public boolean deleteTaskById(int task_id, Long ta_id);
     public boolean restoreTAById(Long id);
+    public Schedule getWeeklyScheduleForTA(TA ta, Date anyCustomDate);
+    public List<ScheduleItem> getScheduleOfTheDay(TA ta, String day);
 }
