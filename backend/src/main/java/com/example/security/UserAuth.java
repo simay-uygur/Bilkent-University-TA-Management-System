@@ -11,7 +11,7 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Component;
 
-import com.example.entity.User;
+import com.example.entity.Actors.User;
 import com.example.exception.UserNotFoundExc;
 import com.example.service.UserServ;
 

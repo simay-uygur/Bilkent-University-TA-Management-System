@@ -2,9 +2,10 @@ package com.example.service;
 
 import java.util.HashSet;
 
-import com.example.entity.TA;
-import com.example.entity.Task;
-import com.example.entity.User;
+import com.example.entity.Actors.TA;
+import com.example.entity.Actors.User;
+import com.example.entity.Courses.Course;
+import com.example.entity.Tasks.Task;
 
 public class AdminServImpl implements AdminServ{
 
@@ -156,6 +157,18 @@ public class AdminServImpl implements AdminServ{
     public boolean strict_deleteUser(User u) {
         // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'strict_deleteUser'");
+    }
+
+    @Override
+    public boolean createCourse(Course c) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'createCourse'");
+    }
+
+    @Override
+    public boolean updateCourse(Course c) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'updateCourse'");
     }
     
 }

@@ -11,10 +11,11 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.example.entity.TA;
-import com.example.entity.Task;
 import com.example.repo.TARepo;
 import com.example.service.TaskServ;
+import com.example.entity.Actors.TA;
+import com.example.entity.Tasks.Task;
+import com.example.entity.Tasks.TaskAccessType;
 
 import lombok.RequiredArgsConstructor;
 
@@ -92,10 +93,11 @@ public class Task_controller {
     }
 
     @PutMapping("/api/task/{task_id}/assign/{ta_id}")
-    public ResponseEntity<?> assignTA(@PathVariable int task_id, @PathVariable Long ta_id) {
+    public ResponseEntity<?> assignTA(@PathVariable int task_id, @PathVariable Long ta_id, @PathVariable String type) {
+        TaskAccessType taskType = TaskAccessType.valueOf(type.toUpperCase());
         TA ta = taRepo.findById(ta_id)
                 .orElseThrow(() -> new RuntimeException("TA with ID " + ta_id + " not found."));
-        return new ResponseEntity<>(taskServ.assignTA(task_id, ta),HttpStatus.OK);
+        return new ResponseEntity<>(taskServ.assignTA(task_id, ta, taskType),HttpStatus.OK);
     }   
 
     @PutMapping("/api/task/{task_id}/unassign/{ta_id}")
