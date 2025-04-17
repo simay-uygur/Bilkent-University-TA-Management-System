@@ -128,14 +128,14 @@ public class TAServImpl implements TAServ {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public boolean assignTask(Task task, Long id, TaskAccessType type) {
+    public boolean assignTask(Task task, Long id) {
         TA existingTA = repo.findById(id)
         .orElseThrow(() -> new TaNotFoundExc(id));
         
         if (!taskServ.checkAndUpdateStatusTask(task)) {
             throw new TaskIsNotActiveExc();
         }
-        taskServ.assignTA(task.getTask_id(), existingTA, type) ;
+        taskServ.assignTA(task.getTask_id(), existingTA) ;
         return true ;
     }
     

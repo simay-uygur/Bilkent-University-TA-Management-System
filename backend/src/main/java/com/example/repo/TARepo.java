@@ -25,7 +25,7 @@ public interface TARepo extends JpaRepository<TA, Long> { // TA is the entity an
     // This query will fetch all tasks (both public and private) for a given TA that are pending
     @Query("SELECT t FROM Task t " +
        "JOIN TA_Task tt ON t.id = tt.task.id " +
-       "WHERE tt.ta.id = :taId AND t.status = 'PENDING'")
+       "WHERE tt.ta_owner.id = :taId AND t.status = 'PENDING'")
     List<Task> findPendingTasksForTA(@Param("taId") Long taId);
 
 

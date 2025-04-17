@@ -12,7 +12,6 @@ import com.example.entity.General.Date;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Embedded;
-import jakarta.persistence.EmbeddedId;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToOne;
@@ -38,6 +37,7 @@ public class Schedule {
     private String weekStart;
 
     // List of days in the schedule
+    @Embedded
     @Column(name = "daily_schedule")
     private List<Day> dailySchedule;
 

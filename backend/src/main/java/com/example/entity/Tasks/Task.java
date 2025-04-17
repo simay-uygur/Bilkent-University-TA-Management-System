@@ -4,7 +4,6 @@ import java.util.List;
 
 import com.example.entity.General.Event;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonTypeInfo;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Embedded;
@@ -30,7 +29,6 @@ import lombok.Setter;
 @JsonInclude(JsonInclude.Include.NON_DEFAULT)
 @NoArgsConstructor
 @AllArgsConstructor
-@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "type")
 /*@JsonSubTypes({
     @JsonSubTypes.Type(value = PublicTask.class, name = "PUBLIC"),
     @JsonSubTypes.Type(value = PrivateTask.class, name = "PRIVATE")
@@ -65,6 +63,10 @@ public class Task {
     @Column(name = "status", unique = false, updatable = true, nullable = false)
     @Enumerated(EnumType.STRING)
     private TaskState status = TaskState.UNKNOWN;
+
+    @Column(name = "access_type", unique = false, updatable = false)
+    @Enumerated(EnumType.STRING)
+    private TaskAccessType access_type;
 
     /*@Column(name = "access_type", unique = false, updatable = true, nullable = false)
     @Enumerated(EnumType.STRING)

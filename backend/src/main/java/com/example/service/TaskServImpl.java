@@ -13,7 +13,6 @@ import com.example.entity.Actors.TA;
 import com.example.entity.Tasks.TA_Task;
 import com.example.entity.Tasks.TA_TaskId;
 import com.example.entity.Tasks.Task;
-import com.example.entity.Tasks.TaskAccessType;
 import com.example.entity.Tasks.TaskState;
 import com.example.exception.GeneralExc;
 import com.example.exception.NoPersistExc;
@@ -149,7 +148,7 @@ public class TaskServImpl implements TaskServ {
     }
 
     @Override
-    public boolean assignTA(int task_id, TA ta, TaskAccessType type) {
+    public boolean assignTA(int task_id, TA ta) {
         Optional<Task> taskOptional = taskRepo.findById(task_id);
         if (taskOptional.isEmpty()) {
             throw new TaskNotFoundExc(task_id);
@@ -161,7 +160,7 @@ public class TaskServImpl implements TaskServ {
         }
 
         TA_TaskId id = new TA_TaskId(task_id,ta.getId()) ;
-        TA_Task tas_task = new TA_Task(task, ta, type, id) ;
+        TA_Task tas_task = new TA_Task(task, ta, task.getAccess_type(), id) ;
         task.getTas_list().add(tas_task);
         ta.getTa_tasks().add(tas_task);
         task.addTA();
