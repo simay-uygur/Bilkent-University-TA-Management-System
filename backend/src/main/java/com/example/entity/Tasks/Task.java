@@ -37,7 +37,7 @@ import lombok.Setter;
 public class Task {
     @Id
     @GeneratedValue(strategy = GenerationType.TABLE) // auto id generation
-    @Column(name = "task_id", unique = true, updatable = false, nullable = false)
+    @Column(name = "task_id", unique = true, updatable = true, nullable = false)
     private int task_id;
 
     /*@ManyToOne // when using relationships needs to know who 

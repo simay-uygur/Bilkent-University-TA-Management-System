@@ -14,9 +14,9 @@ public
 @Setter
 // This class is used to create a composite key for the TA_Task entity
 class TA_TaskId implements Serializable{
-    private int taskId;
+    private int id1; // taskId
 
-    private Long taId;
+    private Long id2; // taId
 
     @Column(name = "ta_task_id")
     private Long taTaskId;
@@ -27,8 +27,8 @@ class TA_TaskId implements Serializable{
 
     // Parameterized constructor
     public TA_TaskId(int taskId, Long taId) {
-        this.taskId = taskId;
-        this.taId = taId;
+        this.id1 = taskId;
+        this.id2 = taId;
         //this.taTaskId = Long.parseLong(taskId + "" + taId); // Concatenate taskId and taId to create a unique identifier
     }
 
@@ -37,11 +37,11 @@ class TA_TaskId implements Serializable{
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         TA_TaskId that = (TA_TaskId) o;
-        return taskId == that.taskId && Objects.equals(taId, that.taId);
+        return id1 == that.id1 && Objects.equals(id2, that.id2);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(taskId, taId);
+        return Objects.hash(id1, id2);
     }
 } 
