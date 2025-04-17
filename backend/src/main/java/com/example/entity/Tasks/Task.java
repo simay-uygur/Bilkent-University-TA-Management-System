@@ -37,7 +37,7 @@ import lombok.Setter;
 })*/
 public class Task {
     @Id
-    @GeneratedValue(strategy = GenerationType.TABLE) // auto id generation
+    @GeneratedValue(strategy = GenerationType.IDENTITY) // auto id generation
     @Column(name = "task_id", unique = true, updatable = true, nullable = false)
     private int task_id;
     
