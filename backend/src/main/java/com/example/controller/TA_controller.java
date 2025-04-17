@@ -14,14 +14,17 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.example.entity.TA;
-import com.example.entity.Task;
+import com.example.entity.Actors.TA;
+import com.example.entity.General.Date;
+import com.example.entity.Tasks.Task;
+import com.example.entity.Tasks.TaskAccessType;
 import com.example.exception.UserNotFoundExc;
 import com.example.service.TAServ;
 import com.example.service.TaskServ;
 import com.example.service.UserServ;
 
 import lombok.RequiredArgsConstructor;
+
 
 
 @RestController
@@ -88,9 +91,14 @@ public class TA_controller {
     }
     
     @PostMapping("/api/ta/{id}/task")
-    public Task createTask(@RequestBody Task task, @PathVariable Long id) 
+    public Task createTask(@RequestBody Task task, @PathVariable Long id, @PathVariable String type) 
     {
-        return serv.assignTask(task, id);
+        TaskAccessType taskType = TaskAccessType.valueOf(type.toUpperCase());
+        if (taskType == null) {
+            throw new IllegalArgumentException("Invalid task type: " + type);
+        }
+        serv.assignTask(task, id, taskType);
+        return serv.getTaskById(task.getTask_id(), id);
     }
     
     @DeleteMapping("/api/ta/{ta_id}/task/{task_id}")
@@ -103,6 +111,14 @@ public class TA_controller {
     public ResponseEntity<?> restoreTA(@PathVariable Long id) {
         return new ResponseEntity<>(serv.restoreTAById(id), HttpStatus.OK);
     } 
+
+    @GetMapping("/api/ta/{id}/schedule")
+    public ResponseEntity<?> getWeeklyScheduleForTA(@PathVariable Long id) {
+        TA ta = serv.getTAById(id);
+        Date date = new Date().currenDate() ;
+        return new ResponseEntity<>(serv.getWeeklyScheduleForTA(ta, date), HttpStatus.OK);
+    }
+    
 }
 /*{
   "task_type" : "Lab",

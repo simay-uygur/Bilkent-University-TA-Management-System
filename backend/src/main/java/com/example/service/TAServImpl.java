@@ -9,12 +9,22 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.example.entity.PrivateTask;
-import com.example.entity.PublicTask;
-import com.example.entity.TA;
-import com.example.entity.Task;
+import com.example.entity.Actors.TA;
+import com.example.entity.General.Date;
+import com.example.entity.Schedule.Schedule;
+import com.example.entity.Schedule.ScheduleItem;
+import com.example.entity.Tasks.TA_Task;
+import com.example.entity.Tasks.TA_TaskId;
+import com.example.entity.Tasks.Task;
+import com.example.entity.Tasks.TaskAccessType;
+import com.example.exception.GeneralExc;
+import com.example.exception.NoPersistExc;
 import com.example.exception.UserNotFoundExc;
+import com.example.exception.taExc.TaNotFoundExc;
+import com.example.exception.taskExc.TaskIsNotActiveExc;
+import com.example.exception.taskExc.TaskNotFoundExc;
 import com.example.repo.TARepo;
+import com.example.repo.TA_TaskRepo;
 import com.example.repo.TaskRepo;
 
 import lombok.RequiredArgsConstructor;
@@ -31,7 +41,13 @@ public class TAServImpl implements TAServ {
 
     @Autowired
     private TaskServ taskServ;
+
+    @Autowired
+    private TA_TaskRepo taTaskRepo;
     
+    @Autowired
+    private ScheduleServ scheduleServ;
+
     @Override
     public TA getTAById(Long id){
         return repo.findById(id)
@@ -59,7 +75,7 @@ public class TAServImpl implements TAServ {
                 .orElseThrow(() -> new UserNotFoundExc(id));
         
         if (!freshTa.isDeleted()) {
-            throw new IllegalStateException("Deletion did not persist");
+            throw new NoPersistExc("Deletion");
         }
         
         return true;
@@ -81,7 +97,7 @@ public class TAServImpl implements TAServ {
                 .orElseThrow(() -> new UserNotFoundExc(id));
         
         if (freshTa.isDeleted()) {
-            throw new IllegalStateException("Restoration did not persist");
+            throw new NoPersistExc("Restoration");
         }
         
         return true;
@@ -89,9 +105,9 @@ public class TAServImpl implements TAServ {
     
     @Override
     public Task getTaskById(int task_id, Long ta_id) {
-        Optional<TA> taOptional = repo.findById(ta_id);
+        /*Optional<TA> taOptional = repo.findById(ta_id);
         if (taOptional.isEmpty()) {
-            throw new RuntimeException("TA with ID " + ta_id + " not found.");
+            throw new TaNotFoundExc(ta_id);
         }  
         TA ta = taOptional.get();
         for (Task task : ta.getTa_public_tasks_list()) {
@@ -103,86 +119,67 @@ public class TAServImpl implements TAServ {
             if (task.getTask_id() == task_id) {
                 return task;
             }
-        }
-        throw new RuntimeException("Task with ID " + task_id + " not found.");
+        }*/
+        TA_TaskId taTaskId = new TA_TaskId(task_id, ta_id);
+        Optional<TA_Task> optTaTask = taTaskRepo.findById(taTaskId);
+        TA_Task taTask = optTaTask.orElseThrow(() -> new TaskNotFoundExc(task_id));
+        return taTask.getTask();
     }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public Task assignTask(Task task, Long id) {
+    public boolean assignTask(Task task, Long id, TaskAccessType type) {
         TA existingTA = repo.findById(id)
-        .orElseThrow(() -> new RuntimeException("TA with ID " + id + " does not exist."));
+        .orElseThrow(() -> new TaNotFoundExc(id));
         
         if (!taskServ.checkAndUpdateStatusTask(task)) {
-            throw new RuntimeException("Task with ID " + task.getTask_id() + " is not active! Please check duration!"); // or can be warning that user set incorrect duration!!!!!
+            throw new TaskIsNotActiveExc();
         }
-        
-        if (task instanceof PublicTask publicTask)
-        {
-            if(publicTask.getTas_list() == null) {
-                publicTask.setTas_list(new HashSet<>());
-            }
-            publicTask.addTA();
-            publicTask.getTas_list().add(existingTA);
-            existingTA.getTa_public_tasks_list().add(publicTask);
-            repo.saveAndFlush(existingTA);
-            return publicTask;
-        }
-        else
-        {
-            PrivateTask privateTask = (PrivateTask) task;
-            privateTask.setTa_owner(existingTA);
-            existingTA.getTa_private_tasks_list().add(privateTask);
-            repo.saveAndFlush(existingTA);
-            return privateTask;
-        }
+        taskServ.assignTA(task.getTask_id(), existingTA, type) ;
+        return true ;
     }
     
     @Override
     public boolean deleteTaskById(int task_id, Long ta_id) {
         Optional<TA> taOptional = repo.findById(ta_id);
         if (taOptional.isEmpty()) {
-            throw new RuntimeException("TA with ID " + ta_id + " not found.");
+            throw new TaNotFoundExc(ta_id);
         }
         TA ta = taOptional.get();
-        for (PublicTask task : ta.getTa_public_tasks_list()) {
-            if (task.getTask_id() == task_id) {
-                ta.getTa_public_tasks_list().remove(task);
-                task.getTas_list().remove(ta);
-                repo.save(ta);
-                taskRepo.save(task);
-                return true;
-            }
-        }
-        for (PrivateTask task : ta.getTa_private_tasks_list()) {
-            if (task.getTask_id() == task_id) {
-                ta.getTa_private_tasks_list().remove(task);
-                task.setTa_owner(null);
-                repo.save(ta);
-                taskRepo.save(task);
-                return true;
-            }
-        }
-        throw new RuntimeException("Deletion failed!");
+        taskServ.unassignTA(task_id, ta) ; 
+        return true ;
     }
     
     @Override
     public Set<Task> getAllTasks(Long id) {
         TA existingTA = repo.findById(id)
-            .orElseThrow(() -> new RuntimeException("TA with ID " + id + " does not exist."));
-        Set<Task> tasks = new HashSet<>();
-        tasks.addAll(existingTA.getTa_public_tasks_list());
-        tasks.addAll(existingTA.getTa_private_tasks_list());
-        return tasks;
+            .orElseThrow(() -> new TaNotFoundExc(id));
+        List<TA_Task> ta_tasks = taTaskRepo.findAllByTaId(id);
+        Set<Task> tasks_list = new HashSet<>();
+        for (TA_Task ta_task : ta_tasks) {
+            Task task = ta_task.getTask();
+            if (task != null) {
+                tasks_list.add(task);
+            }
+        }
+        return tasks_list;
     }
 
     private void mark_deleted(TA ta) {
         if (ta.isDeleted()) {
-            throw new IllegalStateException("User already deleted");
+            throw new GeneralExc("User already deleted");
         }
         ta.setDeleted(true);
-        ta.getTa_public_tasks_list().clear();
-        ta.getTa_private_tasks_list().clear();
+        List<TA_Task> ta_tasks = taTaskRepo.findAllByTaId(ta.getId());
+        for (TA_Task ta_task : ta_tasks) {
+            Task task = ta_task.getTask();
+            if (task != null) {
+                taskServ.unassignTA(task.getTask_id(), ta);
+            }
+        }
+        taTaskRepo.deleteAll(ta_tasks);
+        taTaskRepo.flush();
+        repo.saveAndFlush(ta);
     }
 
     private void delete(TA ta){
@@ -191,8 +188,53 @@ public class TAServImpl implements TAServ {
 
     private void restore(TA ta) {
         if (!ta.isDeleted()) {
-            throw new IllegalStateException("User is not deleted");
+            throw new GeneralExc("User is not deleted");
         }
         ta.setDeleted(false);
+    }
+
+    @Override
+    public Schedule getWeeklyScheduleForTA(TA ta, Date anyCustomDate) {
+        if (ta == null) {
+            throw new TaNotFoundExc(-1L);
+        }
+        ta.setSchedule(scheduleServ.getWeeklyScheduleForTA(ta, anyCustomDate));
+        return ta.getSchedule();
+    }
+
+    @Override
+    public List<ScheduleItem> getScheduleOfTheDay(TA ta, String day) {
+        if (ta == null) {
+            throw new TaNotFoundExc(-1L);
+        }
+        if (ta.getSchedule() != null)
+            return ta.getSchedule().getDailySchedule().get(indexOf(day)).getScheduleItems() ;
+        else 
+        {
+            Date date = new Date().currenDate();
+            ta.setSchedule(scheduleServ.getWeeklyScheduleForTA(ta, date));
+            return ta.getSchedule().getDailySchedule().get(indexOf(day)).getScheduleItems() ;
+        }
+    }
+
+    private int indexOf(String day) {
+        switch (day) {
+            case "Monday":
+                return 0;
+            case "Tuesday":
+                return 1;
+            case "Wednesday":
+                return 2;
+            case "Thursday":
+                return 3;
+            case "Friday":
+                return 4;
+            case "Saturday":
+                return 5;
+            case "Sunday":
+                return 6;
+            default:
+                throw new IllegalArgumentException("Invalid day: " + day);
+        }
     }
 }
