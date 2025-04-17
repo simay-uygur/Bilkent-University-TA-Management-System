@@ -30,6 +30,7 @@ public class TA_Task {
     private Task task;
 
     // Many-to-one relationship with TA
+    //@JsonIgnore
     @ManyToOne
     @JoinColumn(name = "ta_id", insertable = true, updatable = false)
     private TA ta_owner;
