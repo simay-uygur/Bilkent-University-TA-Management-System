@@ -16,7 +16,6 @@ import com.example.entity.Schedule.ScheduleItem;
 import com.example.entity.Tasks.TA_Task;
 import com.example.entity.Tasks.TA_TaskId;
 import com.example.entity.Tasks.Task;
-import com.example.entity.Tasks.TaskAccessType;
 import com.example.exception.GeneralExc;
 import com.example.exception.NoPersistExc;
 import com.example.exception.UserNotFoundExc;
@@ -31,6 +30,7 @@ import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
+@Transactional(rollbackFor = Exception.class)
 public class TAServImpl implements TAServ {
     
     @Autowired

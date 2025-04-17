@@ -90,13 +90,12 @@ public class TA_controller {
     }
     
     @PostMapping("/api/ta/{id}/task")
-    public ResponseEntity<HttpStatus> createTask(@RequestBody Task task, @PathVariable Long id) 
+    public ResponseEntity<?> createTask(@RequestBody Task task, @PathVariable Long id) 
     {
         if (task.getAccess_type() == TaskAccessType.PRIVATE && task.getRequiredTAs() > 1) {
             throw new GeneralExc("Private tasks can only have one TA assigned.");
         }
-        serv.assignTask(task, id);
-        return new ResponseEntity<>(HttpStatus.CREATED);
+        return new ResponseEntity<>(serv.assignTask(task, id),HttpStatus.CREATED);
     }
     
     @DeleteMapping("/api/ta/{ta_id}/task/{task_id}")

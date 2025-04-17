@@ -14,7 +14,6 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
-import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -73,12 +72,8 @@ public class TA extends User{
         total_workload += load ;
     }
 
-    @OneToMany(
-        mappedBy = "ta_owner", // the other side of the relationship is the owner of the relationship
-        fetch = FetchType.LAZY,
-        cascade = {CascadeType.PERSIST, CascadeType.MERGE}
-    )
-    private List<TA_Task> ta_tasks; // ta görevleri
+    @OneToMany(mappedBy = "ta_owner", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<TA_Task> ta_tasks = new ArrayList<>(); 
     
     @OneToOne(
         fetch = FetchType.LAZY,

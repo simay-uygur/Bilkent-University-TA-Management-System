@@ -17,12 +17,12 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.example.security.SignInRequest;
-import com.example.service.UserServ;
 import com.example.entity.Actors.User;
 import com.example.exception.IncorrectWebMailException;
 import com.example.exception.UserExistsExc;
 import com.example.exception.UserNotFoundExc;
+import com.example.security.SignInRequest;
+import com.example.service.UserServ;
 
 import lombok.RequiredArgsConstructor;
 
@@ -84,12 +84,3 @@ public class log_controller {
     }
     
 }
-/*{
-    "role" : "TA",
-    "id" : 1, 
-    "password" : "1", 
-    "name" : "ta",
-    "surname" : "1",
-    "webmail" : "ta.1@ug.bilkent.edu.tr",
-    "type" : "TA"
-} */
