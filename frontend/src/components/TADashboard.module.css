@@ -48,4 +48,49 @@
     border-radius: 0.5rem;
     box-sizing: border-box;
   }
-  
+  /* at bottom of TADashboard.module.css */
+.linkCell {
+  background: none;
+  border: none;
+  color: #2563EB;
+  text-decoration: underline;
+  cursor: pointer;
+  padding: 0;
+  font: inherit;
+}
+/* TADashboard.module.css */
+/* …existing styles… */
+
+.emptyState {
+  padding: 1rem;
+  background: #FEF3C7; /* yellow-100 */
+  border: 1px solid #FCD34D; /* yellow-300 */
+  border-radius: 0.375rem;
+  color: #92400E; /* yellow-800 */
+  margin-bottom: 1rem;
+  font-style: italic;
+}
+
+.linkCell {
+  background: none;
+  border: none;
+  color: #2563EB;
+  text-decoration: underline;
+  cursor: pointer;
+  padding: 0;
+  font: inherit;
+}
+
+.actionBtn {
+  background: #2563EB;
+  color: #fff;
+  border: none;
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.375rem;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.actionBtn:hover {
+  background: #1E40AF;
+}
