@@ -72,4 +72,32 @@ export interface LeaveRequest {
   export function fetchAvailableTAs() {
     return axios.get<{id:string;name:string}[]>('/api/ta/available', { withCredentials:true });
   }
+  // fetch a single schedule item:
+export function fetchScheduleItem(id: string) {
+    return axios.get<ScheduleItem>(`/api/ta/schedule/${id}`, { withCredentials: true });
+  }
+  
+  // payload for leave request:
+  export interface LeaveRequestPayload {
+    scheduleId: string;
+    startTime: string;
+    endTime: string;
+    excuse: string;
+    message: string;
+  }
+  
+  export function submitLeaveRequest(payload: LeaveRequestPayload, file?: File) {
+    const form = new FormData();
+    form.append('startTime', payload.startTime);
+    form.append('endTime', payload.endTime);
+    form.append('excuse', payload.excuse);
+    form.append('message', payload.message);
+    if (file) form.append('attachment', file);
+  
+    return axios.post(
+      `/api/ta/schedule/${payload.scheduleId}/leave-request`,
+      form,
+      { withCredentials: true, headers: { 'Content-Type': 'multipart/form-data' } }
+    );
+  }
   
