@@ -9,3 +9,4 @@ db-dump
 /db-dump/
 .idea/
 db-dump/
+.DS_Store
