@@ -9,3 +9,8 @@ db-dump
 /db-dump/
 .idea/
 db-dump/
+backend/.DS_Store
+out/.DS_Store
+.DS_Store
+application.properties
+application.yml
