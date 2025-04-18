@@ -1,96 +1,134 @@
-/* TADashboard.module.css */
-.header {
-    background: #2563EB;
-    height: 56px;
-    display: flex;
-    align-items: center;
-    padding: 0 1rem;
-    box-sizing: border-box;
-    color: #FFFFFF;
-    font-size: 1.25rem;
-    font-weight: 600;
-  }
-  
-  .container {
-    padding: 1rem;
-    background: #EFF6FF;
-    min-height: calc(100vh - 56px);
-  }
-  
-  .section {
-    margin-bottom: 2rem;
-  }
-  
-  .section h2 {
-    font-size: 1.25rem;
-    margin-bottom: 1rem;
-    color: #111827;
-  }
-  
-  .table {
-    width: 100%;
-    border-collapse: collapse;
-    background: #FFFFFF;
-  }
-  
-  .table th,
-  .table td {
-    border: 1px solid #E5E7EB;
-    padding: 0.5rem 1rem;
-    text-align: left;
-  }
-  
-  .section input {
-    width: 100%;
-    padding: 0.5rem 1rem;
-    margin-bottom: 1rem;
-    border: 1px solid #D1D5DB;
-    border-radius: 0.5rem;
-    box-sizing: border-box;
-  }
-  /* at bottom of TADashboard.module.css */
-.linkCell {
-  background: none;
-  border: none;
-  color: #2563EB;
-  text-decoration: underline;
-  cursor: pointer;
-  padding: 0;
-  font: inherit;
-}
-/* TADashboard.module.css */
-/* …existing styles… */
-
-.emptyState {
-  padding: 1rem;
-  background: #FEF3C7; /* yellow-100 */
-  border: 1px solid #FCD34D; /* yellow-300 */
-  border-radius: 0.375rem;
-  color: #92400E; /* yellow-800 */
-  margin-bottom: 1rem;
-  font-style: italic;
+.page {
+  background: #BDDFFF;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  font-family: 'Inter', sans-serif;
 }
 
-.linkCell {
-  background: none;
-  border: none;
-  color: #2563EB;
-  text-decoration: underline;
-  cursor: pointer;
-  padding: 0;
-  font: inherit;
+/* Nav */
+.navbar {
+  display: flex;
+  align-items: center;
+  background: #BDDFFF;
+  padding: 0.5rem 1rem;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.1);
 }
-
-.actionBtn {
-  background: #2563EB;
-  color: #fff;
-  border: none;
+.logo {
+  background: white;
   padding: 0.25rem 0.5rem;
-  border-radius: 0.375rem;
+  border-radius: 4px;
+  font-weight: bold;
+}
+.title {
+  margin-left: 1rem;
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+.navButton {
+  margin: 0 0.5rem;
+  background: white;
+  border: 1px solid #999;
+  border-radius: 4px;
+  padding: 0.4rem 0.8rem;
   cursor: pointer;
-  transition: background 0.2s;
+}
+.navSpacer {
+  flex-grow: 1;
 }
 
-.actionBtn:hover {
-  background: #1E40AF;
+/* Layout */
+.content {
+  display: flex;
+  flex: 1;
+  padding: 1rem;
+  gap: 1rem;
+}
+.leftPanel, .rightPanel {
+  flex: 1;
+}
+
+/* Card */
+.card {
+  background: white;
+  border-radius: 8px;
+  padding: 1rem;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+
+/* Calendar */
+.timePicker {
+  margin-top: 1rem;
+  font-size: 0.9rem;
+}
+
+/* Time Table */
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 1rem;
+}
+.table th, .table td {
+  border: 1px solid #ccc;
+  padding: 0.5rem;
+  text-align: left;
+}
+.linkCell {
+  background: none;
+  border: none;
+  color: #2563EB;
+  text-decoration: underline;
+  cursor: pointer;
+  padding: 0;
+  font: inherit;
+}
+.swapBtn {
+  background: #3B82F6;
+  color: white;
+  border: none;
+  margin-right: 0.5rem;
+  padding: 0.3rem 0.6rem;
+  border-radius: 4px;
+  cursor: pointer;
+}
+.transferBtn {
+  background: #3B82F6;
+  color: white;
+  border: none;
+  padding: 0.3rem 0.6rem;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+/* Swap Section */
+.swapSection {
+  margin-top: 1.5rem;
+  border-top: 1px solid #E5E7EB;
+  padding-top: 1rem;
+}
+.swapSection h3 {
+  margin-bottom: 0.5rem;
+}
+.filterInput {
+  width: 100%;
+  padding: 0.4rem;
+  margin-bottom: 0.75rem;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+.swapTable {
+  width: 100%;
+  border-collapse: collapse;
+}
+.swapTable th, .swapTable td {
+  border: 1px solid #ccc;
+  padding: 0.5rem;
+}
+.selectBtn {
+  background: #10B981;
+  color: white;
+  border: none;
+  padding: 0.3rem 0.6rem;
+  border-radius: 4px;
+  cursor: pointer;
 }
