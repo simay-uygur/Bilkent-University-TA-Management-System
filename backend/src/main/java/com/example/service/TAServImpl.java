@@ -104,21 +104,6 @@ public class TAServImpl implements TAServ {
     
     @Override
     public Task getTaskById(int task_id, Long ta_id) {
-        /*Optional<TA> taOptional = repo.findById(ta_id);
-        if (taOptional.isEmpty()) {
-            throw new TaNotFoundExc(ta_id);
-        }  
-        TA ta = taOptional.get();
-        for (Task task : ta.getTa_public_tasks_list()) {
-            if (task.getTask_id() == task_id) {
-                return task;
-            }
-        }
-        for (Task task : ta.getTa_private_tasks_list()) {
-            if (task.getTask_id() == task_id) {
-                return task;
-            }
-        }*/
         Optional<TA_Task> optTaTask = taTaskRepo.findByTaskIdAndTaId(task_id, ta_id);
         TA_Task taTask = optTaTask.orElseThrow(() -> new TaskNotFoundExc(task_id));
         return taTask.getTask();
@@ -196,43 +181,20 @@ public class TAServImpl implements TAServ {
         if (ta == null) {
             throw new TaNotFoundExc(-1L);
         }
-        ta.setSchedule(scheduleServ.getWeeklyScheduleForTA(ta, anyCustomDate));
-        return ta.getSchedule();
+        return scheduleServ.getWeeklyScheduleForTA(ta, anyCustomDate);
     }
 
     @Override
     public List<ScheduleItem> getScheduleOfTheDay(TA ta, String day) {
-        if (ta == null) {
+        /*if (ta == null)
             throw new TaNotFoundExc(-1L);
-        }
-        if (ta.getSchedule() != null)
-            return ta.getSchedule().getDailySchedule().get(indexOf(day)).getScheduleItems() ;
-        else 
+
+        if (ta.getSchedule() == null)
         {
             Date date = new Date().currenDate();
             ta.setSchedule(scheduleServ.getWeeklyScheduleForTA(ta, date));
-            return ta.getSchedule().getDailySchedule().get(indexOf(day)).getScheduleItems() ;
         }
-    }
-
-    private int indexOf(String day) {
-        switch (day) {
-            case "Monday":
-                return 0;
-            case "Tuesday":
-                return 1;
-            case "Wednesday":
-                return 2;
-            case "Thursday":
-                return 3;
-            case "Friday":
-                return 4;
-            case "Saturday":
-                return 5;
-            case "Sunday":
-                return 6;
-            default:
-                throw new IllegalArgumentException("Invalid day: " + day);
-        }
+        return ta.getSchedule().findDay(day);*/
+        return null;
     }
 }

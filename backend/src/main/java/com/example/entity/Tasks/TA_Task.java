@@ -21,7 +21,7 @@ import lombok.Setter;
 @Table(name = "TA_Tasks")
 public class TA_Task {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)// auto id generation
+    @GeneratedValue(strategy = GenerationType.TABLE) // auto id generation
     private int id; // Composite key
 
     // Many-to-one relationship with Task
