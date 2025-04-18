@@ -48,5 +48,4 @@ public interface TA_TaskRepo extends JpaRepository<TA_Task, Integer> {
         WHERE t.task.task_id   = :taskId
         AND t.ta_owner.id    = :taId""")
     boolean exists(int taskId, Long taId);
-
 }
