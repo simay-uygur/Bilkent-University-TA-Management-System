@@ -17,3 +17,4 @@ application.yml
 
 .cache_ggshield
 /.cache_ggshield
+.DS_Store

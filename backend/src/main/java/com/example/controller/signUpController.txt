@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.demo1.entity.User;
-import com.example.demo1.excpetion.IncorrectWebMailException;
+import com.example.demo1.exception.IncorrectWebMailException;
 import com.example.demo1.excpetion.UserExistsExc;
 import com.example.demo1.excpetion.UserNotFoundExc;
 import com.example.demo1.service.UserServ;
