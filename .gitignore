@@ -14,3 +14,6 @@ out/.DS_Store
 .DS_Store
 application.properties
 application.yml
+
+.cache_ggshield
+/.cache_ggshield

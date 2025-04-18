@@ -19,7 +19,7 @@
 //     // 1) Load schedule from your database via API
 //     fetchSchedule()
 //       .then(r => setSchedule(r.data))
-//       .catch(() => {
+//       .catch((err => setError(err.message)) => {
 //         /* you may want to show an error here */
 //       })
 //       .finally(() => setLoading(false));
