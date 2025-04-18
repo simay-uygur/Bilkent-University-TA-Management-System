@@ -31,7 +31,21 @@ const LeaveRequestForm: React.FC = () => {
   const handleFile = (e: React.ChangeEvent<HTMLInputElement>) => {
     setAttachment(e.target.files?.[0] ?? null);
   };
-
+  // useEffect(() => {
+  //   fetchScheduleItem(scheduleId)
+  //     .then(r => {
+  //       const it = r.data;
+  //       setStartTime(it.timeRange.split(' - ')[0]);
+  //       setEndTime(it.timeRange.split(' - ')[1]);
+  //     });
+  // }, [scheduleId]);
+  
+  // const onSubmit = (e: FormEvent) => {
+  //   e.preventDefault();
+  //   submitLeaveRequest({ scheduleId, startTime, endTime, excuse, message }, file)
+  //     .then(() => navigate('/dashboard'))
+  //     .catch(err => setError(err.message));
+  // };
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
     // For now just log and navigate back
