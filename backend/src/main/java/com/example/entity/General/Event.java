@@ -37,4 +37,12 @@ public class Event {
         Date current = new Date().currenDate();
         return (current.isAfter(start) || current.isBefore(start)) && current.isBefore(finish);
     }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) return true;
+        if (obj == null || getClass() != obj.getClass()) return false;
+        Event event = (Event) obj;
+        return start.equals(event.start) && finish.equals(event.finish);
+    }
 }

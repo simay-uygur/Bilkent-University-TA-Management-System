@@ -31,13 +31,9 @@ import lombok.Setter;
 @JsonInclude(JsonInclude.Include.NON_DEFAULT)
 @NoArgsConstructor
 @AllArgsConstructor
-/*@JsonSubTypes({
-    @JsonSubTypes.Type(value = PublicTask.class, name = "PUBLIC"),
-    @JsonSubTypes.Type(value = PrivateTask.class, name = "PRIVATE")
-})*/
 public class Task {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY) // auto id generation
+    @GeneratedValue(strategy = GenerationType.TABLE) // auto id generation
     @Column(name = "task_id", unique = true, updatable = true, nullable = false)
     private int task_id;
     
@@ -95,5 +91,12 @@ public class Task {
             return true;
         }
         return false;
+    }
+
+    public String getStart_date() {
+        if (duration != null && duration.getStart() != null) {
+            return duration.getStart().toString(); // Assuming Event has a toString() method that formats the date correctly
+        }
+        return null; // or throw an exception if you prefer
     }
 }

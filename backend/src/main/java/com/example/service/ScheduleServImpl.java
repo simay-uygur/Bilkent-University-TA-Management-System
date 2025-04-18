@@ -23,11 +23,9 @@ import com.example.repo.TARepo;
 import com.example.repo.TA_TaskRepo;
 
 import jakarta.persistence.Embeddable;
-import lombok.RequiredArgsConstructor;
 
 @Embeddable
 @Service
-@RequiredArgsConstructor
 public class ScheduleServImpl implements ScheduleServ {
     // Implement the methods defined in the ScheduleServ interface here
     // For example:
@@ -60,8 +58,7 @@ public class ScheduleServImpl implements ScheduleServ {
         Schedule schedule = new Schedule(weekStartStr);
 
         // Retrieve tasks and daily works (this should be done via repository/service calls).
-        // In this example, we use stub methods.
-        List<Task> tasks = fetchTasksForTA(ta.getId());
+        List<Task> tasks = fetchTasksForTA(ta.getId(), weekStartStr);
         List<Lesson> tas_lessons = fetchLessonsForTA(ta);
 
         DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd");
@@ -76,10 +73,12 @@ public class ScheduleServImpl implements ScheduleServ {
                     event.getStart().getMonth(), 
                     event.getStart().getDay()
             );
-            String key = startDate.format(dtf);
+            String key = startDate.format(dtf);// in format "yyyy-MM-dd"
             String title = task.getTask_type().toString() + " Task";
-            ScheduleItem item = new ScheduleItem(title, event, ScheduleItemType.TASK, task.getTask_id());
-            schedule.addScheduleItem(key, item);
+            ScheduleItem item = new ScheduleItem(title, event, ScheduleItemType.TASK, task.getTask_id(),key);
+            if (!schedule.getScheduleItems().contains(item)) {
+                schedule.addScheduleItem(item);
+            } 
         }
 
         // Process each Lesson entry similarly.
@@ -93,20 +92,23 @@ public class ScheduleServImpl implements ScheduleServ {
             String key = startDate.format(dtf);
             String title = lesson.getDuty_type().toString() + " Duty";
             // Reference id can be 0 (or use a proper id if available in Lesson).
-            ScheduleItem item = new ScheduleItem(title, event, ScheduleItemType.DAILY_WORK, lesson.getDuty_id());
-            schedule.addScheduleItem(key, item);
+            ScheduleItem item = new ScheduleItem(title, event, ScheduleItemType.DAILY_WORK, lesson.getDuty_id(), key);
+            if (!schedule.getScheduleItems().contains(item)) {
+                schedule.addScheduleItem(item);
+            } 
         }
 
         return schedule;
     }
 
     // Stub methods to represent data fetching. Replace these with actual repository calls.
-    private List<Task> fetchTasksForTA(Long taId) {
-        List<TA_Task> ta_tasks = taTaskRepo.findAllPendingTasksByTaId(taId);
+    private List<Task> fetchTasksForTA(Long taId, String startDate) {
+        //List<TA_Task> ta_tasks = taTaskRepo.findAllPendingTasksByTaId(taId);
+        List<TA_Task> ta_tasks = taTaskRepo.findAllByTaId(taId);
         List<Task> tasks_list = new ArrayList<>();
         for (TA_Task ta_task : ta_tasks) {
             Task task = ta_task.getTask();
-            if (task != null) {
+            if (task != null && task.getStart_date().compareTo(startDate) >= 0) {
                 tasks_list.add(task);
             }
         }
