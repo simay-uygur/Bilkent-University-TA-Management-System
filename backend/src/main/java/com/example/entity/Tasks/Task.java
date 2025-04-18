@@ -64,6 +64,10 @@ public class Task {
         return duration != null && duration.isOngoing();
     }
 
+
+
+    
+
     @JsonIgnore
     @OneToMany(mappedBy = "task", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<TA_Task> tas_list = new ArrayList<>(); 
