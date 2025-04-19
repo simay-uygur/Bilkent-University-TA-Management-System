@@ -1,0 +1,33 @@
+.container {
+    display: flex;
+    flex-direction: column;
+  }
+  
+  /* Override react‑calendar styles if you need to tweak sizes */
+  .calendar {
+    border: none;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    border-radius: 8px;
+    margin-bottom: 1rem;
+  }
+  
+  .timePicker {
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .label {
+    margin-bottom: 0.25rem;
+    color: #374151;
+    font-size: 0.9rem;
+    font-weight: 500;
+  }
+  
+  .input {
+    padding: 0.5rem;
+    border: 1px solid #D1D5DB;
+    border-radius: 4px;
+    font-size: 1rem;
+    box-sizing: border-box;
+  }
+  

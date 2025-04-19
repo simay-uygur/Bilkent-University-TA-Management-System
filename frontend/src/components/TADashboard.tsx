@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { fetchSchedule, fetchAvailableTAs } from '../api';
 import styles from './TADashboard.module.css';
+import Calendar from './Calendar';
 
 interface ScheduleItem {
   id: string;
@@ -16,7 +17,7 @@ interface TA {
 
 export default function TADashboard() {
   const navigate = useNavigate();
-  const [date, setDate]           = useState<string>(new Date().toISOString().slice(0,10));
+  const [date, setDate]           = useState<Date>(new Date());
   const [startTime, setStartTime] = useState<string>('08:00');
   const [schedule, setSchedule]   = useState<ScheduleItem[]>([]);
   const [swapList, setSwapList]   = useState<TA[]>([]);
@@ -48,6 +49,13 @@ export default function TADashboard() {
         {/* Left panel */}
         <div className={styles.leftPanel}>
           <div className={styles.card}>
+          <Calendar
+             date={date}
+              onDateChange ={(d) => setDate(d as Date)}
+              startTime={startTime}
+              onStartTimeChange={setStartTime}
+            />
+          {/*   
             <label className={styles.fieldLabel}>Select Date</label>
             <input
               type="date"
@@ -62,6 +70,7 @@ export default function TADashboard() {
               value={startTime}
               onChange={e => setStartTime(e.target.value)}
             />
+ */}
           </div>
         </div>
 

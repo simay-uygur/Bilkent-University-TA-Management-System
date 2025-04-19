@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Outlet } from 'react-router-dom';
-import TANavBar from './TANavBar.tsx';
+import TANavBar from './TaNavBar';
 import NotificationPanel from './NotificationPanel.tsx';
 import { fetchNotifications, Notification, markAllNotificationsRead } from '../api';
 
