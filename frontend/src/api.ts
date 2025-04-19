@@ -14,13 +14,20 @@ export function login(
     withCredentials: true,
   });
 }
+export interface ScheduleItem {
+  id: string;
+  timeRange: string;
+  task: string;
+  lesson: string;
+}
 
 // example typed fetch; replace `any` with your real schedule interface
 export function fetchSchedule(): Promise<AxiosResponse<any>> {
-  return axios.get<any>('/api/ta/schedule', {
+  return axios.get<ScheduleItem>('/api/ta/schedule', {
     withCredentials: true,
   });
 }
+
 export interface LeaveRequest {
     id: string;
     taName: string;
@@ -59,11 +66,6 @@ export interface LeaveRequest {
   export function assignTA(courseId: string, taId: string) {
     return axios.post(`/api/courses/${courseId}/assign`, { taId }, { withCredentials:true });
   }
-  export interface ScheduleItem {
-    id: string;
-    timeRange: string; // e.g. "08:00 - 10:00"
-    task: 'Proctoring' | 'Leave Request';
-  }
   
  /*  export function fetchSchedule() {
     return axios.get<ScheduleItem[]>('/api/ta/schedule', { withCredentials:true });
@@ -100,4 +102,58 @@ export function fetchScheduleItem(id: string) {
       { withCredentials: true, headers: { 'Content-Type': 'multipart/form-data' } }
     );
   }
-  
+  /** --- Volunteer Proctoring API --- **/
+
+/**
+ * Represents a single volunteer‑proctoring request.
+ */
+export interface VolunteerRequest {
+  id: string;
+  course: string;
+  needed: number;       // number of TAs needed
+  closesAt: string;     // e.g. '2025-03-06'
+  priority?: boolean;   // if true, show the ★
+  assigned: boolean;    // true if this TA is already assigned
+}
+
+/**
+ * Fetches the list of volunteer‑proctoring requests for the given page.
+ * @param page 1‑based page number
+ */
+export function fetchVolunteerRequests(
+  page: number
+): Promise<AxiosResponse<VolunteerRequest[]>> {
+  return axios.get<VolunteerRequest[]>(
+    `/api/volunteer-requests?page=${page}`,
+    { withCredentials: true }
+  );
+}
+
+/**
+ * Toggles or sets the assignment for a particular volunteer request.
+ * @param id the VolunteerRequest.id to assign/unassign
+ */
+export function assignVolunteer(
+  id: string
+): Promise<AxiosResponse<void>> {
+  return axios.post<void>(
+    `/api/volunteer-requests/${id}/assign`,
+    {},
+    { withCredentials: true }
+  );
+}
+export interface Notification {
+  id: string;
+  source: string;
+  message: string;
+  timestamp: string; // ISO
+  read: boolean;
+}
+
+export function fetchNotifications(): Promise<AxiosResponse<Notification[]>> {
+  return axios.get<Notification[]>('/api/notifications', { withCredentials: true });
+}
+
+export function markAllNotificationsRead(): Promise<AxiosResponse<void>> {
+  return axios.post<void>('/api/notifications/mark-read-all', {}, { withCredentials: true });
+}
