@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
+
 import { useNavigate } from 'react-router-dom';
 import { fetchSchedule, fetchAvailableTAs } from '../api';
+
 import styles from './TADashboard.module.css';
 import Calendar from './Calendar';
 
@@ -153,4 +155,5 @@ export default function TADashboard() {
       </div>
     </div>
   );
+}
 }
