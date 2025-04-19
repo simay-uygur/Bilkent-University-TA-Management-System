@@ -7,7 +7,6 @@ import org.hibernate.annotations.DynamicUpdate;
 
 import com.example.entity.Curriculum.Lesson;
 import com.example.entity.General.AcademicLevelType;
-import com.example.entity.Schedule.Schedule;
 import com.example.entity.Tasks.TA_Task;
 import com.example.exception.NoPersistExc;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -19,7 +18,6 @@ import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.OneToMany;
-import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -41,6 +39,9 @@ public class TA extends User{
     @Column(name = "total_workload", unique = false, updatable = true, nullable = false)
     private int total_workload = 0; // toplam iş yükü
 
+    @Column(name = "is_active", updatable = false,  nullable = false)  //added new
+    private Boolean isActive = true;
+
     //change
     @OneToMany(
         mappedBy = "ta", // the other side of the relationship is the owner of the relationship
@@ -49,18 +50,12 @@ public class TA extends User{
     )
     private List<Lesson> tas_duties = new ArrayList<>(); // ta görevleri
 
-    public void insreaseWorkLoad(int load){
+    public void increaseWorkLoad(int load){
         total_workload += load ;
     }
 
     @OneToMany(mappedBy = "ta_owner", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<TA_Task> ta_tasks = new ArrayList<>(); 
-    
-    @OneToOne(
-        fetch = FetchType.LAZY,
-        cascade = {CascadeType.PERSIST, CascadeType.MERGE}
-    )
-    private Schedule schedule;
 
     public void decreaseWorkLoad(int load){
         if (total_workload - load < 0)

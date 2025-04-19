@@ -152,19 +152,25 @@ public class TaskServImpl implements TaskServ {
     public boolean assignTA(int task_id, TA ta) {
         // Find existing entities
         Task task = taskRepo.findById(task_id)
-                .orElseThrow(() -> new TaskNotFoundExc(task_id));
+                    .orElseThrow(() -> new TaskNotFoundExc(task_id));
+        
+        // Check if assignment already exists
+        if (taTaskRepo.exists(task_id, ta.getId())) {
+            throw new GeneralExc("TA is already assigned to this task");
+        }
+        
+        //check if ta has the task on the same duration
+        for (TA_Task taTask : ta.getTa_tasks()) {
+            if (taTask.getTask().getDuration().equals(task.getDuration())) {
+                throw new GeneralExc("TA already has task on the same duration");
+            }
+        }
         
         // Check task limits
         if (task.getAmount_of_tas() == task.getRequiredTAs()) {
             throw new TaskLimitExc();
         }
 
-        // Create composite ID
-        
-        // Check if assignment already exists
-        if (taTaskRepo.exists(task_id, ta.getId())) {
-            throw new GeneralExc("TA is already assigned to this task");
-        }
 
         // Create new TA_Task relationship
         TA_Task taTask = new TA_Task(task, ta, task.getAccess_type());

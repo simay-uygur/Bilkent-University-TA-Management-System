@@ -88,10 +88,10 @@ Workload Limits
   - Exam distribution list of students for each classroom
     
 #### Technology Stack
-- Backend: not decided
-- Frontend: not decided
+- Backend: Spring Boot
+- Frontend: Html/CSS/Typescript
 - Database: MySQL
-- Hosting: Apache2 on Linux servers
+- Hosting: Apache2 on Linux servers (tomcat by spring boot)
 
 #### Actors in the System
 - Teaching Assistant (TA) 
