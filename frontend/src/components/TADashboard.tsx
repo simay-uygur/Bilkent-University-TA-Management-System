@@ -1,160 +1,147 @@
-
-// import React, { useEffect, useState } from 'react';
-// import { useNavigate } from 'react-router-dom';
-// import {
-//   fetchSchedule,
-//   ScheduleItem,
-//   fetchAvailableTAs
-// } from '../api';
-// import styles from './TADashboard.module.css';
-
-// const TADashboard: React.FC = () => {
-//   const [schedule, setSchedule]       = useState<ScheduleItem[]>([]);
-//   const [swapList, setSwapList]       = useState<{id:string;name:string}[]>([]);
-//   const [filter, setFilter]           = useState<string>('');
-//   const [loadingSchedule, setLoading] = useState<boolean>(true);
-//   const navigate                       = useNavigate();
-
-//   useEffect(() => {
-//     // 1) Load schedule from your database via API
-//     fetchSchedule()
-//       .then(r => setSchedule(r.data))
-//       .catch((err => setError(err.message)) => {
-//         /* you may want to show an error here */
-//       })
-//       .finally(() => setLoading(false));
-
-//     // 2) Load swap‑eligible TAs
-//     fetchAvailableTAs().then(r => setSwapList(r.data));
-//   }, []);
-
-//   const filtered = swapList.filter(ta =>
-//     ta.name.toLowerCase().includes(filter.toLowerCase())
-//   );
-
-//   return (
-//     <>
-//       <header className={styles.header}>TA Management</header>
-//       <main className={styles.container}>
-//         <section className={styles.section}>
-//           <h2>Time Table</h2>
-
-//           {loadingSchedule ? (
-//             <p>Loading schedule…</p>
-//           ) : schedule.length === 0 ? (
-//             <p className={styles.emptyState}>
-//               No assignments found. Make sure your schedule data is populated in the database and that <code>fetchSchedule()</code> is pointing to the correct endpoint.
-//             </p>
-//           ) : (
-//             <table className={styles.table}>
-//               <thead>
-//                 <tr>
-//                   <th>Time</th>
-//                   <th>Task</th>
-//                   <th>Actions</th>
-//                 </tr>
-//               </thead>
-//               <tbody>
-//                 {schedule.map(s => (
-//                   <tr key={s.id}>
-//                     <td>{s.timeRange}</td>
-//                     <td>
-//                       <button
-//                         className={styles.linkCell}
-//                         onClick={() => navigate(`/leave-request/${s.id}`)}
-//                       >
-//                         {s.task}
-//                       </button>
-//                     </td>
-//                     <td>
-//                       <button
-//                         className={styles.actionBtn}
-//                         onClick={() => navigate(`/leave-request/${s.id}`)}
-//                       >
-//                         Request Leave
-//                       </button>
-//                     </td>
-//                   </tr>
-//                 ))}
-//               </tbody>
-//             </table>
-//           )}
-//         </section>
-
-//         {/* ... Swap‑TA section remains unchanged ... */}
-//       </main>
-//     </>
-//   );
-// };
-
-// export default TADashboard;
-// src/components/TADashboard.tsx
-
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { fetchSchedule, fetchAvailableTAs } from '../api';
 import styles from './TADashboard.module.css';
 
 interface ScheduleItem {
   id: string;
   timeRange: string;
   task: string;
+  lesson: string;
+}
+interface TA {
+  id: string;
+  name: string;
 }
 
-// pre‑populated mock tasks for convenience
-const mockSchedule: ScheduleItem[] = [
-  { id: '1', timeRange: '08:00 – 10:00', task: 'Proctoring – CS101' },
-  { id: '2', timeRange: '10:00 – 12:00', task: 'Lecture Assist – CS315' },
-  { id: '3', timeRange: '13:00 – 15:00', task: 'Lab Supervision – CS224' },
-  { id: '4', timeRange: '15:00 – 17:00', task: 'Office Hours' },
-];
+export default function TADashboard() {
+  const navigate = useNavigate();
+  const [date, setDate]           = useState<string>(new Date().toISOString().slice(0,10));
+  const [startTime, setStartTime] = useState<string>('08:00');
+  const [schedule, setSchedule]   = useState<ScheduleItem[]>([]);
+  const [swapList, setSwapList]   = useState<TA[]>([]);
+  const [swapFor, setSwapFor]     = useState<string | null>(null);
+  const [filter, setFilter]       = useState<string>('');
 
-const TADashboard: React.FC = () => {
-  const [schedule] = useState<ScheduleItem[]>(mockSchedule);
-  const navigate   = useNavigate();
+  // Fetch real data on mount
+  useEffect(() => {
+    fetchSchedule()
+      .then(r => setSchedule(r.data))
+      .catch(console.error);
+    fetchAvailableTAs()
+      .then(r => setSwapList(r.data))
+      .catch(console.error);
+  }, []);
+
+  const filteredTAs = swapList.filter(ta =>
+    ta.name.toLowerCase().includes(filter.toLowerCase())
+  );
+
+  const handleSwap = (taId: string) => {
+    console.log(`Swap ${swapFor} with TA ${taId}`);
+    setSwapFor(null);
+  };
 
   return (
-    <>
-    
-      <header className={styles.header}>TA Management</header>
-      <main className={styles.container}>
-        <section className={styles.section}>
-          <h2>Time Table</h2>
-          <table className={styles.table}>
-            <thead>
-              <tr>
-                <th>Time</th>
-                <th>Task</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {schedule.map(item => (
-                <tr key={item.id}>
-                  <td>{item.timeRange}</td>
-                  <td>
-                    <button
-                      className={styles.linkCell}
-                      onClick={() => navigate(`/leave-request/${item.id}`)}
-                    >
-                      {item.task}
-                    </button>
-                  </td>
-                  <td>
-                    <button
-                      className={styles.actionBtn}
-                      onClick={() => navigate(`/leave-request/${item.id}`)}
-                    >
-                      Request Leave
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </section>
-      </main>
-    </>
-  );
-};
+    <div className={styles.page}>
+      <div className={styles.content}>
+        {/* Left panel */}
+        <div className={styles.leftPanel}>
+          <div className={styles.card}>
+            <label className={styles.fieldLabel}>Select Date</label>
+            <input
+              type="date"
+              className={styles.dateInput}
+              value={date}
+              onChange={e => setDate(e.target.value)}
+            />
+            <label className={styles.fieldLabel}>Start Time</label>
+            <input
+              type="time"
+              className={styles.timeInput}
+              value={startTime}
+              onChange={e => setStartTime(e.target.value)}
+            />
+          </div>
+        </div>
 
-export default TADashboard;
+        {/* Right panel */}
+        <div className={styles.rightPanel}>
+          <div className={styles.card}>
+            <h2 className={styles.sectionTitle}>Time Table</h2>
+            <table className={styles.table}>
+              <thead>
+                <tr>
+                  <th>Time</th><th>Task</th><th>Lesson</th><th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {schedule.map(item => (
+                  <tr key={item.id}>
+                    <td>{item.timeRange}</td>
+                    <td>
+                      <button
+                        className={styles.linkCell}
+                        onClick={() => navigate(`/leave-request/${item.id}`)}
+                      >
+                        {item.task}
+                      </button>
+                    </td>
+                    <td>{item.lesson}</td>
+                    <td>
+                      <button
+                        className={styles.swapBtn}
+                        onClick={() => setSwapFor(item.id)}
+                      >
+                        Swap
+                      </button>
+                      <button
+                        className={styles.transferBtn}
+                        onClick={() => navigate(`/leave-request/${item.id}`)}
+                      >
+                        Transfer
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+
+            {swapFor && (
+              <section className={styles.swapSection}>
+                <h3>Swap for assignment #{swapFor}</h3>
+                <input
+                  type="text"
+                  placeholder="Filter TA…"
+                  className={styles.filterInput}
+                  value={filter}
+                  onChange={e => setFilter(e.target.value)}
+                />
+                <table className={styles.swapTable}>
+                  <thead>
+                    <tr><th>TA Name</th><th>Action</th></tr>
+                  </thead>
+                  <tbody>
+                    {filteredTAs.map(ta => (
+                      <tr key={ta.id}>
+                        <td>{ta.name}</td>
+                        <td>
+                          <button
+                            className={styles.selectBtn}
+                            onClick={() => handleSwap(ta.id)}
+                          >
+                            Select
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </section>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
