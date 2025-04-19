@@ -1,17 +1,14 @@
 package com.example.controller;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import com.example.entity.Actors.TA;
 import com.example.entity.General.Date;
@@ -24,7 +21,7 @@ import com.example.service.TaskServ;
 import com.example.service.UserServ;
 
 import lombok.RequiredArgsConstructor;
-
+import org.springframework.web.multipart.MultipartFile;
 
 
 @RestController
@@ -107,7 +104,7 @@ public class TA_controller {
         return new ResponseEntity<>(serv.deleteTaskById(task_id, ta_id),HttpStatus.OK);
     }
 
-    @PutMapping("api/ta/{id}")
+    @PutMapping("api/ta/{id}") //why there is no / at the start ?
     public ResponseEntity<?> restoreTA(@PathVariable Long id) {
         return new ResponseEntity<>(serv.restoreTAById(id), HttpStatus.OK);
     } 
@@ -118,7 +115,21 @@ public class TA_controller {
         Date date = new Date().currenDate() ;
         return new ResponseEntity<>(serv.getWeeklyScheduleForTA(ta, date), HttpStatus.OK);
     }
-    
+
+    //for uploading TA's from excel file'
+    @PostMapping("/api/upload/tas")
+    public ResponseEntity<Map<String, Object>> uploadTAs(@RequestParam("file") MultipartFile file) {
+        try {
+            Map<String, Object> result = serv.importTAsFromExcel(file);
+            return ResponseEntity.ok(result);
+        } catch (Exception e) {
+            Map<String, Object> error = new HashMap<>();
+            error.put("error", e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
+        }
+    }
+
+
 }
 /*{
   "task_type" : "Lab",

@@ -24,8 +24,17 @@ public class Date {
     @Column(nullable = false)
     private int minute;
 
+    @Override
     public String toString() {
-        return String.format("%02d/%02d/%04d %02d:%02d", day, month, year, hour, minute);
+        return String.format("%04d-%02d-%02d", year, month, day); // yyyy-mm-dd
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) return true;
+        if (obj == null || getClass() != obj.getClass()) return false;
+        Date date = (Date) obj;
+        return day == date.day && month == date.month && year == date.year && hour == date.hour && minute == date.minute;
     }
     
     public boolean isBefore(Date other) {
