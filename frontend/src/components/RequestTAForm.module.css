@@ -1,0 +1,66 @@
+.pageWrapper {
+    display: flex;
+    justify-content: center;
+    padding: 2rem 1rem;
+    font-family: Inter, sans-serif;
+    background: #BDDFFF;
+    min-height: calc(100vh - 56px); /* adjust if you have a nav bar height */
+  }
+  
+  .card {
+    background: #000;
+    color: white;
+    padding: 2rem;
+    border-radius: 8px;
+    width: 100%;
+    max-width: 600px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .heading {
+    margin-bottom: 1.5rem;
+    font-size: 1.75rem;
+  }
+  
+  .label {
+    margin-top: 1rem;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+  }
+  
+  .input {
+    padding: 0.75rem 1rem;
+    border-radius: 4px;
+    border: none;
+    font-size: 1rem;
+  }
+  
+  .fieldset {
+    margin-top: 1rem;
+    border: none;
+    padding: 0;
+  }
+  
+  .checkboxLabel {
+    margin-right: 1.5rem;
+    font-weight: 400;
+  }
+  
+  .actions {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 2rem;
+  }
+  
+  .submitBtn {
+    background: #EF4444;
+    border: none;
+    padding: 0.75rem 1.5rem;
+    border-radius: 4px;
+    color: white;
+    font-size: 1rem;
+    cursor: pointer;
+  }
+  

@@ -39,6 +39,9 @@ public class TA extends User{
     @Column(name = "total_workload", unique = false, updatable = true, nullable = false)
     private int total_workload = 0; // toplam iş yükü
 
+    @Column(name = "is_active", updatable = false,  nullable = false)  //added new
+    private Boolean isActive = true;
+
     //change
     @OneToMany(
         mappedBy = "ta", // the other side of the relationship is the owner of the relationship
@@ -47,7 +50,7 @@ public class TA extends User{
     )
     private List<Lesson> tas_duties = new ArrayList<>(); // ta görevleri
 
-    public void insreaseWorkLoad(int load){
+    public void increaseWorkLoad(int load){
         total_workload += load ;
     }
 
