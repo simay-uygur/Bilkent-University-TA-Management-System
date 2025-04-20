@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { fetchSchedule, fetchAvailableTAs } from '../api';
 
 import styles from './TADashboard.module.css';
-import Calendar from './Calendar';
+import Calendar from '../components/Calendar';
 
 interface ScheduleItem {
   id: string;

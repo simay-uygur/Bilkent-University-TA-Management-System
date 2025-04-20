@@ -157,3 +157,20 @@ export function fetchNotifications(): Promise<AxiosResponse<Notification[]>> {
 export function markAllNotificationsRead(): Promise<AxiosResponse<void>> {
   return axios.post<void>('/api/notifications/mark-read-all', {}, { withCredentials: true });
 }
+
+export interface CourseTA {
+  id: number;
+  name: string;
+}
+
+/**
+ * Fetch TAs for a given course.
+ */
+export function fetchCourseTAs(
+  courseId: number
+): Promise<AxiosResponse<CourseTA[]>> {
+  return axios.get<CourseTA[]>(
+    `/api/courses/${courseId}/tas`,
+    { withCredentials: true }
+  );
+}
