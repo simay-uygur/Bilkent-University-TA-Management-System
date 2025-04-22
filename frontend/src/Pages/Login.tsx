@@ -15,13 +15,11 @@ const Login: React.FC = () => {
     // ID: numeric only and exactly 6 digits
     if (/\D/.test(username)) {
       newErrors.username = 'ID must contain only numeric digits.';
-    } else if (username.length !== 6) {
+    } else if (username.length !== 8) {
       newErrors.username = 'ID must be exactly 6 digits.';
     }
     // Password: ≥8 chars & at least one uppercase
-    if (password.length < 8) {
-      newErrors.password = 'Password must be at least 8 characters.';
-    } else if (!/[A-Z]/.test(password)) {
+    if (!/[A-Z]/.test(password)) {
       newErrors.password = 'Password must include at least one uppercase letter.';
     }
 

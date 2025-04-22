@@ -11,7 +11,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.entity.Actors.TA_DTO;
@@ -70,6 +69,12 @@ public class Course_controller {
     public ResponseEntity<Course_DTO> getCourse(@PathVariable String course_code) {
         return new ResponseEntity<>(courseServ.findCourse(course_code), HttpStatus.FOUND);
     }
+
+    @GetMapping("api/course/all")
+    public ResponseEntity<List<Course_DTO>> getCourses() {
+        return new ResponseEntity<>(courseServ.getTasks(),HttpStatus.FOUND);
+    }
+    
     
     @PostMapping("api/course/{course_code}/ta/{ta_id}")
     public ResponseEntity<Boolean> assignTA(@PathVariable String course_code, @PathVariable Long ta_id) {

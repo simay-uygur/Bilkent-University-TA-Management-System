@@ -2,15 +2,24 @@ import axios, { AxiosResponse } from 'axios';
 axios.defaults.baseURL = import.meta.env.VITE_API_URL || '';  // ← point to your API
 
 export interface Credentials {
-  username: string;
+  id: string;
   password: string;
+}
+
+export interface User {
+  id: number;
+  name: string;
+  surname: string;
+  webmail: string;
+  role: string;
+  isDeleted: boolean;
 }
 
 // login returns nothing on success (assumes your Spring endpoint returns 200 OK with no body)
 export function login(
   creds: Credentials
 ): Promise<AxiosResponse<void>> {
-  return axios.post<void>('/api/auth/login', creds, {
+  return axios.post<void>('/api/login', creds, {
     withCredentials: true,
   });
 }
@@ -22,8 +31,8 @@ export interface ScheduleItem {
 }
 
 // example typed fetch; replace `any` with your real schedule interface
-export function fetchSchedule(): Promise<AxiosResponse<any>> {
-  return axios.get<ScheduleItem>('/api/ta/schedule', {
+export function fetchSchedule(): Promise<AxiosResponse<ScheduleItem[]>> {
+  return axios.get<ScheduleItem[]>('/api/ta/schedule', {
     withCredentials: true,
   });
 }

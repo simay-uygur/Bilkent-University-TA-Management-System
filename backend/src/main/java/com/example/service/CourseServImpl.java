@@ -180,6 +180,17 @@ public class CourseServImpl implements CourseServ{
         return true;
     }
 
+    @Override
+    public List<Course_DTO> getTasks(){
+        List<Course> courses = courseRepo.findAll();
+        List<Course_DTO> coursesDtos = new ArrayList<>();
+        for (Course course : courses){
+            Course_DTO courseDto = createDTO(course);
+            coursesDtos.add(courseDto);
+        }
+        return coursesDtos;
+    }
+
     public boolean updateTask(String course_code,int task_id,Task task)
     {
         if (taskServ.updateTask(task_id, task))
