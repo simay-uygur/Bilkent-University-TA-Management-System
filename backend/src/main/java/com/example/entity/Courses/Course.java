@@ -48,8 +48,6 @@ public class Course {
     @Column(name = "course_code", unique = true)
     private String course_code ; 
 
-    
-
     // cs-319. id -> 'c' + 's' + 319 -> 319319
     @PrePersist
     private void setCourseId() {
@@ -58,7 +56,7 @@ public class Course {
     }
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "course_academic_status", unique = false, updatable = true, nullable = false)
+    @Column(name = "course_academic_status",updatable = true, nullable = false)
     private AcademicLevelType course_academic_status ;
 
     @NotEmpty(message = "The field can not be empty!")
