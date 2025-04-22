@@ -47,7 +47,8 @@ public class Course_controller {
         /*  
             // input json body to create course
             {
-                "course_code" : "cs-319",
+                "course_code" : "cs-299",
+                "course_name" : "Summer Training I",
                 "course_academic_status" : "MS",
                 "course_dep"  : "IE",
                 "prereq_list" : "cs-201,math-102"
