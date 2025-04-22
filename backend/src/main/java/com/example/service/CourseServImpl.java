@@ -7,7 +7,7 @@ import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.example.entity.Actors.Coordinator_DTO;
+import com.example.entity.Actors.Instructor_DTO;
 import com.example.entity.Actors.TA;
 import com.example.entity.Actors.TA_DTO;
 import com.example.entity.Courses.Course;
@@ -102,7 +102,7 @@ public class CourseServImpl implements CourseServ{
         dto.setCourse_code(course.getCourse_code());
         dto.setDepartment(course.getCourse_dep());
         dto.setAcademical_status(course.getCourse_academic_status().toString());
-        Coordinator_DTO coor_dto = new Coordinator_DTO();
+        Instructor_DTO coor_dto = new Instructor_DTO();
         dto.setCoordinator(coor_dto);
         dto.setInstructors(null);
         dto.setPrereqs(course.getPrereq_list().trim().split("\\s*,\\s*"));
