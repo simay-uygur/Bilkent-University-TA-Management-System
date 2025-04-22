@@ -11,15 +11,12 @@ services:
       - "8080:8080"
     env_file:
       - .env
-      - .env
     environment:
       - SPRING_DATASOURCE_URL=${SPRING_DATASOURCE_URL}
       - SPRING_DATASOURCE_USERNAME=${SPRING_DATASOURCE_USERNAME}
       - SPRING_DATASOURCE_PASSWORD=${SPRING_DATASOURCE_PASSWORD}
       - SPRING_JPA_HIBERNATE_DDL_AUTO=${SPRING_JPA_HIBERNATE_DDL_AUTO}
       - SPRING_DEVTOOLS_RESTART_ENABLED=true
-
-
     networks:
       - shared_network
     restart: unless-stopped

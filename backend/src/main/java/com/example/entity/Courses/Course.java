@@ -58,7 +58,7 @@ public class Course {
     }
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "course_academic_status", unique = false, updatable = true, nullable = false)
+    @Column(name = "course_academic_status", updatable = true, nullable = false)
     private AcademicLevelType course_academic_status ;
 
     @NotEmpty(message = "The field can not be empty!")
