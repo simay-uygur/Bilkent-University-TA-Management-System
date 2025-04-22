@@ -105,7 +105,7 @@ public class CourseServImpl implements CourseServ{
         Coordinator_DTO coor_dto = new Coordinator_DTO();
         dto.setCoordinator(coor_dto);
         dto.setInstructors(null);
-        dto.setPrereqs(course.getPrereq_list().split(","));
+        dto.setPrereqs(course.getPrereq_list().trim().split("\\s*,\\s*"));
         List<Student_DTO> studDtos = new ArrayList<>();
         for (Student stud : course.getStudents_list()){
             Student_DTO stud_dto = new Student_DTO(stud.getStudent_name(), stud.getStudent_surname(), stud.getStudent_id());

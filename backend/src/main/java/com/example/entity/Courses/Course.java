@@ -48,8 +48,6 @@ public class Course {
     @Column(name = "course_code", unique = true)
     private String course_code ; 
 
-    
-
     // cs-319. id -> 'c' + 's' + 319 -> 319319
     @PrePersist
     private void setCourseId() {
