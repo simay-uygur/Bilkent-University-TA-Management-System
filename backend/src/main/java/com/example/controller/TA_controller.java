@@ -1,6 +1,8 @@
 package com.example.controller;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,7 +29,7 @@ import com.example.service.TaskServ;
 import com.example.service.UserServ;
 
 import lombok.RequiredArgsConstructor;
-
+import org.springframework.web.multipart.MultipartFile;
 
 
 @RestController
@@ -131,7 +133,21 @@ public class TA_controller {
         date = date.substring(1,date.length()-1) ; // remove quotes
         return new ResponseEntity<>(serv.getScheduleOfTheDay(ta, date), HttpStatus.OK);
     }
-    
+
+
+    //for uploading TA's from excel file'
+    @PostMapping("/api/upload/tas")
+    public ResponseEntity<Map<String, Object>> uploadTAs(@RequestParam("file") MultipartFile file) {
+        try {
+            Map<String, Object> result = serv.importTAsFromExcel(file);
+            return ResponseEntity.ok(result);
+        } catch (Exception e) {
+            Map<String, Object> error = new HashMap<>();
+            error.put("error", e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
+        }
+    }
+
 }
 /*{
   "task_type" : "Lab",

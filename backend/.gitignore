@@ -11,7 +11,7 @@ application.properties
 
 ### Ignore .env files globally
 ../.env
-
+.env
 ### STS ###
 .apt_generated
 .classpath
@@ -45,7 +45,6 @@ build/
 
 target
 
-.env
 
 
 .db-dump

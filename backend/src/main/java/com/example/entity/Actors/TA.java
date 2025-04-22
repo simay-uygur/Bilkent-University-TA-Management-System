@@ -42,6 +42,9 @@ public class TA extends User{
     @Column(name = "total_workload", unique = false, updatable = true, nullable = false)
     private int total_workload = 0; // toplam iş yükü
 
+    @Column(name = "is_active", updatable = false,  nullable = false)  //added new
+    private Boolean isActive = true;
+
     @ManyToMany(
         mappedBy = "course_tas", // the other side of the relationship is the owner of the relationship
         fetch = FetchType.LAZY,

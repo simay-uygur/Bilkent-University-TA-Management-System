@@ -1,6 +1,7 @@
 package com.example.repo;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -24,9 +25,11 @@ public interface TARepo extends JpaRepository<TA, Long> { // TA is the entity an
     
     // This query will fetch all tasks (both public and private) for a given TA that are pending
     @Query("SELECT t FROM Task t " +
-       "JOIN TA_Task tt ON t.id = tt.task.id " +
-       "WHERE tt.ta_owner.id = :taId AND t.status = 'PENDING'")
-    List<Task> findPendingTasksForTA(@Param("taId") Long taId);
+            "JOIN TA_Task tt ON t.task_id = tt.task.task_id " +
+            "WHERE tt.ta_owner.id = :taId AND t.status = 'PENDING'")
+    List<Task> findPendingTasksForTA(@Param("taId") Long taId); //it was giving an error
 
 
+    @Query("SELECT t FROM TA t WHERE t.id = :id AND t.webmail = :webmail AND t.isDeleted = false")
+    Optional<TA> findByIdAndWebmail(@Param("id") Long id, @Param("webmail") String webmail);
 }
