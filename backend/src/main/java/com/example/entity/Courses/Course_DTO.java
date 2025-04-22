@@ -3,7 +3,6 @@ package com.example.entity.Courses;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.example.entity.Actors.Coordinator_DTO;
 import com.example.entity.Actors.Instructor_DTO;
 import com.example.entity.Actors.TA_DTO;
 import com.example.entity.General.Student_DTO;
@@ -29,7 +28,7 @@ public class Course_DTO {
 
     private String[] prereqs;
 
-    private Coordinator_DTO coordinator;
+    private Instructor_DTO coordinator;
 
     private List<Instructor_DTO> instructors;
 
@@ -53,7 +52,7 @@ public class Course_DTO {
     // Main constructor with all fields
     public Course_DTO(String course_code, String department, String academical_status,
                      List<Student_DTO> students, List<TA_DTO> tas, String prereqs,
-                     Coordinator_DTO coordinator, List<Instructor_DTO> instructors,
+                     Instructor_DTO coordinator, List<Instructor_DTO> instructors,
                      List<Section_DTO> sections) {
         this.course_code = course_code;
         this.department = department;
