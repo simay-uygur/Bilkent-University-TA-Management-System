@@ -39,6 +39,8 @@ public class SecurityConfig {
             .requestMatchers("/api/chair/{id}").hasRole("DEPARTMENT_CHAIR")
             .requestMatchers("/api/office/{id}").hasRole("DEANS_OFFICE")
             .requestMatchers("/api/fac_mem/{id}").hasRole("FACULTY_MEMBER")*/
+            .requestMatchers("/api/uploadTAs/").hasRole("ADMIN")
+            .requestMatchers("/api/uploadTAs/").hasRole("DEANS_OFFICE")
             .requestMatchers("/api/**").permitAll()
                 .anyRequest().authenticated()
         );

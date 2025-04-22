@@ -6,12 +6,14 @@ import java.time.format.DateTimeFormatter;
 import java.time.temporal.TemporalAdjusters;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.example.entity.Actors.TA;
-import com.example.entity.Curriculum.Lesson;
+import com.example.entity.Courses.Lesson;
+import com.example.entity.Courses.Section;
 import com.example.entity.General.Date;
 import com.example.entity.General.Event;
 import com.example.entity.Schedule.Schedule;
@@ -19,6 +21,7 @@ import com.example.entity.Schedule.ScheduleItem;
 import com.example.entity.Schedule.ScheduleItemType;
 import com.example.entity.Tasks.TA_Task;
 import com.example.entity.Tasks.Task;
+import com.example.exception.taExc.TaNotFoundExc;
 import com.example.repo.TARepo;
 import com.example.repo.TA_TaskRepo;
 
@@ -59,7 +62,6 @@ public class ScheduleServImpl implements ScheduleServ {
 
         // Retrieve tasks and daily works (this should be done via repository/service calls).
         List<Task> tasks = fetchTasksForTA(ta.getId(), weekStartStr);
-        List<Lesson> tas_lessons = fetchLessonsForTA(ta);
 
         DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
@@ -67,39 +69,44 @@ public class ScheduleServImpl implements ScheduleServ {
         for (Task task : tasks) {
             // Obtain the Event from the task, which contains the start Date.
             Event event = task.getDuration();
+
             // Convert the custom Date to a LocalDate in order to build the day key.
             LocalDate startDate = LocalDate.of(
-                    event.getStart().getYear(), 
-                    event.getStart().getMonth(), 
+                    event.getStart().getYear(),
+                    event.getStart().getMonth(),
                     event.getStart().getDay()
             );
+
             String key = startDate.format(dtf);// in format "yyyy-MM-dd"
-            String title = task.getTask_type().toString() + " Task";
+            String title = task.getTask_type().toString() ;
             ScheduleItem item = new ScheduleItem(title, event, ScheduleItemType.TASK, task.getTask_id(),key);
             if (!schedule.getScheduleItems().contains(item)) {
                 schedule.addScheduleItem(item);
-            } 
+            }
         }
 
-        // Process each Lesson entry similarly.
-        for (Lesson lesson : tas_lessons) {
-            Event event = lesson.getDuration();
-            LocalDate startDate = LocalDate.of(
-                    event.getStart().getYear(), 
-                    event.getStart().getMonth(), 
+        for (Section sec : ta.getTas_own_lessons()) {
+            // Obtain the Event from the lesson, which contains the start Date.
+            for (Lesson lesson : sec.getLessons()){
+                Event event = lesson.getDuration();
+                LocalDate startDate = LocalDate.of(
+                    event.getStart().getYear(),
+                    event.getStart().getMonth(),
                     event.getStart().getDay()
-            );
-            String key = startDate.format(dtf);
-            String title = lesson.getDuty_type().toString() + " Duty";
-            // Reference id can be 0 (or use a proper id if available in Lesson).
-            ScheduleItem item = new ScheduleItem(title, event, ScheduleItemType.DAILY_WORK, lesson.getDuty_id(), key);
-            if (!schedule.getScheduleItems().contains(item)) {
-                schedule.addScheduleItem(item);
-            } 
+                );
+                String key = startDate.format(dtf);// in format "yyyy-MM-dd"
+                String title = sec.getSection_code();
+                ScheduleItem item = new ScheduleItem(title, event, ScheduleItemType.LESSON, sec.getSection_id(),key);
+                if (!schedule.getScheduleItems().contains(item)) {
+                    schedule.addScheduleItem(item);
+                } 
+            }
         }
 
         return schedule;
     }
+
+    
 
     // Stub methods to represent data fetching. Replace these with actual repository calls.
     private List<Task> fetchTasksForTA(Long taId, String startDate) {
@@ -119,5 +126,35 @@ public class ScheduleServImpl implements ScheduleServ {
     private List<Lesson> fetchLessonsForTA(TA ta) {
         // Retrieve daily duties assigned to the TA.
         return List.of();
+    }
+
+    private List<Task> fetchTasksOnDateForTA(Long taId, String date) {
+        Optional<TA> ta = taRepo.findById(taId) ;
+        if (ta.isEmpty()) {
+            throw new TaNotFoundExc(taId);
+        }
+
+        TA ta_obj = ta.get() ;
+        List<Task> tasks_list = new ArrayList<>();
+        for (TA_Task ta_task : ta_obj.getTa_tasks()) {
+            Task task = ta_task.getTask();
+            if (task != null && task.getStart_date().equals(date)) {
+                tasks_list.add(task);
+            }
+        }
+        return tasks_list;
+    }
+
+    @Override
+    public List<ScheduleItem> getDaySchedule(TA ta, String date) {
+        // Fetch the schedule for the specified day.
+        List<ScheduleItem> scheduleItems = new ArrayList<>();
+        List<Task> tasks = fetchTasksOnDateForTA(ta.getId(), date);
+        for(Task task : tasks) {
+            Event event = task.getDuration();
+            ScheduleItem item = new ScheduleItem(task.getTask_type().toString() + " Task", event, ScheduleItemType.TASK, task.getTask_id(), date);
+            scheduleItems.add(item);
+        }
+        return scheduleItems;
     }
 }

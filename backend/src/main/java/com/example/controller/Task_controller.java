@@ -1,10 +1,12 @@
 package com.example.controller;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import java.util.List;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -13,7 +15,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.example.entity.Actors.TA;
 import com.example.entity.Tasks.Task;
-import com.example.entity.Tasks.TaskAccessType;
 import com.example.repo.TARepo;
 import com.example.service.TaskServ;
 
@@ -23,14 +24,13 @@ import lombok.RequiredArgsConstructor;
 
 
 @RestController
+//@RequestMapping("")
 @RequiredArgsConstructor
 public class Task_controller {
 
-    @Autowired 
-    private TaskServ taskServ;
+    private final TaskServ taskServ;
 
-    @Autowired
-    private TARepo taRepo;
+    private final TARepo taRepo;
     
     @PostMapping("/api/task")
     public ResponseEntity<Task> createTask(@RequestBody Task task) {
@@ -40,8 +40,8 @@ public class Task_controller {
         return new ResponseEntity<>(taskServ.createTask(task), HttpStatus.CREATED);
     }
     
-    @PutMapping("api/task/{id}")
-    public ResponseEntity<?> updateStatus(@PathVariable int id) {
+    @PatchMapping("api/task/{id}")
+    public ResponseEntity<Task> updateStatus(@PathVariable int id) {
         Task task = taskServ.getTaskById(id);
         if (task == null) {
             throw new RuntimeException("Task with ID " + id + " not found.");
@@ -51,24 +51,24 @@ public class Task_controller {
     }
 
     @PutMapping("api/task/{id}/reject")
-    public ResponseEntity<?> rejectTask(@PathVariable int id) {
+    public ResponseEntity<Boolean> rejectTask(@PathVariable int id) {
         taskServ.rejectTask(id);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
     @PutMapping("api/task/{id}/approve")
-    public ResponseEntity<?> approveTask(@PathVariable int id) {
+    public ResponseEntity<Boolean> approveTask(@PathVariable int id) {
         taskServ.approveTask(id);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
     @GetMapping("/api/task/{id}")
-    public Task getTaskByID(@PathVariable int id) {
-        return taskServ.getTaskById(id);
+    public ResponseEntity<Task> getTaskByID(@PathVariable int id) {
+        return new ResponseEntity<>(taskServ.getTaskById(id),HttpStatus.FOUND);
     }
 
     @GetMapping("/api/task/all")
-    public ResponseEntity<?> getAllTasks() {
+    public ResponseEntity<List<Task>> getAllTasks() {
         return new ResponseEntity<>(taskServ.getAllTasks(), HttpStatus.OK);
     }
 
@@ -93,15 +93,14 @@ public class Task_controller {
     }
 
     @PutMapping("/api/task/{task_id}/assign/{ta_id}")
-    public ResponseEntity<?> assignTA(@PathVariable int task_id, @PathVariable Long ta_id, @PathVariable String type) {
-        TaskAccessType taskType = TaskAccessType.valueOf(type.toUpperCase());
+    public ResponseEntity<Boolean> assignTA(@PathVariable int task_id, @PathVariable Long ta_id) {
         TA ta = taRepo.findById(ta_id)
                 .orElseThrow(() -> new RuntimeException("TA with ID " + ta_id + " not found."));
         return new ResponseEntity<>(taskServ.assignTA(task_id, ta),HttpStatus.OK);
     }   
 
     @PutMapping("/api/task/{task_id}/unassign/{ta_id}")
-    public ResponseEntity<?> unassignTA(@PathVariable int task_id, @PathVariable Long ta_id) {
+    public ResponseEntity<Boolean> unassignTA(@PathVariable int task_id, @PathVariable Long ta_id) {
         TA ta = taRepo.findById(ta_id)
                 .orElseThrow(() -> new RuntimeException("TA with ID " + ta_id + " not found."));
         return new ResponseEntity<>(taskServ.unassignTA(task_id, ta),HttpStatus.OK);

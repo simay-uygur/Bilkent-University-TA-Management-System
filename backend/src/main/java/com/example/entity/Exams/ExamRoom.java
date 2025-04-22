@@ -2,7 +2,6 @@ package com.example.entity.Exams;
 
 import java.util.List;
 
-import com.example.entity.Courses.Section;
 import com.example.entity.General.ClassRoom;
 import com.example.entity.General.Student;
 
@@ -54,10 +53,10 @@ public class ExamRoom {
     private List<Student> students_list ;
 
     @ManyToOne(
-        fetch = FetchType.LAZY,
-        cascade = {CascadeType.PERSIST, CascadeType.MERGE}
+        fetch = FetchType.LAZY
     )
-    private Section section_exam; // this is the section that the exam room is related to, not the course
+    @JoinColumn(name = "exam_id", nullable = false)
+    private Exam exam;
 
     public String getExamRoom(){
         return this.exam_room.getClass_code();

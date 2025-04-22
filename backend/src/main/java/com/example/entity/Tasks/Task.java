@@ -3,6 +3,8 @@ package com.example.entity.Tasks;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.example.entity.Courses.Course;
+import com.example.entity.Exams.Exam;
 import com.example.entity.General.Event;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -13,12 +15,15 @@ import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.Inheritance;
-import jakarta.persistence.InheritanceType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.OneToOne;
+import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -27,7 +32,7 @@ import lombok.Setter;
 @Entity
 @Getter
 @Setter
-@Inheritance(strategy = InheritanceType.TABLE_PER_CLASS) // if it is not included it will add every user with different roles to the same table in mysql. table per class means for each class(ta,deans office) there is their own table 
+@Table(name = "task_table")
 @JsonInclude(JsonInclude.Include.NON_DEFAULT)
 @NoArgsConstructor
 @AllArgsConstructor
@@ -63,13 +68,8 @@ public class Task {
     public boolean isTaskActive() {
         return duration != null && duration.isOngoing();
     }
-
-
-
     
-
-    @JsonIgnore
-    @OneToMany(mappedBy = "task", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "task", cascade = CascadeType.ALL)
     private List<TA_Task> tas_list = new ArrayList<>(); 
     //new class(TA_task) one to many, public task one to many
 
@@ -78,6 +78,19 @@ public class Task {
 
     @Column(name = "size_of_tas", unique = false, updatable = true, nullable = false)
     private int amount_of_tas = 0;
+      
+    @ManyToOne(optional = false, fetch = FetchType.LAZY)
+    @JoinColumn(name = "course_id")
+    private Course course;
+
+    @JsonIgnore
+    @OneToOne(
+        cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE},
+        optional = true,
+        fetch = FetchType.LAZY
+    )
+    @JoinColumn(name = "exam_id")
+    private Exam exam;
 
     public boolean addTA(){
         if (tas_list == null) // Check if tas_list is null before initializing
