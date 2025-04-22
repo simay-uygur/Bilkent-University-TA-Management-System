@@ -89,5 +89,4 @@ public class AppExceptionHandler {
         return ResponseEntity.status(HttpStatus.CONFLICT)
                 .body(Map.of("error", ex.getMessage()));
     }
-    //TA exceptions
 }
