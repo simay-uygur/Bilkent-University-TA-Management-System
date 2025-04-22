@@ -176,12 +176,41 @@ export function fetchCourseTAs(
   );
 }
 
-/** Task and TA interfaces matching your backend */
-export interface TA {
-  id: string;
+export interface RawTA {
+  type: string;
+  id: number;
+  password: string;
   name: string;
+  surname: string;
+  webmail: string;
+  role: string;
+  academic_level: string;
+  isActive?: boolean;
 }
 
+/** the shape your UI cares about */
+export interface TA {
+  id: string;            // string so you can use it as a React key
+  displayName: string;   // e.g. "Alice Smith"
+  webmail: string;
+  active: boolean;
+}
+
+/** fetch raw objects, then map down to your TA */
+export function fetchAllTAs(): Promise<AxiosResponse<TA[]>> {
+  return axios
+    .get<RawTA[]>('/api/ta/all', { withCredentials: true })
+    .then((res): AxiosResponse<TA[]> => ({
+      ...res,
+      data: res.data.map(raw => ({
+        id: raw.id.toString(),
+        displayName: `${raw.name} ${raw.surname}`,
+        name: `${raw.name} ${raw.surname}`,
+        webmail: raw.webmail,
+        active: raw.isActive ?? false,
+      }))
+    }));
+}
 export interface Task {
   id: number;
   title: string;
@@ -191,27 +220,12 @@ export interface Task {
 }
 
 /** Create a new Task (POST /api/task) */
-export function createTask(task: {
-  title: string;
-  courseId: number;
-}): Promise<AxiosResponse<Task>> {
-  return axios.post<Task>('/api/task', task, { withCredentials: true });
-}
 
-/** Get all tasks (GET /api/task/all) */
-export function fetchAllTasks(): Promise<AxiosResponse<Task[]>> {
-  return axios.get<Task[]>('/api/task/all', { withCredentials: true });
-}
+
+
 
 /** Assign a TA to a task (PUT /api/task/{task_id}/assign/{ta_id}) */
-export function assignTA(
-  taskId: number,
-  taId: string
-): Promise<AxiosResponse<boolean>> {
-  return axios.put<boolean>(`/api/task/${taskId}/assign/${taId}`, {}, {
-    withCredentials: true
-  });
-}
+
 
 /** Unassign a TA from a task (PUT /api/task/{task_id}/unassign/{ta_id}) */
 export function unassignTA(
@@ -223,11 +237,50 @@ export function unassignTA(
   });
 }
 
-/** Get assigned TAs for a task (GET /api/task/{task_id}/tas) */
-export function fetchAssignedTAs(
-  taskId: number
-): Promise<AxiosResponse<TA[]>> {
-  return axios.get<TA[]>(`/api/task/${taskId}/tas`, {
-    withCredentials: true
-  });
+
+
+export interface TA {
+  id: string;
+  name: string;
+}
+
+export interface Task {
+  id: number;
+  title: string;
+  courseId: number;
+  date: string;      // ISO date
+  time: string;      // HH:mm
+  type: string;      // Citation | Proctoring | Lab
+  status: string;    // pending, approved, rejected
+}
+
+export function fetchAllTasks(): Promise<AxiosResponse<Task[]>> {
+  return axios.get<Task[]>('/api/task/all', { withCredentials: true });
+}
+
+export function createTask(payload: {
+  title: string;
+  courseId: number;
+  date: string;
+  time: string;
+  type: string;
+  assignedId?: string;
+}): Promise<AxiosResponse<Task>> {
+  return axios.post<Task>('/api/task', payload, { withCredentials: true });
+}
+
+export function fetchAssignedTAs(taskId: number): Promise<AxiosResponse<TA[]>> {
+  return axios.get<TA[]>(`/api/task/${taskId}/tas`, { withCredentials: true });
+}
+
+export function assignTA(taskId: number, taId: string): Promise<AxiosResponse<boolean>> {
+  return axios.put<boolean>(`/api/task/${taskId}/assign/${taId}`, {}, { withCredentials: true });
+}
+
+export function approveTask(taskId: number): Promise<AxiosResponse<void>> {
+  return axios.put<void>(`/api/task/${taskId}/approve`, {}, { withCredentials: true });
+}
+
+export function rejectTask(taskId: number): Promise<AxiosResponse<void>> {
+  return axios.put<void>(`/api/task/${taskId}/reject`, {}, { withCredentials: true });
 }
