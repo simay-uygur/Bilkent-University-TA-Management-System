@@ -1,15 +1,25 @@
 package com.example.entity.General;
 
 
-import com.example.entity.Exams.ExamRoom;
+import java.util.ArrayList;
+import java.util.List;
 
+import com.example.entity.Courses.Lesson;
+import com.example.entity.Exams.ExamRoom;
+import com.example.exception.GeneralExc;
+
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
+import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -20,10 +30,10 @@ import lombok.Setter;
 public class ClassRoom {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.TABLE)
     @Column(name = "classroom_id", unique = true, updatable = true, nullable = false)
-    private int classroom_id; // ex. 3191, 3192 etc, where 1 is the exam room number
+    private int classroom_id; 
 
+    @Transient
     @Column(nullable = false)
     private String class_code;
 
@@ -32,4 +42,46 @@ public class ClassRoom {
 
     @OneToOne(mappedBy = "exam_room")
     private ExamRoom section_exam; // this is the section that the class room is related to, not the course
+
+    @OneToMany(
+        mappedBy = "lesson_room",  // This refers to the 'lesson_room' field in Lesson class
+        fetch = FetchType.LAZY,
+        cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REFRESH}  // No DELETE
+    )
+    private List<Lesson> lessons = new ArrayList<>();
+
+    @PrePersist
+    private void setCourseId() {
+        if (this.class_code!= null)
+            this.classroom_id = code_to_id(this.class_code);
+    }
+
+    public int code_to_id(String to_convert){
+        to_convert = to_convert.toUpperCase();
+        if (to_convert != null){
+            int i = to_convert.indexOf('-') ;
+            System.out.println("INDEX "+i);
+            to_convert = to_convert.substring(0,i) + to_convert.substring(i+1,to_convert.length());
+            int number = prefix_to_int(to_convert); 
+            return number; 
+        }
+        return 0; 
+    }
+
+    private int prefix_to_int(String prefix){
+        System.out.println(prefix);
+        String to_return = "" ;
+        for(int i = 0; i < prefix.length(); i++){
+            int c = prefix.charAt(i) ;
+            if (c >= 48 && c <= 57)
+                to_return += c - 48 ;
+            else if (c >= 'A' && c <= 'Z') {
+                to_return += c - 'A' + 1;
+            }
+            else 
+                throw new GeneralExc("Invalid prefix character: " + prefix.charAt(i));
+            
+        }
+        return Integer.parseInt(to_return) ; 
+    }
 }

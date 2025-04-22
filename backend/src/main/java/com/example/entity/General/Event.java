@@ -43,6 +43,24 @@ public class Event {
         if (this == obj) return true;
         if (obj == null || getClass() != obj.getClass()) return false;
         Event event = (Event) obj;
-        return start.equals(event.start) && finish.equals(event.finish);
+        return this.start.equals(event.start) && this.finish.equals(event.finish);
+    }
+
+    //not checked
+    public boolean has(Event dur){
+        return ((dur.getStart().equals(start) && dur.getFinish().equals(finish)) || 
+                ((dur.getStart().getHour() >= start.getHour() && 
+                  dur.getStart().getMinute() >= start.getMinute()) && 
+                  (dur.getStart().getHour() <= finish.getHour() &&
+                  dur.getStart().getMinute() >= finish.getMinute())) ||
+                ((dur.getFinish().getHour() >= start.getHour() &&
+                  dur.getFinish().getMinute() >= start.getMinute()) && 
+                  (dur.getFinish().getHour() <= finish.getHour() &&
+                   dur.getFinish().getMinute() <= finish.getMinute())));
+    }
+
+    @Override
+    public String toString(){
+        return "Start at: " + start.toString() + "\nFinish at: " + finish.toString();
     }
 }

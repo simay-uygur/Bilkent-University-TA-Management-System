@@ -1,0 +1,40 @@
+.pageWrapper {
+    padding: 1rem;
+    font-family: Inter, sans-serif;
+  }
+  .heading {
+    margin-bottom: 1rem;
+  }
+  .table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  .table th, .table td {
+    border: 1px solid #E5E7EB;
+    padding: 0.5rem 1rem;
+    text-align: center;
+  }
+  .requestBtn {
+    background: #2563EB;
+    color: white;
+    border: none;
+    padding: 0.4rem 0.8rem;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+  .headerRow {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+  }
+  
+  .newRequestBtn {
+    background: #3B82F6;
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+  

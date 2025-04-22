@@ -5,6 +5,7 @@ import java.util.HashSet;
 import com.example.entity.Actors.TA;
 import com.example.entity.Actors.User;
 import com.example.entity.Courses.Course;
+import com.example.entity.General.ClassRoom;
 import com.example.entity.Tasks.Task;
 
 public interface AdminServ {
@@ -43,4 +44,7 @@ public interface AdminServ {
 
     public boolean createCourse(Course c);
     public boolean updateCourse(Course c);
+
+    public boolean createClassroom(ClassRoom room);
+    public boolean deleteClassroom(int id);
 }

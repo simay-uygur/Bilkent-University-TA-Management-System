@@ -4,5 +4,6 @@ public enum TaskType {
     Lab,// public task
     Recitation,
     Grading,
-    Proctoring
+    Proctoring,
+    Office_Hour
 }

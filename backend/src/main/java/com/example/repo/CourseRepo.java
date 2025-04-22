@@ -1,10 +1,35 @@
 package com.example.repo;
 
+import java.util.Optional;
+
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import com.example.entity.Courses.Course;
+import com.example.entity.Tasks.Task;
 @Repository
 public interface CourseRepo extends JpaRepository<Course, Integer>{
+    @Query("""
+    SELECT c
+      FROM Course c
+     WHERE c.course_code = :courseCode
+    """)
+    Optional<Course> findByCourseCode(@Param("courseCode") String courseCode);
+
+    @Query("""
+        SELECT CASE WHEN COUNT(c) > 0 THEN true ELSE false END
+          FROM Course c
+         WHERE c.course_code = :courseCode
+    """)
+    boolean existsByCourseCode(@Param("courseCode") String courseCode);
     
+    @Query(value = "SELECT t.* FROM task_table t " +
+    "JOIN course c ON t.course_id = c.course_id " +
+    "WHERE t.task_id = :taskId AND c.course_code = :courseCode", 
+    nativeQuery = true)
+    Optional<Task> findTask(@Param("taskId") int taskId, 
+                              @Param("courseCode") String courseCode);
+
 }
