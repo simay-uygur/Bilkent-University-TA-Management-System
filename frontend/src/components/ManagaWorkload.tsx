@@ -1,106 +1,119 @@
-// src/components/ManageWorkload.tsx
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import {
-  createTask,
   fetchAllTasks,
   fetchAssignedTAs,
-  Task
+  fetchAllTAs,
+  createTask,
+  assignTA,
+  approveTask,
+  rejectTask,
+  Task,
+  TA
 } from '../api';
 import styles from './ManageWorkload.module.css';
 
-const ManageWorkload: React.FC = () => {
-  const { courseId } = useParams<{ courseId: string }>();
-  const [tasks, setTasks]         = useState<Task[]>([]);
-  const [showModal, setShowModal] = useState(false);
-  const [newTitle, setNewTitle]   = useState('');
-  const [newAssigned, setNewAssigned] = useState<string>('');
+const TASK_TYPES = ['Citation', 'Proctoring', 'Lab'] as const;
 
-  // Load existing tasks and their assigned TAs
+export default function ManageWorkload() {
+  const { courseId } = useParams<{ courseId: string }>();
+  const [tasks, setTasks] = useState<(Task & { assignedTAs: TA[] })[]>([]);
+  const [availableTAs, setAvailableTAs] = useState<TA[]>([]);
+  const [showModal, setShowModal] = useState(false);
+  const [title, setTitle] = useState('');
+  const [date, setDate] = useState('');
+  const [time, setTime] = useState('');
+  const [type, setType] = useState<typeof TASK_TYPES[number]>('Citation');
+  const [assigned, setAssigned] = useState<string>('');
+
+  // 1) load all TAs once
   useEffect(() => {
+    fetchAllTAs()
+      .then(res => setAvailableTAs(res.data))
+      .catch(err => console.error('Error loading TAs:', err));
+  }, []);
+
+  // 2) extract task loader
+  const loadTasks = () => {
     if (!courseId) return;
     fetchAllTasks()
       .then(res => res.data.filter(t => t.courseId === +courseId))
-      .then(courseTasks =>
-        Promise.all(
-          courseTasks.map(async t => {
-            const taRes = await fetchAssignedTAs(t.id);
-            return { ...t, assignedTAs: taRes.data };
-          })
-        )
-      )
-      .then(fullTasks => setTasks(fullTasks))
-      .catch(console.error);
-  }, [courseId]);
+      .then(ts => Promise.all(
+        ts.map(async t => {
+          const taRes = await fetchAssignedTAs(t.id);
+          return { ...t, assignedTAs: taRes.data };
+        })
+      ))
+      .then(full => setTasks(full))
+      .catch(err => console.error('Error loading tasks:', err));
+  };
 
-  // Handle form submit inside the modal
-  const handleCreateTask = (e: React.FormEvent) => {
+  // 3) fetch tasks on courseId change
+  useEffect(loadTasks, [courseId]);
+
+  // 4) handle create + reload
+  const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newTitle.trim() || !courseId) return;
-
-    createTask({ title: newTitle.trim(), courseId: +courseId })
-      .then(res => {
-        setTasks(prev => [...prev, { ...res.data, assignedTAs: [] }]);
-        setNewTitle('');
-        setNewAssigned('');
-        setShowModal(false);
-      })
-      .catch(console.error);
+    if (!title || !date || !time) return;
+    try {
+      const res = await createTask({
+        title,
+        courseId: +courseId!,
+        date,
+        time,
+        type,
+        assignedId: assigned || undefined
+      });
+      console.log('Task created:', res.data);
+      if (assigned) {
+        await assignTA(res.data.id, assigned);
+        console.log(`Assigned TA ${assigned} to task ${res.data.id}`);
+      }
+      loadTasks();
+      setShowModal(false);
+      setTitle(''); setDate(''); setTime(''); setType('Citation'); setAssigned('');
+    } catch (err) {
+      console.error('Error creating task:', err);
+    }
   };
 
   return (
     <div className={styles.pageWrapper}>
-      <h1 className={styles.heading}>
-        Manage Workload for Course {courseId}
-      </h1>
-
-      <button
-        className={styles.addBtn}
-        onClick={() => setShowModal(true)}
-      >
+      <h1 className={styles.heading}>Manage Workload for Course {courseId}</h1>
+      <button className={styles.addBtn} onClick={() => setShowModal(true)}>
         + Add Task
       </button>
 
       {showModal && (
-        <div
-          className={styles.modalBackdrop}
-          onClick={() => setShowModal(false)}
-        >
-          <div
-            className={styles.modalCard}
-            onClick={e => e.stopPropagation()}
-          >
-            <form onSubmit={handleCreateTask}>
-              <h2 className={styles.modalTitle}>Create New Task</h2>
+        <div className={styles.modalBackdrop} onClick={() => setShowModal(false)}>
+          <div className={styles.modal} onClick={e => e.stopPropagation()}>
+            <h2 className={styles.modalTitle}>Create Task</h2>
+            <form onSubmit={handleCreate}>
+              <label>Title</label>
+              <input type="text" value={title} onChange={e => setTitle(e.target.value)} />
 
-              <label className={styles.label}>Task Title</label>
-              <input
-                type="text"
-                value={newTitle}
-                onChange={e => setNewTitle(e.target.value)}
-                className={styles.input}
-              />
+              <label>Date</label>
+              <input type="date" value={date} onChange={e => setDate(e.target.value)} />
 
-              <label className={styles.label}>
-                Assign TA (optional)
-              </label>
-              <select
-                value={newAssigned}
-                onChange={e => setNewAssigned(e.target.value)}
-                className={styles.select}
-              >
-                <option value="">-- None --</option>
-                <option value="ta1">Ali Veli</option>
-                <option value="ta2">Ayşe Yılmaz</option>
-                <option value="ta3">Mehmet Demir</option>
+              <label>Time</label>
+              <input type="time" value={time} onChange={e => setTime(e.target.value)} />
+
+              <label>Type</label>
+              <select value={type} onChange={e => setType(e.target.value as any)}>
+                {TASK_TYPES.map(t => <option key={t} value={t}>{t}</option>)}
               </select>
 
-              <button
-                type="submit"
-                className={styles.submitBtn}
-              >
-                Create Task
-              </button>
+              <label>Assign TA</label>
+              <select value={assigned} onChange={e => setAssigned(e.target.value)}>
+                <option value="">-- none --</option>
+                {availableTAs.map(ta => (
+                  <option key={ta.id} value={ta.id}>
+                    {ta.displayName}
+                  </option>
+                ))}
+              </select>
+
+              <button type="submit">Create</button>
             </form>
           </div>
         </div>
@@ -109,21 +122,35 @@ const ManageWorkload: React.FC = () => {
       <table className={styles.table}>
         <thead>
           <tr>
-            <th>Task</th>
-            <th>Status</th>
+            <th>Title</th><th>Date</th><th>Time</th><th>Type</th>
+            <th>Assigned</th><th>Status</th><th>Actions</th>
           </tr>
         </thead>
         <tbody>
           {tasks.map(task => (
             <tr key={task.id}>
               <td>{task.title}</td>
+              <td>{task.date}</td>
+              <td>{task.time}</td>
+              <td>{task.type}</td>
+              <td>{task.assignedTAs.map(t => t.displayName).join(', ') || '—'}</td>
               <td>{task.status}</td>
+              <td>
+                {task.status === 'pending' && (
+                  <>
+                    <button onClick={() => approveTask(task.id).then(loadTasks)}>
+                      Approve
+                    </button>
+                    <button onClick={() => rejectTask(task.id).then(loadTasks)}>
+                      Reject
+                    </button>
+                  </>
+                )}
+              </td>
             </tr>
           ))}
         </tbody>
       </table>
     </div>
   );
-};
-
-export default ManageWorkload;
+}

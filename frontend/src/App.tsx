@@ -27,6 +27,10 @@ const App: React.FC = () => (
        <Route path="/courses/:courseId/request-ta" element={<RequestTAForm />} />
        <Route path="/instructor/settings" element={<SettingsTA />} />
        <Route path="/instructor/workload" element={<ManageWorkload />} />
+       <Route
+    path="/instructor/workload/:courseId"
+    element={<ManageWorkload />}
+  />
 
      </Route>
       {/* Routes with the instructor nav bar */}
