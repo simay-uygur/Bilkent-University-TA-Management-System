@@ -15,7 +15,7 @@ const InstructorDashboard: React.FC = () => {
   }, []);
 
   const onAssign = (courseId: string) => {
-    assignTA(courseId, selected[courseId]).then(() => {
+    assignTA(Number(courseId), selected[courseId]).then(() => {
       // maybe refresh or show toast
     });
   };

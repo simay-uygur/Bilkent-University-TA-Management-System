@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { fetchVolunteerRequests, VolunteerRequest, assignVolunteer } from '../api';
 import styles from './VolunteerProctoring.module.css';
 

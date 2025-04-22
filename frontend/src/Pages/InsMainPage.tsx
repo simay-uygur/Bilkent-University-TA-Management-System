@@ -53,7 +53,13 @@ const InsMainPage: React.FC = () => {
                 <div className={styles.actions}>
                   <button className={styles.actionButton}>Exam Proctoring</button>
                   <button className={styles.actionButton}>Exam Printing</button>
-                  <button className={styles.actionButton}>Manage Course Works</button>
+                  <button
+  className={styles.actionButton}
+  onClick={() => navigate(`/instructor/workload`)}
+>
+  Manage Course Works
+</button>
+
                   <button
                     className={styles.actionButton}
                     onClick={() => navigate(`/courses/${course.id}/tas`)}

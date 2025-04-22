@@ -1,6 +1,5 @@
 import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import LoginPage         from './components/LoginPage';
 import Login  from './Pages/Login';
 import AdminDashboard    from './components/AdminDashboard';
 import TADashboard       from './Pages/TADashboard';
@@ -12,6 +11,7 @@ import CourseTAList      from './components/CourseTAList';
 import InstructorLayout  from './components/InstructorLayout';
 import RequestTAForm     from './components/RequestTAForm';
 import SettingsTA        from './components/SettingsTA';
+import ManageWorkload from './components/ManagaWorkload';
 const App: React.FC = () => (
   <BrowserRouter>
     <Routes>
@@ -26,6 +26,8 @@ const App: React.FC = () => (
        <Route path="/courses/:courseId/tas" element={<CourseTAList />} />
        <Route path="/courses/:courseId/request-ta" element={<RequestTAForm />} />
        <Route path="/instructor/settings" element={<SettingsTA />} />
+       <Route path="/instructor/workload" element={<ManageWorkload />} />
+
      </Route>
       {/* Routes with the instructor nav bar */}
       {/* Routes with the TA nav bar */}

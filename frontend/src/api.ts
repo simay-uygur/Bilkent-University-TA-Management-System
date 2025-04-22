@@ -63,9 +63,10 @@ export interface LeaveRequest {
   export function fetchCourses() {
     return axios.get<Course[]>('/api/courses', { withCredentials:true });
   }
+  /*
   export function assignTA(courseId: string, taId: string) {
     return axios.post(`/api/courses/${courseId}/assign`, { taId }, { withCredentials:true });
-  }
+  }*/
   
  /*  export function fetchSchedule() {
     return axios.get<ScheduleItem[]>('/api/ta/schedule', { withCredentials:true });
@@ -173,4 +174,60 @@ export function fetchCourseTAs(
     `/api/courses/${courseId}/tas`,
     { withCredentials: true }
   );
+}
+
+/** Task and TA interfaces matching your backend */
+export interface TA {
+  id: string;
+  name: string;
+}
+
+export interface Task {
+  id: number;
+  title: string;
+  courseId: number;
+  status: string;            // pending, approved, etc.
+  assignedTAs: TA[];         // from GET /api/task/{task_id}/tas
+}
+
+/** Create a new Task (POST /api/task) */
+export function createTask(task: {
+  title: string;
+  courseId: number;
+}): Promise<AxiosResponse<Task>> {
+  return axios.post<Task>('/api/task', task, { withCredentials: true });
+}
+
+/** Get all tasks (GET /api/task/all) */
+export function fetchAllTasks(): Promise<AxiosResponse<Task[]>> {
+  return axios.get<Task[]>('/api/task/all', { withCredentials: true });
+}
+
+/** Assign a TA to a task (PUT /api/task/{task_id}/assign/{ta_id}) */
+export function assignTA(
+  taskId: number,
+  taId: string
+): Promise<AxiosResponse<boolean>> {
+  return axios.put<boolean>(`/api/task/${taskId}/assign/${taId}`, {}, {
+    withCredentials: true
+  });
+}
+
+/** Unassign a TA from a task (PUT /api/task/{task_id}/unassign/{ta_id}) */
+export function unassignTA(
+  taskId: number,
+  taId: string
+): Promise<AxiosResponse<boolean>> {
+  return axios.put<boolean>(`/api/task/${taskId}/unassign/${taId}`, {}, {
+    withCredentials: true
+  });
+}
+
+/** Get assigned TAs for a task (GET /api/task/{task_id}/tas) */
+export function fetchAssignedTAs(
+  taskId: number
+): Promise<AxiosResponse<TA[]>> {
+  return axios.get<TA[]>(`/api/task/${taskId}/tas`, {
+    withCredentials: true
+  });
 }

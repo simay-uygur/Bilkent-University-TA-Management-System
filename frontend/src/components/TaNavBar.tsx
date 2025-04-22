@@ -3,7 +3,7 @@ import React from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { Bell, Home, Calendar, FileText, LogOut } from 'lucide-react';
 import logo from '../assets/react.svg';
-import styles from './TANavBar.module.css';
+import styles from './TaNavBar.module.css';
 
 interface TANavBarProps {
   onNotificationsClick: () => void;
