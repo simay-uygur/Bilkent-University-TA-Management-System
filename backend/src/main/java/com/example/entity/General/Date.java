@@ -37,12 +37,12 @@ public class Date {
         return day == date.day && month == date.month && year == date.year && hour == date.hour && minute == date.minute;
     }
     
-    public boolean isBefore(Date other) {
-        if (this.year != other.year) return this.year < other.year;
+    public boolean isBefore(Date other) { // other - 11:00, this - 11:00
+        if (this.year != other.year) return this.year < other.year; 
         if (this.month != other.month) return this.month < other.month;
         if (this.day != other.day) return this.day < other.day;
         if (this.hour != other.hour) return this.hour < other.hour;
-        return this.minute < other.minute;
+        return this.minute <= other.minute;
     }
     
     public boolean isAfter(Date other) {

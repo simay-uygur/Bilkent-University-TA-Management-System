@@ -43,9 +43,14 @@ public class log_controller {
         User user_to_check = serv.getUserById(u.getId());
         if (serv.getUserById(u.getId()) != null)
             throw new UserExistsExc(u.getId()) ;
-        String check_mail = u.getName().toLowerCase() + 
+        String[] name = u.getName().split(" ");
+        String name_to_check = name[name.length-1];
+
+        String[] surname = u.getSurname().split(" ");
+        String surname_to_check = surname[surname.length-1];
+        String check_mail = name_to_check.toLowerCase() + 
                             "." + 
-                            u.getSurname().toLowerCase() + 
+                            surname_to_check.toLowerCase() + 
                             "@ug.bilkent.edu.tr";
         if (!check_mail.matches(u.getWebmail().toLowerCase()) && !Objects.equals(user_to_check.getId(), u.getId()))
             throw new IncorrectWebMailException() ;
