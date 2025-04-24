@@ -73,7 +73,7 @@ public class Course_controller {
 
     @GetMapping("api/course/all")
     public ResponseEntity<List<Course_DTO>> getCourses() {
-        return new ResponseEntity<>(courseServ.getTasks(),HttpStatus.FOUND);
+        return new ResponseEntity<>(courseServ.getCourses(),HttpStatus.FOUND);
     }
     
     
