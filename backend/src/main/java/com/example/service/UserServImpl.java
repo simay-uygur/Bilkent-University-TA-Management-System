@@ -60,8 +60,8 @@ public class UserServImpl implements UserServ{
                 }
             }
 
-        case FACULTY_MEMBER -> {
-            }
+        /*case FACULTY_MEMBER -> {
+            }*/
 
         case DEPARTMENT_STAFF -> {
             }

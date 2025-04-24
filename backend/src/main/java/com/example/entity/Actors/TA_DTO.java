@@ -36,4 +36,10 @@ public class TA_DTO {
         this.courses = courses;
         this.lessons = lessons;
     }
+
+    public TA_DTO(Long id, String name, String surname){
+        this.name = name;
+        this.surname = surname;
+        this.ta_id = id;
+    }
 }

@@ -7,6 +7,7 @@ import java.util.Objects;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import com.example.entity.Actors.TA;
@@ -349,5 +350,13 @@ public class TaskServImpl implements TaskServ {
 
     private void mark_pending(Task t) {
         t.setStatus(TaskState.PENDING);
+    }
+
+    @Scheduled(cron = "0 * * * * *")
+    public void checkTasksForTime(){
+        List<Task> tasks = taskRepo.findAll();
+        for(Task task : tasks){
+            checkAndUpdateStatusTask(task);
+        }
     }
 }

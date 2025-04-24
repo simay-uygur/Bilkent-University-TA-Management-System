@@ -1,7 +1,5 @@
 package com.example.service;
 
-import java.util.List;
-
 import com.example.entity.Courses.Course;
 import com.example.entity.Courses.Course_DTO;
 import com.example.entity.Courses.Section;
@@ -16,5 +14,4 @@ public interface CourseServ {
     public boolean assignTA(Long ta_id, String course_code);
     public boolean updateTask(String course_code,int task_id,Task task);
     public Task getTaskByID(String course_code, int task_id);
-    public List<Course_DTO> getTasks();
 }
