@@ -71,6 +71,9 @@ public class TA extends User{
             throw new NoPersistExc("Decrease workload error: workload can not be negative!\nExecution ") ;
         total_workload -= load ;
     }
+
+    @Column(name = "proctor_type", unique = false, updatable = true)
+    private ProctorType proctor_type = ProctorType.ALL_COURSES;
 }
 /*{
     "role" : "TA",
