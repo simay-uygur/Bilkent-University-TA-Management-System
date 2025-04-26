@@ -44,6 +44,9 @@ public class TA extends User{
 
     @Column(name = "is_active", updatable = false,  nullable = false)  //added new
     private Boolean isActive = true;
+    
+    @Column(name = "ta_type", unique = false, updatable = true, nullable = false)
+    private TAType ta_type;
 
     @ManyToMany(
         mappedBy = "course_tas", // the other side of the relationship is the owner of the relationship

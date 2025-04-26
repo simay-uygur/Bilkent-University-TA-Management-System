@@ -22,6 +22,4 @@ public class Department {
 
     @Column(name = "dep_name", unique= true)
     private String dep_name;
-
-    
 }

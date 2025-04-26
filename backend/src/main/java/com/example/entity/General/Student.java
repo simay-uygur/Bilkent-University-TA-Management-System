@@ -24,7 +24,7 @@ public class Student {
 
     @Id
     @Column(name = "student_id", unique = true, updatable = true, nullable = false)
-    private int student_id;
+    private Long student_id;
 
     @Column(name = "student_name", unique = false, updatable = true, nullable = false)
     private String student_name;

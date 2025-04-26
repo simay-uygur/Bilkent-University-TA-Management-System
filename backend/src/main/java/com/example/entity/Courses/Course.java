@@ -65,7 +65,7 @@ public class Course {
     @NotEmpty(message = "The field can not be empty!")
     @Column(name = "course_dep", unique = false, updatable = true)
     private String course_dep ;
-
+    
     //there should be exam class
 
     @ManyToMany(

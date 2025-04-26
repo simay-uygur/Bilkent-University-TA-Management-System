@@ -29,6 +29,9 @@ public class Exam {
     @Column(name = "exam_id", unique = true)
     private int exam_id;
 
+    @Column(name = "description", unique = false, updatable = true)
+    private String description;
+
     @JsonIgnore
     @OneToOne(
         mappedBy = "exam",  // This refers to the 'exam' field in Task class

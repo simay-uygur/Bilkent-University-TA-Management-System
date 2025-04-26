@@ -13,9 +13,9 @@ public class Student_DTO {
 
     private String surname ;
 
-    private int student_id ;
+    private Long student_id ;
 
-    public Student_DTO(int id, String name, String surname){
+    public Student_DTO(Long id, String name, String surname){
         this.name = name;
         this.surname = surname;
         this.student_id = id;
