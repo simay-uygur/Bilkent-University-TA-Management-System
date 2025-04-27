@@ -139,10 +139,10 @@ public class Course_controller {
         }
     }
 
-    @PostMapping("/course/{course_code}/exam")
+    /*@PostMapping("/course/{course_code}/exam")
     public ResponseEntity<Boolean> createExam(@RequestBody Exam exam, @PathVariable String course_code) {
         return new ResponseEntity<>()
-    }
+    }*/
     
 
 }

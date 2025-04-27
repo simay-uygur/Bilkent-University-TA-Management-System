@@ -34,7 +34,6 @@ public class Event {
 
     public boolean isOngoing() {
         Date current = new Date().currenDate();
-        System.out.println(current.getHour() +":"+ current.getMinute());
         return (current.isAfter(start) || current.isBefore(start)) && current.isBefore(finish);
     }
 
