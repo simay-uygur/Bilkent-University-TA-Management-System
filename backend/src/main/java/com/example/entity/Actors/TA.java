@@ -2,13 +2,14 @@ package com.example.entity.Actors;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
-import com.example.entity.General.ProctorType;
 import org.hibernate.annotations.DynamicUpdate;
 
 import com.example.entity.Courses.Course;
 import com.example.entity.Courses.Section;
 import com.example.entity.General.AcademicLevelType;
+import com.example.entity.General.ProctorType;
 import com.example.entity.Tasks.TA_Task;
 import com.example.exception.NoPersistExc;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -85,6 +86,18 @@ public class TA extends User{
 
     @Column(name = "proctor_type", unique = false, updatable = true)
     private ProctorType proctor_type = ProctorType.ALL_COURSES;
+
+    @Override
+    public boolean equals(Object o){
+        if (this == o) return true;                          // same reference
+        if (!(o instanceof TA)) return false;                // null or different type
+        TA other = (TA) o;
+        // if either ID is null, fall back to identity equality
+        if (getId() == null || other.getId() == null) {
+            return false;
+        }
+        return Objects.equals(getId(), other.getId());
+    }
 }
 
 //json should be changed

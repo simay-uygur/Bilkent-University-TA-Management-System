@@ -23,6 +23,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
@@ -63,9 +64,12 @@ public class Course {
     @Column(name = "course_academic_status", updatable = true, nullable = false)
     private AcademicLevelType course_academic_status ;
 
-    @NotEmpty(message = "The field can not be empty!")
+    /*@NotEmpty(message = "The field can not be empty!")
     @Column(name = "course_dep", unique = false, updatable = true)
-    private String course_dep ;
+    private String course_dep ;*/
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    private Department department;
 
     //there should be exam class
 
@@ -88,7 +92,8 @@ public class Course {
     @OneToMany(
         mappedBy = "course", // the other side of the relationship is the owner of the relationship
         fetch = FetchType.LAZY,
-        orphanRemoval = true
+        orphanRemoval = true,
+        cascade= CascadeType.ALL
     )
     private List<Section> sections_list ; // this is the list of sections that are related to the course
 

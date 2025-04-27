@@ -2,21 +2,32 @@ package com.example.service;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
-import com.example.ExcelHelpers.FailedRowInfo;
-import com.example.entity.Courses.*;
-import com.example.entity.General.AcademicLevelType;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.usermodel.WorkbookFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import com.example.ExcelHelpers.FailedRowInfo;
 import com.example.entity.Actors.Instructor_DTO;
 import com.example.entity.Actors.TA;
 import com.example.entity.Actors.TA_DTO;
+import com.example.entity.Courses.Course;
+import com.example.entity.Courses.CourseCodeConverter;
+import com.example.entity.Courses.Course_DTO;
+import com.example.entity.Courses.Lesson;
+import com.example.entity.Courses.Lesson_DTO;
+import com.example.entity.Courses.Section;
+import com.example.entity.Courses.Section_DTO;
+import com.example.entity.General.AcademicLevelType;
 import com.example.entity.General.Student;
 import com.example.entity.General.Student_DTO;
 import com.example.entity.Tasks.Task;
@@ -24,11 +35,11 @@ import com.example.exception.Course.CourseNotFoundExc;
 import com.example.exception.GeneralExc;
 import com.example.exception.NoPersistExc;
 import com.example.repo.CourseRepo;
+import com.example.repo.DepartmentRepo;
 import com.example.repo.SectionRepo;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.multipart.MultipartFile;
 
 @Transactional(rollbackOn = Exception.class)
 @Service
@@ -42,6 +53,8 @@ public class CourseServImpl implements CourseServ{
     private final TaskServ taskServ;
 
     private final SectionRepo secRepo;
+
+    private final DepartmentRepo depRepo;
 
     @Autowired
     private TaskServ taskService;
@@ -102,7 +115,7 @@ public class CourseServImpl implements CourseServ{
     private Course_DTO createDTO(Course course){
         Course_DTO dto = new Course_DTO();
         dto.setCourse_code(course.getCourse_code());
-        dto.setDepartment(course.getCourse_dep());
+        dto.setDepartment(course.getDepartment().getName());
         dto.setAcademical_status(course.getCourse_academic_status().toString());
         Instructor_DTO coor_dto = new Instructor_DTO();
         dto.setCoordinator(coor_dto);
@@ -236,11 +249,11 @@ public class CourseServImpl implements CourseServ{
 
                     Optional<Course> existing = courseRepo.findById(courseId);
                     Course course = existing.orElseGet(Course::new);
-
+                    //Department dep = depRepo.findDepartmentByName();
                     course.setCourse_id(courseId);
                     course.setCourse_code(code);
                     course.setCourse_name(name);
-                    course.setCourse_dep(department);
+                    //course.setDepartment(department);
                     course.setPrereq_list(prereq);
                     course.setCourse_academic_status(AcademicLevelType.BS); // default or from another column if needed - -- - - - dont forget to add
 

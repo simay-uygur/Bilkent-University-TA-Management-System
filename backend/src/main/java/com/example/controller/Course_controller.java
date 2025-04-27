@@ -8,13 +8,21 @@ import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.example.entity.Actors.TA_DTO;
 import com.example.entity.Courses.Course;
 import com.example.entity.Courses.CourseCodeConverter;
 import com.example.entity.Courses.Course_DTO;
 import com.example.entity.Courses.Section;
+import com.example.entity.Exams.Exam;
 import com.example.entity.Tasks.TA_Task;
 import com.example.entity.Tasks.Task;
 import com.example.entity.Tasks.Task_DTO;
@@ -23,7 +31,7 @@ import com.example.repo.CourseRepo;
 import com.example.service.CourseServ;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.multipart.MultipartFile;
+
 
 
 @RestController
@@ -130,5 +138,11 @@ public class Course_controller {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
         }
     }
+
+    @PostMapping("/course/{course_code}/exam")
+    public ResponseEntity<Boolean> createExam(@RequestBody Exam exam, @PathVariable String course_code) {
+        return new ResponseEntity<>()
+    }
+    
 
 }

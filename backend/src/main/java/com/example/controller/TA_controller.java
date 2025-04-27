@@ -1,8 +1,6 @@
 package com.example.controller;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,7 +11,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestAttribute;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -26,10 +23,8 @@ import com.example.exception.UserNotFoundExc;
 import com.example.exception.taExc.TaNotFoundExc;
 import com.example.service.TAServ;
 import com.example.service.TaskServ;
-import com.example.service.UserServ;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.multipart.MultipartFile;
 
 
 @RestController
@@ -37,8 +32,6 @@ import org.springframework.web.multipart.MultipartFile;
 public class TA_controller {
     @Autowired
     private TAServ serv;
-
-    private UserServ userServ; // why not autowired?
 
     @Autowired
     private TaskServ taskServ;
