@@ -26,7 +26,6 @@ import com.example.exception.UserNotFoundExc;
 import com.example.exception.taExc.TaNotFoundExc;
 import com.example.service.TAServ;
 import com.example.service.TaskServ;
-import com.example.service.UserServ;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.multipart.MultipartFile;
@@ -38,7 +37,7 @@ public class TA_controller {
     @Autowired
     private TAServ serv;
 
-    private UserServ userServ; // why not autowired?
+    private UserServ userServ;
 
     @Autowired
     private TaskServ taskServ;
@@ -112,7 +111,7 @@ public class TA_controller {
         return new ResponseEntity<>(serv.deleteTaskById(task_id, ta_id),HttpStatus.OK);
     }
 
-    @PutMapping("api/ta/{id}")
+    @PutMapping("/api/ta/{id}")
     public ResponseEntity<?> restoreTA(@PathVariable Long id) {
         return new ResponseEntity<>(serv.restoreTAById(id), HttpStatus.OK);
     } 
