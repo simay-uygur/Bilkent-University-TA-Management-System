@@ -1,21 +1,22 @@
 package com.example.service;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.*;
 
+import com.example.ExcelHelpers.FailedRowInfo;
+import com.example.entity.Courses.*;
+import com.example.entity.General.AcademicLevelType;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.usermodel.WorkbookFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.example.entity.Actors.Instructor_DTO;
 import com.example.entity.Actors.TA;
 import com.example.entity.Actors.TA_DTO;
-import com.example.entity.Courses.Course;
-import com.example.entity.Courses.Course_DTO;
-import com.example.entity.Courses.Lesson;
-import com.example.entity.Courses.Lesson_DTO;
-import com.example.entity.Courses.Section;
-import com.example.entity.Courses.Section_DTO;
 import com.example.entity.General.Student;
 import com.example.entity.General.Student_DTO;
 import com.example.entity.Tasks.Task;
@@ -27,6 +28,7 @@ import com.example.repo.SectionRepo;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.web.multipart.MultipartFile;
 
 @Transactional(rollbackOn = Exception.class)
 @Service
@@ -108,7 +110,7 @@ public class CourseServImpl implements CourseServ{
         dto.setPrereqs(course.getPrereq_list().trim().split("\\s*,\\s*"));
         List<Student_DTO> studDtos = new ArrayList<>();
         for (Student stud : course.getStudents_list()){
-            Student_DTO stud_dto = new Student_DTO(stud.getStudent_id(), stud.getStudent_name(), stud.getStudent_surname());
+            Student_DTO stud_dto = new Student_DTO(stud.getStudentName(), stud.getStudentSurname(), stud.getStudentId().intValue());  //i changed the int to long
             studDtos.add(stud_dto);
         }
         dto.setStudents(studDtos);
@@ -210,4 +212,62 @@ public class CourseServImpl implements CourseServ{
 
         return task.get();
     }
+
+    @Override
+    public Map<String, Object> importCoursesFromExcel(MultipartFile file) throws IOException {
+        List<Course> successfulCourses = new ArrayList<>();
+        List<FailedRowInfo> failedRows = new ArrayList<>();
+
+        try (InputStream inputStream = file.getInputStream(); Workbook workbook = WorkbookFactory.create(inputStream)) {
+            Sheet sheet = workbook.getSheetAt(0);
+
+            for (Row row : sheet) {
+                if (row.getRowNum() == 0) continue;
+
+                try {
+                    String department = row.getCell(0).getStringCellValue().trim();
+                    int courseNo = (int) row.getCell(1).getNumericCellValue();
+                    String name = row.getCell(2).getStringCellValue().trim();
+                    String code = department + "-" + courseNo;
+                    String prereq = row.getCell(3) != null ? row.getCell(3).getStringCellValue().trim() : "";
+
+                    // Validate course code format
+                    int courseId = new CourseCodeConverter().code_to_id(code);
+
+                    Optional<Course> existing = courseRepo.findById(courseId);
+                    Course course = existing.orElseGet(Course::new);
+
+                    course.setCourse_id(courseId);
+                    course.setCourse_code(code);
+                    course.setCourse_name(name);
+                    course.setCourse_dep(department);
+                    course.setPrereq_list(prereq);
+                    course.setCourse_academic_status(AcademicLevelType.BS); // default or from another column if needed - -- - - - dont forget to add
+
+                    successfulCourses.add(course);
+
+                } catch (Exception e) {
+                    StringBuilder rawData = new StringBuilder();
+                    row.forEach(cell -> rawData.append(cell.toString()).append(" | "));
+                    failedRows.add(new FailedRowInfo(
+                            row.getRowNum(),
+                            e.getClass().getSimpleName() + ": " + e.getMessage(),
+                            rawData.toString()
+                    ));
+                }
+            }
+        }
+
+        if (!successfulCourses.isEmpty()) {
+            courseRepo.saveAll(successfulCourses);
+            courseRepo.flush();
+        }
+
+        Map<String, Object> result = new HashMap<>();
+        result.put("successCount", successfulCourses.size());
+        result.put("failedCount", failedRows.size());
+        result.put("failedRows", failedRows);
+        return result;
+    }
+
 }

@@ -38,7 +38,7 @@ public class TA_controller {
     @Autowired
     private TAServ serv;
 
-    private UserServ userServ;
+    private UserServ userServ; // why not autowired?
 
     @Autowired
     private TaskServ taskServ;
@@ -135,18 +135,6 @@ public class TA_controller {
     }
 
 
-    //for uploading TA's from excel file'
-    @PostMapping("/api/upload/tas")
-    public ResponseEntity<Map<String, Object>> uploadTAs(@RequestParam("file") MultipartFile file) {
-        try {
-            Map<String, Object> result = serv.importTAsFromExcel(file);
-            return ResponseEntity.ok(result);
-        } catch (Exception e) {
-            Map<String, Object> error = new HashMap<>();
-            error.put("error", e.getMessage());
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
-        }
-    }
 
 }
 /*{

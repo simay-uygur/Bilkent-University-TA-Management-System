@@ -43,13 +43,14 @@ import lombok.Setter;
 public class Course {
     @Id
     @Column(name = "course_id", unique = true, updatable = true)
-    private int course_id; 
+    private int course_id ; 
     
     @Column(name = "course_code", unique = true)
-    private String course_code; 
+    private String course_code ; 
 
-    @Column(name = "course_name", unique = true)
-    private String course_name;
+    @Column(name = "course_name", unique = false, updatable = true, nullable = false)
+    //@NotEmpty(message = "The field can not be empty!")
+    private String course_name ;
 
     // cs-319. id -> 'c' + 's' + 319 -> 319319
     @PrePersist
@@ -65,7 +66,7 @@ public class Course {
     @NotEmpty(message = "The field can not be empty!")
     @Column(name = "course_dep", unique = false, updatable = true)
     private String course_dep ;
-    
+
     //there should be exam class
 
     @ManyToMany(

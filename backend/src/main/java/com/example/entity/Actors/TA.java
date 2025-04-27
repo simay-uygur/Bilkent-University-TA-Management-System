@@ -3,6 +3,7 @@ package com.example.entity.Actors;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.example.entity.General.ProctorType;
 import org.hibernate.annotations.DynamicUpdate;
 
 import com.example.entity.Courses.Course;
@@ -48,6 +49,13 @@ public class TA extends User{
     @Column(name = "ta_type", unique = false, updatable = true, nullable = false)
     private TAType ta_type;
 
+    @Column(name = "department", nullable = false)
+    private String department;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "proctor_type")
+    private ProctorType proctorType;
+
     @ManyToMany(
         mappedBy = "course_tas", // the other side of the relationship is the owner of the relationship
         fetch = FetchType.LAZY,
@@ -78,6 +86,8 @@ public class TA extends User{
     @Column(name = "proctor_type", unique = false, updatable = true)
     private ProctorType proctor_type = ProctorType.ALL_COURSES;
 }
+
+//json should be changed
 /*{
     "role" : "TA",
     "id" : 1, 

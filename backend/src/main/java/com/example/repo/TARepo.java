@@ -34,4 +34,9 @@ public interface TARepo extends JpaRepository<TA, Long> { // TA is the entity an
 
     @Query("SELECT t FROM TA t WHERE t.id = :id AND t.webmail = :webmail AND t.isDeleted = false")
     Optional<TA> findByIdAndWebmail(@Param("id") Long id, @Param("webmail") String webmail);
+
+    @Query("SELECT t FROM TA t WHERE t.id = :id AND t.isDeleted = false")
+    Optional<TA> findTAByTAId(long id);
+
+    //Optional<TA> findTASByIdEqualsAndWebmailEquals(Long id, String webmail); - - böyle bir şey de varmış
 }

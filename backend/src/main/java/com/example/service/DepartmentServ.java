@@ -1,7 +1,16 @@
 package com.example.service;
 
-import com.example.entity.Courses.Department;
+import com.example.repo.DepartmentRepo;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
 
-public interface DepartmentServ {
-    public boolean createDepartment(Department dep);
+@Service
+@RequiredArgsConstructor
+public class DepartmentServ {
+
+    private final DepartmentRepo departmentRepo;
+
+    public boolean departmentExists(String name) {
+        return departmentRepo.existsById(name);
+    }
 }

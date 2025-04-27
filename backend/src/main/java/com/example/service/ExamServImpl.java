@@ -30,7 +30,7 @@ public class ExamServImpl implements ExamServ{
         for (ExamRoom room : exam.getExam_rooms()){
             List<Student_DTO> studDtos = new ArrayList<>();
             for(Student stud : room.getStudents_list()){
-                Student_DTO studDto = new Student_DTO(stud.getStudent_id(), stud.getStudent_name(),stud.getStudent_surname());
+                Student_DTO studDto = new Student_DTO(stud.getStudentName(), stud.getStudentSurname(), stud.getStudentId().intValue());
                 studDtos.add(studDto);
             }
             ExamRoom_DTO room_DTO = new ExamRoom_DTO(room.getExam_room().getClass_code(),studDtos);
