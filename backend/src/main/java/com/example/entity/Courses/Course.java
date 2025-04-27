@@ -48,7 +48,9 @@ public class Course {
     @Column(name = "course_code", unique = true)
     private String course_code ; 
 
-    
+    @Column(name = "course_name", unique = false, updatable = true, nullable = false)
+    //@NotEmpty(message = "The field can not be empty!")
+    private String course_name ;
 
     // cs-319. id -> 'c' + 's' + 319 -> 319319
     @PrePersist
