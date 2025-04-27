@@ -24,4 +24,8 @@ public class DepartmentServImpl implements DepartmentServ{
         return true ;
     }
     
+    @Override
+    public boolean departmentExists(String name) {
+        return depRepo.existsById(name);
+    }
 }
