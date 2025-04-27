@@ -2,7 +2,7 @@ package com.example.service;
 
 import java.util.*;
 
-import com.example.ExcelHelpers.FailedRowInfo;
+import com.example.dto.FailedRowInfo;
 import com.example.entity.Actors.Role;
 import com.example.entity.General.AcademicLevelType;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -254,8 +254,7 @@ public class TAServImpl implements TAServ {
                     row.forEach(cell -> rawData.append(cell.toString()).append(" | "));
                     failedRows.add(new FailedRowInfo(
                             row.getRowNum(),
-                            e.getClass().getSimpleName() + ": " + e.getMessage(),
-                            rawData.toString()
+                            e.getClass().getSimpleName() + ": " + e.getMessage()
                     ));
                 }
             }

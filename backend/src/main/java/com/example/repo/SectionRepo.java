@@ -15,9 +15,9 @@ import com.example.entity.General.Student_DTO;
 public interface SectionRepo extends JpaRepository<Section, Integer>{
     @Query("""
     SELECT new com.example.entity.General.Student_DTO(
-      s.student_id,
-      s.student_name,
-      s.student_surname
+      s.studentId,
+      s.studentName,
+      s.studentSurname
     )
     FROM Section sec
       JOIN sec.students s

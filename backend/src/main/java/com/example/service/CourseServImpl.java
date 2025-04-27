@@ -4,7 +4,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.*;
 
-import com.example.ExcelHelpers.FailedRowInfo;
+import com.example.dto.FailedRowInfo;
 import com.example.entity.Courses.*;
 import com.example.entity.General.AcademicLevelType;
 import org.apache.poi.ss.usermodel.Row;
@@ -251,8 +251,7 @@ public class CourseServImpl implements CourseServ{
                     row.forEach(cell -> rawData.append(cell.toString()).append(" | "));
                     failedRows.add(new FailedRowInfo(
                             row.getRowNum(),
-                            e.getClass().getSimpleName() + ": " + e.getMessage(),
-                            rawData.toString()
+                            e.getClass().getSimpleName() + ": " + e.getMessage() //hope it is correct error message
                     ));
                 }
             }

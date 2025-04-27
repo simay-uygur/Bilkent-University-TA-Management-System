@@ -34,7 +34,7 @@ public class UploadController {
         }
     }
 
-    //for uploading TA's from excel file'
+    //for uploading TA's from excel file' - not used anymore
     @PostMapping("/tas")
     public ResponseEntity<Map<String, Object>> uploadTAs(@RequestParam("file") MultipartFile file) {
         try {
