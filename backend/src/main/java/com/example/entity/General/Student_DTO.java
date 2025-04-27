@@ -1,7 +1,5 @@
 package com.example.entity.General;
 
-import org.springframework.ui.context.ThemeSource;
-
 import jakarta.persistence.Embeddable;
 import lombok.Getter;
 import lombok.Setter;
@@ -15,9 +13,9 @@ public class Student_DTO {
 
     private String surname ;
 
-    private int student_id ;
+    private Long student_id ;
 
-    public Student_DTO(String name, String surname, int id){
+    public Student_DTO(Long id, String name, String surname){
         this.name = name;
         this.surname = surname;
         this.student_id = id;

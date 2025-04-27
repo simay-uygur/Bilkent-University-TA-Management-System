@@ -6,10 +6,12 @@ import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import org.springframework.stereotype.Repository;
 
 import com.example.entity.Actors.TA;
 import com.example.entity.Tasks.Task;
 
+@Repository
 public interface TARepo extends JpaRepository<TA, Long> { // TA is the entity and Long is the type of the primary key
     @Query("SELECT t FROM TA t WHERE t.isDeleted = false")
     List<TA> findAllTAs(); // fixed query

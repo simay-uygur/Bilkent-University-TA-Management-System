@@ -45,6 +45,9 @@ public class TA extends User{
 
     @Column(name = "is_active", updatable = false,  nullable = false)  //added new
     private Boolean isActive = true;
+    
+    @Column(name = "ta_type", unique = false, updatable = true, nullable = false)
+    private TAType ta_type;
 
     @Column(name = "department", nullable = false)
     private String department;
@@ -79,6 +82,9 @@ public class TA extends User{
             throw new NoPersistExc("Decrease workload error: workload can not be negative!\nExecution ") ;
         total_workload -= load ;
     }
+
+    @Column(name = "proctor_type", unique = false, updatable = true)
+    private ProctorType proctor_type = ProctorType.ALL_COURSES;
 }
 
 //json should be changed

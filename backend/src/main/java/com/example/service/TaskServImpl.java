@@ -7,6 +7,8 @@ import java.util.Objects;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Async;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import com.example.entity.Actors.TA;
@@ -18,6 +20,7 @@ import com.example.entity.Tasks.Task;
 import com.example.entity.Tasks.TaskState;
 import com.example.exception.GeneralExc;
 import com.example.exception.NoPersistExc;
+import com.example.exception.taExc.TaNotFoundExc;
 import com.example.exception.taskExc.TaskLimitExc;
 import com.example.exception.taskExc.TaskNoTasExc;
 import com.example.exception.taskExc.TaskNotFoundExc;
@@ -26,8 +29,10 @@ import com.example.repo.TA_TaskRepo;
 import com.example.repo.TaskRepo;
 
 import jakarta.transaction.Transactional;
+import lombok.extern.slf4j.Slf4j;
 
 @Service
+@Slf4j
 @Transactional(rollbackOn = Exception.class)
 public class TaskServImpl implements TaskServ {
 
@@ -139,52 +144,70 @@ public class TaskServImpl implements TaskServ {
     }
 
     @Override
+    public boolean assignProctoring(int task_id, List<Long> ta_ids){
+        Task task = taskRepo.findById(task_id)
+                    .orElseThrow(() -> new TaskNotFoundExc(task_id));
+        for (Long ta_id : ta_ids){
+            TA ta = taRepo.findById(ta_id).orElseThrow(() -> new TaNotFoundExc(ta_id));
+            if (taTaskRepo.exists(task_id, ta.getId())) {
+                throw new GeneralExc("TA is already assigned to this task");
+            }
+            if (task.getAmount_of_tas() == task.getRequiredTAs()) {
+                throw new TaskLimitExc();
+            }
+            // Create new TA_Task relationship
+            TA_Task taTask = new TA_Task(task, ta, task.getAccess_type());
+            // Update task side
+            task.setAmount_of_tas(task.getAmount_of_tas() + 1);
+            if (task.getTas_list() == null) {
+                task.setTas_list(new ArrayList<>());
+            }
+            // Update TA side
+            if (ta.getTa_tasks() == null) {
+                ta.setTa_tasks(new ArrayList<>());
+            }
+            taTaskRepo.saveAndFlush(taTask);
+        }
+        return true;
+    }
+
+    @Override
     public boolean assignTA(int task_id, TA ta) {
         // Find existing entities
         Task task = taskRepo.findById(task_id)
                     .orElseThrow(() -> new TaskNotFoundExc(task_id));
-        
         // Check if assignment already exists
         if (taTaskRepo.exists(task_id, ta.getId())) {
             throw new GeneralExc("TA is already assigned to this task");
         }
-        
         //check if ta has the task on the same duration
         for (TA_Task taTask : ta.getTa_tasks()) {
             if (taTask.getTask().getDuration().equals(task.getDuration())) {
                 throw new GeneralExc("TA already has task on the same duration");
             }
         }
-
         for(Section sec : ta.getTas_own_lessons()){
             for (Lesson lesson : sec.getLessons()){
                 if(task.getDuration().has(lesson.getDuration()))
                     throw new GeneralExc("TA has lesson during that duration");
             }
         }
-        
         // Check task limits
         if (task.getAmount_of_tas() == task.getRequiredTAs()) {
             throw new TaskLimitExc();
         }
-
-
         // Create new TA_Task relationship
         TA_Task taTask = new TA_Task(task, ta, task.getAccess_type());
-        
         // Update task side
         task.setAmount_of_tas(task.getAmount_of_tas() + 1);
         if (task.getTas_list() == null) {
             task.setTas_list(new ArrayList<>());
         }
-        //task.getTas_list().add(taTask);
-        
         // Update TA side
         if (ta.getTa_tasks() == null) {
             ta.setTa_tasks(new ArrayList<>());
         }
         taTaskRepo.saveAndFlush(taTask);
-
         return true;
     }
 
@@ -293,16 +316,19 @@ public class TaskServImpl implements TaskServ {
         if (task == null) {
             throw new GeneralExc("Task not found!");
         }
-        if (task.isTaskActive())
-        {
-            mark_pending(task);
+        
+        TaskState newStatus = task.isTaskActive() ? TaskState.PENDING : TaskState.NORESPOND;
+        if (task.getStatus() != newStatus) {
+            if (task.isTaskActive()) {
+                mark_pending(task);
+            } else {
+                mark_not_responded(task);
+                task.setTimePassed(true);
+            }
             taskRepo.saveAndFlush(task);
             return true;
         }
-        mark_not_responded(task);
-        task.setTimePassed(true);
-        taskRepo.saveAndFlush(task);
-        return true; // warning if ta forgot to enter task and he enters task with past duration and system sends warning to him if he wrote correct duration or not
+        return false;
     }
 
     @Override
@@ -311,7 +337,7 @@ public class TaskServImpl implements TaskServ {
     }
 
     @Override
-    public HashSet<Task> getPendingTasks() {
+    public List<Task> getPendingTasks() {
         return taskRepo.findPendingTasks();
     }
 
@@ -350,4 +376,16 @@ public class TaskServImpl implements TaskServ {
     private void mark_pending(Task t) {
         t.setStatus(TaskState.PENDING);
     }
+
+    @Async("taskCheckExecutor")
+    @Scheduled(cron = "0 * * * * *")
+    public void checkTasksForTime(){
+        List<Task> tasks = taskRepo.findAll();
+        for(Task task : tasks){
+            //log.info("status I " + task.getStatus() + " " + task.getDuration().getStart().getHour()+":"+task.getDuration().getStart().getMinute() + "/" + task.getDuration().getFinish().getHour()+":"+task.getDuration().getFinish().getMinute() + " " + "-" + Thread.currentThread().getName());
+            checkAndUpdateStatusTask(task);
+            //log.info("status II " + task.getStatus() + " " + task.getDuration().getStart().getHour()+":"+task.getDuration().getStart().getMinute() + "/" + task.getDuration().getFinish().getHour()+":"+task.getDuration().getFinish().getMinute() + " " + "-" + Thread.currentThread().getName());
+        }
+    }
+
 }
