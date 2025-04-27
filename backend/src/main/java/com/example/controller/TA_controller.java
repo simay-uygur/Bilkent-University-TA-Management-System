@@ -105,7 +105,7 @@ public class TA_controller {
         return new ResponseEntity<>(serv.deleteTaskById(task_id, ta_id),HttpStatus.OK);
     }
 
-    @PutMapping("api/ta/{id}")
+    @PutMapping("/api/ta/{id}")
     public ResponseEntity<?> restoreTA(@PathVariable Long id) {
         return new ResponseEntity<>(serv.restoreTAById(id), HttpStatus.OK);
     } 
