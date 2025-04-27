@@ -1,16 +1,11 @@
 package com.example.service;
 
-import com.example.repo.DepartmentRepo;
-import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
+import com.example.entity.Courses.Department;
+import java.util.List;
 
-@Service
-@RequiredArgsConstructor
-public class DepartmentServ {
+public interface DepartmentServ {
 
-    private final DepartmentRepo departmentRepo;
+    List<Department> getAllDepartments();
 
-    public boolean departmentExists(String name) {
-        return departmentRepo.existsById(name);
-    }
+    boolean createDepartment(Department department);
 }

@@ -110,7 +110,7 @@ public class CourseServImpl implements CourseServ{
         dto.setPrereqs(course.getPrereq_list().trim().split("\\s*,\\s*"));
         List<Student_DTO> studDtos = new ArrayList<>();
         for (Student stud : course.getStudents_list()){
-            Student_DTO stud_dto = new Student_DTO(stud.getStudentName(), stud.getStudentSurname(), stud.getStudentId().intValue());  //i changed the int to long
+            Student_DTO stud_dto = new Student_DTO(stud.getStudentId(),stud.getStudentName(), stud.getStudentSurname());  //i changed the int to long
             studDtos.add(stud_dto);
         }
         dto.setStudents(studDtos);
@@ -270,4 +270,16 @@ public class CourseServImpl implements CourseServ{
         return result;
     }
 
+    @Override
+    public List<Course_DTO> getTasks() {
+        List<Course> courses = courseRepo.findAll();
+        List<Course_DTO> courseDtos = new ArrayList<>();
+
+        for (Course course : courses) {
+            Course_DTO courseDto = createDTO(course); // you already have this createDTO(course) method
+            courseDtos.add(courseDto);
+        }
+
+        return courseDtos;
+    }
 }

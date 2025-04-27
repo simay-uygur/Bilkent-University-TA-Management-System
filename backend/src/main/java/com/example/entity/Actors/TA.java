@@ -54,7 +54,7 @@ public class TA extends User{
 
     @Enumerated(EnumType.STRING)
     @Column(name = "proctor_type")
-    private ProctorType proctorType;
+    private ProctorType proctorType = ProctorType.ALL_COURSES;
 
     @ManyToMany(
         mappedBy = "course_tas", // the other side of the relationship is the owner of the relationship
@@ -83,8 +83,6 @@ public class TA extends User{
         total_workload -= load ;
     }
 
-    @Column(name = "proctor_type", unique = false, updatable = true)
-    private ProctorType proctor_type = ProctorType.ALL_COURSES;
 }
 
 //json should be changed
