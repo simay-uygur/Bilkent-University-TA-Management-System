@@ -110,7 +110,7 @@ public class CourseServImpl implements CourseServ{
         dto.setPrereqs(course.getPrereq_list().trim().split("\\s*,\\s*"));
         List<Student_DTO> studDtos = new ArrayList<>();
         for (Student stud : course.getStudents_list()){
-            Student_DTO stud_dto = new Student_DTO(stud.getStudentName(), stud.getStudentSurname(), stud.getStudentId().intValue());  //i changed the int to long
+            Student_DTO stud_dto = new Student_DTO(stud.getStudentId(), stud.getStudentName(), stud.getStudentSurname());  //i changed the int to long
             studDtos.add(stud_dto);
         }
         dto.setStudents(studDtos);
