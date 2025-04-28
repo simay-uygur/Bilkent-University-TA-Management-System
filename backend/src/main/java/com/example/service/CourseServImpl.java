@@ -24,6 +24,7 @@ import com.example.exception.Course.CourseNotFoundExc;
 import com.example.exception.GeneralExc;
 import com.example.exception.NoPersistExc;
 import com.example.repo.CourseRepo;
+import com.example.repo.DepartmentRepo;
 import com.example.repo.SectionRepo;
 
 import jakarta.transaction.Transactional;
@@ -46,6 +47,9 @@ public class CourseServImpl implements CourseServ{
     @Autowired
     private TaskServ taskService;
 
+    @Autowired
+    private DepartmentRepo departmentRepo;
+
     @Override
     public boolean addSection(String course_code, Section section){
         Optional<Course> course = courseRepo.findByCourseCode(course_code);
@@ -67,7 +71,7 @@ public class CourseServImpl implements CourseServ{
         Optional<Course> courseOpt = courseRepo.findByCourseCode(course_code);
         if(!courseOpt.isPresent())
             throw new CourseNotFoundExc(course_code);
-        
+
         Course course = courseOpt.get();
         task.setCourse(course);
         Task created = taskService.createTask(task);
@@ -94,7 +98,7 @@ public class CourseServImpl implements CourseServ{
 
         if (!courseOpt.isPresent())
             throw new CourseNotFoundExc(course_code);
-        
+
         Course course = courseOpt.get();
         return createDTO(course);
     }
@@ -139,7 +143,7 @@ public class CourseServImpl implements CourseServ{
             for(Section c : ta.getTas_own_lessons()){
                 lessons.add(c.getSection_code());
             }
-            TA_DTO taDto = new TA_DTO(ta.getName(), ta.getSurname(), ta.getId(), ta.getAcademic_level().toString(), 
+            TA_DTO taDto = new TA_DTO(ta.getName(), ta.getSurname(), ta.getId(), ta.getAcademic_level().toString(),
                                       ta.getTotal_workload(), courses, lessons);
             taDtos.add(taDto);
         }
@@ -226,6 +230,10 @@ public class CourseServImpl implements CourseServ{
 
                 try {
                     String department = row.getCell(0).getStringCellValue().trim();
+                    Optional<Department> departmentOpt = departmentRepo.findDepartmentByName(department); // hope works
+                    if (!departmentOpt.isPresent()) {
+                        throw new GeneralExc("Department " + department + " does not exist!");
+                    }
                     int courseNo = (int) row.getCell(1).getNumericCellValue();
                     String name = row.getCell(2).getStringCellValue().trim();
                     String code = department + "-" + courseNo;
@@ -242,7 +250,7 @@ public class CourseServImpl implements CourseServ{
                     course.setCourse_name(name);
                     course.setCourse_dep(department);
                     course.setPrereq_list(prereq);
-                    course.setCourse_academic_status(AcademicLevelType.BS); // default or from another column if needed - -- - - - dont forget to add
+                    course.setCourse_academic_status(AcademicLevelType.BS); // default or from another column if needed - -- - - dont forget to add
 
                     successfulCourses.add(course);
 
