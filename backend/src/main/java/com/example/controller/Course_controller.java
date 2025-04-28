@@ -127,17 +127,7 @@ public class Course_controller {
         }
     }
 
-    @PostMapping("/api/upload/courses")
-    public ResponseEntity<Map<String, Object>> uploadCourses(@RequestParam("file") MultipartFile file) {
-        try {
-            Map<String, Object> result = courseServ.importCoursesFromExcel(file);
-            return ResponseEntity.ok(result);
-        } catch (Exception e) {
-            Map<String, Object> error = new HashMap<>();
-            error.put("error", e.getMessage());
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
-        }
-    }
+
 
     /*@PostMapping("/course/{course_code}/exam")
     public ResponseEntity<Boolean> createExam(@RequestBody Exam exam, @PathVariable String course_code) {

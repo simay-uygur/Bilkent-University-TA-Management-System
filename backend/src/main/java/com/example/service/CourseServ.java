@@ -22,4 +22,7 @@ public interface CourseServ {
     public Task getTaskByID(String course_code, int task_id);
     public List<Course_DTO> getCourses();
     public Map<String, Object> importCoursesFromExcel(MultipartFile file) throws IOException;
+    // YOU NEED THESE METHODS TOO!
+
+    List<Course_DTO> getCourses();
 }

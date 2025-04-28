@@ -1,31 +1,33 @@
 package com.example.service;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
 import com.example.entity.Courses.Department;
 import com.example.repo.DepartmentRepo;
-
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
 
+import java.util.List;
 
 @Service
 @Transactional(rollbackOn = Exception.class)
 @RequiredArgsConstructor
-public class DepartmentServImpl implements DepartmentServ{
+public class DepartmentServImpl implements DepartmentServ {
 
-    @Autowired
-    private DepartmentRepo depRepo;
+    private final DepartmentRepo departmentRepo;
 
     @Override
-    public boolean createDepartment(Department dep) {
-        depRepo.saveAndFlush(dep);
-        return true ;
+    public List<Department> getAllDepartments() {
+        return departmentRepo.findAll();
     }
-    
+
+    @Override
+    public boolean createDepartment(Department department) {
+        departmentRepo.save(department);
+        return true;
+    }
+
     @Override
     public boolean departmentExists(String name) {
-        return depRepo.existsById(name);
+        return departmentRepo.existsById(name);
     }
 }

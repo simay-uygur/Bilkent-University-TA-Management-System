@@ -8,6 +8,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import com.example.ExcelHelpers.FailedRowInfo;
+import com.example.entity.Courses.*;
+import com.example.entity.General.AcademicLevelType;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
@@ -40,6 +43,7 @@ import com.example.repo.SectionRepo;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.web.multipart.MultipartFile;
 
 @Transactional(rollbackOn = Exception.class)
 @Service
@@ -54,10 +58,11 @@ public class CourseServImpl implements CourseServ{
 
     private final SectionRepo secRepo;
 
-    private final DepartmentRepo depRepo;
-
     @Autowired
     private TaskServ taskService;
+
+    @Autowired
+    private DepartmentRepo departmentRepo;
 
     @Override
     public boolean addSection(String course_code, Section section){
@@ -80,7 +85,7 @@ public class CourseServImpl implements CourseServ{
         Optional<Course> courseOpt = courseRepo.findByCourseCode(course_code);
         if(!courseOpt.isPresent())
             throw new CourseNotFoundExc(course_code);
-        
+
         Course course = courseOpt.get();
         task.setCourse(course);
         Task created = taskService.createTask(task);
@@ -107,7 +112,7 @@ public class CourseServImpl implements CourseServ{
 
         if (!courseOpt.isPresent())
             throw new CourseNotFoundExc(course_code);
-        
+
         Course course = courseOpt.get();
         return createDTO(course);
     }
@@ -123,7 +128,7 @@ public class CourseServImpl implements CourseServ{
         dto.setPrereqs(course.getPrereq_list().trim().split("\\s*,\\s*"));
         List<Student_DTO> studDtos = new ArrayList<>();
         for (Student stud : course.getStudents_list()){
-            Student_DTO stud_dto = new Student_DTO(stud.getStudentId(), stud.getStudentName(), stud.getStudentSurname());  //i changed the int to long
+            Student_DTO stud_dto = new Student_DTO(stud.getStudentId(),stud.getStudentName(), stud.getStudentSurname());  //i changed the int to long
             studDtos.add(stud_dto);
         }
         dto.setStudents(studDtos);
@@ -152,7 +157,7 @@ public class CourseServImpl implements CourseServ{
             for(Section c : ta.getTas_own_lessons()){
                 lessons.add(c.getSection_code());
             }
-            TA_DTO taDto = new TA_DTO(ta.getName(), ta.getSurname(), ta.getId(), ta.getAcademic_level().toString(), 
+            TA_DTO taDto = new TA_DTO(ta.getName(), ta.getSurname(), ta.getId(), ta.getAcademic_level().toString(),
                                       ta.getTotal_workload(), courses, lessons);
             taDtos.add(taDto);
         }
@@ -239,6 +244,10 @@ public class CourseServImpl implements CourseServ{
 
                 try {
                     String department = row.getCell(0).getStringCellValue().trim();
+                    Optional<Department> departmentOpt = departmentRepo.findDepartmentByName(department); // hope works
+                    if (!departmentOpt.isPresent()) {
+                        throw new GeneralExc("Department " + department + " does not exist!");
+                    }
                     int courseNo = (int) row.getCell(1).getNumericCellValue();
                     String name = row.getCell(2).getStringCellValue().trim();
                     String code = department + "-" + courseNo;
@@ -255,7 +264,7 @@ public class CourseServImpl implements CourseServ{
                     course.setCourse_name(name);
                     //course.setDepartment(department);
                     course.setPrereq_list(prereq);
-                    course.setCourse_academic_status(AcademicLevelType.BS); // default or from another column if needed - -- - - - dont forget to add
+                    course.setCourse_academic_status(AcademicLevelType.BS); // default or from another column if needed - -- - - dont forget to add
 
                     successfulCourses.add(course);
 
@@ -264,8 +273,7 @@ public class CourseServImpl implements CourseServ{
                     row.forEach(cell -> rawData.append(cell.toString()).append(" | "));
                     failedRows.add(new FailedRowInfo(
                             row.getRowNum(),
-                            e.getClass().getSimpleName() + ": " + e.getMessage(),
-                            rawData.toString()
+                            e.getClass().getSimpleName() + ": " + e.getMessage() //hope it is correct error message
                     ));
                 }
             }

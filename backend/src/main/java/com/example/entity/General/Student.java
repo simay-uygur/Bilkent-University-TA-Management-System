@@ -32,6 +32,9 @@ public class Student {
     @Column(name = "student_surname", unique = false, updatable = true, nullable = false)
     private String studentSurname;
 
+    @Column(name = "webmail", nullable = true) // newly added - should ,t be nullable or not?
+    private String webmail;
+
     //not sure about nullables
     @Column(name = "academic_status", nullable = true)
     private String academicStatus;
