@@ -24,5 +24,4 @@ public interface CourseServ {
     public Map<String, Object> importCoursesFromExcel(MultipartFile file) throws IOException;
     // YOU NEED THESE METHODS TOO!
 
-    List<Course_DTO> getCourses();
 }
