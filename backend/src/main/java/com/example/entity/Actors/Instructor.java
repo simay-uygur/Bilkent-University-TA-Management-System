@@ -23,7 +23,7 @@ public class Instructor extends User{
     @JoinTable(
         name = "course_instructor",
         joinColumns = @JoinColumn(name = "instructor_id"),
-        inverseJoinColumns = @JoinColumn(name = "course_id")
+        inverseJoinColumns = @JoinColumn(name = "courseId")
     )
     private List<Course> courses = new ArrayList<>();
 }

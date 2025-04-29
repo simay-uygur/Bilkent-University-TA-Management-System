@@ -1,9 +1,7 @@
 package com.example.controller;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -13,16 +11,13 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.multipart.MultipartFile;
 
 import com.example.entity.Actors.TA_DTO;
 import com.example.entity.Courses.Course;
 import com.example.entity.Courses.CourseCodeConverter;
 import com.example.entity.Courses.Course_DTO;
 import com.example.entity.Courses.Section;
-import com.example.entity.Exams.Exam;
 import com.example.entity.Tasks.TA_Task;
 import com.example.entity.Tasks.Task;
 import com.example.entity.Tasks.Task_DTO;
@@ -112,19 +107,6 @@ public class Course_controller {
             durationStr,
             task.getStatus().toString() // Convert enum to String
         );
-    }
-
-
-    private void checkPrerequisites(Course course) {
-        if (course.getPrereq_list() != null) {
-            String[] prereqs = course.getPrereq_list().split(",");
-            for (String course_code : prereqs){
-                int id = new CourseCodeConverter().code_to_id(course_code);
-                if (!courseRepo.existsById(id)){
-                    throw new NoPrereqCourseFound(course_code);
-                }
-            }
-        }
     }
 
 

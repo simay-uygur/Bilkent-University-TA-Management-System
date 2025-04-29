@@ -80,7 +80,7 @@ public class Task {
     private int amount_of_tas = 0;
       
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "course_id")
+    @JoinColumn(name = "courseId")
     private Course course;
 
     @JsonIgnore

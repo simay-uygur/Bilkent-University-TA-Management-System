@@ -53,7 +53,7 @@ public class UploadController {
     }
 
 
-    @PostMapping("/api/upload/courses")
+    @PostMapping("/courses")
     public ResponseEntity<Map<String, Object>> uploadCourses(@RequestParam("file") MultipartFile file) {
         try {
             Map<String, Object> result = courseServ.importCoursesFromExcel(file);
