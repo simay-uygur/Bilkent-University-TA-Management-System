@@ -20,13 +20,14 @@ import ExamProctoringPage   from './components/ExamProctoringPage';
 import CourseTAList         from './components/CourseTAList';
 import RequestTAForm        from './components/RequestTAForm';
 import SettingsTA           from './components/SettingsTA';
-import ManageWorkload       from './components/ManagaWorkload';
+import ManageWorkload       from './components/ManageWorkload';
 
 import ProctorAssignmentsPage from './components/ProctorAssignmentPage';
-import ProctorAssignmentPage  from './components/ProctorAssignmentPage';
+
 import LeaveRequestsPage      from './components/LeaveRequestPage';
 import DepartmentOffice       from './Pages/DepartmentOffice';
 import DeansOffice            from './Pages/DeansOffice';
+import DeanAssignProctors from './components/DeanAssignProctors';
 
 const App: React.FC = () => (
   <BrowserRouter>
@@ -61,7 +62,7 @@ const App: React.FC = () => (
 
       {/* Department Office Area */}
       <Route path="/dept-office" element={<DepartmentLayout />}>
-    <Route index                           element={<Navigate to="proctor" replace />} />
+    <Route index                           element={<Navigate to="proctor"/>} />
     <Route path="proctor"                  element={<ProctorAssignmentsPage />} />
     <Route path="proctor/:courseId/:mode"  element={<ProctorAssignmentsPage />} />
     <Route path="leave"                    element={<LeaveRequestsPage />} />
@@ -69,10 +70,9 @@ const App: React.FC = () => (
 
       {/* Dean Office Area */}
       <Route path="/deans-office" element={<DeansLayout />}>
-    <Route index element={<DeansOffice />} />
-    {/* add nested dean pages here */}
+    <Route index                     element={<DeansOffice />} />
+    <Route path="assign/:courseId/:mode" element={<DeanAssignProctors />} />
   </Route>
-
       {/* Fallback */}
       <Route path="*" element={<Navigate to="/login" replace />} />
     </Routes>

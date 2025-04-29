@@ -1,63 +1,45 @@
 .pageWrapper {
-    padding: 20px;
-    background-color: #f4f7f9;
+    background: #f7f7f7;
+    min-height: 100vh;
   }
   
-  .taList {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
+  .heading {
+    text-align: center;
+    padding: 1rem 0;
+    font-size: 1.5rem;
   }
   
-  .taCard {
-    background-color: white;
-    border: 1px solid #ddd;
-    padding: 15px;
-    border-radius: 5px;
+  .courseList {
+    display: grid;
+    gap: 1rem;
+    padding: 0 1rem;
+  }
+  
+  .courseCard {
     display: flex;
     justify-content: space-between;
-    align-items: center;
+    background: #fff;
+    padding: 1rem;
+    border-radius: 6px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
   }
   
-  .taInfo {
+  .courseInfo > div {
+    margin-top: 0.25rem;
+  }
+  
+  .actions {
     display: flex;
     flex-direction: column;
+    gap: 0.5rem;
   }
   
-  .assignButton {
-    background-color: #4caf50;
+  .btn {
+    background: #2563EB;
     color: white;
-    padding: 5px 10px;
     border: none;
-    border-radius: 5px;
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
     cursor: pointer;
-  }
-  
-  .autoAssignButton {
-    margin-top: 20px;
-    background-color: #ff9800;
-    color: white;
-    padding: 10px 20px;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-  }
-  
-  .assignedTAs, .autoAssignedTAs {
-    margin-top: 30px;
-  }
-  
-  h2 {
-    font-size: 18px;
-    margin-bottom: 10px;
-  }
-  
-  ul {
-    list-style-type: none;
-    padding: 0;
-  }
-  
-  ul li {
-    padding: 5px 0;
   }
   

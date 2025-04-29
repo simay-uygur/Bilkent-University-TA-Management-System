@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import NavBarDeans from './NavBarDeans';
+import NavBarDeans from '../components/NavBarDeans';
 import styles from './DeanAssignProctors.module.css';
 
 interface TA {
@@ -9,6 +9,7 @@ interface TA {
   workload: number;
 }
 
+// mock TA pool
 const mockTAs: TA[] = [
   { id: 1, name: 'Alice Smith',    workload: 3 },
   { id: 2, name: 'Bob Johnson',    workload: 1 },
@@ -22,43 +23,47 @@ export default function DeanAssignProctors() {
 
   const [tas, setTAs] = useState<TA[]>([]);
   const [selected, setSelected] = useState<number[]>([]);
-  const required = 2; // ideally fetched per course
+  const required = 2; // you can pull this from a real course lookup
 
+  // load TA pool
   useEffect(() => {
     setTAs(mockTAs);
   }, []);
 
+  // pre-select for automatic mode
   useEffect(() => {
     if (mode === 'automatic') {
-      const ids = [...mockTAs]
+      const auto = [...mockTAs]
         .sort((a,b) => a.workload - b.workload)
         .slice(0, required)
         .map(t => t.id);
-      setSelected(ids);
+      setSelected(auto);
     } else {
       setSelected([]);
     }
   }, [mode]);
 
+  // toggle for manual mode
   const toggle = (id: number) => {
     setSelected(sel =>
       sel.includes(id)
-        ? sel.filter(x=>x!==id)
+        ? sel.filter(x => x !== id)
         : sel.length < required
           ? [...sel, id]
           : sel
     );
   };
 
+  // confirm and go back
   const confirm = () => {
     const chosen = tas.filter(t => selected.includes(t.id)).map(t => t.name).join(', ');
-    alert(`${mode==='automatic'?'Auto':'Manual'} assigned for course ${courseId}: ${chosen}`);
+    alert(`${mode === 'automatic' ? 'Automatic' : 'Manual'} assignment for course ${courseId}:\n${chosen}`);
     navigate('/deans-office');
   };
 
   return (
     <div className={styles.pageWrapper}>
-      <NavBarDeans onNotifications={() => {}} />
+      
 
       <button className={styles.back} onClick={() => navigate(-1)}>← Back</button>
       <h1 className={styles.heading}>
@@ -77,7 +82,7 @@ export default function DeanAssignProctors() {
         <tbody>
           {tas.map(t => (
             <tr key={t.id}>
-              {mode==='manual' && (
+              {mode === 'manual' && (
                 <td>
                   <input
                     type="checkbox"

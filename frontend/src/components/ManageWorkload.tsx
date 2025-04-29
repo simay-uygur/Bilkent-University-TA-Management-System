@@ -1,6 +1,7 @@
 // src/components/ManageWorkload.tsx
-import React, { useState, ChangeEvent, FormEvent } from 'react';
+import React, { useState, useEffect, ChangeEvent, FormEvent } from 'react';
 import InsNavBar from '../components/InsNavBar';
+import { fetchAllTAs } from '../api';
 import styles from './ManageWorkload.module.css';
 
 interface Task {
@@ -10,101 +11,103 @@ interface Task {
   time: string;
   type: 'Citation' | 'Proctoring' | 'Lab';
   status: 'pending' | 'approved';
+  assignedId?: string;
 }
 
-// 3 mock tasks
+interface TA {
+  id: string;
+  displayName: string;
+}
+
 const initialTasks: Task[] = [
   { id: 1, title: 'Mock Lab Setup',       date: '2025-06-01', time: '10:00', type: 'Lab',        status: 'pending'  },
   { id: 2, title: 'Mock Citation Review', date: '2025-06-02', time: '14:00', type: 'Citation',   status: 'approved' },
   { id: 3, title: 'Mock Proctoring',      date: '2025-06-03', time: '12:00', type: 'Proctoring', status: 'pending'  },
 ];
 
+const TASK_TYPES = ['Citation','Proctoring','Lab'] as const;
+
 export default function ManageWorkload() {
-  const [tasks, setTasks] = useState<Task[]>(initialTasks);
+  const [tasks, setTasks] = useState<Task[]>([]);
+  const [availableTAs, setAvailableTAs] = useState<TA[]>([]);
   const [modalOpen, setModalOpen] = useState(false);
   const [isEdit, setIsEdit] = useState(false);
   const [current, setCurrent] = useState<Partial<Task>>({
-    title: '',
-    date: '',
-    time: '',
-    type: 'Citation',
-    status: 'pending',
+    title: '', date: '', time: '', type: 'Citation', status: 'pending', assignedId: ''
   });
 
-  // open modal for adding
+  // 1) Seed mock tasks on mount
+  useEffect(() => {
+    setTasks(initialTasks);
+  }, []);
+
+  // 2) Fetch TA list once on mount
+  useEffect(() => {
+    fetchAllTAs()
+      .then(res => setAvailableTAs(res.data))
+      .catch(err => console.error('Failed to load TAs:', err));
+  }, []);
+
+  // 3) Open modal for add
   const openAdd = () => {
-    setCurrent({ title:'', date:'', time:'', type:'Citation', status:'pending' });
+    setCurrent({ title:'', date:'', time:'', type:'Citation', status:'pending', assignedId: '' });
     setIsEdit(false);
     setModalOpen(true);
   };
 
-  // open modal for editing
+  // 4) Open modal for edit
   const openEdit = (t: Task) => {
     setCurrent({ ...t });
     setIsEdit(true);
     setModalOpen(true);
   };
 
-  // handle form field changes
-  const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+  // 5) Handle form changes
+  const handleChange = (e: ChangeEvent<HTMLInputElement|HTMLSelectElement>) => {
     const { name, value } = e.target;
     setCurrent(c => ({ ...c, [name]: value }));
   };
 
-  // save new or edited task
+  // 6) Save add/edit
   const handleSave = (e: FormEvent) => {
     e.preventDefault();
     if (!current.title || !current.date || !current.time || !current.type) return;
+
     if (isEdit && current.id != null) {
       setTasks(ts =>
         ts.map(t =>
           t.id === current.id
-            ? {
-                ...t,
-                title: current.title as string,
-                date: current.date as string,
-                time: current.time as string,
-                type: current.type as Task['type'],
-                status: current.status as Task['status'],
-              }
+            ? { ...t, ...current } as Task
             : t
         )
       );
     } else {
-      const nextId = Math.max(...tasks.map(t => t.id), 0) + 1;
+      const nextId = Math.max(0, ...tasks.map(t => t.id)) + 1;
       setTasks(ts => [
         ...ts,
-        {
-          id: nextId,
-          title: current.title as string,
-          date: current.date as string,
-          time: current.time as string,
-          type: current.type as Task['type'],
-          status: current.status as Task['status'],
-        },
+        { id: nextId, status: 'pending', ...current } as Task
       ]);
     }
     setModalOpen(false);
   };
 
-  // delete a task
+  // 7) Delete
   const handleDelete = (id: number) => {
     setTasks(ts => ts.filter(t => t.id !== id));
   };
 
   return (
     <div className={styles.pageWrapper}>
-      <InsNavBar />
+      
 
       <h1 className={styles.heading}>Manage Workload</h1>
-      <button className={styles.addBtn} onClick={openAdd}>
-        + Add Task
-      </button>
+      <button className={styles.addBtn} onClick={openAdd}>+ Add Task</button>
 
       <table className={styles.table}>
         <thead>
           <tr>
-            <th>Title</th><th>Date</th><th>Time</th><th>Type</th><th>Status</th><th>Actions</th>
+            <th>Title</th><th>Date</th><th>Time</th>
+            <th>Type</th><th>Status</th><th>Assigned TA</th><th>Actions</th>
           </tr>
         </thead>
         <tbody>
@@ -116,12 +119,11 @@ export default function ManageWorkload() {
               <td>{t.type}</td>
               <td>{t.status}</td>
               <td>
-                <button className={styles.updateBtn} onClick={() => openEdit(t)}>
-                  Update
-                </button>
-                <button className={styles.deleteBtn} onClick={() => handleDelete(t.id)}>
-                  Delete
-                </button>
+                {availableTAs.find(a => a.id === t.assignedId)?.displayName || '—'}
+              </td>
+              <td>
+                <button className={styles.updateBtn} onClick={() => openEdit(t)}>Update</button>
+                <button className={styles.deleteBtn} onClick={() => handleDelete(t.id)}>Delete</button>
               </td>
             </tr>
           ))}
@@ -134,51 +136,36 @@ export default function ManageWorkload() {
             <h2>{isEdit ? 'Edit Task' : 'New Task'}</h2>
             <form onSubmit={handleSave}>
               <label>Title</label>
-              <input
-                name="title"
-                value={current.title || ''}
-                onChange={handleChange}
-                required
-              />
+              <input name="title" value={current.title||''} onChange={handleChange} required />
 
               <label>Date</label>
-              <input
-                name="date"
-                type="date"
-                value={current.date || ''}
-                onChange={handleChange}
-                required
-              />
+              <input name="date" type="date" value={current.date||''} onChange={handleChange} required />
 
               <label>Time</label>
-              <input
-                name="time"
-                type="time"
-                value={current.time || ''}
-                onChange={handleChange}
-                required
-              />
+              <input name="time" type="time" value={current.time||''} onChange={handleChange} required />
 
               <label>Type</label>
-              <select name="type" value={current.type} onChange={handleChange}>
-                <option>Lab</option>
-                <option>Citation</option>
-                <option>Proctoring</option>
+              <select name="type" value={current.type||''} onChange={handleChange}>
+                {TASK_TYPES.map(t => <option key={t} value={t}>{t}</option>)}
               </select>
 
               <label>Status</label>
-              <select name="status" value={current.status} onChange={handleChange}>
+              <select name="status" value={current.status||''} onChange={handleChange}>
                 <option value="pending">pending</option>
                 <option value="approved">approved</option>
               </select>
 
+              <label>Assign TA</label>
+              <select name="assignedId" value={current.assignedId||''} onChange={handleChange}>
+                <option value="">— none —</option>
+                {availableTAs.map(a=>(
+                  <option key={a.id} value={a.id}>{a.displayName}</option>
+                ))}
+              </select>
+
               <div className={styles.modalBtns}>
-                <button type="button" onClick={() => setModalOpen(false)}>
-                  Cancel
-                </button>
-                <button type="submit">
-                  Save
-                </button>
+                <button type="button" onClick={() => setModalOpen(false)}>Cancel</button>
+                <button type="submit">Save</button>
               </div>
             </form>
           </div>

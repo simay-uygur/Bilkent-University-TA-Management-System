@@ -1,90 +1,52 @@
-import React, { useState } from 'react';
+import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import styles from './DeansOffice.module.css';
-import NavBarDeans from '../components/NavBarDeans.tsx';
 
-interface TA {
+interface Course {
   id: number;
+  code: string;
   name: string;
-  department: string;
+  examTime: string;
+  location: string;
+  numProctorsRequired: number;
 }
 
-const allTAs: TA[] = [
-  { id: 1, name: 'John Doe', department: 'Computer Science' },
-  { id: 2, name: 'Jane Smith', department: 'Computer Science' },
-  { id: 3, name: 'Alan Turing', department: 'Mathematics' },
-  { id: 4, name: 'Marie Curie', department: 'Physics' },
+const courses: Course[] = [
+  { id: 1, code: 'CS-101', name: 'Intro to Programming', examTime: '2025-06-15 10:00', location: 'Room 101', numProctorsRequired: 2 },
+  { id: 2, code: 'ENG-202', name: 'Technical Writing',    examTime: '2025-06-16 14:00', location: 'Room 102', numProctorsRequired: 1 },
 ];
 
 const DeansOffice: React.FC = () => {
-  const [assignedTAs, setAssignedTAs] = useState<TA[]>([]);
-  const [autoAssignedTAs, setAutoAssignedTAs] = useState<TA[]>([]);
-
-  const handleAssignProctorManually = (ta: TA) => {
-    setAssignedTAs((prevAssignedTAs) => [...prevAssignedTAs, ta]);
-  };
-
-  const handleAssignProctorAutomatically = () => {
-    // Example: Automatically assign a proctor from all departments
-    const taToAutoAssign = allTAs[Math.floor(Math.random() * allTAs.length)];
-    setAutoAssignedTAs((prevAutoAssignedTAs) => [...prevAutoAssignedTAs, taToAutoAssign]);
-  };
+  const navigate = useNavigate();
 
   return (
     <div className={styles.pageWrapper}>
-        <div>
-      
-      <div>Dean's Office Content</div>
-    </div>
-      <h1>Dean’s Office Proctoring Assignment</h1>
-      
-      <div className={styles.taList}>
-        {allTAs.map((ta) => (
-          <div key={ta.id} className={styles.taCard}>
-            <div className={styles.taInfo}>
-              <span>{ta.name}</span>
-              <span>{ta.department}</span>
+      <h1 className={styles.heading}>Awaiting Proctor Assignments</h1>
+      <div className={styles.courseList}>
+        {courses.map(c => (
+          <div key={c.id} className={styles.courseCard}>
+            <div className={styles.courseInfo}>
+              <strong>{c.code}</strong> — {c.name}
+              <div>Exam: {c.examTime}</div>
+              <div>Location: {c.location}</div>
+              <div>Needed: {c.numProctorsRequired}</div>
             </div>
-            <button
-              className={styles.assignButton}
-              onClick={() => handleAssignProctorManually(ta)}
-            >
-              Assign Proctor (Manual)
-            </button>
+            <div className={styles.actions}>
+              <button
+                className={styles.btn}
+                onClick={() => navigate(`assign/${c.id}/manual`)}
+              >
+                Manual Assign
+              </button>
+              <button
+                className={styles.btn}
+                onClick={() => navigate(`assign/${c.id}/automatic`)}
+              >
+                Automatic Assign
+              </button>
+            </div>
           </div>
         ))}
-      </div>
-
-      <button
-        className={styles.autoAssignButton}
-        onClick={handleAssignProctorAutomatically}
-      >
-        Auto Assign Proctor
-      </button>
-
-      <div className={styles.assignedTAs}>
-        <h2>Manually Assigned Proctors</h2>
-        {assignedTAs.length === 0 ? (
-          <p>No proctors assigned yet.</p>
-        ) : (
-          <ul>
-            {assignedTAs.map((ta) => (
-              <li key={ta.id}>{ta.name}</li>
-            ))}
-          </ul>
-        )}
-      </div>
-
-      <div className={styles.autoAssignedTAs}>
-        <h2>Automatically Assigned Proctors</h2>
-        {autoAssignedTAs.length === 0 ? (
-          <p>No auto proctors assigned yet.</p>
-        ) : (
-          <ul>
-            {autoAssignedTAs.map((ta) => (
-              <li key={ta.id}>{ta.name}</li>
-            ))}
-          </ul>
-        )}
       </div>
     </div>
   );

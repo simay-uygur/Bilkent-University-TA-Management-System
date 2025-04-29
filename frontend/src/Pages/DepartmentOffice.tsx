@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import DepOfNavBar from '../components/NavBarDepartment';
+
 import styles from './DepartmentOffice.module.css';
 
 interface LeaveRequest {

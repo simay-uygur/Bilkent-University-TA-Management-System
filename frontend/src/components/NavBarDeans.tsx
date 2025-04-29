@@ -1,40 +1,47 @@
-// src/components/NavBarDeans.tsx
 import React from 'react';
 import { Home, Bell, Settings, LogOut } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import logo from '../assets/react.svg';
 import styles from './NavBarDeans.module.css';
 
-interface Props {
-  onNotifications: () => void;
+interface NavItem {
+  label: string;
+  icon: React.ReactNode;
+  to?: string;
+  onClick?: () => void;
 }
 
-const NavBarDeans: React.FC<Props> = ({ onNotifications }) => {
+const NavBarDeans: React.FC<{ onNotifications: () => void }> = ({ onNotifications }) => {
   const navigate = useNavigate();
   const { pathname } = useLocation();
 
-  const items = [
-    { label: 'Home',          icon: <Home size={18} />,      action: () => navigate('/deans-office'), active: pathname === '/deans-office' },
-    { label: 'Notifications', icon: <Bell size={18} />,      action: onNotifications },
-    { label: 'Settings',      icon: <Settings size={18} />,  action: () => navigate('/settings') },
-    { label: 'Logout',        icon: <LogOut size={18} />,    action: () => navigate('/login', { replace: true }) },
+  const navItems: NavItem[] = [
+    { label: 'Home', icon: <Home size={18} />, to: '/deans-office' },
+    { label: 'Notifications', icon: <Bell size={18} />, onClick: onNotifications },
+    { label: 'Settings', icon: <Settings size={18} />, to: '/settings' },
+    { label: 'Logout', icon: <LogOut size={18} />, to: '/login' },
   ];
 
   return (
     <header className={styles.header}>
       <div className={styles.logoSection}>
         <img src={logo} alt="Logo" className={styles.logo} />
-        <span className={styles.title}>TA Management – Dean’s Office</span>
+        <span className={styles.title}>TA Management – Dean’s Office</span>
       </div>
       <nav className={styles.navActions}>
-        {items.map(i => (
+        {navItems.map((item, idx) => (
           <button
-            key={i.label}
-            onClick={i.action}
-            className={`${styles.navButton} ${i.active ? styles.active : ''}`}
+            key={idx}
+            className={`${styles.navButton} ${
+              item.to && pathname.startsWith(item.to) ? styles.active : ''
+            }`}
+            onClick={() => {
+              if (item.to) navigate(item.to);
+              else if (item.onClick) item.onClick();
+            }}
           >
-            <span className={styles.icon}>{i.icon}</span>
-            {i.label}
+            <span className={styles.icon}>{item.icon}</span>
+            {item.label}
           </button>
         ))}
       </nav>

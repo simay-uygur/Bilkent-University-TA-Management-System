@@ -1,8 +1,7 @@
-// src/components/DeanLayout.tsx
 import React, { useState, useEffect } from 'react';
 import { Outlet } from 'react-router-dom';
 import NavBarDeans from './NavBarDeans';
-import NotificationPanel from '../components/NotificationPanel';
+import NotificationPanel from './NotificationPanel';
 import { fetchNotifications, markAllRead } from '../api';
 import styles from './DeansLayout.module.css';
 
