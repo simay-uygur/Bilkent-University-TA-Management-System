@@ -84,4 +84,9 @@ public class UserServImpl implements UserServ{
         Optional<User> u = repo.findById(id) ;
         return u.orElse(null);
     }
+    @Override
+    public User getUserByEmail(String email) {
+        return repo.findByWebmail(email).orElse(null);
+    }
+    
 }
