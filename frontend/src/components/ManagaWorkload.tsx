@@ -1,156 +1,189 @@
-import React, { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
-import {
-  fetchAllTasks,
-  fetchAssignedTAs,
-  fetchAllTAs,
-  createTask,
-  assignTA,
-  approveTask,
-  rejectTask,
-  Task,
-  TA
-} from '../api';
+// src/components/ManageWorkload.tsx
+import React, { useState, ChangeEvent, FormEvent } from 'react';
+import InsNavBar from '../components/InsNavBar';
 import styles from './ManageWorkload.module.css';
 
-const TASK_TYPES = ['Citation', 'Proctoring', 'Lab'] as const;
+interface Task {
+  id: number;
+  title: string;
+  date: string;
+  time: string;
+  type: 'Citation' | 'Proctoring' | 'Lab';
+  status: 'pending' | 'approved';
+}
+
+// 3 mock tasks
+const initialTasks: Task[] = [
+  { id: 1, title: 'Mock Lab Setup',       date: '2025-06-01', time: '10:00', type: 'Lab',        status: 'pending'  },
+  { id: 2, title: 'Mock Citation Review', date: '2025-06-02', time: '14:00', type: 'Citation',   status: 'approved' },
+  { id: 3, title: 'Mock Proctoring',      date: '2025-06-03', time: '12:00', type: 'Proctoring', status: 'pending'  },
+];
 
 export default function ManageWorkload() {
-  const { courseId } = useParams<{ courseId: string }>();
-  const [tasks, setTasks] = useState<(Task & { assignedTAs: TA[] })[]>([]);
-  const [availableTAs, setAvailableTAs] = useState<TA[]>([]);
-  const [showModal, setShowModal] = useState(false);
-  const [title, setTitle] = useState('');
-  const [date, setDate] = useState('');
-  const [time, setTime] = useState('');
-  const [type, setType] = useState<typeof TASK_TYPES[number]>('Citation');
-  const [assigned, setAssigned] = useState<string>('');
+  const [tasks, setTasks] = useState<Task[]>(initialTasks);
+  const [modalOpen, setModalOpen] = useState(false);
+  const [isEdit, setIsEdit] = useState(false);
+  const [current, setCurrent] = useState<Partial<Task>>({
+    title: '',
+    date: '',
+    time: '',
+    type: 'Citation',
+    status: 'pending',
+  });
 
-  // 1) load all TAs once
-  useEffect(() => {
-    fetchAllTAs()
-      .then(res => setAvailableTAs(res.data))
-      .catch(err => console.error('Error loading TAs:', err));
-  }, []);
-
-  // 2) extract task loader
-  const loadTasks = () => {
-    if (!courseId) return;
-    fetchAllTasks()
-      .then(res => res.data.filter(t => t.courseId === +courseId))
-      .then(ts => Promise.all(
-        ts.map(async t => {
-          const taRes = await fetchAssignedTAs(t.id);
-          return { ...t, assignedTAs: taRes.data };
-        })
-      ))
-      .then(full => setTasks(full))
-      .catch(err => console.error('Error loading tasks:', err));
+  // open modal for adding
+  const openAdd = () => {
+    setCurrent({ title:'', date:'', time:'', type:'Citation', status:'pending' });
+    setIsEdit(false);
+    setModalOpen(true);
   };
 
-  // 3) fetch tasks on courseId change
-  useEffect(loadTasks, [courseId]);
+  // open modal for editing
+  const openEdit = (t: Task) => {
+    setCurrent({ ...t });
+    setIsEdit(true);
+    setModalOpen(true);
+  };
 
-  // 4) handle create + reload
-  const handleCreate = async (e: React.FormEvent) => {
+  // handle form field changes
+  const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    const { name, value } = e.target;
+    setCurrent(c => ({ ...c, [name]: value }));
+  };
+
+  // save new or edited task
+  const handleSave = (e: FormEvent) => {
     e.preventDefault();
-    if (!title || !date || !time) return;
-    try {
-      const res = await createTask({
-        title,
-        courseId: +courseId!,
-        date,
-        time,
-        type,
-        assignedId: assigned || undefined
-      });
-      console.log('Task created:', res.data);
-      if (assigned) {
-        await assignTA(res.data.id, assigned);
-        console.log(`Assigned TA ${assigned} to task ${res.data.id}`);
-      }
-      loadTasks();
-      setShowModal(false);
-      setTitle(''); setDate(''); setTime(''); setType('Citation'); setAssigned('');
-    } catch (err) {
-      console.error('Error creating task:', err);
+    if (!current.title || !current.date || !current.time || !current.type) return;
+    if (isEdit && current.id != null) {
+      setTasks(ts =>
+        ts.map(t =>
+          t.id === current.id
+            ? {
+                ...t,
+                title: current.title as string,
+                date: current.date as string,
+                time: current.time as string,
+                type: current.type as Task['type'],
+                status: current.status as Task['status'],
+              }
+            : t
+        )
+      );
+    } else {
+      const nextId = Math.max(...tasks.map(t => t.id), 0) + 1;
+      setTasks(ts => [
+        ...ts,
+        {
+          id: nextId,
+          title: current.title as string,
+          date: current.date as string,
+          time: current.time as string,
+          type: current.type as Task['type'],
+          status: current.status as Task['status'],
+        },
+      ]);
     }
+    setModalOpen(false);
+  };
+
+  // delete a task
+  const handleDelete = (id: number) => {
+    setTasks(ts => ts.filter(t => t.id !== id));
   };
 
   return (
     <div className={styles.pageWrapper}>
-      <h1 className={styles.heading}>Manage Workload for Course {courseId}</h1>
-      <button className={styles.addBtn} onClick={() => setShowModal(true)}>
+      <InsNavBar />
+
+      <h1 className={styles.heading}>Manage Workload</h1>
+      <button className={styles.addBtn} onClick={openAdd}>
         + Add Task
       </button>
-
-      {showModal && (
-        <div className={styles.modalBackdrop} onClick={() => setShowModal(false)}>
-          <div className={styles.modal} onClick={e => e.stopPropagation()}>
-            <h2 className={styles.modalTitle}>Create Task</h2>
-            <form onSubmit={handleCreate}>
-              <label>Title</label>
-              <input type="text" value={title} onChange={e => setTitle(e.target.value)} />
-
-              <label>Date</label>
-              <input type="date" value={date} onChange={e => setDate(e.target.value)} />
-
-              <label>Time</label>
-              <input type="time" value={time} onChange={e => setTime(e.target.value)} />
-
-              <label>Type</label>
-              <select value={type} onChange={e => setType(e.target.value as any)}>
-                {TASK_TYPES.map(t => <option key={t} value={t}>{t}</option>)}
-              </select>
-
-              <label>Assign TA</label>
-              <select value={assigned} onChange={e => setAssigned(e.target.value)}>
-                <option value="">-- none --</option>
-                {availableTAs.map(ta => (
-                  <option key={ta.id} value={ta.id}>
-                    {ta.displayName}
-                  </option>
-                ))}
-              </select>
-
-              <button type="submit">Create</button>
-            </form>
-          </div>
-        </div>
-      )}
 
       <table className={styles.table}>
         <thead>
           <tr>
-            <th>Title</th><th>Date</th><th>Time</th><th>Type</th>
-            <th>Assigned</th><th>Status</th><th>Actions</th>
+            <th>Title</th><th>Date</th><th>Time</th><th>Type</th><th>Status</th><th>Actions</th>
           </tr>
         </thead>
         <tbody>
-          {tasks.map(task => (
-            <tr key={task.id}>
-              <td>{task.title}</td>
-              <td>{task.date}</td>
-              <td>{task.time}</td>
-              <td>{task.type}</td>
-              <td>{task.assignedTAs.map(t => t.displayName).join(', ') || '—'}</td>
-              <td>{task.status}</td>
+          {tasks.map(t => (
+            <tr key={t.id}>
+              <td>{t.title}</td>
+              <td>{t.date}</td>
+              <td>{t.time}</td>
+              <td>{t.type}</td>
+              <td>{t.status}</td>
               <td>
-                {task.status === 'pending' && (
-                  <>
-                    <button onClick={() => approveTask(task.id).then(loadTasks)}>
-                      Approve
-                    </button>
-                    <button onClick={() => rejectTask(task.id).then(loadTasks)}>
-                      Reject
-                    </button>
-                  </>
-                )}
+                <button className={styles.updateBtn} onClick={() => openEdit(t)}>
+                  Update
+                </button>
+                <button className={styles.deleteBtn} onClick={() => handleDelete(t.id)}>
+                  Delete
+                </button>
               </td>
             </tr>
           ))}
         </tbody>
       </table>
+
+      {modalOpen && (
+        <div className={styles.modalBackdrop} onClick={() => setModalOpen(false)}>
+          <div className={styles.modal} onClick={e => e.stopPropagation()}>
+            <h2>{isEdit ? 'Edit Task' : 'New Task'}</h2>
+            <form onSubmit={handleSave}>
+              <label>Title</label>
+              <input
+                name="title"
+                value={current.title || ''}
+                onChange={handleChange}
+                required
+              />
+
+              <label>Date</label>
+              <input
+                name="date"
+                type="date"
+                value={current.date || ''}
+                onChange={handleChange}
+                required
+              />
+
+              <label>Time</label>
+              <input
+                name="time"
+                type="time"
+                value={current.time || ''}
+                onChange={handleChange}
+                required
+              />
+
+              <label>Type</label>
+              <select name="type" value={current.type} onChange={handleChange}>
+                <option>Lab</option>
+                <option>Citation</option>
+                <option>Proctoring</option>
+              </select>
+
+              <label>Status</label>
+              <select name="status" value={current.status} onChange={handleChange}>
+                <option value="pending">pending</option>
+                <option value="approved">approved</option>
+              </select>
+
+              <div className={styles.modalBtns}>
+                <button type="button" onClick={() => setModalOpen(false)}>
+                  Cancel
+                </button>
+                <button type="submit">
+                  Save
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

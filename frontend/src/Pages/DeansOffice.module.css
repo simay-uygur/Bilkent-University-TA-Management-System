@@ -1,0 +1,90 @@
+.pageWrapper {
+    background: #f7f7f7;
+    min-height: 100vh;
+    padding-top: 64px; /* room for navbar */
+  }
+  
+  /* Shared Heading */
+  .heading {
+    text-align: center;
+    margin: 20px 0;
+    font-size: 24px;
+  }
+  
+  /* Awaiting List */
+  .taskList {
+    display: grid;
+    gap: 12px;
+    padding: 0 20px;
+  }
+  .taskCard {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #fff;
+    padding: 12px;
+    border-radius: 6px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  }
+  .info {
+    max-width: 70%;
+  }
+  .actions {
+    display: flex;
+    gap: 8px;
+  }
+  .btnAuto {
+    background: #4caf50;
+    color: #fff;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+  .btnManual {
+    background: #2196f3;
+    color: #fff;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+  
+  /* Selection UI */
+  .back {
+    margin: 10px 20px;
+    background: none;
+    border: none;
+    color: #0288d1;
+    cursor: pointer;
+  }
+  .note {
+    text-align: center;
+    margin-bottom: 16px;
+  }
+  .table {
+    width: calc(100% - 40px);
+    margin: 0 auto 20px;
+    border-collapse: collapse;
+    background: #fff;
+  }
+  .table th,
+  .table td {
+    border: 1px solid #ddd;
+    padding: 8px;
+  }
+  .confirm {
+    display: block;
+    margin: 0 auto 20px;
+    padding: 10px 20px;
+    background: #4caf50;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+  .confirm:disabled {
+    background: #ccc;
+    cursor: not-allowed;
+  }
+  

@@ -220,18 +220,44 @@ export function fetchAllTAs(): Promise<AxiosResponse<TA[]>> {
       }))
     }));
 }
-export interface Task {
-  id: number;
-  title: string;
-  courseId: number;
-  status: string;            // pending, approved, etc.
-  assignedTAs: TA[];         // from GET /api/task/{task_id}/tas
-}
+
 
 /** Create a new Task (POST /api/task) */
 
 
+export interface Task {
+  id: number;
+  title: string;
+  date: string;       // e.g. "2025-06-01"
+  time: string;       // e.g. "14:00"
+  type: string;       // e.g. "Lab" | "Proctoring" | ...
+  courseId: number;
+  status: string;    // optional, e.g. "pending", "approved"
+}
 
+
+// … your other existing exports (fetchAllTasks, createTask, etc.) …
+
+/**
+ * Update an existing task.
+ * Sends a PUT to /api/tasks/{id} with the task fields to overwrite.
+ */
+export function updateTask(
+  id: number,
+  payload: Omit<Task, 'id' | 'status'>
+): Promise<AxiosResponse<Task>> {
+  return axios.put<Task>(`/api/tasks/${id}`, payload, { withCredentials: true });
+}
+
+/**
+ * Delete a task by ID.
+ * Sends a DELETE to /api/tasks/{id}.
+ */
+export function deleteTask(
+  id: number
+): Promise<AxiosResponse<void>> {
+  return axios.delete<void>(`/api/tasks/${id}`, { withCredentials: true });
+}
 
 /** Assign a TA to a task (PUT /api/task/{task_id}/assign/{ta_id}) */
 
@@ -253,15 +279,6 @@ export interface TA {
   name: string;
 }
 
-export interface Task {
-  id: number;
-  title: string;
-  courseId: number;
-  date: string;      // ISO date
-  time: string;      // HH:mm
-  type: string;      // Citation | Proctoring | Lab
-  status: string;    // pending, approved, rejected
-}
 
 export function fetchAllTasks(): Promise<AxiosResponse<Task[]>> {
   return axios.get<Task[]>('/api/task/all', { withCredentials: true });

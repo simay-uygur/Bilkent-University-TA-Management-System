@@ -1,0 +1,8 @@
+.pageWrapper { background:#f7f7f7; min-height:100vh; padding-top:64px; }
+.back        { margin:10px 20px; background:none; border:none; color:#0288d1; cursor:pointer; }
+.heading     { text-align:center; margin:0 20px 12px; font-size:24px; }
+.note        { text-align:center; margin-bottom:16px; }
+.table       { width:calc(100% - 40px); margin:0 auto 20px; border-collapse:collapse; background:#fff; }
+.table th, .table td { border:1px solid #ddd; padding:8px; }
+.confirm     { display:block; margin:0 auto 20px; padding:10px 20px; background:#4caf50; color:#fff; border:none; border-radius:4px; cursor:pointer; }
+.confirm:disabled { background:#ccc; cursor:not-allowed; }
