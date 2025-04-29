@@ -20,9 +20,9 @@ interface TA {
 }
 
 const initialTasks: Task[] = [
-  { id: 1, title: 'Mock Lab Setup',       date: '2025-06-01', time: '10:00', type: 'Lab',        status: 'pending'  },
-  { id: 2, title: 'Mock Citation Review', date: '2025-06-02', time: '14:00', type: 'Citation',   status: 'approved' },
-  { id: 3, title: 'Mock Proctoring',      date: '2025-06-03', time: '12:00', type: 'Proctoring', status: 'pending'  },
+  { id: 1, title: 'Mock Lab Setup',       date: '2025-06-01', time: '10:00', type: 'Lab',        status: 'pending',  assignedId: '' },
+  { id: 2, title: 'Mock Citation Review', date: '2025-06-02', time: '14:00', type: 'Citation',   status: 'approved', assignedId: '' },
+  { id: 3, title: 'Mock Proctoring',      date: '2025-06-03', time: '12:00', type: 'Proctoring', status: 'pending',  assignedId: '' },
 ];
 
 const TASK_TYPES = ['Citation','Proctoring','Lab'] as const;
@@ -42,11 +42,22 @@ export default function ManageWorkload() {
   }, []);
 
   // 2) Fetch TA list once on mount
-  useEffect(() => {
-    fetchAllTAs()
-      .then(res => setAvailableTAs(res.data))
-      .catch(err => console.error('Failed to load TAs:', err));
-  }, []);
+  const [loading, setLoading] = useState(true);
+// filepath: frontend/src/components/ManageWorkload.tsx
+useEffect(() => {
+  console.log('⏳ Fetching TAs…')
+  fetchAllTAs()
+    .then(res => {
+      console.log('✅ fetchAllTAs response:', res.data)
+      setAvailableTAs(res.data)
+    })
+    .catch(err => {
+      console.error('❌ fetchAllTAs error:', err)
+    })
+    .finally(() => {
+      setLoading(false)
+    })
+}, [])
 
   // 3) Open modal for add
   const openAdd = () => {
@@ -103,6 +114,10 @@ export default function ManageWorkload() {
       <h1 className={styles.heading}>Manage Workload</h1>
       <button className={styles.addBtn} onClick={openAdd}>+ Add Task</button>
 
+{/*      {loading
+  ? <div>Loading TAs…</div>
+  : availableTAs.length === 0
+}  */}
       <table className={styles.table}>
         <thead>
           <tr>
