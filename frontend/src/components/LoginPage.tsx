@@ -5,7 +5,7 @@ import styles from './LoginPage.module.css';
 import { useNavigate } from 'react-router-dom';
 
 const LoginPage: React.FC = () => {
-    const [username, setUsername] = useState<string>('');
+    const [id, setID] = useState<string>('');
     const [password, setPassword] = useState<string>('');
     const [error, setError]       = useState<string>('');
     const navigate = useNavigate();                     // ← new
@@ -15,24 +15,24 @@ const LoginPage: React.FC = () => {
       setError('');
   
       // BASIC VALIDATION BEFORE BACKEND CALL
-      if (username == "admin" && password == "admin") {
+      if (id == "admin" && password == "admin") {
         navigate('/admin');
         return;
       }
-      if (username == "ta" || password == "admin") {
+      if (id == "ta" || password == "admin") {
         navigate('/dashboard');
         return;
       }
 
       //------------------
-      if (!username || !password) {
+      if (!id || !password) {
         
         setError('Username & password are required');
         return;
       }
      
       try {
-        await login({ username, password });
+        await login({ id, password });
         navigate('/dashboard');       // ← use in‑app navigation
       } catch (err) {
         if (axios.isAxiosError(err)) {
@@ -60,8 +60,8 @@ const LoginPage: React.FC = () => {
               <input
                 id="username"
                 type="text"
-                value={username}
-                onChange={e => setUsername(e.target.value)}
+                value={id}
+                onChange={e => setID(e.target.value)}
                 required
                 className={styles.input}
               />

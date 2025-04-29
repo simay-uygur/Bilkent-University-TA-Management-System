@@ -60,13 +60,13 @@ public class ProctoringServImpl implements ProctoringServ{
         Task task = exam.getTask();
         Course course = task.getCourse();
         
-        List<TA> course_tas = course.getCourse_tas();
+        List<TA> course_tas = course.getCourseTas();
         List<TA> depTas = new ArrayList<>();
         for(Course c : course.getDepartment().getCourses()){
-            depTas.addAll(c.getCourse_tas());
+            depTas.addAll(c.getCourseTas());
         }
         List<TA> filtered_by_date_tas = taRepo.findAllFreeBetween(task.getDuration().getStart(), task.getDuration().getFinish());
-        List<TA> filtered_by_acad_level_tas = filterByAcademicLevel(course.getCourse_academic_status(), filtered_by_date_tas, restrictions[2]);  
+        List<TA> filtered_by_acad_level_tas = filterByAcademicLevel(course.getCourseAcademicStatus(), filtered_by_date_tas, restrictions[2]);
         List<TA> filtered_by_availability_tas = findEligibleTAsForExam(task.getDuration().getStart(), filtered_by_acad_level_tas);
         if (filtered_by_availability_tas.size() < task.getRequiredTAs())
             throw new GeneralExc("System could not find enough TAs considering the requirements!");

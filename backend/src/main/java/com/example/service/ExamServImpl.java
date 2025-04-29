@@ -36,7 +36,7 @@ public class ExamServImpl implements ExamServ{
             ExamRoom_DTO room_DTO = new ExamRoom_DTO(room.getExam_room().getClass_code(),studDtos);
             rooms.add(room_DTO);
         }
-        dto.setCourse(exam.getTask().getCourse().getCourse_code());
+        dto.setCourse(exam.getTask().getCourse().getCourseCode());
         dto.setDuration(exam.getTask().getDuration().toString());
         dto.setExam_rooms(rooms);
         return dto;
@@ -48,5 +48,5 @@ public class ExamServImpl implements ExamServ{
         return examRepo.existsById(exam.getExam_id());
     }
     
-    
+
 }

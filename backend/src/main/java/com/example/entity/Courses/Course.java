@@ -5,6 +5,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import jakarta.persistence.*;
 import org.hibernate.annotations.DynamicUpdate;
 
 import com.example.entity.Actors.TA;
@@ -13,20 +14,6 @@ import com.example.entity.General.Student;
 import com.example.entity.Tasks.Task;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
-import jakarta.persistence.CascadeType;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.JoinTable;
-import jakarta.persistence.ManyToMany;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToMany;
-import jakarta.persistence.PrePersist;
-import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotEmpty;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -43,26 +30,29 @@ import lombok.Setter;
 @DynamicUpdate // this is used to update only the changed fields in the database, not the whole object
 public class Course {
     @Id
-    @Column(name = "course_id", unique = true, updatable = true)
-    private int course_id ; 
+    @Column(name = "courseId", unique = true, updatable = true)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private int courseId;
     
     @Column(name = "course_code", unique = true)
-    private String course_code ; 
+    private String courseCode; // cs-319
 
     @Column(name = "course_name", unique = false, updatable = true, nullable = false)
     //@NotEmpty(message = "The field can not be empty!")
-    private String course_name ;
+    private String courseName;
 
     // cs-319. id -> 'c' + 's' + 319 -> 319319
-    @PrePersist
+/*
+    @PrePersist //before
     private void setCourseId() {
-        if (this.course_code != null)
-            this.course_id = new CourseCodeConverter().code_to_id(this.course_code);
+        if (this.courseCode != null)
+            this.courseId = new CourseCodeConverter().code_to_id(this.courseCode.toLowerCase()); //may be changed
     }
+*/
 
     @Enumerated(EnumType.STRING)
     @Column(name = "course_academic_status", updatable = true, nullable = false)
-    private AcademicLevelType course_academic_status ;
+    private AcademicLevelType courseAcademicStatus;
 
     /*@NotEmpty(message = "The field can not be empty!")
     @Column(name = "course_dep", unique = false, updatable = true)
@@ -79,14 +69,14 @@ public class Course {
     )
     @JoinTable( // creates a table for many to many relationship
         name = "students_list_table",
-        joinColumns = @JoinColumn(name = "course_id"),
+        joinColumns = @JoinColumn(name = "courseId"),
         inverseJoinColumns = @JoinColumn(name = "student_id")
     )
-    private Set<Student> students_list = new HashSet<>();
+    private Set<Student> studentsList = new HashSet<>();
 
     @Column(name = "prereq_list", unique = false, updatable = true, nullable = false)
-    @NotEmpty(message = "The field can not be empty!")
-    private String prereq_list;
+    //@NotEmpty(message = "The field can not be empty!")
+    private String prereqList;
     // do not use join table
 
     @OneToMany(
@@ -95,7 +85,7 @@ public class Course {
         orphanRemoval = true,
         cascade= CascadeType.ALL
     )
-    private List<Section> sections_list ; // this is the list of sections that are related to the course
+    private List<Section> sectionsList; // this is the list of sections that are related to the course
 
     @ManyToMany(
         fetch = FetchType.LAZY,
@@ -106,14 +96,14 @@ public class Course {
         joinColumns = @JoinColumn(name = "section_id"),
         inverseJoinColumns = @JoinColumn(name = "ta_id")
     )
-    private List<TA> course_tas; // tas is the list of tas that are in the section
+    private List<TA> courseTas; // tas is the list of tas that are in the section
 
     @Override
     public boolean equals(Object obj){
         if (this == obj) return true;
         if (obj == null || getClass() != obj.getClass()) return false;
         Course course = (Course) obj ;
-        return course.getCourse_id() == this.course_id;
+        return course.getCourseId() == this.courseId;
     }
 
     @OneToMany(

@@ -9,7 +9,5 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class FailedRowInfo {
     private int rowIndex;
-    private String reason;
-    private String rawData;
+    private String message;
 }
-

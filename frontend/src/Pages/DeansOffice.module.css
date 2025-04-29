@@ -1,90 +1,63 @@
 .pageWrapper {
-    background: #f7f7f7;
-    min-height: 100vh;
-    padding-top: 64px; /* room for navbar */
+    padding: 20px;
+    background-color: #f4f7f9;
   }
   
-  /* Shared Heading */
-  .heading {
-    text-align: center;
-    margin: 20px 0;
-    font-size: 24px;
+  .taList {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
   }
   
-  /* Awaiting List */
-  .taskList {
-    display: grid;
-    gap: 12px;
-    padding: 0 20px;
-  }
-  .taskCard {
+  .taCard {
+    background-color: white;
+    border: 1px solid #ddd;
+    padding: 15px;
+    border-radius: 5px;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    background: #fff;
-    padding: 12px;
-    border-radius: 6px;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
   }
-  .info {
-    max-width: 70%;
-  }
-  .actions {
+  
+  .taInfo {
     display: flex;
-    gap: 8px;
+    flex-direction: column;
   }
-  .btnAuto {
-    background: #4caf50;
-    color: #fff;
+  
+  .assignButton {
+    background-color: #4caf50;
+    color: white;
+    padding: 5px 10px;
     border: none;
-    padding: 6px 12px;
-    border-radius: 4px;
-    cursor: pointer;
-  }
-  .btnManual {
-    background: #2196f3;
-    color: #fff;
-    border: none;
-    padding: 6px 12px;
-    border-radius: 4px;
+    border-radius: 5px;
     cursor: pointer;
   }
   
-  /* Selection UI */
-  .back {
-    margin: 10px 20px;
-    background: none;
-    border: none;
-    color: #0288d1;
-    cursor: pointer;
-  }
-  .note {
-    text-align: center;
-    margin-bottom: 16px;
-  }
-  .table {
-    width: calc(100% - 40px);
-    margin: 0 auto 20px;
-    border-collapse: collapse;
-    background: #fff;
-  }
-  .table th,
-  .table td {
-    border: 1px solid #ddd;
-    padding: 8px;
-  }
-  .confirm {
-    display: block;
-    margin: 0 auto 20px;
+  .autoAssignButton {
+    margin-top: 20px;
+    background-color: #ff9800;
+    color: white;
     padding: 10px 20px;
-    background: #4caf50;
-    color: #fff;
     border: none;
-    border-radius: 4px;
+    border-radius: 5px;
     cursor: pointer;
   }
-  .confirm:disabled {
-    background: #ccc;
-    cursor: not-allowed;
+  
+  .assignedTAs, .autoAssignedTAs {
+    margin-top: 30px;
+  }
+  
+  h2 {
+    font-size: 18px;
+    margin-bottom: 10px;
+  }
+  
+  ul {
+    list-style-type: none;
+    padding: 0;
+  }
+  
+  ul li {
+    padding: 5px 0;
   }
   

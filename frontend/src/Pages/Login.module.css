@@ -1,9 +1,9 @@
 /* Login.module.css */
 
-/* 1. Import Exo Thin for the watermark */
+/* 1. Import Exo Thin */
 @import url('https://fonts.googleapis.com/css?family=Exo:100');
 
-/* 2. CSS variables and tiled‐background animation */
+/* 2. Custom props for the tiled background + all your originals */
 :global(:root) {
   --nav-bg: #2563EB;
   --bg-page: #EFF6FF;
@@ -20,25 +20,28 @@
   --scroll-speed: 2s;
 }
 
-@keyframes bg-scroll {
-  from { background-position: 0 0; }
-  to   { background-position: var(--bg-tile-size); }
-}
-
-/* 3. Page wrapper: tiled animated background + watermark */
-.pageWrapper {
-  position: relative;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
+/* 3. Put the infinite scroll on <body> */
+.body {
+  margin: 0;
   background: var(--bg-tile) repeat;
   background-size: var(--bg-tile-size);
   animation: bg-scroll var(--scroll-speed) linear infinite;
   font-family: var(--font-base);
 }
 
+@keyframes bg-scroll {
+  from { background-position: 0 0; }
+  to   { background-position: var(--bg-tile-size); }
+}
+
+.pageWrapper {
+  position: relative;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
 .pageWrapper::before {
-  content: 'Login';
   position: absolute;
   top: 2rem;
   left: 50%;
@@ -46,21 +49,26 @@
   font-family: 'Exo', sans-serif;
   font-size: 8rem;
   font-weight: 100;
-  color: rgba(0, 0, 0, 0.05);
+  color: rgba(0,0,0,0.05);
   pointer-events: none;
   z-index: 0;
 }
 
-/* 4. Container and card sit above the background */
+.NavBar,
+.container,
+.card {
+  position: relative;
+  z-index: 1;
+}
+
 .container {
   flex: 1;
   display: flex;
   align-items: flex-start;
   justify-content: center;
   padding-top: 5rem;
-  background: transparent; /* so you see the tiled bg underneath */
-  position: relative;
-  z-index: 1;
+  /* make it transparent so you see the patterned body behind */
+  background: transparent;
 }
 
 .card {
@@ -69,9 +77,7 @@
   background-color: var(--bg-card);
   padding: 2rem;
   border-radius: var(--radius);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-  position: relative;
-  z-index: 1;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
 }
 
 .title {
@@ -79,7 +85,7 @@
   font-weight: 600;
   color: var(--text-default);
   text-align: center;
-  margin-bottom: var(--spacing);
+  margin-bottom: 1.5rem;
 }
 
 .form {

@@ -2,11 +2,13 @@ package com.example.entity.General;
 
 import jakarta.persistence.Embeddable;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Embeddable
 @Getter
 @Setter
+@NoArgsConstructor //new added
 public class Student_DTO {
     
     private String name ;

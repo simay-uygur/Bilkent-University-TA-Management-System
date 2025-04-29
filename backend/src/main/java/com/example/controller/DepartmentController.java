@@ -14,6 +14,28 @@ import java.util.List;
 public class DepartmentController {
 
     private final DepartmentRepo departmentRepo;
+    
+    
+  /*  @GetMapping
+    public ResponseEntity<List<Department>> getAllDepartments(@RequestParam(required = false) String name) {
+        if (name != null) {
+            return departmentRepo.findDepartmentByName(name)
+                .map(department -> ResponseEntity.ok(List.of(department)))
+                .orElse(ResponseEntity.ok(List.of()));
+        }
+        return ResponseEntity.ok(departmentRepo.findAll());
+    }
+    */
+
+    @PutMapping("/{name}")
+    public ResponseEntity<Department> updateDepartment(@PathVariable String name, @RequestBody Department department) {
+        if (!departmentRepo.existsById(name)) {
+            return ResponseEntity.notFound().build();
+        }
+        department.setName(name);
+        Department saved = departmentRepo.save(department);
+        return ResponseEntity.ok(saved);
+    }
 
     @PostMapping
     public ResponseEntity<Department> addDepartment(@RequestBody Department department) {

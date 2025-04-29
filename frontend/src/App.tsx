@@ -69,7 +69,6 @@ const App: React.FC = () => (
 
       {/* Dean Office Area */}
       <Route path="/deans-office" element={<DeansLayout />}>
-      
     <Route index element={<DeansOffice />} />
     {/* add nested dean pages here */}
   </Route>
