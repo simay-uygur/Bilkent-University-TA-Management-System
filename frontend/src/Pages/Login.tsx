@@ -1,5 +1,5 @@
-import React, { useState, FormEvent } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, FormEvent, useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import NavBar from '../components/NavBar';
 import styles from './Login.module.css';
 
@@ -8,19 +8,27 @@ const Login: React.FC = () => {
   const [password, setPassword] = useState('');
   const [errors, setErrors] = useState<{ username?: string; password?: string }>({});
   const navigate = useNavigate();
+  const location = useLocation();
+  const [referrer, setReferrer] = useState<string | null>(null);
+
+  // ------------- read ?ref=<something> from URL -------------
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const r = params.get('ref');    // e.g. /login?ref=/dashboard
+    if (r) setReferrer(r);
+  }, [location.search]);
 
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
     const newErrors: { username?: string; password?: string } = {};
-    // ID: numeric only and exactly 6 digits
-    if (/\D/.test(username)) {
-      newErrors.username = 'ID must contain only numeric digits.';
-    } else if (username.length !== 8) {
-      newErrors.username = 'ID must be exactly 6 digits.';
+
+    // Simple validation: just check if fields are filled
+    if (!username) {
+      newErrors.username = 'Username is required.';
     }
-    // Password: ≥8 chars & at least one uppercase
-    if (!/[A-Z]/.test(password)) {
-      newErrors.password = 'Password must include at least one uppercase letter.';
+
+    if (!password) {
+      newErrors.password = 'Password is required.';
     }
 
     if (Object.keys(newErrors).length) {
@@ -29,7 +37,8 @@ const Login: React.FC = () => {
     }
 
     setErrors({});
-    navigate('/ta');
+    // Assuming successful login, redirect to the page stored in `referrer` or default `/ta`
+    navigate(referrer || '/ta');
   };
 
   return (
@@ -41,7 +50,7 @@ const Login: React.FC = () => {
           <h1 className={styles.title}>Sign In</h1>
           <form onSubmit={handleSubmit} className={styles.form} noValidate>
             <div className={styles.formGroup}>
-              <label htmlFor="username" className={styles.label}>ID/Username</label>
+              <label htmlFor="username" className={styles.label}>Username</label>
               <input
                 id="username"
                 type="text"

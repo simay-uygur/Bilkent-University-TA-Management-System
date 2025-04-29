@@ -160,6 +160,8 @@ export interface Notification {
   read: boolean;
 }
 
+
+export const markAllRead = () => axios.post('/notifications/markAllRead');
 export function fetchNotifications(): Promise<AxiosResponse<Notification[]>> {
   return axios.get<Notification[]>('/api/notifications', { withCredentials: true });
 }
@@ -292,4 +294,20 @@ export function approveTask(taskId: number): Promise<AxiosResponse<void>> {
 
 export function rejectTask(taskId: number): Promise<AxiosResponse<void>> {
   return axios.put<void>(`/api/task/${taskId}/reject`, {}, { withCredentials: true });
+}
+export interface ProctorRequest { id: number; examId: string; numberOfTAs: number; assignedTA?: TA; }
+export interface Department    { id: string; name: string; }
+export function fetchProctoringRequests(deptId: string) {
+  return axios.get<ProctorRequest[]>(`/proctoring-requests?dept=${deptId}`);
+}
+export async function fetchAllDepartments() {
+  return axios.get<Department[]>('/departments');
+}              { /* GET /api/departments */ }
+export function fetchDepartmentTAs(deptId: string): Promise<AxiosResponse<TA[]>> {
+  return axios.get<TA[]>(`/departments/${deptId}/tas`);
+}
+export function assignProctorTA(requestId: number, taId: string): Promise<void> {
+  return axios
+    .post(`/proctoring/${requestId}/assign`, { taId }, { withCredentials: true })
+    .then(() => {});
 }

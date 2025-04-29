@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { Outlet } from 'react-router-dom';
-import TANavBar from './TaNavBar';
+import TANavBar from './TaNavBar.tsx';
 import NotificationPanel from './NotificationPanel.tsx';
-import { fetchNotifications, Notification, markAllNotificationsRead } from '../api';
+import { fetchNotifications, Notification, markAllNotificationsRead } from '../api.ts';
 
 const Layout: React.FC = () => {
   const [show, setShow] = useState(false);
