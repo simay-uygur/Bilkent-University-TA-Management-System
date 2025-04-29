@@ -2,6 +2,7 @@ package com.example.repo;
 
 import java.util.Optional;
 
+import com.example.entity.Courses.Department;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -11,17 +12,19 @@ import com.example.entity.Courses.Course;
 import com.example.entity.Tasks.Task;
 @Repository
 public interface CourseRepo extends JpaRepository<Course, Integer>{
+
+
     @Query("""
     SELECT c
       FROM Course c
-     WHERE c.course_code = :courseCode
+     WHERE c.courseCode = :courseCode
     """)
     Optional<Course> findByCourseCode(@Param("courseCode") String courseCode);
 
     @Query("""
         SELECT CASE WHEN COUNT(c) > 0 THEN true ELSE false END
           FROM Course c
-         WHERE c.course_code = :courseCode
+         WHERE c.courseCode = :courseCode
     """)
     boolean existsByCourseCode(@Param("courseCode") String courseCode);
     
@@ -31,5 +34,11 @@ public interface CourseRepo extends JpaRepository<Course, Integer>{
     nativeQuery = true)
     Optional<Task> findTask(@Param("taskId") int taskId, 
                               @Param("courseCode") String courseCode);
+
+    Optional<Course> findCourseByCourseCode(String courseCode);
+
+    Optional<Course> findCourseByCourseCodeAndDepartmentName(String courseCode, String departmentName);
+
+    boolean existsCourseByCourseCodeEquals(String courseCode);
 
 }

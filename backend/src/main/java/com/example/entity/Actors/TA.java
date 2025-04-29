@@ -58,7 +58,7 @@ public class TA extends User{
     private ProctorType proctorType = ProctorType.ALL_COURSES;
 
     @ManyToMany(
-        mappedBy = "course_tas", // the other side of the relationship is the owner of the relationship
+        mappedBy = "courseTas", // the other side of the relationship is the owner of the relationship
         fetch = FetchType.LAZY,
         cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REFRESH} // cascade operations for the relationship
     )

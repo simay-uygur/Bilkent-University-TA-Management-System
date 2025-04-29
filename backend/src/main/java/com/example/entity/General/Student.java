@@ -48,7 +48,7 @@ public class Student {
     // what is mappedBy?
     // mappedBy is used to specify the owner of the relationship. In this case, the owner is the Course class.
     @ManyToMany(
-        mappedBy = "students_list",
+        mappedBy = "studentsList",
         fetch = FetchType.LAZY,
         cascade = {CascadeType.PERSIST, CascadeType.MERGE}
     )

@@ -11,15 +11,14 @@ import java.util.Optional;
 import com.example.ExcelHelpers.FailedRowInfo;
 import com.example.entity.Courses.*;
 import com.example.entity.General.AcademicLevelType;
+import com.example.exception.Course.NoPrereqCourseFound;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.usermodel.WorkbookFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.example.ExcelHelpers.FailedRowInfo;
 import com.example.entity.Actors.Instructor_DTO;
 import com.example.entity.Actors.TA;
 import com.example.entity.Actors.TA_DTO;
@@ -30,7 +29,6 @@ import com.example.entity.Courses.Lesson;
 import com.example.entity.Courses.Lesson_DTO;
 import com.example.entity.Courses.Section;
 import com.example.entity.Courses.Section_DTO;
-import com.example.entity.General.AcademicLevelType;
 import com.example.entity.General.Student;
 import com.example.entity.General.Student_DTO;
 import com.example.entity.Tasks.Task;
@@ -43,7 +41,6 @@ import com.example.repo.SectionRepo;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.multipart.MultipartFile;
 
 @Transactional(rollbackOn = Exception.class)
 @Service
@@ -58,22 +55,18 @@ public class CourseServImpl implements CourseServ{
 
     private final SectionRepo secRepo;
 
-    @Autowired
-    private TaskServ taskService;
-
-    @Autowired
-    private DepartmentRepo departmentRepo;
+    private final DepartmentRepo departmentRepo;
 
     @Override
     public boolean addSection(String course_code, Section section){
-        Optional<Course> course = courseRepo.findByCourseCode(course_code);
+        Optional<Course> course = courseRepo.findCourseByCourseCode(course_code);
 
         if (!course.isPresent())
             throw new CourseNotFoundExc(course_code);
         Course courseObj = course.get();
-        if (courseObj.getSections_list() == null)
-            courseObj.setSections_list(new ArrayList<>());
-        courseObj.getSections_list().add(section);
+        if (courseObj.getSectionsList() == null)
+            courseObj.setSectionsList(new ArrayList<>());
+        courseObj.getSectionsList().add(section);
         secRepo.saveAndFlush(section);
         courseRepo.saveAndFlush(courseObj);
 
@@ -82,13 +75,13 @@ public class CourseServImpl implements CourseServ{
 
     @Override
     public boolean addTask(String course_code, Task task) {
-        Optional<Course> courseOpt = courseRepo.findByCourseCode(course_code);
+        Optional<Course> courseOpt = courseRepo.findCourseByCourseCode(course_code);
         if(!courseOpt.isPresent())
             throw new CourseNotFoundExc(course_code);
 
         Course course = courseOpt.get();
         task.setCourse(course);
-        Task created = taskService.createTask(task);
+        Task created = taskServ.createTask(task);
         course.getTasks().add(created);
         courseRepo.save(course);
         return true;
@@ -99,16 +92,34 @@ public class CourseServImpl implements CourseServ{
         return courseRepo.existsByCourseCode(course_code);
     }
 
+/*
     @Override
     public boolean createCourse(Course course) {
         courseRepo.saveAndFlush(course);
 
         return true;
     }
+*/
+
+    @Override
+    @Transactional
+    public boolean createCourse(Course course) {
+        if (course.getDepartment() != null) {
+            String departmentName = course.getDepartment().getName();
+
+            Department department = departmentRepo.findDepartmentByName(departmentName)
+                    .orElseThrow(() -> new RuntimeException("Department not found: " + departmentName));
+
+            course.setDepartment(department); // attach the existing department
+        }
+
+        courseRepo.saveAndFlush(course);
+        return true;
+    }
 
     @Override
     public Course_DTO findCourse(String course_code) {
-        Optional<Course> courseOpt = courseRepo.findByCourseCode(course_code);
+        Optional<Course> courseOpt = courseRepo.findCourseByCourseCode(course_code);
 
         if (!courseOpt.isPresent())
             throw new CourseNotFoundExc(course_code);
@@ -119,21 +130,21 @@ public class CourseServImpl implements CourseServ{
 
     private Course_DTO createDTO(Course course){
         Course_DTO dto = new Course_DTO();
-        dto.setCourse_code(course.getCourse_code());
+        dto.setCourse_code(course.getCourseCode());
         dto.setDepartment(course.getDepartment().getName());
-        dto.setAcademical_status(course.getCourse_academic_status().toString());
+        dto.setAcademical_status(course.getCourseAcademicStatus().toString());
         Instructor_DTO coor_dto = new Instructor_DTO();
         dto.setCoordinator(coor_dto);
         dto.setInstructors(null);
-        dto.setPrereqs(course.getPrereq_list().trim().split("\\s*,\\s*"));
+        dto.setPrereqs(course.getPrereqList().trim().split("\\s*,\\s*"));
         List<Student_DTO> studDtos = new ArrayList<>();
-        for (Student stud : course.getStudents_list()){
+        for (Student stud : course.getStudentsList()){
             Student_DTO stud_dto = new Student_DTO(stud.getStudentId(),stud.getStudentName(), stud.getStudentSurname());  //i changed the int to long
             studDtos.add(stud_dto);
         }
         dto.setStudents(studDtos);
         List<Section_DTO> sections = new ArrayList<>();
-        for (Section section : course.getSections_list()){
+        for (Section section : course.getSectionsList()){
             Section_DTO sec = new Section_DTO();
             sec.setSection_code(section.getSection_code());
             List<Lesson_DTO> lessons = new ArrayList<>();
@@ -147,10 +158,10 @@ public class CourseServImpl implements CourseServ{
         dto.setSections(sections);
 
         List<TA_DTO> taDtos = new ArrayList<>();
-        for (TA ta : course.getCourse_tas()){
+        for (TA ta : course.getCourseTas()){
             List<String> courses = new ArrayList<>();
             for (Course c : ta.getCourses()){
-                courses.add(c.getCourse_code());
+                courses.add(c.getCourseCode());
             }
 
             List<String> lessons = new ArrayList<>();
@@ -169,7 +180,7 @@ public class CourseServImpl implements CourseServ{
 
     @Override
     public boolean assignTA(Long ta_id, String course_code) {
-        Optional<Course> courseOpt = courseRepo.findByCourseCode(course_code);
+        Optional<Course> courseOpt = courseRepo.findCourseByCourseCode(course_code);
         if (!courseOpt.isPresent())
             throw new CourseNotFoundExc(course_code);
 
@@ -181,20 +192,20 @@ public class CourseServImpl implements CourseServ{
                 throw new GeneralExc("TA with id " + ta_id + " is already assigned to the Course with code " + course_code);
 
         for (Section sec : ta.getTas_own_lessons()){
-            if (sec.getCourse().getCourse_code().equals(course.getCourse_code()))
+            if (sec.getCourse().getCourseCode().equals(course.getCourseCode()))
                 throw new GeneralExc("TA with id " + ta_id + " can not be assigned as the TA to the Course with code " + course_code + ". TA takes this course as the lesson.");
         }
 
-        course.getCourse_tas().add(ta);
+        course.getCourseTas().add(ta);
         courseRepo.save(course);
 
-        courseOpt = courseRepo.findByCourseCode(course_code);
+        courseOpt = courseRepo.findCourseByCourseCode(course_code);
         if (!courseOpt.isPresent())
             throw new CourseNotFoundExc(course_code);
 
         Course course1 = courseOpt.get();
 
-        if (!course1.getCourse_tas().contains(ta))
+        if (!course1.getCourseTas().contains(ta))
             throw new NoPersistExc("Assignment ");
 
         return true;
@@ -231,6 +242,12 @@ public class CourseServImpl implements CourseServ{
         return task.get();
     }
 
+    /*
+    1.	Department name (String) → row.getCell(0)
+	2.	Course number (Numeric) → row.getCell(1)
+	3.	Course name (String) → row.getCell(2)
+	4.	Prerequisite list (String, optional) → row.getCell(3)
+     */
     @Override
     public Map<String, Object> importCoursesFromExcel(MultipartFile file) throws IOException {
         List<Course> successfulCourses = new ArrayList<>();
@@ -241,11 +258,11 @@ public class CourseServImpl implements CourseServ{
 
             for (Row row : sheet) {
                 if (row.getRowNum() == 0) continue;
- 
+
                 try {
                     String department = row.getCell(0).getStringCellValue().trim();
                     Optional<Department> departmentOpt = departmentRepo.findDepartmentByName(department); // hope works
-                    if (!departmentOpt.isPresent()) {
+                    if (departmentOpt.isEmpty()) {
                         throw new GeneralExc("Department " + department + " does not exist!");
                     }
                     int courseNo = (int) row.getCell(1).getNumericCellValue();
@@ -253,18 +270,37 @@ public class CourseServImpl implements CourseServ{
                     String code = department + "-" + courseNo;
                     String prereq = row.getCell(3) != null ? row.getCell(3).getStringCellValue().trim() : "";
 
-                    // Validate course code format
-                    int courseId = new CourseCodeConverter().code_to_id(code);
+                    // Read academic level from column 4 (E)
+                    String academicLevelStr = row.getCell(4) != null ? row.getCell(4).getStringCellValue().trim().toUpperCase() : "BS";
+                    AcademicLevelType academicLevel;
+                    switch (academicLevelStr) {
+                        case "BS":
+                            academicLevel = AcademicLevelType.BS;
+                            break;
+                        case "MS":
+                            academicLevel = AcademicLevelType.MS;
+                            break;
+                        case "PHD":
+                            academicLevel = AcademicLevelType.PHD;
+                            break;
+                        default:
+                            throw new GeneralExc("Invalid academic level: " + academicLevelStr + ". Must be BS, MS, or PHD.");
+                    }
 
-                    Optional<Course> existing = courseRepo.findById(courseId);
-                    Course course = existing.orElseGet(Course::new);
-                    //Department dep = depRepo.findDepartmentByName();
-                    course.setCourse_id(courseId);
-                    course.setCourse_code(code);
-                    course.setCourse_name(name);
-                    //course.setDepartment(department);
-                    course.setPrereq_list(prereq);
-                    course.setCourse_academic_status(AcademicLevelType.BS); // default or from another column if needed - -- - - dont forget to add
+                    // Validate course code format
+                    // id belirlemedim ama
+
+                    Optional<Course> existing = courseRepo.findCourseByCourseCode(code);
+                    if (existing.isPresent()) {
+                        throw new GeneralExc("Course already exists with department and code: " + code);
+                    }
+                    Course course = new Course();
+                    //course.setCourseId(courseId);
+                    course.setCourseCode(code);
+                    course.setCourseName(name);
+                    course.setDepartment(departmentOpt.get()); // is this correct
+                    course.setPrereqList(prereq);
+                    course.setCourseAcademicStatus(academicLevel);
 
                     successfulCourses.add(course);
 
@@ -290,5 +326,18 @@ public class CourseServImpl implements CourseServ{
         result.put("failedRows", failedRows);
         return result;
     }
+
+    private void checkPrerequisites(Course course) {
+        if (course.getPrereqList() != null) {
+            String[] prereqs = course.getPrereqList().split(",");
+            for (String course_code : prereqs){
+                //int id = new CourseCodeConverter().code_to_id(course_code);
+                if (courseRepo.existsByCourseCode(course_code)) {
+                    throw new NoPrereqCourseFound(course_code);
+                }
+            }
+        }
+    }
+
 
 }
