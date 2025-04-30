@@ -1,0 +1,90 @@
+package com.example.controller;
+
+import com.example.service.*;
+import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.util.HashMap;
+import java.util.Map;
+
+@RestController
+@RequiredArgsConstructor
+@RequestMapping("/api/upload")
+public class UploadController {
+
+    private final StudentServ studentServ;
+    private final TAServ taServ;
+    private final CourseServ courseServ;
+    private final UploadService uploadService;
+
+    private final InstructorServ instructorServ;
+
+    //for uploading students and ta's (from the same excel file)
+    @PostMapping("/students")
+    public ResponseEntity<Map<String, Object>> uploadStudents(@RequestParam("file") MultipartFile file) {
+        try {
+            Map<String, Object> result = studentServ.importStudentsFromExcel(file);
+            return ResponseEntity.ok(result);
+        } catch (Exception e) {
+            Map<String, Object> error = new HashMap<>();
+            error.put("error", e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
+        }
+    }
+
+    //for uploading only  TA's from excel file' - not used anymore!!! just for testing    - - -
+    @PostMapping("/tas")
+    public ResponseEntity<Map<String, Object>> uploadTAs(@RequestParam("file") MultipartFile file) {
+        try {
+            Map<String, Object> result = taServ.importTAsFromExcel(file);
+            return ResponseEntity.ok(result);
+        } catch (Exception e) {
+            Map<String, Object> error = new HashMap<>();
+            error.put("error", e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
+        }
+    }
+
+
+    @PostMapping("/courses")
+    public ResponseEntity<Map<String, Object>> uploadCourses(@RequestParam("file") MultipartFile file) {
+        try {
+            Map<String, Object> result = courseServ.importCoursesFromExcel(file);
+            return ResponseEntity.ok(result);
+        } catch (Exception e) {
+            Map<String, Object> error = new HashMap<>();
+            error.put("error", e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
+        }
+    }
+
+    // for both instructors and department staff (from the same excel file)
+    @PostMapping("/staff")
+    public ResponseEntity<Map<String, Object>> uploadInstructorsAndStaff(@RequestParam("file") MultipartFile file) {
+        try {
+            Map<String, Object> result = uploadService.importInstructorsAndStaffFromExcel(file);
+            return ResponseEntity.ok(result);
+        } catch (Exception e) {
+            Map<String, Object> error = new HashMap<>();
+            error.put("error", e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
+        }
+    }
+
+
+    @PostMapping("/instructors")
+    public ResponseEntity<Map<String, Object>> uploadInstructors(@RequestParam("file") MultipartFile file) {
+        try {
+            Map<String, Object> result = instructorServ.importInstructorsFromExcel(file);
+            return ResponseEntity.ok(result);
+        } catch (Exception e) {
+            Map<String, Object> error = new HashMap<>();
+            error.put("error", e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
+        }
+    }
+}

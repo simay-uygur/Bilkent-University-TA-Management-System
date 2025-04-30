@@ -1,6 +1,10 @@
 package com.example.service;
 
+import java.io.IOException;
 import java.util.List;
+import java.util.Map;
+
+import org.springframework.web.multipart.MultipartFile;
 
 import com.example.entity.Courses.Course;
 import com.example.entity.Courses.Course_DTO;
@@ -17,4 +21,6 @@ public interface CourseServ {
     public boolean updateTask(String course_code,int task_id,Task task);
     public Task getTaskByID(String course_code, int task_id);
     public List<Course_DTO> getCourses();
+    public Map<String, Object> importCoursesFromExcel(MultipartFile file) throws IOException;
+
 }

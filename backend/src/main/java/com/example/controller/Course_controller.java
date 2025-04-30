@@ -29,8 +29,6 @@ import lombok.RequiredArgsConstructor;
 
 
 
-
-
 @RestController
 @RequiredArgsConstructor
 public class Course_controller {
@@ -110,19 +108,13 @@ public class Course_controller {
             task.getStatus().toString() // Convert enum to String
         );
     }
+
+
+
+    /*@PostMapping("/course/{course_code}/exam")
+    public ResponseEntity<Boolean> createExam(@RequestBody Exam exam, @PathVariable String course_code) {
+        return new ResponseEntity<>()
+    }*/
     
 
-
-
-    private void checkPrerequisites(Course course) {
-        if (course.getPrereqList() != null) {
-            String[] prereqs = course.getPrereqList().split(",");
-            for (String course_code : prereqs){
-                int id = new CourseCodeConverter().code_to_id(course_code);
-                if (!courseRepo.existsById(id)){
-                    throw new NoPrereqCourseFound(course_code);
-                }
-            }
-        }
-    }
 }

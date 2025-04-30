@@ -14,9 +14,11 @@ import com.example.exception.NoPersistExc;
 import com.example.repo.ClassRoomRepo;
 
 import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
 
 @Service
 @Transactional(rollbackOn = Exception.class)
+@RequiredArgsConstructor
 public class AdminServImpl implements AdminServ{
 
     @Autowired

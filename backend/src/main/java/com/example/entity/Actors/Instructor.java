@@ -4,26 +4,39 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.example.entity.Courses.Course;
+import com.example.entity.Courses.Department;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.JoinTable;
-import jakarta.persistence.ManyToMany;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import org.hibernate.annotations.DynamicUpdate;
 
 @Entity
 @Table(name = "instructor_table")
+@DynamicUpdate // for needed rows only in sql -
+@Getter
+@Setter
 @AllArgsConstructor
+@NoArgsConstructor //this was missing
 @JsonInclude(JsonInclude.Include.NON_DEFAULT)
 public class Instructor extends User{
+
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
         name = "course_instructor",
         joinColumns = @JoinColumn(name = "instructor_id"),
-        inverseJoinColumns = @JoinColumn(name = "course_id")
+        inverseJoinColumns = @JoinColumn(name = "courseId")
     )
     private List<Course> courses = new ArrayList<>();
+
+    @Column(name = "is_active", updatable = false,  nullable = false)  //added new
+    private Boolean isActive = true;
+
+    @ManyToOne
+    @JoinColumn(name = "department_id")
+    private Department department;
+
 }

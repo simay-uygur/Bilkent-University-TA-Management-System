@@ -3,6 +3,7 @@ package com.example.security;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
@@ -47,11 +48,17 @@ public class SecurityConfig {
             .requestMatchers("/api/staff/{id}").hasRole("DEPARTMENT_STAFF")
             .requestMatchers("/api/chair/{id}").hasRole("DEPARTMENT_CHAIR")
             .requestMatchers("/api/office/{id}").hasRole("DEANS_OFFICE")
-            .requestMatchers("/api/fac_mem/{id}").hasRole("FACULTY_MEMBER")*/
+            .requestMatchers("/api/fac_mem/{id}").hasRole("FACULTY_MEMBER")
             .requestMatchers("/api/uploadTAs/").hasRole("ADMIN")
             .requestMatchers("/api/uploadTAs/").hasRole("DEANS_OFFICE")
+            .requestMatchers(HttpMethod.POST, "/api/student").permitAll() // ADDed
             .requestMatchers("/api/**").permitAll()
-                .anyRequest().authenticated()
+                .anyRequest().authenticated()*/
+            .requestMatchers(HttpMethod.GET, "/api/**").permitAll()
+            .requestMatchers(HttpMethod.POST, "/api/**").permitAll()
+            .requestMatchers(HttpMethod.PUT, "/api/**").permitAll()
+            .requestMatchers(HttpMethod.DELETE, "/api/**").permitAll()
+            .anyRequest().authenticated()
         );
         return http.build() ;
     }

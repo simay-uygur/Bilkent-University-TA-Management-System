@@ -22,7 +22,8 @@ public interface TaskServ {
     public boolean rejectTask(int task_id);
     public boolean checkAndUpdateStatusTask(Task task);
     public HashSet<Task> getApprovedTasks() ;
-    public HashSet<Task> getPendingTasks() ;
+    public List<Task> getPendingTasks() ;
     public HashSet<Task> getRejectedTasks() ;
     public HashSet<Task> getDeletedTasks() ;
+    public boolean assignProctoring(int task_id, List<Long> ta_id);
 }

@@ -24,20 +24,34 @@ public class Student {
 
     @Id
     @Column(name = "student_id", unique = true, updatable = true, nullable = false)
-    private int student_id;
+    private Long studentId;
 
     @Column(name = "student_name", unique = false, updatable = true, nullable = false)
-    private String student_name;
+    private String studentName;
 
     @Column(name = "student_surname", unique = false, updatable = true, nullable = false)
-    private String student_surname;
+    private String studentSurname;
+
+    @Column(name = "webmail", nullable = true) // newly added - should ,t be nullable or not?
+    private String webmail;
+
+    //not sure about nullables
+    @Column(name = "academic_status", nullable = true)
+    private String academicStatus;
+
+    @Column(name = "department", nullable = true)
+    private String department;
+
+    @Column(name = "is_active", nullable = false)
+    private Boolean isActive;
+
     // what is mappedBy?
     // mappedBy is used to specify the owner of the relationship. In this case, the owner is the Course class.
     @ManyToMany(
-        mappedBy = "students_list",
+        mappedBy = "studentsList",
         fetch = FetchType.LAZY,
         cascade = {CascadeType.PERSIST, CascadeType.MERGE}
     )
     @JsonIgnore
-    private Set<Course> student_courses = new HashSet<>();
+    private Set<Course> studentCourses = new HashSet<>();
 }

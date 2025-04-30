@@ -5,6 +5,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import jakarta.persistence.*;
 import org.hibernate.annotations.DynamicUpdate;
 
 import com.example.entity.Actors.TA;
@@ -13,19 +15,7 @@ import com.example.entity.General.Student;
 import com.example.entity.Tasks.Task;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
-import jakarta.persistence.CascadeType;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.JoinTable;
-import jakarta.persistence.ManyToMany;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToMany;
-import jakarta.persistence.Table;
+import jakarta.validation.constraints.NotEmpty;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -40,17 +30,26 @@ import lombok.Setter;
 @Table(name = "course")
 @DynamicUpdate // this is used to update only the changed fields in the database, not the whole object
 public class Course {
-
     @Id
     @Column(name = "courseId", unique = true, updatable = true)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int courseId;
-
+    
     @Column(name = "course_code", unique = true)
-    private String courseCode;
+    private String courseCode; // cs-319
 
     @Column(name = "course_name", unique = false, updatable = true, nullable = false)
     //@NotEmpty(message = "The field can not be empty!")
     private String courseName;
+
+    // cs-319. id -> 'c' + 's' + 319 -> 319319
+/*
+    @PrePersist //before
+    private void setCourseId() {
+        if (this.courseCode != null)
+            this.courseId = new CourseCodeConverter().code_to_id(this.courseCode.toLowerCase()); //may be changed
+    }
+*/
 
     @Enumerated(EnumType.STRING)
     @Column(name = "course_academic_status", updatable = true, nullable = false)

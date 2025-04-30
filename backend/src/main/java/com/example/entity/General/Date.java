@@ -1,5 +1,8 @@
 package com.example.entity.General;
 
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 import lombok.Getter;
@@ -37,7 +40,7 @@ public class Date {
         return day == date.day && month == date.month && year == date.year && hour == date.hour && minute == date.minute;
     }
     
-    public boolean isBefore(Date other) { // other - 11:00, this - 11:00
+    public boolean isBefore(Date other) { // other - 16:48, this - 16:45
         if (this.year != other.year) return this.year < other.year; 
         if (this.month != other.month) return this.month < other.month;
         if (this.day != other.day) return this.day < other.day;
@@ -60,7 +63,8 @@ public class Date {
     }
 
     public Date currenDate() {
-        java.time.LocalDateTime now = java.time.LocalDateTime.now();
+        //java.time.ZonedDateTime now = java.time.ZonedDateTime.now(java.time.ZoneId.of("UTC"));
+        ZonedDateTime now = ZonedDateTime.now(ZoneId.of("Europe/Istanbul"));
         Date currentDate = new Date();
         currentDate.setDay(now.getDayOfMonth());
         currentDate.setMonth(now.getMonthValue());

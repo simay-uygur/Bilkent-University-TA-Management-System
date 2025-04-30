@@ -2,12 +2,14 @@ package com.example.entity.Actors;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import org.hibernate.annotations.DynamicUpdate;
 
 import com.example.entity.Courses.Course;
 import com.example.entity.Courses.Section;
 import com.example.entity.General.AcademicLevelType;
+import com.example.entity.General.ProctorType;
 import com.example.entity.Tasks.TA_Task;
 import com.example.exception.NoPersistExc;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -44,9 +46,19 @@ public class TA extends User{
 
     @Column(name = "is_active", updatable = false,  nullable = false)  //added new
     private Boolean isActive = true;
+    
+    @Column(name = "ta_type", unique = false, updatable = true, nullable = false)
+    private TAType ta_type;
+
+    @Column(name = "department", nullable = false)
+    private String department;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "proctor_type")
+    private ProctorType proctorType = ProctorType.ALL_COURSES;
 
     @ManyToMany(
-        mappedBy = "course_tas", // the other side of the relationship is the owner of the relationship
+        mappedBy = "courseTas", // the other side of the relationship is the owner of the relationship
         fetch = FetchType.LAZY,
         cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REFRESH} // cascade operations for the relationship
     )
@@ -72,9 +84,20 @@ public class TA extends User{
         total_workload -= load ;
     }
 
-    @Column(name = "proctor_type", unique = false, updatable = true)
-    private ProctorType proctor_type = ProctorType.ALL_COURSES;
+    @Override
+    public boolean equals(Object o){
+        if (this == o) return true;                          // same reference
+        if (!(o instanceof TA)) return false;                // null or different type
+        TA other = (TA) o;
+        // if either ID is null, fall back to identity equality
+        if (getId() == null || other.getId() == null) {
+            return false;
+        }
+        return Objects.equals(getId(), other.getId());
+    }
 }
+
+//json should be changed
 /*{
     "role" : "TA",
     "id" : 1, 

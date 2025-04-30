@@ -4,15 +4,17 @@ import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
+import org.springframework.stereotype.Repository;
 
 import com.example.entity.Courses.Department;
 
-public interface DepartmentRepo extends JpaRepository<Department, Integer>{
+@Repository
+public interface DepartmentRepo extends JpaRepository<Department, String> {
+    // No extra methods needed for now because we only need existsById
     @Query("""
     SELECT d
-    FROM Deparment d
-    WHERE d.dep_name = :depName
+      FROM Department d
+     WHERE d.name = :name
     """)
-    Optional<Department> findByDepartmentName(@Param("depName") String depName);
+    Optional<Department> findDepartmentByName(String name); //hope it works
 }

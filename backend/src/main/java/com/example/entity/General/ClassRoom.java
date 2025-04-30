@@ -60,7 +60,6 @@ public class ClassRoom {
         to_convert = to_convert.toUpperCase();
         if (to_convert != null){
             int i = to_convert.indexOf('-') ;
-            System.out.println("INDEX "+i);
             to_convert = to_convert.substring(0,i) + to_convert.substring(i+1,to_convert.length());
             int number = prefix_to_int(to_convert); 
             return number; 
@@ -69,7 +68,6 @@ public class ClassRoom {
     }
 
     private int prefix_to_int(String prefix){
-        System.out.println(prefix);
         String to_return = "" ;
         for(int i = 0; i < prefix.length(); i++){
             int c = prefix.charAt(i) ;

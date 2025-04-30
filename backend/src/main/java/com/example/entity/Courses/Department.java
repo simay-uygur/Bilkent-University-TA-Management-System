@@ -1,10 +1,12 @@
 package com.example.entity.Courses;
 
-import jakarta.persistence.Column;
+import java.util.List;
+
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
@@ -12,16 +14,17 @@ import lombok.Setter;
 @Entity
 @Getter
 @Setter
-@Table(name = "department")
+@Table(name = "departments")
 public class Department {
-    
+
     @Id
-    @GeneratedValue(strategy= GenerationType.AUTO)
-    @Column(name = "dep_id", unique = true)
-    private int dep_id;
+    private String name;  // example: "CS", "MATH", "EE"
 
-    @Column(name = "dep_name", unique= true)
-    private String dep_name;
-
-    
+    @OneToMany(
+        mappedBy = "department",
+        fetch = FetchType.LAZY,
+        orphanRemoval = true,
+        cascade= CascadeType.ALL
+    )
+    private List<Course> courses;
 }

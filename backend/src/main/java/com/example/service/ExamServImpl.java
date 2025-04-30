@@ -30,13 +30,13 @@ public class ExamServImpl implements ExamServ{
         for (ExamRoom room : exam.getExam_rooms()){
             List<Student_DTO> studDtos = new ArrayList<>();
             for(Student stud : room.getStudents_list()){
-                Student_DTO studDto = new Student_DTO(stud.getStudent_id(), stud.getStudent_name(),stud.getStudent_surname());
+                Student_DTO studDto = new Student_DTO(stud.getStudentId(), stud.getStudentName(), stud.getStudentSurname());
                 studDtos.add(studDto);
             }
             ExamRoom_DTO room_DTO = new ExamRoom_DTO(room.getExam_room().getClass_code(),studDtos);
             rooms.add(room_DTO);
         }
-        dto.setCourse(exam.getTask().getCourse().getCourse_code());
+        dto.setCourse(exam.getTask().getCourse().getCourseCode());
         dto.setDuration(exam.getTask().getDuration().toString());
         dto.setExam_rooms(rooms);
         return dto;
@@ -48,4 +48,5 @@ public class ExamServImpl implements ExamServ{
         return examRepo.existsById(exam.getExam_id());
     }
     
+
 }

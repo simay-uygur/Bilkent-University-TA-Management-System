@@ -79,8 +79,8 @@ public class Task {
     @Column(name = "size_of_tas", unique = false, updatable = true, nullable = false)
     private int amount_of_tas = 0;
       
-    @ManyToOne(optional = false, fetch = FetchType.LAZY)
-    @JoinColumn(name = "course_id")
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "courseId")
     private Course course;
 
     @JsonIgnore
