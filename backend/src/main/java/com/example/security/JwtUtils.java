@@ -3,6 +3,7 @@ package com.example.security;
 import java.util.Date;
 import java.util.stream.Collectors;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
@@ -13,14 +14,17 @@ import io.jsonwebtoken.SignatureAlgorithm;
 
 @Component
 public class JwtUtils {
-    private final String jwtSecret = System.getProperty("JWT_SECRET");
-    private final int jwtExpirationMs = Integer.parseInt(System.getProperty("JWT_EXPIRATION_MS"));
+    @Value("${jwt.secret}")
+    private String jwtSecret;
+
+    @Value("${jwt.expiration-ms}")
+    private long jwtExpirationMs;
   
 
         public String generateJwtToken(UserDetails userDetails) {
             return Jwts.builder()
             .setSubject(userDetails.getUsername())
-            .claim("roles", userDetails.getAuthorities().stream()
+            .claim("role", userDetails.getAuthorities().stream()
                     .map(GrantedAuthority::getAuthority).collect(Collectors.toList()))
             .setIssuedAt(new Date())
             .setExpiration(new Date(System.currentTimeMillis() + jwtExpirationMs))

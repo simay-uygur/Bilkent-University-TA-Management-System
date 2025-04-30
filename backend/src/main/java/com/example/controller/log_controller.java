@@ -42,6 +42,7 @@ public class log_controller {
 
     private final AuthenticationManager authenticationManager;
     private final JwtTokenProvider tokenProvider;
+    
     @PostMapping("/api/signUp")
     public ResponseEntity<User> createUser(@RequestBody User u) 
     {
@@ -111,5 +112,4 @@ public class log_controller {
         serv.deleteUser(u);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
-    
 }

@@ -1,44 +1,77 @@
 package com.example.security;
 
+import java.nio.charset.StandardCharsets;
+import java.security.Key;
 import java.util.Date;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
 
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.security.Keys;
+import jakarta.annotation.PostConstruct;
 
 @Component
 public class JwtTokenProvider {
-    private final String jwtSecret = System.getProperty("JWT_SECRET");
-    private final int jwtExpirationMs = Integer.parseInt(System.getProperty("JWT_EXPIRATION_MS"));
+    @Value("${jwt.secret}")
+    private String jwtSecret;
 
+    @Value("${jwt.expiration-ms}")
+    private long jwtExpirationMs;
+
+    private Key signingKey;
+
+    /**
+     * Initialize the signing key from the raw secret bytes (UTF-8).
+     */
+    @PostConstruct
+    public void init() {
+        byte[] keyBytes = jwtSecret.getBytes(StandardCharsets.UTF_8);
+        // For HS512, ensure jwtSecret is at least 64 bytes
+        this.signingKey = Keys.hmacShaKeyFor(keyBytes);
+    }
+
+    /**
+     * Generate a JWT token using the pre-built signing key.
+     */
     public String generateJwtToken(Authentication authentication) {
         UserDetailsImpl userPrincipal = (UserDetailsImpl) authentication.getPrincipal();
         return Jwts.builder()
             .setSubject(userPrincipal.getUsername())
             .claim("role", userPrincipal.getAuthorities().iterator().next().getAuthority())
             .setIssuedAt(new Date())
-            .setExpiration(new Date((new Date()).getTime() + jwtExpirationMs))
-            .signWith(SignatureAlgorithm.HS512, jwtSecret)
+            .setExpiration(new Date(System.currentTimeMillis() + jwtExpirationMs))
+            .signWith(signingKey, SignatureAlgorithm.HS512)
             .compact();
     }
 
+    /**
+     * Extract username from JWT using the same signing key.
+     */
     public String getUserNameFromJwtToken(String token) {
-        return Jwts.parser()
-                  .setSigningKey(jwtSecret)
-                  .parseClaimsJws(token)
-                  .getBody()
-                  .getSubject();
+        return Jwts.parserBuilder()
+                   .setSigningKey(signingKey)
+                   .build()
+                   .parseClaimsJws(token)
+                   .getBody()
+                   .getSubject();
     }
 
+    /**
+     * Validate the JWT token signature and expiration.
+     */
     public boolean validateJwtToken(String authToken) {
         try {
-            Jwts.parser().setSigningKey(jwtSecret).parseClaimsJws(authToken);
+            Jwts.parserBuilder()
+                .setSigningKey(signingKey)
+                .build()
+                .parseClaimsJws(authToken);
             return true;
         } catch (JwtException e) {
-            // log token errors here if desired
+            // You can log specific validation errors here if desired
         }
         return false;
     }
