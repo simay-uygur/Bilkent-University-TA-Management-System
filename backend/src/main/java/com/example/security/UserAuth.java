@@ -1,18 +1,16 @@
 package com.example.security;
 
-import java.util.ArrayList;
-
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Primary;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Component;
 
 import com.example.entity.Actors.User;
-import com.example.exception.UserNotFoundExc;
 import com.example.service.UserServ;
 
 import lombok.AllArgsConstructor;
@@ -20,25 +18,28 @@ import lombok.AllArgsConstructor;
 @Component
 @Primary
 @AllArgsConstructor
-public class UserAuth implements AuthenticationManager{
-
-    @Autowired
-    UserServ serv ;
-    @Autowired
-    BCryptPasswordEncoder enc ;
+public class UserAuth implements AuthenticationManager {
+    private final UserServ serv;
+    private final BCryptPasswordEncoder enc;
 
     @Override
     public Authentication authenticate(Authentication authentication) throws AuthenticationException {
-        Long user_id = Long.parseLong(authentication.getName()) ;
+        Long userId = Long.parseLong(authentication.getName());
+        User u = serv.getUserById(userId);
+        if (u == null) {
+            throw new UsernameNotFoundException("User not found: " + userId);
+        }
+        if (!enc.matches(authentication.getCredentials().toString(), u.getPassword())) {
+            throw new BadCredentialsException("Password is incorrect!");
+        }
 
-        User u = serv.getUserById(user_id) ;
-
-        if (u == null)
-            throw new UserNotFoundExc(user_id) ;
-        else if (!enc.matches(authentication.getCredentials().toString(),u.getPassword()))
-            throw new RuntimeException("Password is incorrect!") ;
-
-        return new UsernamePasswordAuthenticationToken(user_id, u.getPassword(), new ArrayList<>());
+        // Build your UserDetailsImpl
+        UserDetailsImpl userDetails = UserDetailsImpl.build(u);
+        // Return it as the principal, with its authorities
+        return new UsernamePasswordAuthenticationToken(
+            userDetails,                // ← principal is now UserDetailsImpl
+            null,                       // credentials (we don’t need to keep the raw password)
+            userDetails.getAuthorities()
+        );
     }
-    
 }

@@ -53,7 +53,7 @@ public class Section {
         joinColumns = @JoinColumn(name = "section_id"),
         inverseJoinColumns = @JoinColumn(name = "task_id")
     )
-    private ArrayList<Task> section_tasks_list ;
+    private ArrayList<Task> section_tasks_list;
 
     @OneToMany(
         // this is used to avoid loading the whole exam room when only the section is needed

@@ -62,6 +62,10 @@ public class UserServImpl implements UserServ{
 
         /*case FACULTY_MEMBER -> {
             }*/
+        // faculty member is not a role
+        case INSTRUCTOR ->  {
+
+        }
 
         case DEPARTMENT_STAFF -> {
             }
