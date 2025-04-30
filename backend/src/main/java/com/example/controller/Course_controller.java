@@ -115,8 +115,8 @@ public class Course_controller {
 
 
     private void checkPrerequisites(Course course) {
-        if (course.getPrereq_list() != null) {
-            String[] prereqs = course.getPrereq_list().split(",");
+        if (course.getPrereqList() != null) {
+            String[] prereqs = course.getPrereqList().split(",");
             for (String course_code : prereqs){
                 int id = new CourseCodeConverter().code_to_id(course_code);
                 if (!courseRepo.existsById(id)){

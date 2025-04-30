@@ -51,9 +51,9 @@ public class CourseServImpl implements CourseServ{
         if (!course.isPresent())
             throw new CourseNotFoundExc(course_code);
         Course courseObj = course.get();
-        if (courseObj.getSections_list() == null)
+        if (courseObj.getSectionsList() == null)
             courseObj.setSections_list(new ArrayList<>());
-        courseObj.getSections_list().add(section);
+        courseObj.getSectionsList().add(section);
         secRepo.saveAndFlush(section);
         courseRepo.saveAndFlush(courseObj);
 
@@ -99,21 +99,21 @@ public class CourseServImpl implements CourseServ{
 
     private Course_DTO createDTO(Course course){
         Course_DTO dto = new Course_DTO();
-        dto.setCourse_code(course.getCourse_code());
+        dto.setCourse_code(course.getCourseTas());
         dto.setDepartment(course.getCourse_dep());
         dto.setAcademical_status(course.getCourse_academic_status().toString());
         Instructor_DTO coor_dto = new Instructor_DTO();
         dto.setCoordinator(coor_dto);
         dto.setInstructors(null);
-        dto.setPrereqs(course.getPrereq_list().trim().split("\\s*,\\s*"));
+        dto.setPrereqs(course.getPrereqList().trim().split("\\s*,\\s*"));
         List<Student_DTO> studDtos = new ArrayList<>();
-        for (Student stud : course.getStudents_list()){
+        for (Student stud : course.getStudentsList()){
             Student_DTO stud_dto = new Student_DTO(stud.getStudent_id(), stud.getStudent_name(), stud.getStudent_surname());
             studDtos.add(stud_dto);
         }
         dto.setStudents(studDtos);
         List<Section_DTO> sections = new ArrayList<>();
-        for (Section section : course.getSections_list()){
+        for (Section section : course.getSectionsList()){
             Section_DTO sec = new Section_DTO();
             sec.setSection_code(section.getSection_code());
             List<Lesson_DTO> lessons = new ArrayList<>();
@@ -127,10 +127,10 @@ public class CourseServImpl implements CourseServ{
         dto.setSections(sections);
 
         List<TA_DTO> taDtos = new ArrayList<>();
-        for (TA ta : course.getCourse_tas()){
+        for (TA ta : course.getCourseTas()){
             List<String> courses = new ArrayList<>();
             for (Course c : ta.getCourses()){
-                courses.add(c.getCourse_code());
+                courses.add(c.getCourseTas());
             }
 
             List<String> lessons = new ArrayList<>();
@@ -161,11 +161,11 @@ public class CourseServImpl implements CourseServ{
                 throw new GeneralExc("TA with id " + ta_id + " is already assigned to the Course with code " + course_code);
 
         for (Section sec : ta.getTas_own_lessons()){
-            if (sec.getCourse().getCourse_code().equals(course.getCourse_code()))
+            if (sec.getCourse().getCourseTas().equals(course.getCourseTas()))
                 throw new GeneralExc("TA with id " + ta_id + " can not be assigned as the TA to the Course with code " + course_code + ". TA takes this course as the lesson.");
         }
 
-        course.getCourse_tas().add(ta);
+        course.getCourseTas().add(ta);
         courseRepo.save(course);
 
         courseOpt = courseRepo.findByCourseCode(course_code);
@@ -174,7 +174,7 @@ public class CourseServImpl implements CourseServ{
 
         Course course1 = courseOpt.get();
 
-        if (!course1.getCourse_tas().contains(ta))
+        if (!course1.getCourseTas().contains(ta))
             throw new NoPersistExc("Assignment ");
 
         return true;

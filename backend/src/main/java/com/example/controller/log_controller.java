@@ -10,6 +10,8 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -21,9 +23,13 @@ import com.example.entity.Actors.User;
 import com.example.exception.IncorrectWebMailException;
 import com.example.exception.UserExistsExc;
 import com.example.exception.UserNotFoundExc;
+import com.example.security.JwtResponse;
+import com.example.security.JwtTokenProvider;
 import com.example.security.SignInRequest;
+import com.example.security.UserDetailsImpl;
 import com.example.service.UserServ;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 // better to use different controllers for each role, because the logic for each role is different
@@ -35,7 +41,7 @@ public class log_controller {
     UserServ serv ;
 
     private final AuthenticationManager authenticationManager;
-    
+    private final JwtTokenProvider tokenProvider;
     @PostMapping("/api/signUp")
     public ResponseEntity<User> createUser(@RequestBody User u) 
     {
@@ -59,13 +65,31 @@ public class log_controller {
     }
 
     @PostMapping("/api/signIn")
-    public ResponseEntity<?> auth(@RequestBody SignInRequest request) {
+    public ResponseEntity<?> auth(@Valid @RequestBody SignInRequest request) {
         try {
             Authentication authentication = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(request.getId(), request.getPassword())
+            new UsernamePasswordAuthenticationToken(
+                request.getId(),
+                request.getPassword()
+            )
+        );
+            SecurityContextHolder.getContext().setAuthentication(authentication);
+            String jwt = tokenProvider.generateJwtToken(authentication);
+
+            UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
+            String role = userDetails.getAuthorities()
+                         .stream()
+                         .map(GrantedAuthority::getAuthority)
+                         .findFirst()
+                         .orElse("ROLE_USER");  // fallback if somehow missing
+
+            JwtResponse body = new JwtResponse(
+                jwt,
+                userDetails.getId(),         // now available once you add getId()
+                userDetails.getUsername(),
+                role
             );
-            User user = serv.getUserById(request.getId());
-            return ResponseEntity.ok(user);
+            return ResponseEntity.ok(body);
         } catch (AuthenticationException e) {
             ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid credentials");
         }

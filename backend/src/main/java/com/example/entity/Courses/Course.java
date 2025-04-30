@@ -23,10 +23,9 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
-import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
-import jakarta.validation.constraints.NotEmpty;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -41,30 +40,28 @@ import lombok.Setter;
 @Table(name = "course")
 @DynamicUpdate // this is used to update only the changed fields in the database, not the whole object
 public class Course {
+
     @Id
-    @Column(name = "course_id", unique = true, updatable = true)
-    private int course_id; 
-    
+    @Column(name = "courseId", unique = true, updatable = true)
+    private int courseId;
+
     @Column(name = "course_code", unique = true)
-    private String course_code; 
+    private String courseCode;
 
-    @Column(name = "course_name", unique = true)
-    private String course_name;
-
-    // cs-319. id -> 'c' + 's' + 319 -> 319319
-    @PrePersist
-    private void setCourseId() {
-        if (this.course_code != null)
-            this.course_id = new CourseCodeConverter().code_to_id(this.course_code);
-    }
+    @Column(name = "course_name", unique = false, updatable = true, nullable = false)
+    //@NotEmpty(message = "The field can not be empty!")
+    private String courseName;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "course_academic_status",updatable = true, nullable = false)
-    private AcademicLevelType course_academic_status ;
+    @Column(name = "course_academic_status", updatable = true, nullable = false)
+    private AcademicLevelType courseAcademicStatus;
 
-    @NotEmpty(message = "The field can not be empty!")
+    /*@NotEmpty(message = "The field can not be empty!")
     @Column(name = "course_dep", unique = false, updatable = true)
-    private String course_dep ;
+    private String course_dep ;*/
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    private Department department;
 
     //there should be exam class
 
@@ -74,22 +71,23 @@ public class Course {
     )
     @JoinTable( // creates a table for many to many relationship
         name = "students_list_table",
-        joinColumns = @JoinColumn(name = "course_id"),
+        joinColumns = @JoinColumn(name = "courseId"),
         inverseJoinColumns = @JoinColumn(name = "student_id")
     )
-    private Set<Student> students_list = new HashSet<>();
+    private Set<Student> studentsList = new HashSet<>();
 
     @Column(name = "prereq_list", unique = false, updatable = true, nullable = false)
-    @NotEmpty(message = "The field can not be empty!")
-    private String prereq_list;
+    //@NotEmpty(message = "The field can not be empty!")
+    private String prereqList;
     // do not use join table
 
     @OneToMany(
         mappedBy = "course", // the other side of the relationship is the owner of the relationship
         fetch = FetchType.LAZY,
-        orphanRemoval = true
+        orphanRemoval = true,
+        cascade= CascadeType.ALL
     )
-    private List<Section> sections_list ; // this is the list of sections that are related to the course
+    private List<Section> sectionsList; // this is the list of sections that are related to the course
 
     @ManyToMany(
         fetch = FetchType.LAZY,
@@ -100,14 +98,14 @@ public class Course {
         joinColumns = @JoinColumn(name = "section_id"),
         inverseJoinColumns = @JoinColumn(name = "ta_id")
     )
-    private List<TA> course_tas; // tas is the list of tas that are in the section
+    private List<TA> courseTas; // tas is the list of tas that are in the section
 
     @Override
     public boolean equals(Object obj){
         if (this == obj) return true;
         if (obj == null || getClass() != obj.getClass()) return false;
         Course course = (Course) obj ;
-        return course.getCourse_id() == this.course_id;
+        return course.getCourseId() == this.courseId;
     }
 
     @OneToMany(
