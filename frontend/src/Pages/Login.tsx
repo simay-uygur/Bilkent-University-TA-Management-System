@@ -1,44 +1,53 @@
+// src/pages/Login.tsx
 import React, { useState, FormEvent, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import NavBar from '../components/NavBar';
+import { login } from '../api';
 import styles from './Login.module.css';
 
 const Login: React.FC = () => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
-  const [errors, setErrors] = useState<{ username?: string; password?: string }>({});
+  const [errors, setErrors]   = useState<{ username?: string; password?: string }>({});
   const navigate = useNavigate();
   const location = useLocation();
   const [referrer, setReferrer] = useState<string | null>(null);
 
-  // ------------- read ?ref=<something> from URL -------------
   useEffect(() => {
     const params = new URLSearchParams(location.search);
-    const r = params.get('ref');    // e.g. /login?ref=/dashboard
+    const r = params.get('ref');
     if (r) setReferrer(r);
   }, [location.search]);
 
-  const handleSubmit = (e: FormEvent) => {
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     const newErrors: { username?: string; password?: string } = {};
 
-    // Simple validation: just check if fields are filled
-    if (!username) {
-      newErrors.username = 'Username is required.';
-    }
-
-    if (!password) {
-      newErrors.password = 'Password is required.';
-    }
+    if (!username) newErrors.username = 'Username is required.';
+    if (!password) newErrors.password = 'Password is required.';
 
     if (Object.keys(newErrors).length) {
       setErrors(newErrors);
       return;
     }
 
-    setErrors({});
-    // Assuming successful login, redirect to the page stored in `referrer` or default `/ta`
-    navigate(referrer || '/ta');
+    try {
+            setErrors({});
+            const res = await login({ id: username, password });
+            const jwt = res.data?.token;
+            // if no token returned, treat as invalid credentials
+            if (!jwt) {
+              setErrors({ password: 'Invalid username or password.' });
+              return;
+            }
+            // store JWT
+            localStorage.setItem('jwt', jwt);
+            // redirect
+            navigate(referrer || '/dashboard', { replace: true });
+          } catch (err: any) {
+            console.error('Login failed', err);
+            setErrors({ password: 'Invalid username or password.' });
+          }
   };
 
   return (
