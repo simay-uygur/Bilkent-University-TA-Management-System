@@ -9,7 +9,7 @@ interface Task {
   title: string;
   date: string;
   time: string;
-  type: 'Citation' | 'Proctoring' | 'Lab';
+  type: 'Recitation' | 'Proctoring' | 'Lab';
   status: 'pending' | 'approved';
   assignedId?: string;
 }
@@ -21,11 +21,11 @@ interface TA {
 
 const initialTasks: Task[] = [
   { id: 1, title: 'Mock Lab Setup',       date: '2025-06-01', time: '10:00', type: 'Lab',        status: 'pending',  assignedId: '' },
-  { id: 2, title: 'Mock Citation Review', date: '2025-06-02', time: '14:00', type: 'Citation',   status: 'approved', assignedId: '' },
+  { id: 2, title: 'Mock Citation Review', date: '2025-06-02', time: '14:00', type: 'Recitation',   status: 'approved', assignedId: '' },
   { id: 3, title: 'Mock Proctoring',      date: '2025-06-03', time: '12:00', type: 'Proctoring', status: 'pending',  assignedId: '' },
 ];
 
-const TASK_TYPES = ['Citation','Proctoring','Lab'] as const;
+const TASK_TYPES = ['Recitation','Proctoring','Lab'] as const;
 
 export default function ManageWorkload() {
   const [tasks, setTasks] = useState<Task[]>([]);
@@ -33,7 +33,7 @@ export default function ManageWorkload() {
   const [modalOpen, setModalOpen] = useState(false);
   const [isEdit, setIsEdit] = useState(false);
   const [current, setCurrent] = useState<Partial<Task>>({
-    title: '', date: '', time: '', type: 'Citation', status: 'pending', assignedId: ''
+    title: '', date: '', time: '', type: 'Recitation', status: 'pending', assignedId: ''
   });
 
   // 1) Seed mock tasks on mount
@@ -61,7 +61,7 @@ useEffect(() => {
 
   // 3) Open modal for add
   const openAdd = () => {
-    setCurrent({ title:'', date:'', time:'', type:'Citation', status:'pending', assignedId: '' });
+    setCurrent({ title:'', date:'', time:'', type:'Recitation', status:'pending', assignedId: '' });
     setIsEdit(false);
     setModalOpen(true);
   };

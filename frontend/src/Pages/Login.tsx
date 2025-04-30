@@ -42,7 +42,7 @@ const Login: React.FC = () => {
   };
 
   return (
-    <div className={styles.pageWrapper}>
+    <div className={styles.loginPageWrapper}>
       <NavBar />
 
       <div className={styles.container}>

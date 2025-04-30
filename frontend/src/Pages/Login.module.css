@@ -3,7 +3,7 @@
 /* 1. Import Exo Thin */
 @import url('https://fonts.googleapis.com/css?family=Exo:100');
 
-/* 2. Custom props for the tiled background + all your originals */
+/* 2. Custom props for the tiled background + originals */
 :global(:root) {
   --nav-bg: #2563EB;
   --bg-page: #EFF6FF;
@@ -20,27 +20,24 @@
   --scroll-speed: 2s;
 }
 
-/* 3. Put the infinite scroll on <body> */
-.body {
-  margin: 0;
-  background: var(--bg-tile) repeat;
-  background-size: var(--bg-tile-size);
-  animation: bg-scroll var(--scroll-speed) linear infinite;
-  font-family: var(--font-base);
-}
-
 @keyframes bg-scroll {
   from { background-position: 0 0; }
   to   { background-position: var(--bg-tile-size); }
 }
 
-.pageWrapper {
+/* 4. Your page wrapper gets the same tiled background too */
+.loginPageWrapper {
   position: relative;
   min-height: 100vh;
   display: flex;
   flex-direction: column;
+  /* you can optionally keep the animated-tile here too */
+  background: var(--bg-tile) repeat;
+  background-size: var(--bg-tile-size);
+  animation: bg-scroll var(--scroll-speed) linear infinite;
 }
 
+/* Watermark behind everything */
 .pageWrapper::before {
   position: absolute;
   top: 2rem;
@@ -54,6 +51,7 @@
   z-index: 0;
 }
 
+/* Bring your actual content above that watermark */
 .NavBar,
 .container,
 .card {
@@ -67,7 +65,6 @@
   align-items: flex-start;
   justify-content: center;
   padding-top: 5rem;
-  /* make it transparent so you see the patterned body behind */
   background: transparent;
 }
 
