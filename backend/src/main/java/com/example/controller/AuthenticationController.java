@@ -3,7 +3,6 @@ package com.example.controller;
 import java.util.List;
 import java.util.Objects;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -35,11 +34,8 @@ import lombok.RequiredArgsConstructor;
 // better to use different controllers for each role, because the logic for each role is different
 @RestController
 @RequiredArgsConstructor
-public class log_controller {
-    
-    @Autowired
-    UserServ serv ;
-
+public class AuthenticationController {
+    private final UserServ serv ;
     private final AuthenticationManager authenticationManager;
     private final JwtTokenProvider tokenProvider;
     

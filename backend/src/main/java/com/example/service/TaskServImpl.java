@@ -15,7 +15,6 @@ import com.example.entity.Actors.TA;
 import com.example.entity.Courses.Lesson;
 import com.example.entity.Courses.Section;
 import com.example.entity.Tasks.TA_Task;
-import com.example.entity.Tasks.TA_TaskId;
 import com.example.entity.Tasks.Task;
 import com.example.entity.Tasks.TaskState;
 import com.example.exception.GeneralExc;
@@ -223,7 +222,6 @@ public class TaskServImpl implements TaskServ {
             throw new TaskNoTasExc();
         }
 
-        TA_TaskId id = new TA_TaskId(task_id,ta.getId()) ;
         Optional<TA_Task> tas_taskOptional = taTaskRepo.findByTaskIdAndTaId(task_id, ta.getId());
         if (tas_taskOptional.isEmpty()) {
             throw new GeneralExc("TA not assigned to task");
