@@ -16,7 +16,7 @@ public class InstructorMapper {
         dto.setId(instructor.getId());
         dto.setName(instructor.getName());
         dto.setSurname(instructor.getSurname());
-        dto.setIsActive(instructor.getIsActive());
+        //dto.setIsActive(instructor.getIsActive()); -  active is not a field in dto
 
         if (instructor.getDepartment() != null) {
             dto.setDepartmentName(instructor.getDepartment().getName());

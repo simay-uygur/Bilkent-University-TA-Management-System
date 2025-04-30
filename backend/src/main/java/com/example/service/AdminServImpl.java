@@ -189,7 +189,7 @@ public class AdminServImpl implements AdminServ{
     @Override
     public boolean createClassroom(ClassRoom room) {
         classRoomRepo.saveAndFlush(room);
-        if (classRoomRepo.findById(room.getClassroom_id()).isPresent())
+        if (classRoomRepo.findById(room.getClassroomId()).isPresent())
             return true;
         throw new NoPersistExc("Classroom creation ");
     }

@@ -1,5 +1,6 @@
 package com.example.service;
 
+import com.example.dto.InstructorDto;
 import com.example.entity.Actors.Instructor;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -19,4 +20,8 @@ public interface InstructorServ {
     Instructor updateInstructor(Long id, Instructor instructor);
 
     List<Instructor> getAllInstructors();
+
+    List<InstructorDto> getAllInstructorsDto();
+
+    List<InstructorDto> getInstructorsByDepartment(String departmentName);
 }

@@ -42,11 +42,11 @@ public class InstructorController {
         instructorServ.deleteInstructor(id);
         return ResponseEntity.ok("Instructor deleted successfully.");
     }
-
-    @GetMapping()
-    public ResponseEntity<List<Instructor>> getAllInstructors() {
-        return ResponseEntity.ok(instructorServ.getAllInstructors());
-    }
+//
+//    @GetMapping()
+//    public ResponseEntity<List<Instructor>> getAllInstructors() {
+//        return ResponseEntity.ok(instructorServ.getAllInstructors());
+//    }
 
     //this will be used to get all instructor dto's
     @GetMapping("/dto")
@@ -58,5 +58,26 @@ public class InstructorController {
         return ResponseEntity.ok(dtos);
     }
 
+    /**
+     * GET /api/v1/instructors
+     * Returns all instructors as DTOs.
+     */
+    @GetMapping
+    public ResponseEntity<List<InstructorDto>> getAllInstructors() {
+        List<InstructorDto> dtos = instructorServ.getAllInstructorsDto();
+        return ResponseEntity.ok(dtos);
+    }
+
+    /**
+     * GET /api/v1/instructors/department/{deptName}
+     * Returns all instructors in the given department as DTOs.
+     */
+    @GetMapping("/department/{deptName}")
+    public ResponseEntity<List<InstructorDto>> getByDepartment(
+            @PathVariable("deptName") String deptName
+    ) {
+        List<InstructorDto> dtos = instructorServ.getInstructorsByDepartment(deptName);
+        return ResponseEntity.ok(dtos);
+    }
 
 }

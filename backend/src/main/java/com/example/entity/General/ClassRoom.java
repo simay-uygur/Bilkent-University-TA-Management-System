@@ -1,5 +1,72 @@
 package com.example.entity.General;
 
+import com.example.entity.Courses.Lesson;
+import com.example.entity.Exams.ExamRoom;
+import com.example.exception.GeneralExc;
+import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
+
+import java.util.ArrayList;
+import java.util.List;
+
+@Entity
+@Table(name = "class_room")
+@Getter
+@Setter
+public class ClassRoom {
+
+    @Id
+    @Column(name = "classroom_id", nullable = false, updatable = true)
+    private int classroomId;
+
+    @Transient
+    @Column(nullable = false)
+    private String classCode;
+
+    @Column(name = "class_capacity", nullable = false)
+    private int classCapacity;
+
+    @OneToOne(mappedBy = "examRoom")
+    private ExamRoom examRoom;
+
+    @OneToMany(
+            mappedBy = "lessonRoom",
+            fetch = FetchType.LAZY,
+            cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REFRESH}
+    )
+    private List<Lesson> lessons = new ArrayList<>();
+
+    @PrePersist
+    private void setClassroomId() {
+        if (classCode != null)
+            classroomId = codeToId(classCode);
+    }
+
+    public int codeToId(String code) {
+        code = code.toUpperCase();
+        int idx = code.indexOf('-');
+        String combined = idx == -1 ? code : code.substring(0, idx) + code.substring(idx + 1);
+        return prefixToInt(combined);
+    }
+
+    private int prefixToInt(String prefix) {
+        StringBuilder sb = new StringBuilder();
+        for (char ch : prefix.toCharArray()) {
+            if (Character.isDigit(ch))
+                sb.append(ch - '0');
+            else if (ch >= 'A' && ch <= 'Z')
+                sb.append(ch - 'A' + 1);
+            else
+                throw new GeneralExc("Invalid prefix character: " + ch);
+        }
+        return Integer.parseInt(sb.toString());
+    }
+}
+
+/*
+package com.example.entity.General;
+
 
 import java.util.ArrayList;
 import java.util.List;
@@ -83,3 +150,4 @@ public class ClassRoom {
         return Integer.parseInt(to_return) ; 
     }
 }
+*/

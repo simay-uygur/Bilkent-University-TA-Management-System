@@ -14,8 +14,8 @@ import org.springframework.stereotype.Service;
 import com.example.entity.Actors.TA;
 import com.example.entity.Courses.Lesson;
 import com.example.entity.Courses.Section;
-import com.example.entity.Tasks.TA_Task;
-import com.example.entity.Tasks.TA_TaskId;
+import com.example.entity.Tasks.TaTask;
+import com.example.entity.Tasks.TaTaskId;
 import com.example.entity.Tasks.Task;
 import com.example.entity.Tasks.TaskState;
 import com.example.exception.GeneralExc;
@@ -25,7 +25,7 @@ import com.example.exception.taskExc.TaskLimitExc;
 import com.example.exception.taskExc.TaskNoTasExc;
 import com.example.exception.taskExc.TaskNotFoundExc;
 import com.example.repo.TARepo;
-import com.example.repo.TA_TaskRepo;
+import com.example.repo.TaTaskRepo;
 import com.example.repo.TaskRepo;
 
 import jakarta.transaction.Transactional;
@@ -43,7 +43,7 @@ public class TaskServImpl implements TaskServ {
     private TARepo taRepo;
 
     @Autowired
-    private TA_TaskRepo taTaskRepo;
+    private TaTaskRepo taTaskRepo;
 
     @Override
     public Task createTask(Task task) {
@@ -121,7 +121,7 @@ public class TaskServImpl implements TaskServ {
         existing.setDuration(incoming.getDuration());
         existing.setTimePassed(incoming.isTimePassed());
         existing.setWorkload(incoming.getWorkload());
-        existing.setTask_type(incoming.getTask_type());
+        existing.setTaskType(incoming.getTaskType());
         existing.setStatus(incoming.getStatus());
         existing.setRequiredTAs(incoming.getRequiredTAs());
         existing.setCourse(incoming.getCourse());
@@ -135,10 +135,10 @@ public class TaskServImpl implements TaskServ {
     public TA getTAById(int task_id, Long ta_id) {
         Task task = taskRepo.findById(task_id)
                 .orElseThrow(() -> new TaskNotFoundExc(task_id));
-        List<TA_Task> task_list = task.getTas_list() ;
-        for (TA_Task t : task_list){
-            if (Objects.equals(t.getTa_owner().getId(), ta_id))
-                return t.getTa_owner() ;
+        List<TaTask> task_list = task.getTasList() ;
+        for (TaTask t : task_list){
+            if (Objects.equals(t.getTaOwner().getId(), ta_id))
+                return t.getTaOwner() ;
         }
         throw new GeneralExc("TA with ID " + ta_id + " not found for task with ID " + task_id);
     }
@@ -152,19 +152,19 @@ public class TaskServImpl implements TaskServ {
             if (taTaskRepo.exists(task_id, ta.getId())) {
                 throw new GeneralExc("TA is already assigned to this task");
             }
-            if (task.getAmount_of_tas() == task.getRequiredTAs()) {
+            if (task.getAmountOfTas() == task.getRequiredTAs()) {
                 throw new TaskLimitExc();
             }
-            // Create new TA_Task relationship
-            TA_Task taTask = new TA_Task(task, ta, task.getAccess_type());
+            // Create new TaTask relationship
+            TaTask taTask = new TaTask(task, ta, task.getAccessType());
             // Update task side
-            task.setAmount_of_tas(task.getAmount_of_tas() + 1);
-            if (task.getTas_list() == null) {
-                task.setTas_list(new ArrayList<>());
+            task.setAmountOfTas(task.getAmountOfTas() + 1);
+            if (task.getTasList() == null) {
+                task.setTasList(new ArrayList<>());
             }
             // Update TA side
-            if (ta.getTa_tasks() == null) {
-                ta.setTa_tasks(new ArrayList<>());
+            if (ta.getTaTasks() == null) {
+                ta.setTaTasks(new ArrayList<>());
             }
             taTaskRepo.saveAndFlush(taTask);
         }
@@ -181,31 +181,31 @@ public class TaskServImpl implements TaskServ {
             throw new GeneralExc("TA is already assigned to this task");
         }
         //check if ta has the task on the same duration
-        for (TA_Task taTask : ta.getTa_tasks()) {
+        for (TaTask taTask : ta.getTaTasks()) {
             if (taTask.getTask().getDuration().equals(task.getDuration())) {
                 throw new GeneralExc("TA already has task on the same duration");
             }
         }
-        for(Section sec : ta.getTas_own_lessons()){
+        for(Section sec : ta.getTasOwnLessons()){
             for (Lesson lesson : sec.getLessons()){
                 if(task.getDuration().has(lesson.getDuration()))
                     throw new GeneralExc("TA has lesson during that duration");
             }
         }
         // Check task limits
-        if (task.getAmount_of_tas() == task.getRequiredTAs()) {
+        if (task.getAmountOfTas() == task.getRequiredTAs()) {
             throw new TaskLimitExc();
         }
-        // Create new TA_Task relationship
-        TA_Task taTask = new TA_Task(task, ta, task.getAccess_type());
+        
+        TaTask taTask = new TaTask( task, ta, task.getAccessType());
         // Update task side
-        task.setAmount_of_tas(task.getAmount_of_tas() + 1);
-        if (task.getTas_list() == null) {
-            task.setTas_list(new ArrayList<>());
+        task.setAmountOfTas(task.getAmountOfTas() + 1);
+        if (task.getTasList() == null) {
+            task.setTasList(new ArrayList<>());
         }
         // Update TA side
-        if (ta.getTa_tasks() == null) {
-            ta.setTa_tasks(new ArrayList<>());
+        if (ta.getTaTasks() == null) {
+            ta.setTaTasks(new ArrayList<>());
         }
         taTaskRepo.saveAndFlush(taTask);
         return true;
@@ -219,19 +219,19 @@ public class TaskServImpl implements TaskServ {
         }
 
         Task task = (Task) taskOptional.get();
-        if (task.getAmount_of_tas() == 0) {
+        if (task.getAmountOfTas() == 0) {
             throw new TaskNoTasExc();
         }
 
-        TA_TaskId id = new TA_TaskId(task_id,ta.getId()) ;
-        Optional<TA_Task> tas_taskOptional = taTaskRepo.findByTaskIdAndTaId(task_id, ta.getId());
+        //TaTaskId id = new TaTaskId(task_id,ta.getId()) ;
+        Optional<TaTask> tas_taskOptional = taTaskRepo.findByTaskIdAndTaId(task_id, ta.getId());
         if (tas_taskOptional.isEmpty()) {
             throw new GeneralExc("TA not assigned to task");
         }
-        TA_Task taTask = tas_taskOptional.get();
+        TaTask taTask = tas_taskOptional.get();
         taTaskRepo.delete(taTask);
-        task.getTas_list().remove(taTask);
-        ta.getTa_tasks().remove(taTask);
+        task.getTasList().remove(taTask);
+        ta.getTaTasks().remove(taTask);
         task.removeTA();
         taskRepo.saveAndFlush(task);
         taRepo.saveAndFlush(ta);
@@ -252,23 +252,23 @@ public class TaskServImpl implements TaskServ {
         }
 
         Task task = (Task) taskOptional.get();
-        if (task.getAmount_of_tas() == 0) {
+        if (task.getAmountOfTas() == 0) {
             throw new TaskNoTasExc();
         }
 
-        if (task.getTas_list() == null) {
+        if (task.getTasList() == null) {
             throw new TaskNoTasExc();
         }
         
         List<TA> tas_list = new ArrayList<>();
-        for (TA_Task t : task.getTas_list()) {
-            if (t.getTa_owner() == null) {
+        for (TaTask t : task.getTasList()) {
+            if (t.getTaOwner() == null) {
                 throw new GeneralExc("TA owner not found for task with ID " + task_id);
             }
-            if (t.getTa_owner().getId() == null) {
-                throw new GeneralExc("TA with ID " + t.getTa_owner().getId() + " not found for task with ID " + task_id);
+            if (t.getTaOwner().getId() == null) {
+                throw new GeneralExc("TA with ID " + t.getTaOwner().getId() + " not found for task with ID " + task_id);
             }
-            tas_list.add(t.getTa_owner()) ;
+            tas_list.add(t.getTaOwner()) ;
         }
         return tas_list;
     }
