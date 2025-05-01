@@ -22,6 +22,7 @@ import com.example.entity.Actors.User;
 import com.example.exception.IncorrectWebMailException;
 import com.example.exception.UserExistsExc;
 import com.example.exception.UserNotFoundExc;
+import com.example.repo.UserRepo;
 import com.example.security.JwtResponse;
 import com.example.security.JwtTokenProvider;
 import com.example.security.SignInRequest;
@@ -38,7 +39,8 @@ import lombok.RequiredArgsConstructor;
 public class AuthController {
     
    
-    private final UserServ serv ;
+    private final UserServ serv;
+    private final UserRepo userRepo;
 
     private final AuthenticationManager authenticationManager;
     private final JwtTokenProvider tokenProvider;
@@ -69,7 +71,11 @@ public class AuthController {
 
     @PostMapping("/api/signIn")
     public ResponseEntity<?> signIn(@Valid @RequestBody SignInRequest request) {
-        System.out.println("here\n\n\n\n\n");
+        if(!userRepo.existsById(request.getId())){
+            return ResponseEntity
+                    .status(HttpStatus.UNAUTHORIZED)
+                    .body(Map.of("error", "Invalid credentials"));
+        }
         // 1) Load user by ID
         UserDetailsImpl user = (UserDetailsImpl) 
             userDetailsService.loadUserByUsername(request.getId().toString());
