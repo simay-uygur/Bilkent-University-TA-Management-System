@@ -5,12 +5,14 @@ import com.example.dto.TaDto;
 import com.example.entity.Actors.TA;
 import com.example.entity.Courses.Course;
 import com.example.entity.Courses.Section;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
 @Component
+@RequiredArgsConstructor
 public class TaMapper {
 
     public TaDto toDto(TA ta) {

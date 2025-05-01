@@ -3,9 +3,11 @@ package com.example.mapper;
 
 import com.example.dto.DepartmentStaffDto;
 import com.example.entity.Actors.DepartmentStaff;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 @Component
+@RequiredArgsConstructor
 public class DepartmentStaffMapper {
 
     public DepartmentStaffDto toDto(DepartmentStaff staff) {

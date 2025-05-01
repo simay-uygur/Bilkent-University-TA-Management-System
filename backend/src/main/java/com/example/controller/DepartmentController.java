@@ -9,6 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/departments")
@@ -16,13 +17,13 @@ import java.util.List;
 public class DepartmentController {
 
     private final DepartmentRepo departmentRepo;
+    private final DepartmentMapper   departmentMapper;
 
     @GetMapping
     public ResponseEntity<List<DepartmentDto>> getAllDepartments() {
-        List<Department> departments = departmentRepo.findAll();
-        List<DepartmentDto> dtos = departments.stream()
-                .map(DepartmentMapper::toDto)
-                .toList();
+        List<DepartmentDto> dtos = departmentRepo.findAll().stream()
+                .map(departmentMapper::toDto)
+                .collect(Collectors.toList());
         return ResponseEntity.ok(dtos);
     }
 
@@ -31,30 +32,75 @@ public class DepartmentController {
         if (departmentRepo.existsById(dto.getCode())) {
             return ResponseEntity.badRequest().build();
         }
-        Department department = DepartmentMapper.toEntity(dto, null); // faculty set separately if needed
-        Department saved = departmentRepo.save(department);
-        return ResponseEntity.ok(DepartmentMapper.toDto(saved));
-    }
-
-    @PutMapping("/{name}")
-    public ResponseEntity<DepartmentDto> updateDepartment(@PathVariable String name, @RequestBody DepartmentDto dto) {
-        if (!departmentRepo.existsById(name)) {
-            return ResponseEntity.notFound().build();
-        }
-        Department entity = DepartmentMapper.toEntity(dto, null);
-        entity.setName(name);
+        Department entity = departmentMapper.toEntity(dto, null);
         Department saved = departmentRepo.save(entity);
-        return ResponseEntity.ok(DepartmentMapper.toDto(saved));
+        return ResponseEntity.ok(departmentMapper.toDto(saved));
     }
 
-    @DeleteMapping("/{name}")
-    public ResponseEntity<Void> deleteDepartment(@PathVariable String name) {
-        if (!departmentRepo.existsById(name)) {
+    @PutMapping("/{code}")
+    public ResponseEntity<DepartmentDto> updateDepartment(
+            @PathVariable("code") String code,
+            @RequestBody DepartmentDto dto) {
+
+        if (!departmentRepo.existsById(code)) {
             return ResponseEntity.notFound().build();
         }
-        departmentRepo.deleteById(name);
+        // rebuild from DTO (faculty can be set later if needed)
+        Department entity = departmentMapper.toEntity(dto, null);
+        // make sure we don’t accidentally change the PK
+        entity.setName(code);
+
+        Department saved = departmentRepo.save(entity);
+        return ResponseEntity.ok(departmentMapper.toDto(saved));
+    }
+
+    @DeleteMapping("/{code}")
+    public ResponseEntity<Void> deleteDepartment(@PathVariable("code") String code) {
+        if (!departmentRepo.existsById(code)) {
+            return ResponseEntity.notFound().build();
+        }
+        departmentRepo.deleteById(code);
         return ResponseEntity.noContent().build();
     }
+
+//    @GetMapping
+//    public ResponseEntity<List<DepartmentDto>> getAllDepartments() {
+//        List<Department> departments = departmentRepo.findAll();
+//        List<DepartmentDto> dtos = departments.stream()
+//                .map(DepartmentMapper::toDto)
+//                .toList();
+//        return ResponseEntity.ok(dtos);
+//    }
+//
+//    @PostMapping
+//    public ResponseEntity<DepartmentDto> addDepartment(@RequestBody DepartmentDto dto) {
+//        if (departmentRepo.existsById(dto.getCode())) {
+//            return ResponseEntity.badRequest().build();
+//        }
+//        Department department = DepartmentMapper.toEntity(dto, null); // faculty set separately if needed
+//        Department saved = departmentRepo.save(department);
+//        return ResponseEntity.ok(DepartmentMapper.toDto(saved));
+//    }
+//
+//    @PutMapping("/{name}")
+//    public ResponseEntity<DepartmentDto> updateDepartment(@PathVariable String name, @RequestBody DepartmentDto dto) {
+//        if (!departmentRepo.existsById(name)) {
+//            return ResponseEntity.notFound().build();
+//        }
+//        Department entity = DepartmentMapper.toEntity(dto, null);
+//        entity.setName(name);
+//        Department saved = departmentRepo.save(entity);
+//        return ResponseEntity.ok(DepartmentMapper.toDto(saved));
+//    }
+//
+//    @DeleteMapping("/{name}")
+//    public ResponseEntity<Void> deleteDepartment(@PathVariable String name) {
+//        if (!departmentRepo.existsById(name)) {
+//            return ResponseEntity.notFound().build();
+//        }
+//        departmentRepo.deleteById(name);
+//        return ResponseEntity.noContent().build();
+//    }
 
     @GetMapping("/{name}")
     public ResponseEntity<Boolean> checkDepartmentExists(@PathVariable String name) {

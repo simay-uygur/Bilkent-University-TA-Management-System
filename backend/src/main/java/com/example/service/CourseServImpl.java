@@ -48,6 +48,7 @@ public class CourseServImpl implements CourseServ {
     private final TaskServ taskServ;
     private final SectionRepo secRepo;
     private final DepartmentRepo departmentRepo;
+    private final LessonMapper lessonMapper;
 
     @Override
     public boolean addSection(String courseCode, Section section) {
@@ -233,7 +234,7 @@ public class CourseServImpl implements CourseServ {
                 course.getSectionsList().stream()
                         .map(sec -> {
                             List<LessonDto> lessons = sec.getLessons().stream()
-                                    .map(LessonMapper::toDto)
+                                    .map(lessonMapper::toDto)
                                     .collect(Collectors.toList());
 
                             // — instructor

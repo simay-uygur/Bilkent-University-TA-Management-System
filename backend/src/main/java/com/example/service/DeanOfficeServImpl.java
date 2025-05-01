@@ -20,6 +20,7 @@ public class DeanOfficeServImpl implements DeanOfficeServ {
     private final DeanOfficeRepo deanOfficeRepo;
     private final FacultyRepo facultyRepo;
     private final PasswordEncoder encoder;
+    private final DeanOfficeMapper deanOfficeMapper;
 
     @Override
     @Transactional
@@ -60,15 +61,8 @@ public class DeanOfficeServImpl implements DeanOfficeServ {
     @Override
     public DeanOffice saveFromDto(DeanOfficeDto deanOfficeDto, String facultyCode) {
         Faculty faculty = facultyRepo.findById(facultyCode)
-                .orElseThrow(() -> new IllegalArgumentException("Faculty with code '" + facultyCode + "' not found"));
-
-        DeanOffice deanOffice = DeanOfficeMapper.toEntity(deanOfficeDto, faculty);
-
-        //Double-check this faculty object has a valid ID
-        if (faculty.getCode() == null) {
-            throw new IllegalStateException("Fetched faculty has null code");
-        }
-
+                .orElseThrow(() -> new IllegalArgumentException("…"));
+        DeanOffice deanOffice = deanOfficeMapper.toEntity(deanOfficeDto, faculty);
         return deanOfficeRepo.save(deanOffice);
     }
 }

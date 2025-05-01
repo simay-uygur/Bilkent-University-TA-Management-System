@@ -3,10 +3,14 @@ package com.example.mapper;
 import com.example.dto.DeanOfficeDto;
 import com.example.entity.Actors.DeanOffice;
 import com.example.entity.General.Faculty;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Component;
 
+@Component
+@RequiredArgsConstructor
 public class DeanOfficeMapper {
 
-    public static DeanOfficeDto toDto(DeanOffice deanOffice) {
+    public DeanOfficeDto toDto(DeanOffice deanOffice) {
         if (deanOffice == null) return null;
 
         String facultyCode = deanOffice.getFaculty() != null
@@ -22,7 +26,7 @@ public class DeanOfficeMapper {
         );
     }
 
-    public static DeanOffice toEntity(DeanOfficeDto dto, Faculty faculty) {
+    public DeanOffice toEntity(DeanOfficeDto dto, Faculty faculty) {
         if (dto == null) return null;
 
         DeanOffice dean = new DeanOffice();

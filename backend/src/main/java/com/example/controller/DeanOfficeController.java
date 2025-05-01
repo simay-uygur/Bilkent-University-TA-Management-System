@@ -15,6 +15,7 @@ import java.util.List;
 public class DeanOfficeController {
 
     private final DeanOfficeServ deanOfficeServ;
+    private final DeanOfficeMapper deanOfficeMapper;
 
 //    @PostMapping("/{facultyCode}")
 //    public DeanOfficeDto create(@RequestBody DeanOfficeDto deanOfficeDto,
@@ -29,18 +30,16 @@ public class DeanOfficeController {
         return deanOfficeServ.save(deanOffice, facultyCode);
     }
 
-
     @GetMapping
     public List<DeanOfficeDto> list() {
-        return deanOfficeServ.getAll()
-                .stream()
-                .map(DeanOfficeMapper::toDto)
+        return deanOfficeServ.getAll().stream()
+                .map(deanOfficeMapper::toDto)
                 .toList();
     }
 
     @GetMapping("/{id}")
     public DeanOfficeDto byId(@PathVariable Long id) {
-        return DeanOfficeMapper.toDto(deanOfficeServ.getById(id));
+        return deanOfficeMapper.toDto(deanOfficeServ.getById(id));
     }
 
     @DeleteMapping("/{id}")

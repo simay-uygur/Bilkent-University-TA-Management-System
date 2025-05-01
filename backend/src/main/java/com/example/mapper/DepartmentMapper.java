@@ -3,10 +3,14 @@ package com.example.mapper;
 import com.example.dto.DepartmentDto;
 import com.example.entity.Courses.Department;
 import com.example.entity.General.Faculty;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Component;
 
+@Component
+@RequiredArgsConstructor
 public class DepartmentMapper {
 
-    public static DepartmentDto toDto(Department department) {
+    public DepartmentDto toDto(Department department) {
         if (department == null) return null;
 
         String facultyCode = department.getFaculty() != null
@@ -19,7 +23,7 @@ public class DepartmentMapper {
         );
     }
 
-    public static Department toEntity(DepartmentDto dto, Faculty faculty) {
+    public Department toEntity(DepartmentDto dto, Faculty faculty) {
         if (dto == null) return null;
 
         Department department = new Department();

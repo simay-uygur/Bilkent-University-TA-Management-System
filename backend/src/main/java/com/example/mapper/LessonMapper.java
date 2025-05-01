@@ -2,77 +2,55 @@ package com.example.mapper;
 
 import com.example.dto.LessonDto;
 import com.example.entity.Courses.Lesson;
-
 import com.example.entity.General.ClassRoom;
-import org.springframework.stereotype.Component;
-
-
-@Component
-public class LessonMapper {
-
-    /** Entity → DTO */
-    public static LessonDto toDto(Lesson lesson) {
-        if (lesson == null) return null;
-        LessonDto dto = new LessonDto();
-        // convert Duration to ISO-8601 string
-        dto.setDuration( lesson.getDuration().toString() );
-        ClassRoom room = lesson.getLessonRoom();
-        dto.setClassCode( room.getClassCode() );
-        dto.setRoom( room.getExamRoom().toString() );
-        return dto;
-    }
-
-    /** DTO → Entity */
-
-    //lesson has duration but
-    public Lesson toEntity(LessonDto dto) {
-        if (dto == null) return null;
-        Lesson lesson = new Lesson();
-        // parse ISO-8601 back into an Event
-        com.example.entity.General.Event durationEvent = new com.example.entity.General.Event();
-        //durationEvent.setStart(dto.);
-        //durationEvent.setEventDuration(Duration.parse(dto.getDuration()));
-        lesson.setDuration(durationEvent);
-
-        // Don’t try to look up ClassRoom here—you need the repository in your service:
-        //    ClassRoom room = roomRepo.findByClassCode(dto.getClassCode()).orElseThrow(...);
-        //    lesson.setLessonRoom(room);
-
-        return lesson;
-    }
-}
-
-/*
-
-package com.example.mapper;
-
-import com.example.dto.LessonDto;
-import com.example.entity.Courses.Lesson;
-import com.example.entity.General.ClassRoom;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 import java.time.Duration;
 
 @Component
+@RequiredArgsConstructor
 public class LessonMapper {
 
+    /**
+     * Entity → DTO
+     */
+    public LessonDto toDto(Lesson lesson) {
+        if (lesson == null) return null;
 
-public static LessonDto toDto(Lesson lesson) {
-    if (lesson == null) return null;
-    LessonDto dto = new LessonDto();
-    dto.setDuration(lesson.getDuration().toString());
-    ClassRoom room = lesson.getLessonRoom();
-    dto.setClassCode(room.getClassCode());
-    dto.setRoom(room.getRoomNumber());
-    return dto;
-}
+        LessonDto dto = new LessonDto();
+        // ISO-8601 duration string
+        dto.setDuration(lesson.getDuration() != null
+                ? lesson.getDuration().toString()
+                : null
+        );
 
-public static Lesson toEntity(LessonDto dto) {
-    if (dto == null) return null;
-    Lesson lesson = new Lesson();
-    lesson.setDuration(Duration.parse(dto.getDuration()));
-    // wiring of lesson.getLessonRoom() must happen in your service
-    return lesson;
+        // classRoom → classCode + examRoom
+        ClassRoom room = lesson.getLessonRoom();
+        if (room != null) {
+            dto.setClassCode(room.getClassCode());
+            dto.setRoom(
+                    room.getExamRoom() != null
+                            ? room.getExamRoom().toString()
+                            : null
+            );
+        }
+        return dto;
+    }
+
+    /**
+     * DTO → Entity
+     *
+     * Note: we only parse the duration here.  If you need to look up
+     *       and assign a real ClassRoom/ExamRoom, do that in your service.
+     */
+    public Lesson toEntity(LessonDto dto) {
+        if (dto == null) return null;
+
+        Lesson lesson = new Lesson();
+        // parse ISO-8601 duration (e.g. "PT1H30M")
+        //lesson.setDuration(Duration.parse(dto.getDuration()));
+        // lesson.setLessonRoom(...) must be done in service
+        return lesson;
+    }
 }
-}
- */

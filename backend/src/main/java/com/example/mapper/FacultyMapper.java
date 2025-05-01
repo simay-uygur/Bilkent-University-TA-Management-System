@@ -4,20 +4,28 @@ import com.example.dto.DepartmentDto;
 import com.example.dto.FacultyDto;
 import com.example.entity.General.Faculty;
 import com.example.entity.Courses.Department;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Component;
 
+import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
+@Component
+@RequiredArgsConstructor
 public class FacultyMapper {
 
-    public static FacultyDto toDto(Faculty faculty) {
+    private final DepartmentMapper departmentMapper;
+
+    public FacultyDto toDto(Faculty faculty) {
         if (faculty == null) return null;
 
-        List<DepartmentDto> departmentDtos = faculty.getDepartments() != null
-                ? faculty.getDepartments().stream()
-                .map(DepartmentMapper::toDto)
-                .collect(Collectors.toList())
-                : null;
+        List<DepartmentDto> departmentDtos = Optional.ofNullable(faculty.getDepartments())
+                .orElse(Collections.emptyList())
+                .stream()
+                .map(departmentMapper::toDto)
+                .collect(Collectors.toList());
 
         return new FacultyDto(
                 faculty.getCode(),
@@ -25,8 +33,7 @@ public class FacultyMapper {
                 departmentDtos
         );
     }
-
-    public static Faculty toEntity(FacultyDto dto) {
+    public Faculty toEntity(FacultyDto dto) {
         if (dto == null) return null;
 
         Faculty faculty = new Faculty();
