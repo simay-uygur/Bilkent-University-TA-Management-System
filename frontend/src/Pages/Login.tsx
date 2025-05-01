@@ -1,6 +1,8 @@
+// src/pages/Login.tsx
 import React, { useState, FormEvent, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import NavBar from '../components/NavBar';
+import { login } from '../api';
 import styles from './Login.module.css';
 
 interface Credentials {
@@ -17,50 +19,30 @@ interface JwtResponse {
 const Login: React.FC = () => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
-  const [errors, setErrors] = useState<{ username?: string; password?: string }>({});
+  const [errors, setErrors]   = useState<{ username?: string; password?: string }>({});
   const navigate = useNavigate();
   const location = useLocation();
   const [referrer, setReferrer] = useState<string | null>(null);
 
-<<<<<<< Updated upstream
-  // ------------- read ?ref=<something> from URL -------------
-=======
   // capture optional ?ref= redirect target
->>>>>>> Stashed changes
   useEffect(() => {
     const params = new URLSearchParams(location.search);
-    const r = params.get('ref');    // e.g. /login?ref=/dashboard
+    const r = params.get('ref');
     if (r) setReferrer(r);
   }, [location.search]);
 
-  const handleSubmit = (e: FormEvent) => {
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     const newErrors: { username?: string; password?: string } = {};
 
-<<<<<<< Updated upstream
-    // Simple validation: just check if fields are filled
-    if (!username) {
-      newErrors.username = 'Username is required.';
-    }
-
-    if (!password) {
-      newErrors.password = 'Password is required.';
-    }
-=======
     if (!username.trim()) newErrors.username = 'Username is required.';
     if (!password)      newErrors.password = 'Password is required.';
->>>>>>> Stashed changes
 
     if (Object.keys(newErrors).length) {
       setErrors(newErrors);
       return;
     }
 
-<<<<<<< Updated upstream
-    setErrors({});
-    // Assuming successful login, redirect to the page stored in `referrer` or default `/ta`
-    navigate(referrer || '/ta');
-=======
     try {
       setErrors({});
       const res = await login({ id: username, password });
@@ -99,11 +81,10 @@ const Login: React.FC = () => {
       console.error('Login failed', err);
       setErrors({ password: 'Invalid username or password.' });
     }
->>>>>>> Stashed changes
   };
 
   return (
-    <div className={styles.pageWrapper}>
+    <div className={styles.loginPageWrapper}>
       <NavBar />
 
       <div className={styles.container}>
