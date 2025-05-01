@@ -1,7 +1,7 @@
 // src/components/NavBarDepartment.tsx
 import React from 'react';
 import { Bell, Home, LogOut, Settings, ClipboardList, Calendar } from 'lucide-react';
-import logo from '../assets/react.svg';
+import logo from '../../assets/react.svg';
 import { useNavigate, useLocation } from 'react-router-dom';
 import styles from './NavBarDepartment.module.css';
 

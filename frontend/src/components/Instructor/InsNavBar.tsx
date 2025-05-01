@@ -2,7 +2,7 @@
 import React from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { Bell, Home, Settings, LogOut } from 'lucide-react';
-import logo from '../assets/react.svg';
+import logo from '../../assets/react.svg';
 import styles from './InsNavBar.module.css';
 
 const InsNavBar: React.FC = () => {
