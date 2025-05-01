@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
@@ -21,8 +22,11 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.example.dto.FailedRowInfo;
+import com.example.dto.TaDto;
 import com.example.entity.Actors.Role;
 import com.example.entity.Actors.TA;
+import com.example.entity.Courses.Course;
+import com.example.entity.Courses.Section;
 import com.example.entity.General.AcademicLevelType;
 import com.example.entity.General.Date;
 import com.example.entity.Schedule.Schedule;
@@ -37,7 +41,7 @@ import com.example.exception.taskExc.TaskIsNotActiveExc;
 import com.example.exception.taskExc.TaskNotFoundExc;
 import com.example.repo.TARepo;
 import com.example.repo.TaTaskRepo;
-import com.example.repo.TaskRepo;
+
 
 import lombok.RequiredArgsConstructor;
 
@@ -49,8 +53,7 @@ public class TAServImpl implements TAServ {
     @Autowired
     private TARepo repo;
 
-    @Autowired
-    private TaskRepo taskRepo;
+
 
     @Autowired
     private TaskServ taskServ;
@@ -69,7 +72,15 @@ public class TAServImpl implements TAServ {
         return repo.findById(id)
         .orElseThrow(() -> new UserNotFoundExc(id));
     }
-    
+    @Override
+        public List<TaDto> getTAsByDepartment(String deptName){
+        List<TA> tas = repo.findByDepartment(deptName);
+        if (tas.isEmpty()) {
+            
+        }
+        return mapToDtoList(tas);
+    } 
+
     @Override
     public List<TA> getAllTAs() {
         return repo.findAllTAs(); 
@@ -272,5 +283,29 @@ public class TAServImpl implements TAServ {
         result.put("failedCount", failedRows.size());
         result.put("failedRows", failedRows);
         return result;
+    }
+
+    private List<TaDto> mapToDtoList(List<TA> tas) {
+        List<TaDto> taDtos = new ArrayList<>();
+        for (TA ta : tas) {
+            TaDto taDto = new TaDto(
+                    ta.getId(),
+                    ta.getName(),
+                    ta.getSurname(),
+                    ta.getAcademicLevel().name(),
+                    ta.getTotalWorkload(),
+                    ta.getIsActive(),
+                    ta.getIsGraduated(),
+                    ta.getDepartment(),
+                    ta.getCourses().stream()
+                            .map(Course::getCourseCode)
+                            .collect(Collectors.toList()),
+                    ta.getTasOwnLessons().stream()
+                            .map(Section::getSectionCode)
+                            .collect(Collectors.toList())
+            );
+            taDtos.add(taDto);
+        }
+        return taDtos;
     }
 }

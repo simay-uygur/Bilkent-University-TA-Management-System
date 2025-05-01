@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.example.dto.TaDto;
 import com.example.entity.Actors.TA;
 import com.example.entity.General.Date;
 import com.example.entity.Tasks.Task;
@@ -63,6 +64,12 @@ public class TA_controller {
     public TA getTAById(@PathVariable Long id) 
     {
         return serv.getTAById(id);
+    }
+    
+    @GetMapping("/api/ta/department/{deptName}")
+    public List<TaDto> getTAByDepartment(@PathVariable String deptName) 
+    {
+        return serv.getTAsByDepartment(deptName);
     }
 
     @DeleteMapping("/api/ta/{id}")
