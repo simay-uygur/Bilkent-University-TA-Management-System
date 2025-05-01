@@ -9,5 +9,5 @@ import com.example.entity.Actors.User;
 
 @Repository
 public interface UserRepo extends JpaRepository<User, Long> {
-    Optional<User> findByWebmail(String webmail);  // BU SATIRI EKLİYORSUN
+    Optional<User> findUserByWebmail(String webmail);  // BU SATIRI EKLİYORSUN
 }
