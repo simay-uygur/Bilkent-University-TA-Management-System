@@ -28,8 +28,8 @@ public interface TARepo extends JpaRepository<TA, Long> { // TA is the entity an
     
     // This query will fetch all tasks (both public and private) for a given TA that are pending
     @Query("SELECT t FROM Task t " +
-            "JOIN TA_Task tt ON t.task_id = tt.task.task_id " +
-            "WHERE tt.ta_owner.id = :taId AND t.status = 'PENDING'")
+            "JOIN TaTask tt ON t.taskId = tt.task.taskId " +
+            "WHERE tt.taOwner.id = :taId AND t.status = 'PENDING'")
     List<Task> findPendingTasksForTA(@Param("taId") Long taId); //it was giving an error
 
 
@@ -47,8 +47,8 @@ public interface TARepo extends JpaRepository<TA, Long> { // TA is the entity an
     @Query("""
       SELECT CASE WHEN COUNT(tsk)>0 THEN TRUE ELSE FALSE END
       FROM Section s
-      JOIN s.ta_as_students ta
-      JOIN s.section_tasks_list tsk
+      JOIN s.taAsStudents ta
+      JOIN s.sectionTasksList tsk
       WHERE ta.id = :taId
         AND tsk.exam IS NOT NULL
         AND (
@@ -79,7 +79,7 @@ public interface TARepo extends JpaRepository<TA, Long> { // TA is the entity an
       SELECT CASE WHEN COUNT(les)>0 THEN TRUE ELSE FALSE END
       FROM Lesson les
       JOIN les.section sec
-      JOIN sec.ta_as_students ta
+      JOIN sec.taAsStudents ta
       WHERE ta.id = :taId
         AND (
              (les.duration.start.year > :endYear)
@@ -110,15 +110,15 @@ public interface TARepo extends JpaRepository<TA, Long> { // TA is the entity an
           SELECT l
             FROM Lesson l
             JOIN l.section s
-            JOIN s.ta_as_students tas
+            JOIN s.taAsStudents tas
             WHERE tas       = ta
               AND l.duration.start  <= :to
               AND l.duration.finish >= :from
         )
         AND NOT EXISTS (
           SELECT tt
-            FROM TA_Task tt
-            WHERE tt.ta_owner = ta
+            FROM TaTask tt
+            WHERE tt.taOwner = ta
               AND tt.task.duration.start  <= :to
               AND tt.task.duration.finish >= :from
         )
@@ -127,4 +127,15 @@ public interface TARepo extends JpaRepository<TA, Long> { // TA is the entity an
       @Param("from") Date from,
       @Param("to")   Date to
     );
+
+
+    @Query("""
+       SELECT DISTINCT t
+       FROM   Section  sec
+              JOIN     sec.taAsStudents t
+              LEFT JOIN FETCH t.courses
+              LEFT JOIN FETCH t.tasOwnLessons
+       WHERE  sec.sectionId = :sectionId
+       """)
+    List<TA> findTasWithAllRelations(@Param("sectionId") int sectionId);
 }

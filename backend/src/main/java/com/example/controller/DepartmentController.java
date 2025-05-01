@@ -78,4 +78,5 @@ public class DepartmentController {
                 .toList();
         return ResponseEntity.ok(dtos);
     }
+
 }

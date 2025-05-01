@@ -2,12 +2,8 @@ package com.example.entity.Courses;
 
 import java.util.List;
 
-import jakarta.persistence.CascadeType;
-import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.Id;
-import jakarta.persistence.OneToMany;
-import jakarta.persistence.Table;
+import com.example.entity.General.Faculty;
+import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -19,6 +15,10 @@ public class Department {
 
     @Id
     private String name;  // example: "CS", "MATH", "EE"
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "faculty_code")
+    private Faculty faculty;
 
     @OneToMany(
         mappedBy = "department",

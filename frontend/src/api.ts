@@ -1,10 +1,27 @@
 import axios, { AxiosResponse } from 'axios';
 axios.defaults.baseURL = import.meta.env.VITE_API_URL || '';  // ← point to your API
-
 export interface Credentials {
   id: string;
   password: string;
 }
+
+export interface JwtResponse {
+  token: string;
+  id: number;
+  username: string;
+  role: string;
+}
+
+export function login(
+  creds: Credentials
+): Promise<AxiosResponse<JwtResponse>> {
+  return axios.post<JwtResponse>(
+    '/api/signIn',
+    creds,
+    { withCredentials: true }
+  );
+}
+
 
 export interface User {
   id: number;
@@ -16,13 +33,7 @@ export interface User {
 }
 
 // login returns nothing on success (assumes your Spring endpoint returns 200 OK with no body)
-export function login(
-  creds: Credentials
-): Promise<AxiosResponse<void>> {
-  return axios.post<void>('/api/login', creds, {
-    withCredentials: true,
-  });
-}
+
 export interface ScheduleItem {
   id: string;
   timeRange: string;
@@ -160,6 +171,8 @@ export interface Notification {
   read: boolean;
 }
 
+
+export const markAllRead = () => axios.post('/notifications/markAllRead');
 export function fetchNotifications(): Promise<AxiosResponse<Notification[]>> {
   return axios.get<Notification[]>('/api/notifications', { withCredentials: true });
 }
@@ -220,18 +233,44 @@ export function fetchAllTAs(): Promise<AxiosResponse<TA[]>> {
       }))
     }));
 }
-export interface Task {
-  id: number;
-  title: string;
-  courseId: number;
-  status: string;            // pending, approved, etc.
-  assignedTAs: TA[];         // from GET /api/task/{task_id}/tas
-}
+
 
 /** Create a new Task (POST /api/task) */
 
 
+export interface Task {
+  id: number;
+  title: string;
+  date: string;       // e.g. "2025-06-01"
+  time: string;       // e.g. "14:00"
+  type: string;       // e.g. "Lab" | "Proctoring" | ...
+  courseId: number;
+  status: string;    // optional, e.g. "pending", "approved"
+}
 
+
+// … your other existing exports (fetchAllTasks, createTask, etc.) …
+
+/**
+ * Update an existing task.
+ * Sends a PUT to /api/tasks/{id} with the task fields to overwrite.
+ */
+export function updateTask(
+  id: number,
+  payload: Omit<Task, 'id' | 'status'>
+): Promise<AxiosResponse<Task>> {
+  return axios.put<Task>(`/api/tasks/${id}`, payload, { withCredentials: true });
+}
+
+/**
+ * Delete a task by ID.
+ * Sends a DELETE to /api/tasks/{id}.
+ */
+export function deleteTask(
+  id: number
+): Promise<AxiosResponse<void>> {
+  return axios.delete<void>(`/api/tasks/${id}`, { withCredentials: true });
+}
 
 /** Assign a TA to a task (PUT /api/task/{task_id}/assign/{ta_id}) */
 
@@ -253,15 +292,6 @@ export interface TA {
   name: string;
 }
 
-export interface Task {
-  id: number;
-  title: string;
-  courseId: number;
-  date: string;      // ISO date
-  time: string;      // HH:mm
-  type: string;      // Citation | Proctoring | Lab
-  status: string;    // pending, approved, rejected
-}
 
 export function fetchAllTasks(): Promise<AxiosResponse<Task[]>> {
   return axios.get<Task[]>('/api/task/all', { withCredentials: true });
@@ -292,4 +322,20 @@ export function approveTask(taskId: number): Promise<AxiosResponse<void>> {
 
 export function rejectTask(taskId: number): Promise<AxiosResponse<void>> {
   return axios.put<void>(`/api/task/${taskId}/reject`, {}, { withCredentials: true });
+}
+export interface ProctorRequest { id: number; examId: string; numberOfTAs: number; assignedTA?: TA; }
+export interface Department    { id: string; name: string; }
+export function fetchProctoringRequests(deptId: string) {
+  return axios.get<ProctorRequest[]>(`/proctoring-requests?dept=${deptId}`);
+}
+export async function fetchAllDepartments() {
+  return axios.get<Department[]>('/departments');
+}              { /* GET /api/departments */ }
+export function fetchDepartmentTAs(deptId: string): Promise<AxiosResponse<TA[]>> {
+  return axios.get<TA[]>(`/departments/${deptId}/tas`);
+}
+export function assignProctorTA(requestId: number, taId: string): Promise<void> {
+  return axios
+    .post(`/proctoring/${requestId}/assign`, { taId }, { withCredentials: true })
+    .then(() => {});
 }

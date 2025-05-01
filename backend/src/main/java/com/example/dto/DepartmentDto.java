@@ -1,12 +1,12 @@
 package com.example.dto;
 
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 import java.util.List;
 
-@Getter
-@Setter
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class DepartmentDto {
     private String name;
     private List<CourseDto> courses;

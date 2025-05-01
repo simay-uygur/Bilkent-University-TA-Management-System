@@ -3,9 +3,11 @@ package com.example.service;
 
 
 import com.example.ExcelHelpers.FailedRowInfo;
+import com.example.dto.InstructorDto;
 import com.example.entity.Actors.Instructor;
 
 import com.example.entity.Courses.Department;
+import com.example.mapper.InstructorMapper;
 import com.example.repo.DepartmentRepo;
 import com.example.repo.InstructorRepo;
 import lombok.RequiredArgsConstructor;
@@ -18,6 +20,7 @@ import com.example.entity.Actors.Role;
 import java.io.InputStream;
 import java.io.IOException;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -26,6 +29,7 @@ public class InstructorServImpl implements InstructorServ {
     private final InstructorRepo instructorRepo;
     private final PasswordEncoder encoder;
     private final DepartmentRepo departmentRepo;
+    private final InstructorMapper instructorMapper;
 
 
     @Override
@@ -222,5 +226,24 @@ public class InstructorServImpl implements InstructorServ {
         return instructorRepo.findAll();
     }
 
+    @Override
+    public List<InstructorDto> getAllInstructorsDto() {
+        return instructorRepo.findAll().stream()
+                .map(instructorMapper::toDto)
+                .collect(Collectors.toList());
+    }
+
+
+    @Override
+    public List<InstructorDto> getInstructorsByDepartment(String departmentName) {
+        Department dept = departmentRepo
+                .findDepartmentByName(departmentName)
+                .orElseThrow(() -> new RuntimeException("Department not found: " + departmentName));
+
+        return instructorRepo.findAll().stream()
+                .filter(i -> dept.equals(i.getDepartment()))
+                .map(instructorMapper::toDto)
+                .collect(Collectors.toList());
+    }
 
 }

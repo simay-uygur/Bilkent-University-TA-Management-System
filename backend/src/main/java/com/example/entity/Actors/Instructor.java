@@ -5,6 +5,7 @@ import java.util.List;
 
 import com.example.entity.Courses.Course;
 import com.example.entity.Courses.Department;
+import com.example.entity.Courses.Section;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
 import jakarta.persistence.*;
@@ -38,5 +39,11 @@ public class Instructor extends User{
     @ManyToOne
     @JoinColumn(name = "department_id")
     private Department department;
+
+    @Column(name = "is_in_faculty")
+    private Boolean isInFaculty;  // allow null
+
+    @OneToMany(mappedBy = "instructor", fetch = FetchType.LAZY)
+    private List<Section> sections = new ArrayList<>(); //newly added 
 
 }

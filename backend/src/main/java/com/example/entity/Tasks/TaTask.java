@@ -1,6 +1,47 @@
 package com.example.entity.Tasks;
 
 import com.example.entity.Actors.TA;
+import jakarta.persistence.*;
+import lombok.*;
+
+@Entity
+@Table(name = "TA_Tasks")
+@Getter @Setter
+@NoArgsConstructor
+@AllArgsConstructor
+public class TaTask {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.TABLE)
+    private int id;
+
+    /* many – to – one : Task */
+    @ManyToOne
+    @JoinColumn(name = "task_id", insertable = true, updatable = false)
+    private Task task;
+
+    /* many – to – one : TA (the “owner” of this sub-task) */
+    @ManyToOne
+    @JoinColumn(name = "ta_id", insertable = true, updatable = false)
+    private TA taOwner;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "access_type", updatable = false)
+    private TaskAccessType type;
+
+    // Parameterized constructor
+    public TaTask(Task task, TA ta_owner, TaskAccessType type) {
+        this.taOwner = ta_owner;
+        this.task = task;
+        this.type = type;
+    }
+
+}
+
+/*
+package com.example.entity.Tasks;
+
+import com.example.entity.Actors.TA;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -48,4 +89,4 @@ public class TA_Task {
 
     // Default constructor
     public TA_Task() {}
-}
+}*/

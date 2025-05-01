@@ -12,14 +12,14 @@ import com.example.entity.Courses.Course;
 import com.example.entity.Exams.Exam;
 import com.example.entity.General.AcademicLevelType;
 import com.example.entity.General.Date;
-import com.example.entity.Tasks.TA_Task;
+import com.example.entity.Tasks.TaTask;
 import com.example.entity.Tasks.Task;
 import com.example.exception.GeneralExc;
 import com.example.repo.CourseRepo;
 import com.example.repo.DepartmentRepo;
 import com.example.repo.ExamRepo;
 import com.example.repo.TARepo;
-import com.example.repo.TA_TaskRepo;
+import com.example.repo.TaTaskRepo;
 import com.example.repo.TaskRepo;
 
 import lombok.AllArgsConstructor;
@@ -41,7 +41,7 @@ public class ProctoringServImpl implements ProctoringServ{
     private final TaskRepo taskRepo; 
     private final ExamRepo examRepo;
     private final DepartmentRepo depRepo;
-    private final TA_TaskRepo taTaskRepo;
+    private final TaTaskRepo taTaskRepo;
     private final TARepo taRepo;
 
     @Override
@@ -99,7 +99,7 @@ public class ProctoringServImpl implements ProctoringServ{
         return tas.stream()
         .filter(ta -> isAcademicLevelOK(
             course_type,
-            ta.getAcademic_level(),         
+            ta.getAcademicLevel(),         
             restriction_enabled
         ))
         .collect(Collectors.toList());
@@ -125,8 +125,8 @@ public class ProctoringServImpl implements ProctoringServ{
         LocalDate prevDay,
         LocalDate nextDay
     ) {
-        return ta.getTa_tasks().stream()
-            .map(TA_Task::getTask)                         // :contentReference[oaicite:0]{index=0}&#8203;:contentReference[oaicite:1]{index=1}
+        return ta.getTaTasks().stream()
+            .map(TaTask::getTask)                         // :contentReference[oaicite:0]{index=0}&#8203;:contentReference[oaicite:1]{index=1}
             .filter(task -> task.getExam() != null)        // :contentReference[oaicite:2]{index=2}&#8203;:contentReference[oaicite:3]{index=3}
             .map(task -> task.getDuration().getStart())     // get the embeddable Date :contentReference[oaicite:4]{index=4}&#8203;:contentReference[oaicite:5]{index=5}
             // convert to java.time.LocalDate for easy comparison

@@ -45,6 +45,10 @@ public class Student {
     @Column(name = "is_active", nullable = false)
     private Boolean isActive;
 
+    @Column(name = "is_graduated", nullable = false)
+    private Boolean isGraduated = false;
+
+
     // what is mappedBy?
     // mappedBy is used to specify the owner of the relationship. In this case, the owner is the Course class.
     @ManyToMany(

@@ -1,39 +1,57 @@
-import React, { useState, FormEvent } from 'react';
-import { useNavigate } from 'react-router-dom';
+// src/pages/Login.tsx
+import React, { useState, FormEvent, useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import NavBar from '../components/NavBar';
+import { login } from '../api';
 import styles from './Login.module.css';
 
 const Login: React.FC = () => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
-  const [errors, setErrors] = useState<{ username?: string; password?: string }>({});
+  const [errors, setErrors]   = useState<{ username?: string; password?: string }>({});
   const navigate = useNavigate();
+  const location = useLocation();
+  const [referrer, setReferrer] = useState<string | null>(null);
 
-  const handleSubmit = (e: FormEvent) => {
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const r = params.get('ref');
+    if (r) setReferrer(r);
+  }, [location.search]);
+
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     const newErrors: { username?: string; password?: string } = {};
-    // ID: numeric only and exactly 6 digits
-    if (/\D/.test(username)) {
-      newErrors.username = 'ID must contain only numeric digits.';
-    } else if (username.length !== 8) {
-      newErrors.username = 'ID must be exactly 6 digits.';
-    }
-    // Password: ≥8 chars & at least one uppercase
-    if (!/[A-Z]/.test(password)) {
-      newErrors.password = 'Password must include at least one uppercase letter.';
-    }
+
+    if (!username) newErrors.username = 'Username is required.';
+    if (!password) newErrors.password = 'Password is required.';
 
     if (Object.keys(newErrors).length) {
       setErrors(newErrors);
       return;
     }
 
-    setErrors({});
-    navigate('/ta');
+    try {
+            setErrors({});
+            const res = await login({ id: username, password });
+            const jwt = res.data?.token;
+            // if no token returned, treat as invalid credentials
+            if (!jwt) {
+              setErrors({ password: 'Invalid username or password.' });
+              return;
+            }
+            // store JWT
+            localStorage.setItem('jwt', jwt);
+            // redirect
+            navigate(referrer || '/dashboard', { replace: true });
+          } catch (err: any) {
+            console.error('Login failed', err);
+            setErrors({ password: 'Invalid username or password.' });
+          }
   };
 
   return (
-    <div className={styles.pageWrapper}>
+    <div className={styles.loginPageWrapper}>
       <NavBar />
 
       <div className={styles.container}>
@@ -41,7 +59,7 @@ const Login: React.FC = () => {
           <h1 className={styles.title}>Sign In</h1>
           <form onSubmit={handleSubmit} className={styles.form} noValidate>
             <div className={styles.formGroup}>
-              <label htmlFor="username" className={styles.label}>ID/Username</label>
+              <label htmlFor="username" className={styles.label}>Username</label>
               <input
                 id="username"
                 type="text"
