@@ -2,13 +2,418 @@ package com.example.service;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.*;
+import java.util.stream.Collectors;
+
+import com.example.ExcelHelpers.FailedRowInfo;
+import com.example.dto.CourseDto;
+import com.example.dto.SectionDto;
+import com.example.dto.LessonDto;
+import com.example.dto.InstructorDto;
+import com.example.dto.TaDto;
+import com.example.dto.StudentDto;
+import com.example.entity.Actors.Instructor;
+import com.example.entity.Actors.TA;
+import com.example.entity.Courses.Course;
+import com.example.entity.Courses.Department;
+import com.example.entity.Courses.Section;
+import com.example.entity.Tasks.Task;
+import com.example.entity.General.AcademicLevelType;
+import com.example.exception.Course.CourseNotFoundExc;
+import com.example.exception.Course.NoPrereqCourseFound;
+import com.example.exception.GeneralExc;
+import com.example.exception.NoPersistExc;
+import com.example.repo.CourseRepo;
+import com.example.repo.DepartmentRepo;
+import com.example.repo.SectionRepo;
+
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.usermodel.WorkbookFactory;
+import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
+
+import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
+
+@Service
+@Transactional(rollbackOn = Exception.class)
+@RequiredArgsConstructor
+public class CourseServImpl implements CourseServ {
+
+    private final CourseRepo courseRepo;
+    private final TAServ taServ;
+    private final TaskServ taskServ;
+    private final SectionRepo secRepo;
+    private final DepartmentRepo departmentRepo;
+
+    @Override
+    public boolean addSection(String courseCode, Section section) {
+        Course course = courseRepo.findCourseByCourseCode(courseCode)
+                .orElseThrow(() -> new CourseNotFoundExc(courseCode));
+        if (course.getSectionsList() == null) {
+            course.setSectionsList(new ArrayList<>());
+        }
+        course.getSectionsList().add(section);
+        secRepo.saveAndFlush(section);
+        courseRepo.saveAndFlush(course);
+        return true;
+    }
+
+    @Override
+    public boolean addTask(String courseCode, Task task) {
+        Course course = courseRepo.findCourseByCourseCode(courseCode)
+                .orElseThrow(() -> new CourseNotFoundExc(courseCode));
+        task.setCourse(course);
+        Task created = taskServ.createTask(task);
+        course.getTasks().add(created);
+        courseRepo.save(course);
+        return true;
+    }
+
+    @Override
+    public boolean courseExists(String courseCode) {
+        return courseRepo.existsByCourseCode(courseCode);
+    }
+
+    @Override
+    public boolean createCourse(Course course) {
+        if (course.getDepartment() != null) {
+            String deptName = course.getDepartment().getName();
+            Department dept = departmentRepo.findDepartmentByName(deptName)
+                    .orElseThrow(() -> new RuntimeException("Department not found: " + deptName));
+            course.setDepartment(dept);
+        }
+        courseRepo.saveAndFlush(course);
+        return true;
+    }
+
+    @Override
+    public CourseDto findCourse(String courseCode) {
+        Course course = courseRepo.findCourseByCourseCode(courseCode)
+                .orElseThrow(() -> new CourseNotFoundExc(courseCode));
+        return mapToDto(course);
+    }
+
+    @Override
+    public List<CourseDto> getCourses() {
+        return courseRepo.findAll().stream()
+                .map(this::mapToDto)
+                .collect(Collectors.toList());
+    }
+
+/*
+
+    private CourseDto mapToDto(Course course) {
+        CourseDto dto = new CourseDto();
+
+        // Basic info
+        dto.setCourseId(course.getCourseId());
+        dto.setCourseCode(course.getCourseCode());
+        dto.setCourseName(course.getCourseName());
+        dto.setCourseAcademicStatus(course.getCourseAcademicStatus().name());
+        dto.setDepartment(course.getDepartment().getName());
+
+//        // Coordinator
+//        Instructor coord = course.getCoordinator();
+//        if (coord != null) {
+//            dto.setCoordinator(new InstructorDto(
+//                    coord.getInstructorId(),
+//                    coord.getName(),
+//                    coord.getSurname(),
+//                    coord.getWebmail(),
+//                    coord.getRole().name(),
+//                    coord.getDepartment().getName()
+//            ));
+//        }
+
+        // Instructors
+        dto.setInstructors(course.getInstructors().stream()
+                .map(i -> new InstructorDto(
+                        i.getInstructorId(), i.getName(), i.getSurname(),
+                        i.getWebmail(), i.getRole().name(), i.getDepartment().getName()
+                ))
+                .collect(Collectors.toList()));
+
+        // Prerequisites
+        dto.setPrereqs(Arrays.stream(course.getPrereqList().split("\\s*,\\s*"))
+                .filter(s -> !s.isBlank())
+                .collect(Collectors.toList()));
+
+        // Students
+        dto.setStudents(course.getStudentsList().stream()
+                .map(s -> new StudentDto(
+                        s.getStudentId(),
+                        s.getStudentName(),
+                        s.getStudentSurname(),
+                        s.getWebmail(),
+                        s.getAcademicStatus(),
+                        s.getDepartment(),
+                        s.getIsActive(),
+                        s.getIsGraduated()
+                ))
+                .collect(Collectors.toList()));
+
+        // Sections & Lessons
+        dto.setSections(course.getSectionsList().stream()
+                .map(sec -> {
+                    List<LessonDto> lessons = sec.getLessons().stream()
+                            .map(l -> new LessonDto(
+                                    l.getDuration().toString(),
+                                    l.getLesson_room().getClass_code()
+                            ))
+                            .collect(Collectors.toList());
+                    return new SectionDto(
+                            sec.getSectionId(),
+                            sec.getSectionCode(),
+                            lessons
+                    );
+                })
+                .collect(Collectors.toList()));
+
+        // TAs
+        dto.setTas(course.getCourseTas().stream()
+                .map(ta -> new TaDto(
+                        ta.getName(),
+                        ta.getSurname(),
+                        ta.getId(),
+                        ta.getAcademic_level().name(),
+                        ta.getTotal_workload(),
+                        ta.getCourses().stream()
+                                .map(Course::getCourseCode)
+                                .collect(Collectors.toList()),
+                        ta.getTas_own_lessons().stream()
+                                .map(Section::getSectionCode)
+                                .collect(Collectors.toList())
+                ))
+                .collect(Collectors.toList()));
+
+        return dto;
+    }
+*/
+
+    private CourseDto mapToDto(Course course) {
+        CourseDto dto = new CourseDto();
+
+        /* ── basic course fields ────────────────────────── */
+        dto.setCourseId(course.getCourseId());
+        dto.setCourseCode(course.getCourseCode());
+        dto.setCourseName(course.getCourseName());
+        dto.setCourseAcademicStatus(course.getCourseAcademicStatus().name());
+        dto.setDepartment(course.getDepartment().getName());
+
+        /* ── prereqs (split → List<String>) ─────────────── */
+        dto.setPrereqs(
+                Arrays.stream(course.getPrereqList().split("\\s*,\\s*"))
+                        .filter(s -> !s.isBlank())
+                        .collect(Collectors.toList())
+        );
+
+        /* ── students ───────────────────────────────────── */
+        dto.setStudents(
+                course.getStudentsList().stream()
+                        .map(s -> new StudentDto(
+                                s.getStudentId(),
+                                s.getStudentName(),
+                                s.getStudentSurname(),
+                                s.getWebmail(),
+                                s.getAcademicStatus(),      // ← enum → String
+                                s.getDepartment(),       // ← entity → name
+                                s.getIsActive(),
+                                s.getIsGraduated()
+                        ))
+                        .collect(Collectors.toList())
+        );
+
+
+        dto.setSections(
+                course.getSectionsList().stream()
+                        .map(sec -> {
+
+                            /* lessons */
+                            List<LessonDto> lessons = sec.getLessons().stream()
+                                    .map(l -> new LessonDto(
+                                            l.getDuration().toString(),
+                                            l.getLessonRoom().getClassCode()))
+                                    .collect(Collectors.toList());
+
+                            /* instructor + its courses */
+                            Instructor i = sec.getInstructor();
+                            List<String> courseCodes = i.getCourses().stream()
+                                    .map(Course::getCourseCode)
+                                    .collect(Collectors.toList());
+
+                            InstructorDto instrDto = new InstructorDto(
+                                    i.getId(),                       // id
+                                    i.getName(),                     // name
+                                    i.getSurname(),                  // surname
+                                    i.getWebmail(),                  // webmail
+                                    i.getDepartment().getName(),     // department name
+                                    courseCodes                      // course codes list
+                            );
+
+                            return new SectionDto(
+                                    sec.getSectionId(),
+                                    sec.getSectionCode(),
+                                    lessons,
+                                    instrDto
+                            );
+                        })
+                        .collect(Collectors.toList())
+        );
+        /*
+          private Long id;
+    private String name;
+    private String surname;
+    private String academicLevel;
+    private int totalWorkload;
+    private Boolean isActive;
+    private Boolean isGraduated;
+    private String department;
+    private List<String> courses;
+    private List<String> lessons;
+    */
+        dto.setTas(
+                course.getCourseTas().stream()
+                        .map(ta -> new TaDto(
+                                ta.getId(),
+                                ta.getName(),
+                                ta.getSurname(),
+                                ta.getAcademicLevel().toString(),           // ← camel-case
+                                ta.getTotalWorkload(),
+                                ta.getIsActive(),
+                                ta.getIsGraduated(),// ← camel-case
+                                ta.getDepartment(),
+                                ta.getCourses().stream()
+                                        .map(Course::getCourseCode)
+                                        .collect(Collectors.toList()),
+                                ta.getTasOwnLessons().stream()          // ← camel-case
+                                        .map(Section::getSectionCode)
+                                        .collect(Collectors.toList())
+                        ))
+                        .collect(Collectors.toList())
+        );
+
+        return dto;
+    }
+
+    @Override
+    public boolean assignTA(Long taId, String courseCode) {
+        Course course = courseRepo.findCourseByCourseCode(courseCode)
+                .orElseThrow(() -> new CourseNotFoundExc(courseCode));
+        TA ta = taServ.getTAById(taId);
+        if (ta.getCourses().contains(course)) {
+            throw new GeneralExc("TA " + taId + " already assigned to " + courseCode);
+        }
+        if (ta.getTasOwnLessons().stream()
+                .anyMatch(sec -> sec.getCourse().getCourseCode().equals(courseCode))) {
+            throw new GeneralExc("TA " + taId + " takes this course as a student");
+        }
+        course.getCourseTas().add(ta);
+        courseRepo.save(course);
+        return true;
+    }
+
+    @Override
+    public Task getTaskByID(String courseCode, int taskId) {
+        if (!courseRepo.existsByCourseCode(courseCode)) {
+            throw new CourseNotFoundExc(courseCode);
+        }
+        return courseRepo.findTask(taskId, courseCode)
+                .orElseThrow(() -> new GeneralExc("Task not assigned to " + courseCode));
+    }
+
+    @Override
+    public boolean updateTask(String courseCode, int taskId, Task task) {
+        if (taskServ.updateTask(taskId, task)) {
+            return true;
+        }
+        throw new NoPersistExc("Task update failed");
+    }
+
+    @Override
+    public Map<String, Object> importCoursesFromExcel(MultipartFile file) throws IOException {
+        List<Course> success = new ArrayList<>();
+        List<FailedRowInfo> failed = new ArrayList<>();
+        try (InputStream in = file.getInputStream(); Workbook wb = WorkbookFactory.create(in)) {
+            Sheet sheet = wb.getSheetAt(0);
+            for (Row row : sheet) {
+                if (row.getRowNum() == 0) continue;
+                try {
+                    String deptName = row.getCell(0).getStringCellValue().trim();
+                    Department dept = departmentRepo.findDepartmentByName(deptName)
+                            .orElseThrow(() -> new GeneralExc("Dept not found: " + deptName));
+                    int no = (int) row.getCell(1).getNumericCellValue();
+                    String name = row.getCell(2).getStringCellValue().trim();
+                    String code = deptName + "-" + no;
+                    String prereq = row.getCell(3) != null
+                            ? row.getCell(3).getStringCellValue().trim() : "";
+                    String acs = row.getCell(4) != null
+                            ? row.getCell(4).getStringCellValue().trim().toUpperCase() : "BS";
+                    AcademicLevelType alt;
+                    switch (acs) {
+                        case "BS": alt = AcademicLevelType.BS; break;
+                        case "MS": alt = AcademicLevelType.MS; break;
+                        case "PHD": alt = AcademicLevelType.PHD; break;
+                        default: throw new GeneralExc("Invalid academic level: " + acs);
+                    }
+                    if (courseRepo.existsByCourseCode(code)) {
+                        throw new GeneralExc("Already exists: " + code);
+                    }
+                    Course c = new Course();
+                    c.setCourseCode(code);
+                    c.setCourseName(name);
+                    c.setDepartment(dept);
+                    c.setPrereqList(prereq);
+                    c.setCourseAcademicStatus(alt);
+                    success.add(c);
+                } catch (Exception ex) {
+                    StringBuilder raw = new StringBuilder();
+                    row.forEach(cell -> raw.append(cell.toString()).append("|"));
+                    failed.add(new FailedRowInfo(row.getRowNum(), ex.getClass().getSimpleName() + ": " + ex.getMessage()));
+                }
+            }
+        }
+        if (!success.isEmpty()) {
+            courseRepo.saveAll(success);
+            courseRepo.flush();
+        }
+        Map<String,Object> res = new HashMap<>();
+        res.put("successCount", success.size());
+        res.put("failedCount", failed.size());
+        res.put("failedRows", failed);
+        return res;
+    }
+
+    private void checkPrerequisites(Course c) {
+        if (c.getPrereqList() != null) {
+            for (String code : c.getPrereqList().split(",")) {
+                if (!courseRepo.existsByCourseCode(code.trim())) {
+                    throw new NoPrereqCourseFound(code.trim());
+                }
+            }
+        }
+    }
+}
+
+
+
+/*
+package com.example.service;
+
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import com.example.ExcelHelpers.FailedRowInfo;
+import com.example.dto.*;
+import com.example.entity.Actors.Instructor;
 import com.example.entity.Courses.*;
 import com.example.entity.General.AcademicLevelType;
 import com.example.exception.Course.NoPrereqCourseFound;
@@ -19,18 +424,9 @@ import org.apache.poi.ss.usermodel.WorkbookFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.example.entity.Actors.Instructor_DTO;
 import com.example.entity.Actors.TA;
-import com.example.entity.Actors.TA_DTO;
 import com.example.entity.Courses.Course;
-import com.example.entity.Courses.CourseCodeConverter;
-import com.example.entity.Courses.Course_DTO;
-import com.example.entity.Courses.Lesson;
-import com.example.entity.Courses.Lesson_DTO;
 import com.example.entity.Courses.Section;
-import com.example.entity.Courses.Section_DTO;
-import com.example.entity.General.Student;
-import com.example.entity.General.Student_DTO;
 import com.example.entity.Tasks.Task;
 import com.example.exception.Course.CourseNotFoundExc;
 import com.example.exception.GeneralExc;
@@ -92,6 +488,7 @@ public class CourseServImpl implements CourseServ{
         return courseRepo.existsByCourseCode(course_code);
     }
 
+*/
 /*
     @Override
     public boolean createCourse(Course course) {
@@ -99,7 +496,8 @@ public class CourseServImpl implements CourseServ{
 
         return true;
     }
-*/
+*//*
+
 
     @Override
     @Transactional
@@ -118,7 +516,7 @@ public class CourseServImpl implements CourseServ{
     }
 
     @Override
-    public Course_DTO findCourse(String course_code) {
+    public CourseDto findCourse(String course_code) {
         Optional<Course> courseOpt = courseRepo.findCourseByCourseCode(course_code);
 
         if (!courseOpt.isPresent())
@@ -128,51 +526,101 @@ public class CourseServImpl implements CourseServ{
         return createDTO(course);
     }
 
-    private Course_DTO createDTO(Course course){
-        Course_DTO dto = new Course_DTO();
-        dto.setCourse_code(course.getCourseCode());
+
+    private CourseDto createDTO(Course course) {
+        CourseDto dto = new CourseDto();
+
+        // Basic course info
+        dto.setCourseId(course.getCourseId());
+        dto.setCourseCode(course.getCourseCode());
+        dto.setCourseName(course.getCourseName());
+        dto.setCourseAcademicStatus(course.getCourseAcademicStatus().name());
         dto.setDepartment(course.getDepartment().getName());
-        dto.setAcademical_status(course.getCourseAcademicStatus().toString());
-        Instructor_DTO coor_dto = new Instructor_DTO();
-        dto.setCoordinator(coor_dto);
-        dto.setInstructors(null);
-        dto.setPrereqs(course.getPrereqList().trim().split("\\s*,\\s*"));
-        List<Student_DTO> studDtos = new ArrayList<>();
-        for (Student stud : course.getStudentsList()){
-            Student_DTO stud_dto = new Student_DTO(stud.getStudentId(),stud.getStudentName(), stud.getStudentSurname());  //i changed the int to long
-            studDtos.add(stud_dto);
-        }
+
+        // Coordinator
+//        Instructor coord = course.getCoordinator();
+//        InstructorDto coordDto = new InstructorDto(
+//                coord.getInstructorId(),
+//                coord.getName(),
+//                coord.getSurname(),
+//                coord.getWebmail(),
+//                coord.getRole().name(),
+//                coord.getDepartment().getName()
+//        );
+        dto.setCoordinator(coordDto);
+
+        // Instructors
+        List<InstructorDto> instructorDtos = course.get().stream()
+                .map(i -> new InstructorDto(
+                        i.getInstructorId(),
+                        i.getName(),
+                        i.getSurname(),
+                        i.getWebmail(),
+                        i.getRole().name(),
+                        i.getDepartment().getName()
+                ))
+                .collect(Collectors.toList());
+        dto.setInstructors(instructorDtos);
+
+        // Prerequisites (List<String>)
+        List<String> prereqs = Arrays.stream(course.getPrereqList().split("\\s*,\\s*"))
+                .filter(s -> !s.isBlank())
+                .collect(Collectors.toList());
+        dto.setPrereqs(prereqs);
+
+        // Students
+        List<StudentDto> studDtos = course.getStudentsList().stream()
+                .map(s -> new StudentDto(
+                        s.getStudentId(),
+                        s.getStudentName(),
+                        s.getStudentSurname(),
+                        s.getWebmail(),
+                        s.getAcademicStatus().name(),
+                        s.getDepartment().getName(),
+                        s.getIsActive(),
+                        s.getIsGraduated()
+                ))
+                .collect(Collectors.toList());
         dto.setStudents(studDtos);
-        List<Section_DTO> sections = new ArrayList<>();
-        for (Section section : course.getSectionsList()){
-            Section_DTO sec = new Section_DTO();
-            sec.setSection_code(section.getSection_code());
-            List<Lesson_DTO> lessons = new ArrayList<>();
-            for (Lesson lesson : section.getLessons()){
-                Lesson_DTO lessonDto = new Lesson_DTO(lesson.getDuration(), lesson.getLesson_room().getClass_code());
-                lessons.add(lessonDto);
-            }
-            sec.setDurations(lessons);
-        }
 
-        dto.setSections(sections);
+        // Sections and their Lessons
+        List<SectionDto> sectionDtos = course.getSectionsList().stream()
+                .map(sec -> {
+                    List<LessonDto> lessonDtos = sec.getLessons().stream()
+                            .map(l -> new LessonDto(
+                                    l.getDuration().toString(),
+                                    l.getLesson_room().getClass_code()
+                            ))
+                            .collect(Collectors.toList());
+                    return new SectionDto(
+                            sec.getSection_id(),
+                            sec.getSectionCode(),
+                            lessonDtos
+                    );
+                })
+                .collect(Collectors.toList());
+        dto.setSections(sectionDtos);
 
-        List<TA_DTO> taDtos = new ArrayList<>();
-        for (TA ta : course.getCourseTas()){
-            List<String> courses = new ArrayList<>();
-            for (Course c : ta.getCourses()){
-                courses.add(c.getCourseCode());
-            }
-
-            List<String> lessons = new ArrayList<>();
-            for(Section c : ta.getTas_own_lessons()){
-                lessons.add(c.getSection_code());
-            }
-            TA_DTO taDto = new TA_DTO(ta.getName(), ta.getSurname(), ta.getId(), ta.getAcademic_level().toString(),
-                                      ta.getTotal_workload(), courses, lessons);
-            taDtos.add(taDto);
-        }
-
+        // TAs
+        List<TaDto> taDtos = course.getCourseTas().stream()
+                .map(ta -> {
+                    List<String> taCourseCodes = ta.getCourses().stream()
+                            .map(Course::getCourseCode)
+                            .collect(Collectors.toList());
+                    List<String> taLessonCodes = ta.getTasOwnLessons().stream()
+                            .map(Section::getSectionCode)
+                            .collect(Collectors.toList());
+                    return new TaDto(
+                            ta.getName(),
+                            ta.getSurname(),
+                            ta.getId(),
+                            ta.getAcademicLevel().name(),
+                            ta.getTotalWorkload(),
+                            taCourseCodes,
+                            taLessonCodes
+                    );
+                })
+                .collect(Collectors.toList());
         dto.setTas(taDtos);
 
         return dto;
@@ -212,11 +660,11 @@ public class CourseServImpl implements CourseServ{
     }
 
     @Override
-    public List<Course_DTO> getCourses(){
+    public List<CourseDto> getCourses(){
         List<Course> courses = courseRepo.findAll();
-        List<Course_DTO> coursesDtos = new ArrayList<>();
+        List<CourseDto> coursesDtos = new ArrayList<>();
         for (Course course : courses){
-            Course_DTO courseDto = createDTO(course);
+            CourseDto courseDto = createDTO(course);
             coursesDtos.add(courseDto);
         }
         return coursesDtos;
@@ -242,12 +690,14 @@ public class CourseServImpl implements CourseServ{
         return task.get();
     }
 
-    /*
+    */
+/*
     1.	Department name (String) → row.getCell(0)
 	2.	Course number (Numeric) → row.getCell(1)
 	3.	Course name (String) → row.getCell(2)
 	4.	Prerequisite list (String, optional) → row.getCell(3)
-     */
+     *//*
+
     @Override
     public Map<String, Object> importCoursesFromExcel(MultipartFile file) throws IOException {
         List<Course> successfulCourses = new ArrayList<>();
@@ -341,3 +791,4 @@ public class CourseServImpl implements CourseServ{
 
 
 }
+*/

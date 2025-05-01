@@ -1,5 +1,107 @@
 package com.example.entity.Tasks;
 
+import com.example.entity.Courses.Course;
+import com.example.entity.Exams.Exam;
+import com.example.entity.General.Event;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import jakarta.persistence.*;
+import lombok.*;
+
+import java.util.ArrayList;
+import java.util.List;
+
+@Entity
+@Table(name = "task_table")
+@Getter @Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@JsonInclude(JsonInclude.Include.NON_DEFAULT)
+public class Task {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.TABLE)
+    @Column(name = "task_id", nullable = false, updatable = true)
+    private int taskId;
+
+    @Embedded
+    @Column(name = "duration", nullable = false)
+    private Event duration;
+
+    @Column(name = "is_time_passed", nullable = false)
+    private boolean timePassed;
+
+    @Column(name = "workload", nullable = false)
+    private int workload;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "task_type", nullable = false)
+    private TaskType taskType;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status", nullable = false)
+    private TaskState status = TaskState.UNKNOWN;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "access_type", updatable = false)
+    private TaskAccessType accessType;
+
+    @OneToMany(mappedBy = "task", cascade = CascadeType.ALL)
+    private List<TaTask> tasList = new ArrayList<>();
+
+    @Column(name = "required_tas", nullable = false)
+    private int requiredTAs;
+
+    @Column(name = "size_of_tas", nullable = false)
+    private int amountOfTas = 0;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "courseId")
+    private Course course;
+
+    @JsonIgnore
+    @OneToOne(
+            cascade        = { CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE },
+            optional       = true,
+            fetch          = FetchType.LAZY
+    )
+    @JoinColumn(name = "exam_id")
+    private Exam exam;
+
+    /* ─── helper methods ─────────────────────────── */
+
+    /** true if the task’s Event says it is currently ongoing */
+    public boolean isTaskActive() {
+        return duration != null && duration.isOngoing();
+    }
+
+    public boolean addTA() {
+        if (tasList == null) tasList = new ArrayList<>();
+        if (amountOfTas < requiredTAs) {
+            amountOfTas++;
+            return true;
+        }
+        return false;
+    }
+
+    public boolean removeTA() {
+        if (amountOfTas > 0) {
+            amountOfTas--;
+            return true;
+        }
+        return false;
+    }
+
+    public String getStartDate() {
+        return (duration != null && duration.getStart() != null)
+                ? duration.getStart().toString()
+                : null;
+    }
+}
+
+/*
+package com.example.entity.Tasks;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -117,3 +219,4 @@ public class Task {
         return null; // or throw an exception if you prefer
     }
 }
+*/

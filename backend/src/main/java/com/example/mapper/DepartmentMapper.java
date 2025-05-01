@@ -26,9 +26,10 @@ public class DepartmentMapper {
 
     private CourseDto toCourseDto(Course course) {
         CourseDto cd = new CourseDto();
-        cd.setId(course.getCourseId());
+        cd.setCourseId(course.getCourseId());
         cd.setCourseName(course.getCourseName());
-        cd.setDepartmentName(course.getDepartment().getName());
+        cd.setDepartment(course.getDepartment().getName());
         return cd;
     }
 }
+

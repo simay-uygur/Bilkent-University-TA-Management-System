@@ -1,5 +1,50 @@
 package com.example.entity.Tasks;
 
+import jakarta.persistence.Column;
+import jakarta.persistence.Embeddable;
+import lombok.*;
+
+import java.io.Serializable;
+import java.util.Objects;
+
+@Embeddable
+@Getter @Setter
+@NoArgsConstructor
+@AllArgsConstructor
+public class TaTaskId implements Serializable {
+
+    @Column(name = "task_id")
+    private int taskId;
+
+    @Column(name = "ta_id")
+    private Long taId;
+
+    @Column(name = "ta_task_id")
+    private Long taTaskId;
+
+    public TaTaskId(int taskId, Long id) {
+        this.taskId = taskId;
+        this.taId = id;
+        this.taTaskId = Long.parseLong(taskId + "" + id);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof TaTaskId)) return false;
+        TaTaskId that = (TaTaskId) o;
+        return taskId == that.taskId && Objects.equals(taId, that.taId);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(taskId, taId);
+    }
+}
+
+/*
+package com.example.entity.Tasks;
+
 import java.io.Serializable;
 import java.util.Objects;
 
@@ -8,7 +53,7 @@ import jakarta.persistence.Embeddable;
 import lombok.Getter;
 import lombok.Setter;
 
-public 
+public
 @Embeddable
 @Getter
 @Setter
@@ -44,4 +89,5 @@ class TA_TaskId implements Serializable{
     public int hashCode() {
         return Objects.hash(id1, id2);
     }
-} 
+}
+*/

@@ -19,11 +19,11 @@ import com.example.entity.General.Event;
 import com.example.entity.Schedule.Schedule;
 import com.example.entity.Schedule.ScheduleItem;
 import com.example.entity.Schedule.ScheduleItemType;
-import com.example.entity.Tasks.TA_Task;
+import com.example.entity.Tasks.TaTask;
 import com.example.entity.Tasks.Task;
 import com.example.exception.taExc.TaNotFoundExc;
 import com.example.repo.TARepo;
-import com.example.repo.TA_TaskRepo;
+import com.example.repo.TaTaskRepo;
 
 import jakarta.persistence.Embeddable;
 
@@ -46,7 +46,7 @@ public class ScheduleServImpl implements ScheduleServ {
     private TARepo taRepo;
 
     @Autowired
-    private TA_TaskRepo taTaskRepo;
+    private TaTaskRepo taTaskRepo;
 
     @Override
     public LocalDate getWeekStart(LocalDate date) {
@@ -78,14 +78,14 @@ public class ScheduleServImpl implements ScheduleServ {
             );
 
             String key = startDate.format(dtf);// in format "yyyy-MM-dd"
-            String title = task.getTask_type().toString() ;
-            ScheduleItem item = new ScheduleItem(title, event, ScheduleItemType.TASK, task.getTask_id(),key);
+            String title = task.getTaskType().toString() ;
+            ScheduleItem item = new ScheduleItem(title, event, ScheduleItemType.TASK, task.getTaskId(),key);
             if (!schedule.getScheduleItems().contains(item)) {
                 schedule.addScheduleItem(item);
             }
         }
 
-        for (Section sec : ta.getTas_own_lessons()) {
+        for (Section sec : ta.getTasOwnLessons()) {
             // Obtain the Event from the lesson, which contains the start Date.
             for (Lesson lesson : sec.getLessons()){
                 Event event = lesson.getDuration();
@@ -95,8 +95,8 @@ public class ScheduleServImpl implements ScheduleServ {
                     event.getStart().getDay()
                 );
                 String key = startDate.format(dtf);// in format "yyyy-MM-dd"
-                String title = sec.getSection_code();
-                ScheduleItem item = new ScheduleItem(title, event, ScheduleItemType.LESSON, sec.getSection_id(),key);
+                String title = sec.getSectionCode();
+                ScheduleItem item = new ScheduleItem(title, event, ScheduleItemType.LESSON, sec.getSectionId(),key);
                 if (!schedule.getScheduleItems().contains(item)) {
                     schedule.addScheduleItem(item);
                 } 
@@ -110,12 +110,12 @@ public class ScheduleServImpl implements ScheduleServ {
 
     // Stub methods to represent data fetching. Replace these with actual repository calls.
     private List<Task> fetchTasksForTA(Long taId, String startDate) {
-        //List<TA_Task> ta_tasks = taTaskRepo.findAllPendingTasksByTaId(taId);
-        List<TA_Task> ta_tasks = taTaskRepo.findAllByTaId(taId);
+        //List<TaTask> TaTasks = taTaskRepo.findAllPendingTasksByTaId(taId);
+        List<TaTask> TaTasks = taTaskRepo.findAllByTaId(taId);
         List<Task> tasks_list = new ArrayList<>();
-        for (TA_Task ta_task : ta_tasks) {
-            Task task = ta_task.getTask();
-            if (task != null && task.getStart_date().compareTo(startDate) >= 0) {
+        for (TaTask TaTask : TaTasks) {
+            Task task = TaTask.getTask();
+            if (task != null && task.getStartDate().compareTo(startDate) >= 0) {
                 tasks_list.add(task);
             }
         }
@@ -136,9 +136,9 @@ public class ScheduleServImpl implements ScheduleServ {
 
         TA ta_obj = ta.get() ;
         List<Task> tasks_list = new ArrayList<>();
-        for (TA_Task ta_task : ta_obj.getTa_tasks()) {
-            Task task = ta_task.getTask();
-            if (task != null && task.getStart_date().equals(date)) {
+        for (TaTask TaTask : ta_obj.getTaTasks()) {
+            Task task = TaTask.getTask();
+            if (task != null && task.getStartDate().equals(date)) {
                 tasks_list.add(task);
             }
         }
@@ -152,7 +152,7 @@ public class ScheduleServImpl implements ScheduleServ {
         List<Task> tasks = fetchTasksOnDateForTA(ta.getId(), date);
         for(Task task : tasks) {
             Event event = task.getDuration();
-            ScheduleItem item = new ScheduleItem(task.getTask_type().toString() + " Task", event, ScheduleItemType.TASK, task.getTask_id(), date);
+            ScheduleItem item = new ScheduleItem(task.getTaskType().toString() + " Task", event, ScheduleItemType.TASK, task.getTaskId(), date);
             scheduleItems.add(item);
         }
         return scheduleItems;

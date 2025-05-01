@@ -2,6 +2,50 @@ package com.example.entity.Courses;
 
 import com.example.entity.General.ClassRoom;
 import com.example.entity.General.Event;
+import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
+
+/**
+ * One weekly lesson hour (time-slot) of a Section.
+ */
+@Entity
+@Table(name = "lesson_table")
+@Getter
+@Setter
+public class Lesson {
+
+    /* ─────────────── identifiers ─────────────── */
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "lesson_id")
+    private Long lessonId;
+
+    @Embedded
+    @Column(name = "duration")
+    private Event duration;                       // start / end date-times
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "section_id", nullable = false)
+    private Section section;                      // each lesson belongs to exactly one section
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "classroom_id")            // nullable=true (default)
+    private ClassRoom lessonRoom;
+
+    public enum LessonType {
+        LESSON,
+        SPARE_HOUR
+    }
+}
+
+
+/*
+package com.example.entity.Courses;
+
+import com.example.entity.General.ClassRoom;
+import com.example.entity.General.Event;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Embedded;
@@ -44,3 +88,4 @@ public class Lesson {
     }
 
 }
+*/

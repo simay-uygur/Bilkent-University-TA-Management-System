@@ -1,5 +1,111 @@
 package com.example.entity.Actors;
 
+import com.example.entity.Courses.Course;
+import com.example.entity.Courses.Section;
+import com.example.entity.General.AcademicLevelType;
+import com.example.entity.General.ProctorType;
+import com.example.entity.Tasks.TaTask;
+import com.example.exception.NoPersistExc;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import jakarta.persistence.*;
+import lombok.*;
+import org.hibernate.annotations.DynamicUpdate;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+
+/**
+ * Teaching-Assistant entity.
+ * Field names follow Java camel-case conventions; column names keep their original
+ * snake-case via {@code @Column(name = "...")}, so no DB migration is required.
+ */
+@Entity
+@Table(name = "TA")
+@DynamicUpdate
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@JsonInclude(JsonInclude.Include.NON_DEFAULT)
+public class TA extends User {
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "academic_level", nullable = false)
+    private AcademicLevelType academicLevel;
+
+    @Column(name = "total_workload", nullable = false)
+    private int totalWorkload = 0;
+
+    @Column(name = "is_active", updatable = false, nullable = false)
+    private Boolean isActive = true;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "ta_type", nullable = false)
+    private TAType taType;
+
+    @Column(name = "department", nullable = false)
+    private String department;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "proctor_type")
+    private ProctorType proctorType = ProctorType.ALL_COURSES;
+
+    @Column(name = "is_graduated", nullable = false)
+    private Boolean isGraduated = false;
+
+
+    /** Courses for which this user is an official TA */
+    @ManyToMany(
+            mappedBy = "courseTas",
+            fetch = FetchType.LAZY,
+            cascade = { CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REFRESH }
+    )
+    private List<Course> courses = new ArrayList<>();
+
+    /** Sections the TA attends as a student */
+    @ManyToMany(
+            mappedBy = "taAsStudents",
+            fetch = FetchType.LAZY,
+            cascade = { CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REFRESH }
+    )
+    private List<Section> tasOwnLessons = new ArrayList<>();
+
+    /** Individual tasks (grading, proctoring, etc.) */
+    @OneToMany(mappedBy = "taOwner", cascade = CascadeType.ALL)
+    private List<TaTask> taTasks = new ArrayList<>();
+
+    /* ─────────────── helpers ─────────────── */
+
+    public void increaseWorkload(int load) {
+        totalWorkload += load;
+    }
+
+    public void decreaseWorkload(int load) {
+        if (totalWorkload - load < 0) {
+            throw new NoPersistExc("Decrease workload error: workload cannot be negative!");
+        }
+        totalWorkload -= load;
+    }
+
+    /* ─────────────── equality ─────────────── */
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof TA other)) return false;
+        return getId() != null && getId().equals(other.getId());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(getId());
+    }
+}
+
+/*
+package com.example.entity.Actors;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -76,7 +182,10 @@ public class TA extends User{
     }
 
     @OneToMany(mappedBy = "ta_owner", cascade = CascadeType.ALL)
-    private List<TA_Task> ta_tasks = new ArrayList<>(); 
+    private List<TA_Task> ta_tasks = new ArrayList<>();
+
+    @Column(name = "is_graduated", nullable = false)
+    private Boolean isGraduated = false;
 
     public void decreaseWorkLoad(int load){
         if (total_workload - load < 0)
@@ -98,6 +207,7 @@ public class TA extends User{
 }
 
 //json should be changed
+*/
 /*{
     "role" : "TA",
     "id" : 1, 

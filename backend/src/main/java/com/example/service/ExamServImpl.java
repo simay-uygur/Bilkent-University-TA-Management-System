@@ -3,14 +3,15 @@ package com.example.service;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.example.dto.ExamDto;
+import com.example.dto.ExamRoomDto;
+import com.example.dto.StudentDto;
 import org.springframework.stereotype.Service;
 
 import com.example.entity.Exams.Exam;
 import com.example.entity.Exams.ExamRoom;
-import com.example.entity.Exams.ExamRoom_DTO;
-import com.example.entity.Exams.Exam_DTO;
+
 import com.example.entity.General.Student;
-import com.example.entity.General.Student_DTO;
 import com.example.repo.ExamRepo;
 
 import jakarta.transaction.Transactional;
@@ -21,24 +22,29 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class ExamServImpl implements ExamServ{
 
-    private ExamRepo examRepo;
+    private final ExamRepo examRepo;
 
     @Override
-    public Exam_DTO getExam(Exam exam) {
-        Exam_DTO dto = new Exam_DTO();
-        List<ExamRoom_DTO> rooms = new ArrayList<>();
+    public ExamDto getExam(Exam exam) {
+        ExamDto dto = new ExamDto();
+        List<ExamRoomDto> rooms = new ArrayList<>();
         for (ExamRoom room : exam.getExam_rooms()){
-            List<Student_DTO> studDtos = new ArrayList<>();
-            for(Student stud : room.getStudents_list()){
-                Student_DTO studDto = new Student_DTO(stud.getStudentId(), stud.getStudentName(), stud.getStudentSurname());
-                studDtos.add(studDto);
+            List<StudentDto> studDtos = new ArrayList<>();
+            for (Student stud : room.getStudentsList()) { // some other fields may be added here if needed.
+                StudentDto s = new StudentDto();
+                s.setStudentId(stud.getStudentId());
+                s.setStudentName(stud.getStudentName());
+                s.setStudentSurname(stud.getStudentSurname());
+                s.setAcademicStatus(stud.getAcademicStatus());
+                s.setDepartment(stud.getDepartment());
+                studDtos.add(s);
             }
-            ExamRoom_DTO room_DTO = new ExamRoom_DTO(room.getExam_room().getClass_code(),studDtos);
+            ExamRoomDto room_DTO = new ExamRoomDto(room.getExamRoom().getClassCode(), studDtos);
             rooms.add(room_DTO);
         }
-        dto.setCourse(exam.getTask().getCourse().getCourseCode());
+        dto.setCourseCode(exam.getTask().getCourse().getCourseCode());
         dto.setDuration(exam.getTask().getDuration().toString());
-        dto.setExam_rooms(rooms);
+        dto.setExamRooms(rooms);
         return dto;
     }
 

@@ -114,5 +114,9 @@ public class Course {
         orphanRemoval = true
     )
     private List<Task> tasks = new ArrayList<>();
+
+
+
+    //coordinator should be also added
 }
 // only one prepersist call method
