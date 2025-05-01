@@ -68,7 +68,7 @@ const Login: React.FC = () => {
         case 'ROLE_INSTRUCTOR':
           home = '/instructor';
           break;
-        case 'ROLE_DEPARTMENT':
+        case 'ROLE_DEPARTMENT_STAFF':
           home = '/dept-office';
           break;
         case 'ROLE_DEAN':

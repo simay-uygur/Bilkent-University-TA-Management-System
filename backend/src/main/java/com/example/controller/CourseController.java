@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import com.example.dto.CourseDto;
+import com.example.dto.InstructorDto;
 import com.example.dto.TaDto;
 import com.example.dto.TaskDto;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -62,6 +63,13 @@ public class CourseController {
                 "section_code" : "cs319-1"
             }
         */
+    }
+    @GetMapping("api/course/department/{deptName}")
+    public ResponseEntity<List<CourseDto>> getByDepartment(
+            @PathVariable String deptName ) {
+        return new ResponseEntity<>(courseServ.getCoursesByDepartment(deptName), HttpStatus.FOUND);
+       /*  List<CourseDto> dtos = courseServ.getCoursesByDepartment(deptName);
+        return ResponseEntity.ok(dtos); */
     }
 
     @GetMapping("api/course/{course_code}")
@@ -144,5 +152,5 @@ public class CourseController {
         return new ResponseEntity<>()
     }*/
     
-
+    
 }

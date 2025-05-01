@@ -47,7 +47,12 @@ public class CourseServImpl implements CourseServ {
     private final TaskServ taskServ;
     private final SectionRepo secRepo;
     private final DepartmentRepo departmentRepo;
-
+    @Override
+    public List<CourseDto> getCoursesByDepartment(String deptName) {
+        List<Course> courses = courseRepo.findCourseByDepartmentName(deptName)
+                                         .orElse(Collections.emptyList());
+        return mapToDtoList(courses);
+    }
     @Override
     public boolean addSection(String courseCode, Section section) {
         Course course = courseRepo.findCourseByCourseCode(courseCode)
@@ -101,6 +106,8 @@ public class CourseServImpl implements CourseServ {
         return courseRepo.findAll().stream()
                 .map(this::mapToDto)
                 .collect(Collectors.toList());
+
+        //return mapToDtoList(courseRepo.findAll());
     }
 
 /*
@@ -192,7 +199,11 @@ public class CourseServImpl implements CourseServ {
         return dto;
     }
 */
-
+private List<CourseDto> mapToDtoList(List<Course> courses) {
+    return courses.stream()
+                  .map(this::mapToDto)    // reuse your single‐entity mapper
+                  .collect(Collectors.toList());
+}
     private CourseDto mapToDto(Course course) {
         CourseDto dto = new CourseDto();
 
@@ -395,6 +406,8 @@ public class CourseServImpl implements CourseServ {
             }
         }
     }
+
+   
 }
 
 
