@@ -4,7 +4,7 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.example.entity.Actors.TA;
@@ -28,8 +28,8 @@ public class UserServImpl implements UserServ{
     @Autowired
     private TARepo taRepo;
 
-    @Autowired
-    private final BCryptPasswordEncoder encoder ;
+    private final PasswordEncoder encoder;
+
     
     @Override
     public List<User> getAllUsers(){
