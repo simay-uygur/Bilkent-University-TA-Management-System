@@ -28,17 +28,12 @@ import java.util.List;
 public class Section {
 
     @Id
-    @Column(name = "section_id", unique = true, updatable = true)
-    private int sectionId;                                        // e.g. 3193191
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "section_id")
+    private Long sectionId;                                       // e.g. 3193191
 
-    @Transient
-    private String sectionCode;                                   // e.g. cs-319-1
-
-    @PrePersist
-    private void createId() {
-        this.sectionId = new CourseCodeConverter()
-                .code_to_id_sec(this.sectionCode);                // keep legacy ID logic
-    }
+    @Column(name = "section_code", nullable = false, unique = true)
+    private String sectionCode;
 
     @ManyToMany(fetch = FetchType.LAZY,
             cascade = { CascadeType.PERSIST, CascadeType.MERGE })
@@ -52,12 +47,16 @@ public class Section {
     @OneToMany(fetch = FetchType.LAZY,
             cascade = { CascadeType.PERSIST, CascadeType.MERGE })
     @JoinColumn(name = "section_id")
-    private List<ExamRoom> examRooms = new ArrayList<>();
+    private List<ExamRoom> examRooms = new ArrayList<>(); // why ?
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "course_id", nullable = false)
-    private Course course;
+    //instead of course, now course id is being used
+//    @ManyToOne(fetch = FetchType.LAZY)
+//    @JoinColumn(name = "course_id", nullable = false)
+//    private Course course;
 
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "offering_id", nullable = false)
+    private CourseOffering offering;
 
     @ManyToMany(fetch = FetchType.LAZY,
             cascade = { CascadeType.PERSIST, CascadeType.MERGE })
