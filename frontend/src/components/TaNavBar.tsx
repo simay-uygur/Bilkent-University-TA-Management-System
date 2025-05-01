@@ -4,6 +4,7 @@ import { NavLink, useNavigate } from 'react-router-dom';
 import { Bell, Home, Calendar, FileText, LogOut } from 'lucide-react';
 import logo from '../assets/react.svg';
 import styles from './TaNavBar.module.css';
+import axios from 'axios';
 
 interface TANavBarProps {
   onNotificationsClick: () => void;
@@ -63,15 +64,20 @@ const TANavBar: React.FC<TANavBarProps> = ({ onNotificationsClick }) => {
         </button>
 
         <button
-          className={`${styles.navButton} ${styles.logoutButton}`}
-          onClick={() => {
-            // TODO: clear auth state if needed
-            navigate('/login', { replace: true });
-          }}
-        >
-          <LogOut size={18} className={styles.icon} />
-          Logout
-        </button>
+  className={`${styles.navButton} ${styles.logoutButton}`}
+  onClick={() => {
+    // clear stored JWT
+    localStorage.removeItem('jwt');
+    // clear axios default header (if you set it)
+    delete (axios.defaults.headers.common as any)['Authorization'];
+    // send back to login
+    navigate('/login', { replace: true });
+  }}
+>
+  <LogOut size={18} className={styles.icon} />
+  Logout
+</button>
+
       </nav>
     </header>
   );

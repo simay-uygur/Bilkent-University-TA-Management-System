@@ -1,7 +1,7 @@
 // src/components/ManageWorkload.tsx
 import React, { useState, useEffect, ChangeEvent, FormEvent } from 'react';
-import InsNavBar from '../components/InsNavBar';
-import { fetchAllTAs } from '../api';
+import InsNavBar from './InsNavBar';
+import { fetchAllTAs } from '../../api';
 import styles from './ManageWorkload.module.css';
 
 interface Task {

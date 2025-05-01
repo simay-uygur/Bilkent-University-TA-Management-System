@@ -19,7 +19,14 @@ const NavBarDeans: React.FC<{ onNotifications: () => void }> = ({ onNotification
     { label: 'Home', icon: <Home size={18} />, to: '/deans-office' },
     { label: 'Notifications', icon: <Bell size={18} />, onClick: onNotifications },
     { label: 'Settings', icon: <Settings size={18} />, to: '/settings' },
-    { label: 'Logout', icon: <LogOut size={18} />, to: '/login' },
+    {
+                 label: 'Logout',
+                  icon: <LogOut size={18} />,
+              onClick: () => {
+                        navigate('/login', { replace: true });
+                          localStorage.removeItem('jwt');
+                  }
+                },
   ];
 
   return (

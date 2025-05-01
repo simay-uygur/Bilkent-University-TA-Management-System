@@ -3,7 +3,7 @@ import {
   fetchCourses,
   assignTA,
   Course
-} from '../api';
+} from '../../api';
 import styles from './InstructorDashboard.module.css';
 
 const InstructorDashboard: React.FC = () => {

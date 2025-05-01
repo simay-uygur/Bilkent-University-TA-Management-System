@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import DepOfNavBar from '../components/NavBarDepartment';
+import DepOfNavBar from './DepartmentOffice/NavBarDepartment';
 import styles from './ProctorAssignmentPage.module.css';
 
 interface Task {
