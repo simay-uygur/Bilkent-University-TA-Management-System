@@ -1,20 +1,29 @@
 package com.example.service;
 
-import java.util.*;
-
-import com.example.dto.FailedRowInfo;
-import com.example.entity.Actors.Role;
-import com.example.entity.General.AcademicLevelType;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.usermodel.WorkbookFactory;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
+
+import com.example.dto.FailedRowInfo;
+import com.example.entity.Actors.Role;
 import com.example.entity.Actors.TA;
+import com.example.entity.General.AcademicLevelType;
 import com.example.entity.General.Date;
 import com.example.entity.Schedule.Schedule;
 import com.example.entity.Schedule.ScheduleItem;
@@ -30,11 +39,7 @@ import com.example.repo.TARepo;
 import com.example.repo.TA_TaskRepo;
 import com.example.repo.TaskRepo;
 
-import java.io.IOException;
-import java.io.InputStream;
-
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.multipart.MultipartFile;
 
 @Service
 @RequiredArgsConstructor
@@ -57,7 +62,8 @@ public class TAServImpl implements TAServ {
     private ScheduleServ scheduleServ;
 
     @Autowired
-    private BCryptPasswordEncoder encoder;
+    private PasswordEncoder encoder;
+
 
     @Override
     public TA getTAById(Long id){

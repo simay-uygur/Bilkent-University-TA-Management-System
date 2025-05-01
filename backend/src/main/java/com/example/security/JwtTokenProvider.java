@@ -39,11 +39,14 @@ public class JwtTokenProvider {
      */
     public String generateJwtToken(Authentication authentication) {
         UserDetailsImpl userPrincipal = (UserDetailsImpl) authentication.getPrincipal();
+
+        // 2) Build the JWT with the user’s ID as the subject
+        Date now = new Date();
         return Jwts.builder()
-            .setSubject(userPrincipal.getUsername())
+            .setSubject(String.valueOf(userPrincipal.getId()))             // <-- ID, not webmail
             .claim("role", userPrincipal.getAuthorities().iterator().next().getAuthority())
-            .setIssuedAt(new Date())
-            .setExpiration(new Date(System.currentTimeMillis() + jwtExpirationMs))
+            .setIssuedAt(now)
+            .setExpiration(new Date(now.getTime() + jwtExpirationMs))
             .signWith(signingKey, SignatureAlgorithm.HS512)
             .compact();
     }
