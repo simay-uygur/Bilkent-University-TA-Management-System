@@ -5,6 +5,17 @@ import NavBar from '../components/NavBar';
 import { login } from '../api';
 import styles from './Login.module.css';
 
+interface Credentials {
+  id: string;
+  password: string;
+}
+
+interface JwtResponse {
+  token: string;
+  role: string;
+  // other fields as returned
+}
+
 const Login: React.FC = () => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
@@ -13,6 +24,7 @@ const Login: React.FC = () => {
   const location = useLocation();
   const [referrer, setReferrer] = useState<string | null>(null);
 
+  // capture optional ?ref= redirect target
   useEffect(() => {
     const params = new URLSearchParams(location.search);
     const r = params.get('ref');
@@ -23,8 +35,8 @@ const Login: React.FC = () => {
     e.preventDefault();
     const newErrors: { username?: string; password?: string } = {};
 
-    if (!username) newErrors.username = 'Username is required.';
-    if (!password) newErrors.password = 'Password is required.';
+    if (!username.trim()) newErrors.username = 'Username is required.';
+    if (!password)      newErrors.password = 'Password is required.';
 
     if (Object.keys(newErrors).length) {
       setErrors(newErrors);
@@ -32,22 +44,43 @@ const Login: React.FC = () => {
     }
 
     try {
-            setErrors({});
-            const res = await login({ id: username, password });
-            const jwt = res.data?.token;
-            // if no token returned, treat as invalid credentials
-            if (!jwt) {
-              setErrors({ password: 'Invalid username or password.' });
-              return;
-            }
-            // store JWT
-            localStorage.setItem('jwt', jwt);
-            // redirect
-            navigate(referrer || '/dashboard', { replace: true });
-          } catch (err: any) {
-            console.error('Login failed', err);
-            setErrors({ password: 'Invalid username or password.' });
-          }
+      setErrors({});
+      const res = await login({ id: username, password });
+      const jwt  = res.data?.token;
+      const role = res.data?.role;
+
+      if (!jwt) {
+        setErrors({ password: 'Invalid username or password.' });
+        return;
+      }
+
+      // store token
+      localStorage.setItem('jwt', jwt);
+      // set axios default header if used elsewhere
+      // axios.defaults.headers.common['Authorization'] = `Bearer ${jwt}`;
+
+      // choose landing page by role
+      let home = '/login';
+      switch (role) {
+        case 'ROLE_TA':
+          home = '/dashboard';
+          break;
+        case 'ROLE_INSTRUCTOR':
+          home = '/instructor';
+          break;
+        case 'ROLE_DEPARTMENT':
+          home = '/dept-office';
+          break;
+        case 'ROLE_DEAN':
+          home = '/deans-office';
+          break;
+      }
+
+      navigate(referrer || home, { replace: true });
+    } catch (err) {
+      console.error('Login failed', err);
+      setErrors({ password: 'Invalid username or password.' });
+    }
   };
 
   return (
@@ -69,6 +102,7 @@ const Login: React.FC = () => {
               />
               {errors.username && <div className={styles.errorText}>{errors.username}</div>}
             </div>
+
             <div className={styles.formGroup}>
               <label htmlFor="password" className={styles.label}>Password</label>
               <input
@@ -80,6 +114,7 @@ const Login: React.FC = () => {
               />
               {errors.password && <div className={styles.errorText}>{errors.password}</div>}
             </div>
+
             <button type="submit" className={styles.button}>Log In</button>
           </form>
         </div>

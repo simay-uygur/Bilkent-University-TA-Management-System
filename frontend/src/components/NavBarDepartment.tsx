@@ -17,7 +17,14 @@ const NavBarDepartment: React.FC<Props> = ({ onNotifications }) => {
     { label: 'Proctor Assignments', icon: <ClipboardList size={18}/>, path: '/dept-office/proctor',   onClick: () => navigate('/dept-office/proctor') },
     { label: 'Pending Leaves',      icon: <Calendar size={18}/>,     path: '/dept-office/leave',     onClick: () => navigate('/dept-office/leave') },
     { label: 'Notifications',       icon: <Bell size={18} />,        path: '',                        onClick: onNotifications },
-    { label: 'Logout',              icon: <LogOut size={18} />,      path: '/login',                  onClick: () => navigate('/login') },
+    {
+             label: 'Logout',
+              icon: <LogOut size={18} />,
+          onClick: () => {
+                    navigate('/login', { replace: true });
+                      localStorage.removeItem('jwt');
+              }
+            },
   ];
 
   return (
