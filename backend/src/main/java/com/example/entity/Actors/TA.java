@@ -30,8 +30,6 @@ import java.util.Objects;
 @JsonInclude(JsonInclude.Include.NON_DEFAULT)
 public class TA extends User {
 
-    /* ─────────────── basic attributes ─────────────── */
-
     @Enumerated(EnumType.STRING)
     @Column(name = "academic_level", nullable = false)
     private AcademicLevelType academicLevel;
@@ -56,7 +54,6 @@ public class TA extends User {
     @Column(name = "is_graduated", nullable = false)
     private Boolean isGraduated = false;
 
-    /* ─────────────── relationships ─────────────── */
 
     /** Courses for which this user is an official TA */
     @ManyToMany(
@@ -96,8 +93,7 @@ public class TA extends User {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof TA)) return false;
-        TA other = (TA) o;
+        if (!(o instanceof TA other)) return false;
         return getId() != null && getId().equals(other.getId());
     }
 
