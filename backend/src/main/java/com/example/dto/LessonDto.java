@@ -1,23 +1,19 @@
 package com.example.dto;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
-/**
- * Data Transfer Object for Lesson entity.
- */
+
 @Data
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 public class LessonDto {
-    /**
-     * The duration of the lesson, typically represented as a string (e.g., "09:00-10:00").
-     */
+
     private String duration;
 
-    /**
-     * The classroom or room identifier where the lesson takes place.
-     */
+    private String classCode;  // e.g. "A101"
+
     private String room;
 }
+

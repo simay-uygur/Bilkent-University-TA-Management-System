@@ -4,29 +4,32 @@ import com.example.dto.InstructorDto;
 import com.example.entity.Actors.Instructor;
 import com.example.entity.Courses.Course;
 import org.springframework.stereotype.Component;
-
-import java.util.List;
 import java.util.stream.Collectors;
 
 @Component
 public class InstructorMapper {
-
     public InstructorDto toDto(Instructor instructor) {
         InstructorDto dto = new InstructorDto();
         dto.setId(instructor.getId());
         dto.setName(instructor.getName());
         dto.setSurname(instructor.getSurname());
-        //dto.setIsActive(instructor.getIsActive()); -  active is not a field in dto
-
         if (instructor.getDepartment() != null) {
             dto.setDepartmentName(instructor.getDepartment().getName());
         }
-
-        List<String> courseCodes = instructor.getCourses().stream()
-                .map(Course::getCourseCode) // instead of lambda expression
-                .collect(Collectors.toList());
-        dto.setCourseCodes(courseCodes);
-
+        dto.setCourseCodes(
+                instructor.getCourses().stream()
+                        .map(Course::getCourseCode)
+                        .collect(Collectors.toList())
+        );
         return dto;
+    }
+
+    public Instructor toEntity(InstructorDto dto) {
+        Instructor inst = new Instructor();
+        inst.setId(dto.getId());
+        inst.setName(dto.getName());
+        inst.setSurname(dto.getSurname());
+        // department & courses wiring in service
+        return inst;
     }
 }
