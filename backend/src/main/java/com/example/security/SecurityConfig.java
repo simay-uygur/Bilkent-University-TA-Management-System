@@ -55,7 +55,8 @@ public class SecurityConfig {
             .requestMatchers(HttpMethod.DELETE, "/api/**").permitAll()
             .anyRequest().authenticated()
         )
-        .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
+        .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+        .authenticationManager(authenticationManager(http));
         http.addFilterBefore(jwtAuthTokenFilter, UsernamePasswordAuthenticationFilter.class);
         return http.build() ;
     }
