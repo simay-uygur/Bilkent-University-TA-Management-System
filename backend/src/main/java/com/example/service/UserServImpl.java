@@ -70,8 +70,6 @@ public class UserServImpl implements UserServ{
         case DEPARTMENT_STAFF -> {
             }
 
-        case DEPARTMENT_CHAIR -> {
-            }
 
         default -> throw new GeneralExc("Unsupported role: " + u.getRole());
     }
