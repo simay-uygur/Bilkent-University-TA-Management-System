@@ -3,20 +3,23 @@
 
 package com.example.service;
 
+import com.example.dto.DeanOfficeDto;
 import com.example.entity.Actors.DeanOffice;
 import com.example.entity.Actors.Role;
 import com.example.entity.General.Faculty;
+import com.example.mapper.DeanOfficeMapper;
 import com.example.repo.DeanOfficeRepo;
 import com.example.repo.FacultyRepo;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 public class DeanOfficeServImpl implements DeanOfficeServ {
-
+    private final DeanOfficeMapper deanOfficeMapper;
     private final DeanOfficeRepo deanOfficeRepo;
     private final FacultyRepo facultyRepo;
     private final PasswordEncoder encoder;
@@ -35,9 +38,16 @@ public class DeanOfficeServImpl implements DeanOfficeServ {
         return deanOffice;
     }
 
-    @Override
+    /* @Override
     public List<DeanOffice> getAll() {
         return deanOfficeRepo.findAll();
+    } */
+    @Override
+    public List<DeanOfficeDto> getAll() {
+        List<DeanOffice> deanOffices = deanOfficeRepo.findAll();
+        return deanOffices.stream()
+                .map(deanOfficeMapper::toDto)
+                .collect(Collectors.toList());
     }
 
     @Override

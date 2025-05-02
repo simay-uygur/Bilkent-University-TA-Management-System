@@ -1,6 +1,7 @@
 
 package com.example.controller;
 
+import com.example.dto.DeanOfficeDto;
 import com.example.entity.Actors.DeanOffice;
 import com.example.service.DeanOfficeServ;
 import lombok.RequiredArgsConstructor;
@@ -22,7 +23,7 @@ public class DeanOfficeController {
     }
 
     @GetMapping
-    public List<DeanOffice> list() {
+    public List<DeanOfficeDto> list() {
         return deanOfficeServ.getAll();
     }
 
