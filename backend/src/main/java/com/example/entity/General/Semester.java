@@ -9,7 +9,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-@Table(name = "semesters")
+@Table(
+        name = "semesters",
+        uniqueConstraints = @UniqueConstraint(columnNames = {"year", "term"})
+)
 @Getter @Setter
 @NoArgsConstructor @AllArgsConstructor @Builder
 @JsonIgnoreProperties("offerings")   // avoid cycles when serializing
