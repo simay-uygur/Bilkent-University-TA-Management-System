@@ -65,11 +65,11 @@ public class TA_controller {
     {
         return serv.getTAById(id);
     }
-    
+
     @GetMapping("/api/ta/department/{deptName}")
-    public List<TaDto> getTAByDepartment(@PathVariable String deptName) 
+    public ResponseEntity<List<TaDto>> getTAByDepartment(@PathVariable String deptName) 
     {
-        return serv.getTAsByDepartment(deptName);
+        return new ResponseEntity<>(serv.getTAsByDepartment(deptName), HttpStatus.OK);
     }
 
     @DeleteMapping("/api/ta/{id}")
