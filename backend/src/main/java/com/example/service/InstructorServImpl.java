@@ -247,8 +247,8 @@ public class InstructorServImpl implements InstructorServ {
     } */
     @Override
     public List<InstructorDto> getInstructorsByDepartment(String departmentName) {
-        List<Instructor> instructors = instructorRepo.findByDepartmentName(departmentName);
-                
+        List<Instructor> instructors = instructorRepo.findByDepartmentName(departmentName)
+                .orElseThrow(() -> new RuntimeException("Department not found: " + departmentName));
 
       return instructors.stream()
                 .map(instructorMapper::toDto)

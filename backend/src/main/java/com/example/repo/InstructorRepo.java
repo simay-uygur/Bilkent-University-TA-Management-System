@@ -21,7 +21,7 @@ public interface InstructorRepo extends JpaRepository<Instructor, Long> {
     List<Section> findSectionsByInstructor(@Param("instId") Long instructorId);
 
     @Query("SELECT i FROM Instructor i WHERE i.department.name = :departmentName")
-    List<Instructor> findByDepartmentName(String departmentName);
+    Optional<List<Instructor>> findByDepartmentName(String departmentName);
 
 
 }
