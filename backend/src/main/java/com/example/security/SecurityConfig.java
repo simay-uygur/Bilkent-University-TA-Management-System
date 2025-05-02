@@ -45,8 +45,7 @@ public class SecurityConfig {
             .requestMatchers(HttpMethod.POST, "/api/student").permitAll() // ADDed
             .requestMatchers("/api/**").permitAll()
                 .anyRequest().authenticated()*/
-            .requestMatchers(HttpMethod.POST, "/api/mail/**").permitAll()  // ← BURASI KRİTİK
-            .requestMatchers(HttpMethod.GET, "/api/mail/**").permitAll()
+            .requestMatchers(HttpMethod.POST, "/api/**").permitAll() // ← BURASI KRİTİK
             .requestMatchers(HttpMethod.GET, "/api/**").permitAll()
             .requestMatchers(HttpMethod.POST, "/api/**").permitAll()
             .requestMatchers(HttpMethod.PUT, "/api/**").permitAll()

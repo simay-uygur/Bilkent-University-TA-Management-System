@@ -12,6 +12,7 @@ import com.example.ExcelHelpers.FailedRowInfo;
 import com.example.entity.Courses.*;
 import com.example.entity.General.AcademicLevelType;
 import com.example.exception.Course.NoPrereqCourseFound;
+
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
@@ -23,7 +24,6 @@ import com.example.entity.Actors.Instructor_DTO;
 import com.example.entity.Actors.TA;
 import com.example.entity.Actors.TA_DTO;
 import com.example.entity.Courses.Course;
-import com.example.entity.Courses.CourseCodeConverter;
 import com.example.entity.Courses.Course_DTO;
 import com.example.entity.Courses.Lesson;
 import com.example.entity.Courses.Lesson_DTO;
