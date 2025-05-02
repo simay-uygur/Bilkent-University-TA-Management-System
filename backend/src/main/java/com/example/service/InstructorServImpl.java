@@ -106,77 +106,12 @@ public class InstructorServImpl implements InstructorServ {
         result.put("failedRows", failedRows);
         return result;
     }
-//
-//    @Override
-//    public Map<String, Object> importInstructorsFromExcel(MultipartFile file) throws IOException {
-//        List<Instructor> successfulInstructors = new ArrayList<>();
-//        List<FailedRowInfo> failedRows = new ArrayList<>();
-//
-//        try (InputStream inputStream = file.getInputStream(); Workbook workbook = WorkbookFactory.create(inputStream)) {
-//            Sheet sheet = workbook.getSheetAt(0);
-//
-//            for (Row row : sheet) {
-//                if (row.getRowNum() == 0) continue; // Skip header row
-//
-//                try {
-//                    long staffId = (long) row.getCell(0).getNumericCellValue();
-//                    String firstName = row.getCell(1).getStringCellValue().trim();
-//                    String lastName = row.getCell(2).getStringCellValue().trim();
-//                    String email = row.getCell(3).getStringCellValue().trim();
-//                    String departmentCode = row.getCell(4).getStringCellValue().trim();
-//                    int inFacultyFlag = (int) row.getCell(5).getNumericCellValue(); // 1 = in faculty, 0 = office staff
-//                    int inactiveFlag = (int) row.getCell(6).getNumericCellValue(); // 0 = active, 1 = inactive
-//                    boolean isActive = (inactiveFlag == 0);
-//
-//                    // Only create Instructor if inFaculty = 1
-//                    if (inFacultyFlag == 1) {
-//                        Optional<Instructor> optionalInstructor = repo.findById(staffId); // id must be unique for each staff
-//
-//                        Instructor instructor = optionalInstructor.map(existing -> {
-//                            existing.setName(firstName);
-//                            existing.setSurname(lastName);
-//                            existing.setWebmail(email);
-//                            existing.setIsActive(isActive);
-//                            existing.setDeleted(false); // Just in case
-//                            return existing;
-//                        }).orElseGet(() -> {
-//                            Instructor newInstructor = new Instructor();
-//                            newInstructor.setId(staffId);
-//                            newInstructor.setName(firstName);
-//                            newInstructor.setSurname(lastName);
-//                            newInstructor.setWebmail(email);
-//                            newInstructor.setIsActive(isActive);
-//                            newInstructor.setRole(Role.INSTRUCTOR);
-//                            newInstructor.setPassword(encoder.encode("default123"));
-//                            return newInstructor;
-//                        });
-//
-//                        successfulInstructors.add(instructor);
-//                    }
-//                    // else -> If inFaculty == 0, later DepartmentOffice object will be created elsewhere
-//
-//                } catch (Exception e) {
-//                    StringBuilder rawData = new StringBuilder();
-//                    row.forEach(cell -> rawData.append(cell.toString()).append(" | "));
-//                    failedRows.add(new FailedRowInfo(
-//                            row.getRowNum(),
-//                            e.getClass().getSimpleName() + ": " + e.getMessage()
-//                    ));
-//                }
-//            }
-//        }
-//
-//        if (!successfulInstructors.isEmpty()) {
-//            repo.saveAll(successfulInstructors);
-//            repo.flush();
-//        }
-//
-//        Map<String, Object> result = new HashMap<>();
-//        result.put("successCount", successfulInstructors.size());
-//        result.put("failedCount", failedRows.size());
-//        result.put("failedRows", failedRows);
-//        return result;
-//    }
+
+    @Override
+    public Instructor getById(Long id) {
+        return instructorRepo.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Instructor not found: " + id));
+    }
 
     @Override
     public Instructor createInstructor(Instructor instructor) {
@@ -264,3 +199,76 @@ public class InstructorServImpl implements InstructorServ {
     }
 
 }
+
+
+//
+//    @Override
+//    public Map<String, Object> importInstructorsFromExcel(MultipartFile file) throws IOException {
+//        List<Instructor> successfulInstructors = new ArrayList<>();
+//        List<FailedRowInfo> failedRows = new ArrayList<>();
+//
+//        try (InputStream inputStream = file.getInputStream(); Workbook workbook = WorkbookFactory.create(inputStream)) {
+//            Sheet sheet = workbook.getSheetAt(0);
+//
+//            for (Row row : sheet) {
+//                if (row.getRowNum() == 0) continue; // Skip header row
+//
+//                try {
+//                    long staffId = (long) row.getCell(0).getNumericCellValue();
+//                    String firstName = row.getCell(1).getStringCellValue().trim();
+//                    String lastName = row.getCell(2).getStringCellValue().trim();
+//                    String email = row.getCell(3).getStringCellValue().trim();
+//                    String departmentCode = row.getCell(4).getStringCellValue().trim();
+//                    int inFacultyFlag = (int) row.getCell(5).getNumericCellValue(); // 1 = in faculty, 0 = office staff
+//                    int inactiveFlag = (int) row.getCell(6).getNumericCellValue(); // 0 = active, 1 = inactive
+//                    boolean isActive = (inactiveFlag == 0);
+//
+//                    // Only create Instructor if inFaculty = 1
+//                    if (inFacultyFlag == 1) {
+//                        Optional<Instructor> optionalInstructor = repo.findById(staffId); // id must be unique for each staff
+//
+//                        Instructor instructor = optionalInstructor.map(existing -> {
+//                            existing.setName(firstName);
+//                            existing.setSurname(lastName);
+//                            existing.setWebmail(email);
+//                            existing.setIsActive(isActive);
+//                            existing.setDeleted(false); // Just in case
+//                            return existing;
+//                        }).orElseGet(() -> {
+//                            Instructor newInstructor = new Instructor();
+//                            newInstructor.setId(staffId);
+//                            newInstructor.setName(firstName);
+//                            newInstructor.setSurname(lastName);
+//                            newInstructor.setWebmail(email);
+//                            newInstructor.setIsActive(isActive);
+//                            newInstructor.setRole(Role.INSTRUCTOR);
+//                            newInstructor.setPassword(encoder.encode("default123"));
+//                            return newInstructor;
+//                        });
+//
+//                        successfulInstructors.add(instructor);
+//                    }
+//                    // else -> If inFaculty == 0, later DepartmentOffice object will be created elsewhere
+//
+//                } catch (Exception e) {
+//                    StringBuilder rawData = new StringBuilder();
+//                    row.forEach(cell -> rawData.append(cell.toString()).append(" | "));
+//                    failedRows.add(new FailedRowInfo(
+//                            row.getRowNum(),
+//                            e.getClass().getSimpleName() + ": " + e.getMessage()
+//                    ));
+//                }
+//            }
+//        }
+//
+//        if (!successfulInstructors.isEmpty()) {
+//            repo.saveAll(successfulInstructors);
+//            repo.flush();
+//        }
+//
+//        Map<String, Object> result = new HashMap<>();
+//        result.put("successCount", successfulInstructors.size());
+//        result.put("failedCount", failedRows.size());
+//        result.put("failedRows", failedRows);
+//        return result;
+//    }

@@ -12,6 +12,8 @@ public interface InstructorServ {
 
     Map<String, Object> importInstructorsFromExcel(MultipartFile file) throws IOException;
 
+    Instructor getById(Long id);
+
     Instructor createInstructor(Instructor instructor);
 
     void deleteInstructor(Long id);
