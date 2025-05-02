@@ -28,8 +28,7 @@ import java.util.List;
 public class Section {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "section_id")
+    @Column(name = "section_id", unique = true, nullable = false)
     private Long sectionId;                                       // e.g. 3193191
 
     @Column(name = "section_code", nullable = false, unique = true)

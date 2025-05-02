@@ -15,6 +15,7 @@ import com.example.dto.StudentDto;
 import com.example.entity.Actors.Instructor;
 import com.example.entity.Actors.TA;
 import com.example.entity.Courses.Course;
+import com.example.entity.Courses.CourseOffering;
 import com.example.entity.Courses.Department;
 import com.example.entity.Courses.Section;
 import com.example.entity.Tasks.Task;
@@ -54,10 +55,19 @@ public class CourseServImpl implements CourseServ {
     public boolean addSection(String courseCode, Section section) {
         Course course = courseRepo.findCourseByCourseCode(courseCode)
                 .orElseThrow(() -> new CourseNotFoundExc(courseCode));
-        if (course.getSectionsList() == null) {
-            course.setSectionsList(new ArrayList<>());
+
+        if (course.getCourseOfferings() == null || course.getCourseOfferings().isEmpty()) {
+            throw new GeneralExc("No offering found for course: " + courseCode);
         }
-        course.getSectionsList().add(section);
+
+        // Assuming latest offering gets the section (you can change this logic)
+        CourseOffering offering = course.getCourseOfferings().get(0);
+        if (offering.getSections() == null) {
+            offering.setSections(new ArrayList<>());
+        }
+
+        offering.getSections().add(section);
+        section.setOffering(offering); // maintain bidirectional link
         secRepo.saveAndFlush(section);
         courseRepo.saveAndFlush(course);
         return true;
@@ -231,7 +241,8 @@ public class CourseServImpl implements CourseServ {
 
         // inside CourseServImpl.mapToDto(...)
         dto.setSections(
-                course.getSectionsList().stream()
+                course.getCourseOfferings().stream()
+                        .flatMap(offering -> offering.getSections().stream())
                         .map(sec -> {
                             List<LessonDto> lessons = sec.getLessons().stream()
                                     .map(lessonMapper::toDto)
