@@ -1,7 +1,7 @@
 // src/components/InsMainPage.tsx
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import CourseInfoPanel from '../components/Instructor/CourseInfoPanel';
+import CourseInfoPanel from '../components/CourseInfoPanel';
 import styles from './InsMainPage.module.css';
 
 export interface Instructor {
