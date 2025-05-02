@@ -145,7 +145,7 @@ public interface TARepo extends JpaRepository<TA, Long> { // TA is the entity an
        FROM   TA  t
               LEFT JOIN FETCH t.courses
               LEFT JOIN FETCH t.tasOwnLessons
-       WHERE  t.department.name = :deptName
+       WHERE  t.department = :deptName
             AND t.isActive = TRUE
             AND t.isDeleted = FALSE
        """)

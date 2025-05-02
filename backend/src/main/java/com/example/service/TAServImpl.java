@@ -74,11 +74,11 @@ public class TAServImpl implements TAServ {
     }
     @Override
         public List<TaDto> getTAsByDepartment(String deptName){
-        List<TA> tas = repo.findByDepartment(deptName);
-        if (tas.isEmpty()) {
-            
-        }
-        return mapToDtoList(tas);
+            List<TA> tas = repo.findByDepartment(deptName);
+            if (tas.isEmpty()) {
+                throw new UserNotFoundExc(deptName);
+            }
+            return mapToDtoList(tas);
     } 
 
     @Override
