@@ -38,7 +38,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class AuthController {
     
-   
+
     private final UserServ serv;
     private final UserRepo userRepo;
 
@@ -46,7 +46,7 @@ public class AuthController {
     private final JwtTokenProvider tokenProvider;
     private final UserDetailsServiceImpl userDetailsService;
     private final PasswordEncoder passwordEncoder; 
-    
+
     @PostMapping("/api/signUp")
     public ResponseEntity<User> createUser(@RequestBody User u) 
     {
