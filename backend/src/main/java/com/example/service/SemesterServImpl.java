@@ -2,6 +2,7 @@ package com.example.service;
 
 
 import com.example.entity.General.Semester;
+import com.example.entity.General.Term;
 import com.example.repo.SemesterRepo;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -45,5 +46,10 @@ public class SemesterServImpl implements SemesterServ {
     @Override
     public void delete(Long id) {
         repo.deleteById(id);
+    }
+
+    @Override
+    public Optional<Semester> findByYearAndTerm(int year, String term) {
+        return repo.findByYearAndTerm(year, Term.valueOf(term));
     }
 }
