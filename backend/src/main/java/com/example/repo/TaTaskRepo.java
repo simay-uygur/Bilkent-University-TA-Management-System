@@ -9,45 +9,45 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import com.example.entity.General.Date;
-import com.example.entity.Tasks.TA_Task;
+import com.example.entity.Tasks.TaTask;
 
 @Repository
-public interface TA_TaskRepo extends JpaRepository<TA_Task, Integer> {
+public interface TaTaskRepo extends JpaRepository<TaTask, Integer> {
 
     /**
-     * Find a single TA_Task by the task’s ID and the TA’s ID.
+     * Find a single TaTask by the task’s ID and the TA’s ID.
      */
     @Query("""
       SELECT t
-        FROM TA_Task t
-       WHERE t.task.task_id = :taskId
-         AND t.ta_owner.id  = :taId
+        FROM TaTask t
+       WHERE t.task.taskId = :taskId
+         AND t.taOwner.id  = :taId
     """)
-    Optional<TA_Task> findByTaskIdAndTaId(
+    Optional<TaTask> findByTaskIdAndTaId(
         @Param("taskId") int    taskId,
         @Param("taId")   Long   taId
     );
 
     @Query("""
       SELECT t
-        FROM TA_Task t
-       WHERE t.ta_owner.id = :taId
+        FROM TaTask t
+       WHERE t.taOwner.id = :taId
     """)
-    List<TA_Task> findAllByTaId(@Param("taId") Long taId);
+    List<TaTask> findAllByTaId(@Param("taId") Long taId);
 
     @Query("""
       SELECT t
-        FROM TA_Task t
-       WHERE t.ta_owner.id  = :taId
+        FROM TaTask t
+       WHERE t.taOwner.id  = :taId
          AND t.task.status  = 'PENDING'
     """)
-    List<TA_Task> findAllPendingTasksByTaId(@Param("taId") Long taId);
+    List<TaTask> findAllPendingTasksByTaId(@Param("taId") Long taId);
 
     @Query("""
       SELECT CASE WHEN COUNT(t) > 0 THEN TRUE ELSE FALSE END
-        FROM TA_Task t
-        WHERE t.task.task_id   = :taskId
-        AND t.ta_owner.id    = :taId""")
+        FROM TaTask t
+        WHERE t.task.taskId   = :taskId
+        AND t.taOwner.id    = :taId""")
     boolean exists(int taskId, Long taId);
 
      /**
@@ -55,8 +55,8 @@ public interface TA_TaskRepo extends JpaRepository<TA_Task, Integer> {
      * whose start date lies between (inclusive) the two Date values.
      */@Query("""
         SELECT CASE WHEN COUNT(tt)>0 THEN TRUE ELSE FALSE END
-        FROM TA_Task tt
-        WHERE tt.ta_owner.id = :taId
+        FROM TaTask tt
+        WHERE tt.taOwner.id = :taId
           AND (
               (tt.task.duration.start.year > :fromYear)
             OR (tt.task.duration.start.year = :fromYear
@@ -86,8 +86,8 @@ public interface TA_TaskRepo extends JpaRepository<TA_Task, Integer> {
 
       @Query("""
         SELECT CASE WHEN COUNT(tt)>0 THEN TRUE ELSE FALSE END
-          FROM TA_Task tt
-        WHERE tt.ta_owner.id     = :taId
+          FROM TaTask tt
+        WHERE tt.taOwner.id     = :taId
           AND tt.task.exam IS NOT NULL
           AND tt.task.duration.start <= :to
           AND tt.task.duration.finish >= :from

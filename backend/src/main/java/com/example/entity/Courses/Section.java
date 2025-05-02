@@ -1,5 +1,179 @@
 package com.example.entity.Courses;
 
+import com.example.entity.Actors.Instructor;
+import com.example.entity.Actors.TA;
+import com.example.entity.Exams.ExamRoom;
+import com.example.entity.General.Student;
+import com.example.entity.Tasks.Task;
+import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
+import org.hibernate.annotations.DynamicUpdate;
+
+import java.util.ArrayList;
+import java.util.List;
+
+/**
+ * Section — a single class group of a course (e.g. CS-319-1).
+ * <p>
+ * • Each section belongs to one {@link Course}.<br>
+ * • A section can have <strong>one or more instructors</strong> &amp; several TAs.<br>
+ * • Relationships keep the original table / column names, even though field names are camel-case.
+ */
+@Entity
+@Table(name = "section")
+@DynamicUpdate
+@Getter
+@Setter
+public class Section {
+
+    @Id
+    @Column(name = "section_id", unique = true, updatable = true)
+    private int sectionId;                                        // e.g. 3193191
+
+    @Transient
+    private String sectionCode;                                   // e.g. cs-319-1
+
+    @PrePersist
+    private void createId() {
+        this.sectionId = new CourseCodeConverter()
+                .code_to_id_sec(this.sectionCode);                // keep legacy ID logic
+    }
+
+    @ManyToMany(fetch = FetchType.LAZY,
+            cascade = { CascadeType.PERSIST, CascadeType.MERGE })
+    @JoinTable(
+            name               = "section_tasks",
+            joinColumns        = @JoinColumn(name = "section_id"),
+            inverseJoinColumns = @JoinColumn(name = "task_id")
+    )
+    private List<Task> sectionTasksList = new ArrayList<>();
+
+    @OneToMany(fetch = FetchType.LAZY,
+            cascade = { CascadeType.PERSIST, CascadeType.MERGE })
+    @JoinColumn(name = "section_id")
+    private List<ExamRoom> examRooms = new ArrayList<>();
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "course_id", nullable = false)
+    private Course course;
+
+
+    @ManyToMany(fetch = FetchType.LAZY,
+            cascade = { CascadeType.PERSIST, CascadeType.MERGE })
+    @JoinTable(
+            name               = "section_students",
+            joinColumns        = @JoinColumn(name = "section_id"),
+            inverseJoinColumns = @JoinColumn(name = "student_id")
+    )
+    private List<Student> students = new ArrayList<>();
+
+    @ManyToMany(fetch = FetchType.LAZY,
+            cascade = { CascadeType.PERSIST, CascadeType.MERGE })
+    @JoinTable(
+            name               = "section_ta_as_students",
+            joinColumns        = @JoinColumn(name = "section_id"),
+            inverseJoinColumns = @JoinColumn(name = "ta_id")
+    )
+    private List<TA> taAsStudents = new ArrayList<>();
+
+    @ManyToOne(fetch = FetchType.LAZY,
+            cascade = { CascadeType.PERSIST, CascadeType.MERGE })
+    @JoinColumn(name = "instructor_id", nullable = false)
+    private Instructor instructor;
+
+
+    @OneToMany(mappedBy      = "section",
+            fetch         = FetchType.LAZY,
+            cascade       = CascadeType.ALL,
+            orphanRemoval = true)
+    private List<Lesson> lessons = new ArrayList<>();
+}
+
+
+/*
+package com.example.entity.Courses;
+
+import jakarta.persistence.*;
+import org.hibernate.annotations.DynamicUpdate;
+
+import com.example.entity.Actors.TA;
+import com.example.entity.Exams.ExamRoom;
+import com.example.entity.General.Student;
+import com.example.entity.Tasks.Task;
+import lombok.Getter;
+import lombok.Setter;
+
+import java.util.ArrayList;
+import java.util.List;
+
+@Entity
+@Table(name = "section")
+@DynamicUpdate
+@Getter
+@Setter
+public class Section {
+
+    @Id
+    @Column(name = "section_id", unique = true, updatable = true)
+    private int sectionId;  // e.g., cs-319-1 id
+
+    @Transient
+    private String sectionCode;  // e.g., cs-319-1
+
+    @PrePersist
+    private void createId() {
+        // assumes CourseCodeConverter.code_to_id_sec still exists
+        this.sectionId = new CourseCodeConverter().code_to_id_sec(this.sectionCode);
+    }
+
+    @ManyToMany(fetch = FetchType.LAZY, cascade = { CascadeType.PERSIST, CascadeType.MERGE })
+    @JoinTable(
+            name = "section_tasks",
+            joinColumns = @JoinColumn(name = "section_id"),
+            inverseJoinColumns = @JoinColumn(name = "task_id")
+    )
+    private List<Task> sectionTasksList = new ArrayList<>();
+
+    @OneToMany(fetch = FetchType.LAZY, cascade = { CascadeType.PERSIST, CascadeType.MERGE })
+    @JoinColumn(name = "section_id")
+    private List<ExamRoom> examRooms = new ArrayList<>();
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "course_id", nullable = false)
+    private Course course;
+
+    @ManyToMany(fetch = FetchType.LAZY, cascade = { CascadeType.PERSIST, CascadeType.MERGE })
+    @JoinTable(
+            name = "section_students",
+            joinColumns = @JoinColumn(name = "section_id"),
+            inverseJoinColumns = @JoinColumn(name = "student_id")
+    )
+    private List<Student> students = new ArrayList<>();
+
+    @ManyToMany(fetch = FetchType.LAZY, cascade = { CascadeType.PERSIST, CascadeType.MERGE })
+    @JoinTable(
+            name = "section_ta_as_students",
+            joinColumns = @JoinColumn(name = "section_id"),
+            inverseJoinColumns = @JoinColumn(name = "ta_id")
+    )
+    private List<TA> taAsStudents = new ArrayList<>();
+
+    @OneToMany(
+            mappedBy = "section",
+            fetch = FetchType.LAZY,
+            cascade = CascadeType.ALL,
+            orphanRemoval = true
+    )
+    private List<Lesson> lessons = new ArrayList<>();
+}
+*/
+
+
+
+/*
+package com.example.entity.Courses;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -53,7 +227,7 @@ public class Section {
         joinColumns = @JoinColumn(name = "section_id"),
         inverseJoinColumns = @JoinColumn(name = "task_id")
     )
-    private ArrayList<Task> section_tasks_list ;
+    private ArrayList<Task> section_tasks_list;
 
     @OneToMany(
         // this is used to avoid loading the whole exam room when only the section is needed
@@ -98,3 +272,4 @@ public class Section {
     )
     private List<Lesson> lessons = new ArrayList<>();
 }
+*/

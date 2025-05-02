@@ -1,47 +1,42 @@
-/* DepartmentOffice.module.css */
+/* src/pages/DepartmentOffice.module.css */
+
 .pageWrapper {
-    padding: 20px;
-    background-color: #e0f7fa;
-  }
-  
-  .heading {
-    font-size: 24px;
-    font-weight: bold;
-    color: #004d40;
-    margin-bottom: 20px;
-  }
-  
-  .courseList {
-    display: flex;
-    flex-direction: column;
-  }
-  
-  .courseCard {
-    background-color: white;
-    border: 1px solid #ddd;
-    padding: 15px;
-    margin: 10px 0;
-  }
-  
-  .courseInfo {
-    font-size: 16px;
-    color: #00796b;
-  }
-  
-  .actions {
-    margin-top: 10px;
-  }
-  
-  .actionButton {
-    background-color: #0288d1;
-    color: white;
-    padding: 8px 16px;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-  }
-  
-  .actionButton:hover {
-    background-color: #0277bd;
-  }
-  
+  padding: 2rem;
+  background-color: #f9fafb;
+}
+
+.content {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.heading {
+  font-size: 2rem;
+  margin-bottom: 1.5rem;
+  text-align: center;
+}
+
+.section {
+  margin-bottom: 2rem;
+}
+
+.section h2 {
+  font-size: 1.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.list li {
+  padding: 0.5rem 0;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.noData {
+  font-style: italic;
+  color: #6b7280;
+}

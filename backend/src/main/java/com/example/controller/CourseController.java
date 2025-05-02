@@ -2,7 +2,12 @@ package com.example.controller;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
+import com.example.dto.CourseDto;
+import com.example.dto.InstructorDto;
+import com.example.dto.TaDto;
+import com.example.dto.TaskDto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -13,15 +18,11 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.example.entity.Actors.TA_DTO;
 import com.example.entity.Courses.Course;
-import com.example.entity.Courses.CourseCodeConverter;
-import com.example.entity.Courses.Course_DTO;
 import com.example.entity.Courses.Section;
-import com.example.entity.Tasks.TA_Task;
+import com.example.entity.Tasks.TaTask;
 import com.example.entity.Tasks.Task;
-import com.example.entity.Tasks.Task_DTO;
-import com.example.exception.Course.NoPrereqCourseFound;
+
 import com.example.repo.CourseRepo;
 import com.example.service.CourseServ;
 
@@ -31,7 +32,7 @@ import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequiredArgsConstructor
-public class Course_controller {
+public class CourseController {
     @Autowired
     private CourseServ courseServ; // this is used to check if the course exists in the database
 
@@ -63,14 +64,21 @@ public class Course_controller {
             }
         */
     }
+    @GetMapping("api/course/department/{deptName}")
+    public ResponseEntity<List<CourseDto>> getByDepartment(
+            @PathVariable String deptName ) {
+        return new ResponseEntity<>(courseServ.getCoursesByDepartment(deptName), HttpStatus.FOUND);
+       /*  List<CourseDto> dtos = courseServ.getCoursesByDepartment(deptName);
+        return ResponseEntity.ok(dtos); */
+    }
 
     @GetMapping("api/course/{course_code}")
-    public ResponseEntity<Course_DTO> getCourse(@PathVariable String course_code) {
+    public ResponseEntity<CourseDto> getCourse(@PathVariable String course_code) {
         return new ResponseEntity<>(courseServ.findCourse(course_code), HttpStatus.FOUND);
     }
 
     @GetMapping("api/course/all")
-    public ResponseEntity<List<Course_DTO>> getCourses() {
+    public ResponseEntity<List<CourseDto>> getCourses() {
         return new ResponseEntity<>(courseServ.getCourses(),HttpStatus.FOUND);
     }
     
@@ -91,19 +99,47 @@ public class Course_controller {
     }
 
     @GetMapping("api/course/{course_code}/task/{id}")
-    public Task_DTO getTask(@PathVariable String course_code, @PathVariable int id) {
+    public TaskDto getTask(@PathVariable String course_code, @PathVariable int id) {
         Task task = courseServ.getTaskByID(course_code, id);
-        List<TA_DTO> taDtos = new ArrayList<>();
-        for (TA_Task taTask : task.getTas_list()){
-            TA_DTO ta = new TA_DTO(taTask.getTa_owner().getName(), taTask.getTa_owner().getSurname(), taTask.getTa_owner().getId(), null, 0, null, null);
+        List<TaDto> taDtos = new ArrayList<>();
+        for (TaTask taTask : task.getTasList()){
+            /*
+               private Long id;
+    private String name;
+    private String surname;
+    private String academicLevel;
+    private int totalWorkload;
+    private Boolean isActive;
+    private Boolean isGraduated;
+    private String department;
+    private List<String> courses;
+    private List<String> lessons;
+             */
+            TaDto ta = new TaDto(
+                    taTask.getTaOwner().getId(),                       // id
+                    taTask.getTaOwner().getName(),                     // name
+                    taTask.getTaOwner().getSurname(),                  // surname
+                    taTask.getTaOwner().getAcademicLevel().name(),     // academicLevel
+                    taTask.getTaOwner().getTotalWorkload(),            // totalWorkload
+                    taTask.getTaOwner().getIsActive(),                 // isActive
+                    taTask.getTaOwner().getIsGraduated(),              // isGraduated
+                    taTask.getTaOwner().getDepartment(),               // department
+                    taTask.getTaOwner().getCourses().stream()          // courses → List<String>
+                            .map(Course::getCourseCode)
+                            .collect(Collectors.toList()),
+                    taTask.getTaOwner().getTasOwnLessons().stream()    // lessons → List<String>
+                            .map(Section::getSectionCode)
+                            .collect(Collectors.toList())
+            );
+
             taDtos.add(ta);
         }
         String durationStr = task.getDuration() != null ? task.getDuration().toString() : null;
         
-        return new Task_DTO(
-            task.getTask_type().toString(), // Convert enum to String
+        return new TaskDto(
+            task.getTaskType().toString(), // Convert enum to String
             taDtos,
-            "Task #" + task.getTask_id(), // Description or customize as needed
+            "Task #" + task.getTaskId(), // Description or customize as needed
             durationStr,
             task.getStatus().toString() // Convert enum to String
         );
@@ -116,5 +152,5 @@ public class Course_controller {
         return new ResponseEntity<>()
     }*/
     
-
+    
 }

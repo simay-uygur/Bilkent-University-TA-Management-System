@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.example.dto.TaDto;
 import com.example.entity.Actors.TA;
 import com.example.entity.General.Date;
 import com.example.entity.Schedule.Schedule;
@@ -24,4 +25,5 @@ public interface TAServ {
     public Schedule getWeeklyScheduleForTA(TA ta, Date anyCustomDate);
     public List<ScheduleItem> getScheduleOfTheDay(TA ta, String date);
     public Map<String, Object> importTAsFromExcel(MultipartFile file) throws IOException;
+    public List<TaDto> getTAsByDepartment(String deptName);
 }

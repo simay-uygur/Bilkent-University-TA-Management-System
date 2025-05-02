@@ -13,21 +13,22 @@ import Settings            from './Pages/Settings';
 import LeaveRequestForm    from './components/LeaveRequestForm';
 
 import TALayout            from './components/TALayout';
-import InstructorLayout    from './components/Instructor/InstructorLayout';
-import DepartmentLayout    from './components/DepartmentOffice/DepartmentLayout';
+import InstructorLayout    from './components/InstructorLayout';
+import DepartmentLayout    from './components/DepartmentLayout';
 import DeansLayout         from './components/DeansLayout';
 
 import InsMainPage         from './Pages/InsMainPage';
 import ExamProctoringPage  from './components/ExamProctoringPage';
-import CourseTAList        from './components/Instructor/CourseTAList';
+import CourseTAList        from './components/CourseTAList';
 import RequestTAForm       from './components/RequestTAForm';
 import SettingsTA          from './components/SettingsTA';
-import ManageWorkload      from './components/Instructor/ManageWorkload';
+import ManageWorkload      from './components/ManageWorkload';
 
 import ProctorAssignmentsPage from './components/ProctorAssignmentPage';
-import LeaveRequestsPage      from './components/DepartmentOffice/LeaveRequestPage';
+import LeaveRequestsPage      from './components/LeaveRequestPage';
 import DeansOffice            from './Pages/DeansOffice';
 import DeanAssignProctors     from './components/DeanAssignProctors';
+import DepartmentOffice from './Pages/DepartmentOffice';
 
 const App: React.FC = () => (
   <BrowserRouter>
@@ -67,7 +68,7 @@ const App: React.FC = () => (
       {/* Department Office Area (requires ROLE_DEPARTMENT) */}
       <Route element={<ProtectedRoute requiredRole="ROLE_DEPARTMENT_STAFF" />}>
         <Route path="/dept-office" element={<DepartmentLayout />}>
-          <Route index                          element={<Navigate to="proctor" replace />} />
+          <Route index                          element={<DepartmentOffice />} />
           <Route path="proctor"                 element={<ProctorAssignmentsPage />} />
           <Route path="proctor/:courseId/:mode" element={<ProctorAssignmentsPage />} />
           <Route path="leave"                   element={<LeaveRequestsPage />} />

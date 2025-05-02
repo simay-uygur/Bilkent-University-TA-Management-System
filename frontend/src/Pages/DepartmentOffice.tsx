@@ -1,4 +1,89 @@
-import React, { useState } from 'react';
+// src/pages/DepartmentOffice.tsx
+import React, { useState, useEffect } from 'react';
+import styles from './DepartmentOffice.module.css';
+
+interface InstructorDto {
+  id: number;
+  name: string;
+  surname: string;
+  academicLevel: string;
+  totalWorkload: number;
+  isActive: boolean;
+  isGraduated: boolean;
+  department: string;
+  courses: string[];
+  lessons: string[];
+}
+
+interface CourseDto {
+  courseId: number;
+  courseCode: string;
+  courseName: string;
+  courseAcademicStatus: string;
+  department: string;
+}
+
+const DepartmentOffice: React.FC = () => {
+  const [instructors, setInstructors] = useState<InstructorDto[]>([]);
+  const [courses, setCourses] = useState<CourseDto[]>([]);
+
+  useEffect(() => {
+    // Hard-code “CS” until you wire up real department logic
+    fetch('/api/instructors/department/CS')
+      .then((res) => res.json())
+      .then((data: InstructorDto[]) => setInstructors(data))
+      .catch(console.error);
+
+    fetch('/api/course/department/CS')
+      .then((res) => res.json())
+      .then((data: CourseDto[]) => setCourses(data))
+      .catch(console.error);
+  }, []);
+
+  return (
+    <div className={styles.pageWrapper}>
+      <div className={styles.content}>
+        <h1 className={styles.heading}>Department Overview</h1>
+
+        <section className={styles.section}>
+          <h2>Instructors in CS</h2>
+          {instructors.length > 0 ? (
+            <ul className={styles.list}>
+              {instructors.map((i) => (
+                <li key={i.id}>
+                  {i.name} {i.surname} ({i.academicLevel})
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className={styles.noData}>No instructors found.</p>
+          )}
+        </section>
+
+        <section className={styles.section}>
+          <h2>Courses in CS</h2>
+          {courses.length > 0 ? (
+            <ul className={styles.list}>
+              {courses.map((c) => (
+                <li key={c.courseId}>
+                  {c.courseCode} — {c.courseName}
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className={styles.noData}>No courses found.</p>
+          )}
+        </section>
+      </div>
+    </div>
+  );
+};
+
+export default DepartmentOffice;
+
+
+
+/* import React, { useState } from 'react';
 
 import styles from './DepartmentOffice.module.css';
 
@@ -113,3 +198,4 @@ const DepartmentOffice: React.FC = () => {
 };
 
 export default DepartmentOffice;
+ */

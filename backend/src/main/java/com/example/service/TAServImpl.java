@@ -1,24 +1,37 @@
 package com.example.service;
 
-import java.util.*;
-
-import com.example.dto.FailedRowInfo;
-import com.example.entity.Actors.Role;
-import com.example.entity.General.AcademicLevelType;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.usermodel.WorkbookFactory;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
+
+import com.example.dto.FailedRowInfo;
+import com.example.dto.TaDto;
+import com.example.entity.Actors.Role;
 import com.example.entity.Actors.TA;
+import com.example.entity.Courses.Course;
+import com.example.entity.Courses.Section;
+import com.example.entity.General.AcademicLevelType;
 import com.example.entity.General.Date;
 import com.example.entity.Schedule.Schedule;
 import com.example.entity.Schedule.ScheduleItem;
-import com.example.entity.Tasks.TA_Task;
+import com.example.entity.Tasks.TaTask;
 import com.example.entity.Tasks.Task;
 import com.example.exception.GeneralExc;
 import com.example.exception.NoPersistExc;
@@ -27,14 +40,10 @@ import com.example.exception.taExc.TaNotFoundExc;
 import com.example.exception.taskExc.TaskIsNotActiveExc;
 import com.example.exception.taskExc.TaskNotFoundExc;
 import com.example.repo.TARepo;
-import com.example.repo.TA_TaskRepo;
-import com.example.repo.TaskRepo;
+import com.example.repo.TaTaskRepo;
 
-import java.io.IOException;
-import java.io.InputStream;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.multipart.MultipartFile;
 
 @Service
 @RequiredArgsConstructor
@@ -44,27 +53,34 @@ public class TAServImpl implements TAServ {
     @Autowired
     private TARepo repo;
 
-    @Autowired
-    private TaskRepo taskRepo;
+
 
     @Autowired
     private TaskServ taskServ;
-
     @Autowired
-    private TA_TaskRepo taTaskRepo;
+    private TaTaskRepo taTaskRepo;
     
     @Autowired
     private ScheduleServ scheduleServ;
 
     @Autowired
-    private BCryptPasswordEncoder encoder;
+    private PasswordEncoder encoder;
+
 
     @Override
     public TA getTAById(Long id){
         return repo.findById(id)
         .orElseThrow(() -> new UserNotFoundExc(id));
     }
-    
+    @Override
+        public List<TaDto> getTAsByDepartment(String deptName){
+            List<TA> tas = repo.findByDepartment(deptName);
+            if (tas.isEmpty()) {
+                throw new UserNotFoundExc(deptName);
+            }
+            return mapToDtoList(tas);
+    } 
+
     @Override
     public List<TA> getAllTAs() {
         return repo.findAllTAs(); 
@@ -91,7 +107,6 @@ public class TAServImpl implements TAServ {
         
         return true;
     }
-
     @Override
     @Transactional(rollbackFor = Exception.class)
     public boolean restoreTAById(Long id)
@@ -116,8 +131,8 @@ public class TAServImpl implements TAServ {
     
     @Override
     public Task getTaskById(int task_id, Long ta_id) {
-        Optional<TA_Task> optTaTask = taTaskRepo.findByTaskIdAndTaId(task_id, ta_id);
-        TA_Task taTask = optTaTask.orElseThrow(() -> new TaskNotFoundExc(task_id));
+        Optional<TaTask> optTaTask = taTaskRepo.findByTaskIdAndTaId(task_id, ta_id);
+        TaTask taTask = optTaTask.orElseThrow(() -> new TaskNotFoundExc(task_id));
         return taTask.getTask();
     }
 
@@ -130,7 +145,7 @@ public class TAServImpl implements TAServ {
         if (!taskServ.checkAndUpdateStatusTask(task)) {
             throw new TaskIsNotActiveExc();
         }
-        taskServ.assignTA(task.getTask_id(), existingTA) ;
+        taskServ.assignTA(task.getTaskId(), existingTA) ;
         return true ;
     }
     
@@ -144,14 +159,14 @@ public class TAServImpl implements TAServ {
         taskServ.unassignTA(task_id, ta) ; 
         return true ;
     }
-    
+
     @Override
     public Set<Task> getAllTasks(Long id) {
         TA existingTA = repo.findById(id)
             .orElseThrow(() -> new TaNotFoundExc(id));
-        List<TA_Task> ta_tasks = taTaskRepo.findAllByTaId(id);
+        List<TaTask> ta_tasks = taTaskRepo.findAllByTaId(id);
         Set<Task> tasks_list = new HashSet<>();
-        for (TA_Task ta_task : ta_tasks) {
+        for (TaTask ta_task : ta_tasks) {
             Task task = ta_task.getTask();
             if (task != null) {
                 tasks_list.add(task);
@@ -160,16 +175,16 @@ public class TAServImpl implements TAServ {
         return tasks_list;
     }
 
-    private void mark_deleted(TA ta) {
+    private void markDeleted(TA ta) {
         if (ta.isDeleted()) {
             throw new GeneralExc("User already deleted");
         }
         ta.setDeleted(true);
-        List<TA_Task> ta_tasks = taTaskRepo.findAllByTaId(ta.getId());
-        for (TA_Task ta_task : ta_tasks) {
+        List<TaTask> ta_tasks = taTaskRepo.findAllByTaId(ta.getId());
+        for (TaTask ta_task : ta_tasks) {
             Task task = ta_task.getTask();
             if (task != null) {
-                taskServ.unassignTA(task.getTask_id(), ta);
+                taskServ.unassignTA(task.getTaskId(), ta);
             }
         }
         taTaskRepo.deleteAll(ta_tasks);
@@ -178,7 +193,7 @@ public class TAServImpl implements TAServ {
     }
 
     private void delete(TA ta){
-        mark_deleted(ta);
+        markDeleted(ta);
     }
 
     private void restore(TA ta) {
@@ -225,10 +240,9 @@ public class TAServImpl implements TAServ {
 
                     Optional<TA> optionalTA = repo.findByIdAndWebmail(id, webmail);
 
-                    TA ta = optionalTA.map(existing -> {
-                        existing.setName(name);
+                    TA ta = optionalTA.map(existing -> { existing.setName(name);
                         existing.setSurname(surname);
-                        existing.setAcademic_level(level);
+                        existing.setAcademicLevel(level);
                         existing.setIsActive(isActive);
                         existing.setDeleted(false); // Just in case
                         return existing;
@@ -238,14 +252,13 @@ public class TAServImpl implements TAServ {
                         newTa.setName(name);
                         newTa.setSurname(surname);
                         newTa.setWebmail(webmail);
-                        newTa.setAcademic_level(level);
+                        newTa.setAcademicLevel(level);
                         newTa.setIsActive(isActive);
                         newTa.setRole(Role.TA);
                         newTa.setPassword(encoder.encode("default123"));
-                        newTa.setTotal_workload(0);
+                        newTa.setTotalWorkload(0);
                         return newTa;
                     });
-
                     // Add to save list
                     successfulTAs.add(ta);
 
@@ -270,5 +283,29 @@ public class TAServImpl implements TAServ {
         result.put("failedCount", failedRows.size());
         result.put("failedRows", failedRows);
         return result;
+    }
+
+    private List<TaDto> mapToDtoList(List<TA> tas) {
+        List<TaDto> taDtos = new ArrayList<>();
+        for (TA ta : tas) {
+            TaDto taDto = new TaDto(
+                    ta.getId(),
+                    ta.getName(),
+                    ta.getSurname(),
+                    ta.getAcademicLevel().name(),
+                    ta.getTotalWorkload(),
+                    ta.getIsActive(),
+                    ta.getIsGraduated(),
+                    ta.getDepartment(),
+                    ta.getCourses().stream()
+                            .map(Course::getCourseCode)
+                            .collect(Collectors.toList()),
+                    ta.getTasOwnLessons().stream()
+                            .map(Section::getSectionCode)
+                            .collect(Collectors.toList())
+            );
+            taDtos.add(taDto);
+        }
+        return taDtos;
     }
 }

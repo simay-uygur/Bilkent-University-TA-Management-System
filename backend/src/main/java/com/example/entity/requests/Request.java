@@ -1,4 +1,4 @@
-package com.example.entity.requests;
+package com.example.entity.Requests;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 

@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.example.dto.TaDto;
 import com.example.entity.Actors.TA;
 import com.example.entity.General.Date;
 import com.example.entity.Tasks.Task;
@@ -65,6 +66,12 @@ public class TA_controller {
         return serv.getTAById(id);
     }
 
+    @GetMapping("/api/ta/department/{deptName}")
+    public ResponseEntity<List<TaDto>> getTAByDepartment(@PathVariable String deptName) 
+    {
+        return new ResponseEntity<>(serv.getTAsByDepartment(deptName), HttpStatus.OK);
+    }
+
     @DeleteMapping("/api/ta/{id}")
     public ResponseEntity<HttpStatus> deleteTAById(@PathVariable Long id) 
     {
@@ -93,7 +100,7 @@ public class TA_controller {
         if (task == null) {
             throw new GeneralExc("Task with ID " + task_id + " not found.");
         }
-        if (task.getAccess_type() == TaskAccessType.PRIVATE && task.getRequiredTAs() > 1) {
+        if (task.getAccessType() == TaskAccessType.PRIVATE && task.getRequiredTAs() > 1) {
             throw new GeneralExc("Private tasks can only have one TA assigned.");
         }
         return new ResponseEntity<>(serv.assignTask(task, id),HttpStatus.CREATED);

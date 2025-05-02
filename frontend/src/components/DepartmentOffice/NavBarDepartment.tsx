@@ -14,6 +14,8 @@ const NavBarDepartment: React.FC<Props> = ({ onNotifications }) => {
   const { pathname } = useLocation();
 
   const navItems = [
+    { label: 'Home',                icon: <Home size={18} />,       path: '/dept-office',           onClick: () => navigate('/dept-office') },
+    { label: 'Settings',            icon: <Settings size={18} />,   path: '/dept-office/settings',  onClick: () => navigate('/dept-office/settings') },
     { label: 'Proctor Assignments', icon: <ClipboardList size={18}/>, path: '/dept-office/proctor',   onClick: () => navigate('/dept-office/proctor') },
     { label: 'Pending Leaves',      icon: <Calendar size={18}/>,     path: '/dept-office/leave',     onClick: () => navigate('/dept-office/leave') },
     { label: 'Notifications',       icon: <Bell size={18} />,        path: '',                        onClick: onNotifications },

@@ -1,5 +1,6 @@
 package com.example.repo;
 
+import java.util.List;
 import java.util.Optional;
 
 import com.example.entity.Courses.Department;
@@ -34,11 +35,22 @@ public interface CourseRepo extends JpaRepository<Course, Integer>{
     nativeQuery = true)
     Optional<Task> findTask(@Param("taskId") int taskId, 
                               @Param("courseCode") String courseCode);
-
+                            
+    
     Optional<Course> findCourseByCourseCode(String courseCode);
 
     Optional<Course> findCourseByCourseCodeAndDepartmentName(String courseCode, String departmentName);
 
     boolean existsCourseByCourseCodeEquals(String courseCode);
+
+    @Query("""
+    SELECT c
+      FROM Course c
+     WHERE c.department.name = :deptName
+""")
+  Optional<List<Course>> findCourseByDepartmentName(
+    @Param("deptName") String deptName
+); 
+    
 
 }

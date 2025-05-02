@@ -5,6 +5,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import org.hibernate.annotations.DynamicUpdate;
 
@@ -113,5 +114,9 @@ public class Course {
         orphanRemoval = true
     )
     private List<Task> tasks = new ArrayList<>();
+
+
+
+    //coordinator should be also added
 }
 // only one prepersist call method

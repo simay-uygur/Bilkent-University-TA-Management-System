@@ -1,6 +1,8 @@
 package com.example.controller;
 
+import com.example.dto.DepartmentDto;
 import com.example.entity.Courses.Department;
+import com.example.mapper.DepartmentMapper;
 import com.example.repo.DepartmentRepo;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -14,7 +16,7 @@ import java.util.List;
 public class DepartmentController {
 
     private final DepartmentRepo departmentRepo;
-    
+    private final DepartmentMapper departmentMapper;
     
   /*  @GetMapping
     public ResponseEntity<List<Department>> getAllDepartments(@RequestParam(required = false) String name) {
@@ -47,7 +49,7 @@ public class DepartmentController {
     }
 
     @GetMapping
-    public ResponseEntity<List<Department>> getAllDepartments() {
+    public ResponseEntity<List<Department>> getAllDepartments() { //still recursive
         List<Department> departments = departmentRepo.findAll();
         return ResponseEntity.ok(departments);
     }
@@ -67,4 +69,14 @@ public class DepartmentController {
         boolean exists = departmentRepo.existsById(name);
         return ResponseEntity.ok(exists);
     }
+
+    @GetMapping("/dto")
+    public ResponseEntity<List<DepartmentDto>> getAllDepartmentsAsDto() {
+        List<Department> departments = departmentRepo.findAll();
+        List<DepartmentDto> dtos = departments.stream()
+                .map(departmentMapper::toDto)
+                .toList();
+        return ResponseEntity.ok(dtos);
+    }
+
 }

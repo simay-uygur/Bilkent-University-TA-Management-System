@@ -1,10 +1,27 @@
 import axios, { AxiosResponse } from 'axios';
 axios.defaults.baseURL = import.meta.env.VITE_API_URL || '';  // ← point to your API
-
 export interface Credentials {
   id: string;
   password: string;
 }
+
+export interface JwtResponse {
+  token: string;
+  id: number;
+  username: string;
+  role: string;
+}
+
+export function login(
+  creds: Credentials
+): Promise<AxiosResponse<JwtResponse>> {
+  return axios.post<JwtResponse>(
+    '/api/signIn',
+    creds,
+    { withCredentials: true }
+  );
+}
+
 
 export interface User {
   id: number;
@@ -16,13 +33,7 @@ export interface User {
 }
 
 // login returns nothing on success (assumes your Spring endpoint returns 200 OK with no body)
-export function login(
-  creds: Credentials
-): Promise<AxiosResponse<void>> {
-  return axios.post<void>('/api/login', creds, {
-    withCredentials: true,
-  });
-}
+
 export interface ScheduleItem {
   id: string;
   timeRange: string;
