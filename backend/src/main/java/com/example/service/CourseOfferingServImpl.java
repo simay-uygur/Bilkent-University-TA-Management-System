@@ -7,17 +7,28 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
 public class CourseOfferingServImpl implements CourseOfferingServ {
     private final CourseOfferingRepo repo;
+    private final SemesterServ semesterServ;
 
     @Override
     public CourseOffering create(CourseOffering offering) {
+        Long courseId = (long) offering.getCourse().getCourseId();
+        Long semesterId = offering.getSemester().getId();
+
+        Optional<CourseOffering> existing = repo.findByCourse_CourseIdAndSemester_Id(courseId, semesterId);
+        if (existing.isPresent()) {
+            throw new IllegalArgumentException("Offering already exists for this course and semester.");
+        }
+
+        offering.setSemester(semesterServ.getById(semesterId));
+
         return repo.save(offering);
     }
-
     @Override
     public CourseOffering update(Long id, CourseOffering offering) {
         CourseOffering existing = getById(id);

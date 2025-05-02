@@ -35,6 +35,10 @@ public interface SectionRepo extends JpaRepository<Section, Integer>{
 """)
     List<StudentDto> findStudentDTOsBySectionId(@Param("sectionId") Long sectionId);
 
+    //boolean existsBySectionId(int sectionId);
+
+    boolean existsBySectionCodeEqualsIgnoreCase(String sectionCode);
+
 //  @Query("""
 //    SELECT new com.example.dto.TaDto(
 //      t.id,

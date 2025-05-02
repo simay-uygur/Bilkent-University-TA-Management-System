@@ -15,9 +15,26 @@ public class SectionServImpl implements SectionServ {
 
     @Override
     public Section create(Section section) {
+        // Validate sectionCode uniqueness
+        if (repo.existsBySectionCodeEqualsIgnoreCase(section.getSectionCode())) { //hope it works
+            throw new IllegalArgumentException("Section with code '" + section.getSectionCode() + "' already exists.");
+        }
+
+        // Validate presence of required associations
+        if (section.getInstructor() == null || section.getInstructor().getId() == null) {
+            throw new IllegalArgumentException("Instructor must be specified.");
+        }
+
+        if (section.getOffering() == null || section.getOffering().getId() == null) {
+            throw new IllegalArgumentException("Offering must be specified.");
+        }
+
+        // Optional: You may fetch the actual instructor and offering from DB to ensure they exist
+        // e.g., instructorRepo.findById(id).orElseThrow(...)
+        // and set them again if needed
+
         return repo.save(section);
     }
-
     @Override
     public Section update(Integer id, Section section) {
         Section existing = getById(id);
