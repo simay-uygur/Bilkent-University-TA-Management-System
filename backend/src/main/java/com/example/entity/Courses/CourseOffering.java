@@ -13,7 +13,11 @@ import static jakarta.persistence.FetchType.LAZY;
 
 
 @Entity
-@Table(name = "course_offerings")
+//@Table(name = "course_offerings") -changed
+@Table(
+        name = "course_offerings",
+        uniqueConstraints = @UniqueConstraint(columnNames = {"course_id", "semester_id"})
+)
 @Getter
 @Setter
 @NoArgsConstructor

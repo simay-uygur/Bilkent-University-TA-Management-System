@@ -11,7 +11,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @RestController
-@RequestMapping("/sections")
+@RequestMapping("api/sections")
 public class SectionController {
 
     private final SectionServ    sectionServ;
@@ -35,4 +35,10 @@ public class SectionController {
                 .map(sectionMapper::toDto)
                 .collect(Collectors.toList());
     }
+
+    @PostMapping
+    public Section createSection(@RequestBody Section section) {
+        return sectionServ.create(section);
+    }
+
 }
