@@ -96,7 +96,7 @@ public class ScheduleServImpl implements ScheduleServ {
                 );
                 String key = startDate.format(dtf);// in format "yyyy-MM-dd"
                 String title = sec.getSectionCode();
-                ScheduleItem item = new ScheduleItem(title, event, ScheduleItemType.LESSON, sec.getSectionId(),key);
+                ScheduleItem item = new ScheduleItem(title, event, ScheduleItemType.LESSON, Math.toIntExact(sec.getSectionId()),key);
                 if (!schedule.getScheduleItems().contains(item)) {
                     schedule.addScheduleItem(item);
                 } 

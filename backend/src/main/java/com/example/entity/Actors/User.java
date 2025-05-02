@@ -36,7 +36,8 @@ import lombok.Setter;
     @JsonSubTypes.Type(value = TA.class, name = "TA"),
     //@JsonSubTypes.Type(value = Admin.class, name = "ADMIN")
     @JsonSubTypes.Type(value = Instructor.class, name = "INSTRUCTOR"),
-    @JsonSubTypes.Type(value = DepartmentStaff.class, name = "DEPARTMENT_STAFF")
+    @JsonSubTypes.Type(value = DepartmentStaff.class, name = "DEPARTMENT_STAFF"),
+        @JsonSubTypes.Type(value = DeanOffice.class, name = "DEAN_OFFICE")
 })
 public class User {
     @Id

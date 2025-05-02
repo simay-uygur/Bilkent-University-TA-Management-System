@@ -195,13 +195,30 @@ public class InstructorServImpl implements InstructorServ {
         return instructorRepo.save(instructor);
     }
 
+    /*public InstructorDto create(InstructorDto dto) {
+        Instructor inst = InstructorMapper.toEntity(dto);
+
+        if (dto.getDepartmentName() != null) {
+            var dept = departmentRepo.findById(dto.getDepartmentName())
+                    .orElseThrow(() -> new IllegalArgumentException("Department not found"));
+            inst.setDepartment(dept);
+        }
+
+        if (dto.getCourseCodes() != null) {
+            var courses = courseRepo.findAllByCourseCodeIn(dto.getCourseCodes());
+            inst.setCourses(courses);
+        }
+
+        Instructor saved = instructorRepo.save(inst);
+        return InstructorMapper.toDto(saved);
+    }*/
+
     @Override
-    public boolean deleteInstructor(Long id) {
+    public void deleteInstructor(Long id) {
         if (!instructorRepo.existsById(id)) {
             throw new RuntimeException("Instructor with id " + id + " not found.");
         }
         instructorRepo.deleteById(id);
-        return true;
     }
 
     @Override

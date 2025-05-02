@@ -1,35 +1,34 @@
 package com.example.mapper;
 
-import com.example.dto.CourseDto;
 import com.example.dto.DepartmentDto;
-import com.example.entity.Courses.Course;
 import com.example.entity.Courses.Department;
+import com.example.entity.General.Faculty;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
-import java.util.List;
-import java.util.stream.Collectors;
-
 @Component
+@RequiredArgsConstructor
 public class DepartmentMapper {
 
     public DepartmentDto toDto(Department department) {
-        DepartmentDto dto = new DepartmentDto();
-        dto.setName(department.getName());
+        if (department == null) return null;
 
-        List<CourseDto> courseDtos = department.getCourses().stream()
-                .map(this::toCourseDto)
-                .collect(Collectors.toList());
+        String facultyCode = department.getFaculty() != null
+                ? department.getFaculty().getCode()
+                : null;
 
-        dto.setCourses(courseDtos);
-        return dto;
+        return new DepartmentDto(
+                department.getName(),
+                facultyCode
+        );
     }
 
-    private CourseDto toCourseDto(Course course) {
-        CourseDto cd = new CourseDto();
-        cd.setCourseId(course.getCourseId());
-        cd.setCourseName(course.getCourseName());
-        cd.setDepartment(course.getDepartment().getName());
-        return cd;
+    public Department toEntity(DepartmentDto dto, Faculty faculty) {
+        if (dto == null) return null;
+
+        Department department = new Department();
+        department.setName(dto.getCode());
+        department.setFaculty(faculty);
+        return department;
     }
 }
-
