@@ -19,4 +19,9 @@ public interface InstructorRepo extends JpaRepository<Instructor, Long> {
     // JPQL to list sections for a given instructor
     @Query("select s from Section s where s.instructor.id = :instId")
     List<Section> findSectionsByInstructor(@Param("instId") Long instructorId);
+
+    @Query("SELECT i FROM Instructor i WHERE i.department.name = :departmentName")
+    List<Instructor> findByDepartmentName(String departmentName);
+
+
 }

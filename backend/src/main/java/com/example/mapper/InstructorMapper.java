@@ -29,4 +29,16 @@ public class InstructorMapper {
 
         return dto;
     }
+    public List<InstructorDto> toDtoList(List<Instructor> instructors) {
+        for (Instructor instructor : instructors) {
+            InstructorDto dto = toDto(instructor);
+            dto.setId(instructor.getId());
+            dto.setName(instructor.getName());
+            dto.setSurname(instructor.getSurname());
+            //dto.setIsActive(instructor.getIsActive()); -  active is not a field in dto
+        }
+        return instructors.stream()
+                .map(this::toDto)
+                .collect(Collectors.toList());
+    }
 }

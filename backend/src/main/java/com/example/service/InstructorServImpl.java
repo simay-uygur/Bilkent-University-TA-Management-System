@@ -234,7 +234,7 @@ public class InstructorServImpl implements InstructorServ {
     }
 
 
-    @Override
+    /* @Override
     public List<InstructorDto> getInstructorsByDepartment(String departmentName) {
         Department dept = departmentRepo
                 .findDepartmentByName(departmentName)
@@ -244,6 +244,16 @@ public class InstructorServImpl implements InstructorServ {
                 .filter(i -> dept.equals(i.getDepartment()))
                 .map(instructorMapper::toDto)
                 .collect(Collectors.toList());
-    }
+    } */
+    @Override
+    public List<InstructorDto> getInstructorsByDepartment(String departmentName) {
+        List<Instructor> instructors = instructorRepo.findByDepartmentName(departmentName);
+                
+
+      return instructors.stream()
+                .map(instructorMapper::toDto)
+                .collect(Collectors.toList());
+    //return instructorMapper.toDtoList(instructors);
+}
 
 }
