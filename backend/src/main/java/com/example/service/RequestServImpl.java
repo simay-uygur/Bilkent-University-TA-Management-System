@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import com.example.entity.Actors.User;
 import com.example.entity.Requests.Request;
 import com.example.entity.Requests.RequestType;
+import com.example.exception.Requests.NoSuchRequestExc;
 import com.example.repo.RequestRepo;
 
 import lombok.RequiredArgsConstructor;
@@ -73,7 +74,12 @@ public class RequestServImpl implements RequestServ{
     @Override
     public boolean createRequest(Request req) {
         requestRepo.save(req);
-        return requestRepo.existsById(req.getRequestId().intValue());
+        return requestRepo.existsById(req.getRequestId().longValue());
+    }
+
+    @Override
+    public Request getRequestById(Long req_id) {
+        return requestRepo.findById(req_id).orElseThrow(() -> new NoSuchRequestExc(req_id));
     }
 
     

@@ -6,6 +6,7 @@ import com.example.entity.Actors.User;
 import com.example.entity.Requests.Request;
 
 public interface RequestServ {
+    public Request getRequestById(Long req_id);
     public List<Request> getAllRequests();
     public List<Request> getRequestsOfTheUser(User u);
     public List<Request> getSwapRequestsOfTheUser(User u); //Swap
