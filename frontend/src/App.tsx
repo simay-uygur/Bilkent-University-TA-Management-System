@@ -87,7 +87,7 @@ const App: React.FC = () => (
     element={<DeansDepartmentDetailPage />}
   />
 
-          <Route path="assign/:courseId/:mode"  element={<DeanAssignProctors />} />
+          <Route path="proctor/:courseId/:mode"  element={<DeanAssignProctors />} />
         </Route>
       </Route>
 
