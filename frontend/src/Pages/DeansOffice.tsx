@@ -1,4 +1,73 @@
-import React from 'react';
+// src/pages/DeansOfficePage.tsx
+import React, { useState, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
+import NavBarDeans from '../components/NavBarDeans'
+import styles from './DeansOffice.module.css'
+
+interface DeptStats {
+  dept: string
+  instructors: number
+  courses: number
+  tas: number
+}
+
+
+const DEPARTMENTS = ['CS', 'IE', 'EEE', 'ME']
+
+const DeansOfficePage: React.FC = () => {
+  const [stats, setStats] = useState<DeptStats[]>([])
+  const navigate = useNavigate()
+
+  useEffect(() => {
+    async function loadStats() {
+      const all = await Promise.all(DEPARTMENTS.map(async dept => {
+        const [ins, cou, tas] = await Promise.all([
+          fetch(`/api/instructors/department/${dept}`).then(r => r.json()),
+          fetch(`/api/course/department/${dept}`).then(r => r.json()),
+          fetch(`/api/ta/department/${dept}`).then(r => r.json()),
+        ])
+        return {
+          dept,
+          instructors: Array.isArray(ins) ? ins.length : 0,
+          courses:     Array.isArray(cou) ? cou.length : 0,
+          tas:         Array.isArray(tas) ? tas.length : 0,
+        }
+      }))
+      setStats(all)
+    }
+    loadStats().catch(console.error)
+  }, [])
+
+  return (
+    <>
+      
+
+      <div className={styles.pageWrapper}>
+        <h1 className={styles.heading}>Engineering Faculty Overview</h1>
+        <div className={styles.grid}>
+          {stats.map(s => (
+            <div
+              key={s.dept}
+              className={styles.card}
+              onClick={() => navigate(`/deans-office/department/${s.dept}`)}
+            >
+              <h2 className={styles.deptName}>{s.dept}</h2>
+              <p className={styles.metric}>Instructors: {s.instructors}</p>
+              <p className={styles.metric}>Courses: {s.courses}</p>
+              <p className={styles.metric}>TAs: {s.tas}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+    </>
+  )
+}
+
+export default DeansOfficePage
+
+
+
+/* import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import styles from './DeansOffice.module.css';
 
@@ -53,3 +122,4 @@ const DeansOffice: React.FC = () => {
 };
 
 export default DeansOffice;
+ */
