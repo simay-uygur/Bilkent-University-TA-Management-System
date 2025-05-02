@@ -21,7 +21,7 @@ public class CourseDto {
     private List<StudentDto> students;
     private List<TaDto> tas;
     private List<String> prereqs;
-    private InstructorDto coordinator;
+    //private InstructorDto coordinator;
     private List<InstructorDto> instructors;
     private List<SectionDto> sections;
 }

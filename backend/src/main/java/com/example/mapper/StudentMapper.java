@@ -3,9 +3,11 @@ package com.example.mapper;
 
 import com.example.dto.StudentDto;
 import com.example.entity.General.Student;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 @Component
+@RequiredArgsConstructor
 public class StudentMapper {
     public StudentDto toDto(Student student) {
         StudentDto dto = new StudentDto();

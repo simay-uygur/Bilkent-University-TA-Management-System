@@ -7,7 +7,6 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 public interface InstructorServ {
 
@@ -15,7 +14,7 @@ public interface InstructorServ {
 
     Instructor createInstructor(Instructor instructor);
 
-    boolean deleteInstructor(Long id);
+    void deleteInstructor(Long id);
 
     Instructor updateInstructor(Long id, Instructor instructor);
 

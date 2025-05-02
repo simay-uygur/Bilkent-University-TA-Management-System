@@ -67,9 +67,6 @@ public class Course {
     @Column(name = "course_academic_status", updatable = true, nullable = false)
     private AcademicLevelType courseAcademicStatus;
 
-    /*@NotEmpty(message = "The field can not be empty!")
-    @Column(name = "course_dep", unique = false, updatable = true)
-    private String course_dep ;*/
 
     @ManyToOne(fetch = FetchType.LAZY)
     private Department department;
@@ -92,13 +89,19 @@ public class Course {
     private String prereqList;
     // do not use join table
 
-    @OneToMany(
-        mappedBy = "course", // the other side of the relationship is the owner of the relationship
-        fetch = FetchType.LAZY,
-        orphanRemoval = true,
-        cascade= CascadeType.ALL
-    )
-    private List<Section> sectionsList; // this is the list of sections that are related to the course
+
+//    @OneToMany(
+//        mappedBy = "course", // the other side of the relationship is the owner of the relationship
+//        fetch = FetchType.LAZY,
+//        orphanRemoval = true,
+//        cascade= CascadeType.ALL
+//    )
+//    private List<Section> sectionsList; // this is the list of sections that are related to the course
+
+    //instead of sections, there is course offering 
+    @OneToMany(mappedBy = "course", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<CourseOffering> courseOfferings = new ArrayList<>();
+
 
     @ManyToMany(
         fetch = FetchType.LAZY,

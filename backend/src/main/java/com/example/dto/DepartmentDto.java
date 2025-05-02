@@ -8,6 +8,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class DepartmentDto {
-    private String name;
-    private List<CourseDto> courses;
+
+    private String code;         // e.g., “CS”, “IE”
+    private String facultyCode;  // parent faculty, no full object to avoid cycles
 }
