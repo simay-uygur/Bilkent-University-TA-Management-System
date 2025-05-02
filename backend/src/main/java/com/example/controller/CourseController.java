@@ -10,6 +10,7 @@ import com.example.dto.TaskDto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -64,6 +65,7 @@ public class CourseController {
         */
     }
 
+    @Async("get")
     @GetMapping("api/course/{course_code}")
     public ResponseEntity<CourseDto> getCourse(@PathVariable String course_code) {
         return new ResponseEntity<>(courseServ.findCourse(course_code), HttpStatus.FOUND);
