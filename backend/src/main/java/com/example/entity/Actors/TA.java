@@ -154,6 +154,7 @@ public class TA extends User{
     private Boolean isActive = true;
     
     @Column(name = "ta_type", unique = false, updatable = true, nullable = false)
+    @Enumerated(EnumType.STRING)
     private TAType ta_type;
 
     @Column(name = "department", nullable = false)
