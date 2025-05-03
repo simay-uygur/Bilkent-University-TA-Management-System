@@ -24,6 +24,8 @@ import com.example.exception.Course.CourseNotFoundExc;
 import com.example.exception.Course.NoPrereqCourseFound;
 import com.example.exception.GeneralExc;
 import com.example.exception.NoPersistExc;
+import com.example.mapper.CourseMapper;
+import com.example.mapper.CourseOfferingMapper;
 import com.example.mapper.LessonMapper;
 import com.example.repo.CourseRepo;
 import com.example.repo.DepartmentRepo;
@@ -49,7 +51,9 @@ public class CourseServImpl implements CourseServ {
     private final TaskServ taskServ;
     private final SectionRepo secRepo;
     private final DepartmentRepo departmentRepo;
+    private final CourseOfferingMapper offeringMapper;
     private final LessonMapper lessonMapper;
+    private final CourseMapper courseMapper;
 
     @Override
     public boolean addSection(String courseCode, Section section) {
@@ -74,17 +78,6 @@ public class CourseServImpl implements CourseServ {
     }
 
     @Override
-    public boolean addTask(String courseCode, Task task) {
-        Course course = courseRepo.findCourseByCourseCode(courseCode)
-                .orElseThrow(() -> new CourseNotFoundExc(courseCode));
-        task.setCourse(course);
-        Task created = taskServ.createTask(task);
-        course.getTasks().add(created);
-        courseRepo.save(course);
-        return true;
-    }
-
-    @Override
     public boolean courseExists(String courseCode) {
         return courseRepo.existsByCourseCode(courseCode);
     }
@@ -105,13 +98,13 @@ public class CourseServImpl implements CourseServ {
     public CourseDto findCourse(String courseCode) {
         Course course = courseRepo.findCourseByCourseCode(courseCode)
                 .orElseThrow(() -> new CourseNotFoundExc(courseCode));
-        return mapToDto(course);
+        return courseMapper.toDto(course);
     }
 
     @Override
     public List<CourseDto> getCourses() {
         return courseRepo.findAll().stream()
-                .map(this::mapToDto)
+                .map(courseMapper::toDto)
                 .collect(Collectors.toList());
     }
 
@@ -204,25 +197,26 @@ public class CourseServImpl implements CourseServ {
         return dto;
     }
 */
-
+/*
     private CourseDto mapToDto(Course course) {
         CourseDto dto = new CourseDto();
 
-        /* ── basic course fields ────────────────────────── */
+        */
+    /* ── basic course fields ────────────────────────── *//*
         dto.setCourseId(course.getCourseId());
         dto.setCourseCode(course.getCourseCode());
         dto.setCourseName(course.getCourseName());
         dto.setCourseAcademicStatus(course.getCourseAcademicStatus().name());
         dto.setDepartment(course.getDepartment().getName());
 
-        /* ── prereqs (split → List<String>) ─────────────── */
+        *//* ── prereqs (split → List<String>) ─────────────── *//*
         dto.setPrereqs(
                 Arrays.stream(course.getPrereqList().split("\\s*,\\s*"))
                         .filter(s -> !s.isBlank())
                         .collect(Collectors.toList())
         );
 
-        /* ── students ───────────────────────────────────── */
+        *//* ── students ───────────────────────────────────── *//*
         dto.setStudents(
                 course.getStudentsList().stream()
                         .map(s -> new StudentDto(
@@ -270,7 +264,7 @@ public class CourseServImpl implements CourseServ {
                         })
                         .collect(Collectors.toList())                             // use Collectors.toList()
         );
-        /*
+        *//*
           private Long id;
     private String name;
     private String surname;
@@ -281,7 +275,7 @@ public class CourseServImpl implements CourseServ {
     private String department;
     private List<String> courses;
     private List<String> lessons;
-    */
+    *//*
         dto.setTas(
                 course.getCourseTas().stream()
                         .map(ta -> new TaDto(
@@ -304,24 +298,8 @@ public class CourseServImpl implements CourseServ {
         );
 
         return dto;
-    }
+    }*/
 
-    @Override
-    public boolean assignTA(Long taId, String courseCode) {
-        Course course = courseRepo.findCourseByCourseCode(courseCode)
-                .orElseThrow(() -> new CourseNotFoundExc(courseCode));
-        TA ta = taServ.getTAById(taId);
-        if (ta.getCourses().contains(course)) {
-            throw new GeneralExc("TA " + taId + " already assigned to " + courseCode);
-        }
-        if (ta.getTasOwnLessons().stream()
-                .anyMatch(sec -> sec.getOffering().getCourse().getCourseCode().equals(courseCode))) {
-            throw new GeneralExc("TA " + taId + " takes this course as a student");
-        }
-        course.getCourseTas().add(ta);
-        courseRepo.save(course);
-        return true;
-    }
 
     @Override
     public Task getTaskByID(String courseCode, int taskId) {
