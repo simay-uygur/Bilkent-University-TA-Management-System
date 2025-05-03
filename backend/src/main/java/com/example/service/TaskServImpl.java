@@ -124,7 +124,7 @@ public class TaskServImpl implements TaskServ {
         existing.setTaskType(incoming.getTaskType());
         existing.setStatus(incoming.getStatus());
         existing.setRequiredTAs(incoming.getRequiredTAs());
-        existing.setCourse(incoming.getCourse());
+        existing.setSection(incoming.getSection());
         existing.setExam(incoming.getExam());
         
         taskRepo.save(existing);
@@ -186,7 +186,7 @@ public class TaskServImpl implements TaskServ {
                 throw new GeneralExc("TA already has task on the same duration");
             }
         }
-        for(Section sec : ta.getTasOwnLessons()){
+        for(Section sec : ta.getSectionsAsStudent()){
             for (Lesson lesson : sec.getLessons()){
                 if(task.getDuration().has(lesson.getDuration()))
                     throw new GeneralExc("TA has lesson during that duration");

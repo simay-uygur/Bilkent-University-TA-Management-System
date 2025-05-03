@@ -18,7 +18,7 @@ import org.apache.poi.ss.usermodel.Row.MissingCellPolicy;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.usermodel.WorkbookFactory;
-import org.springframework.beans.factory.annotation.Autowired;
+
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -47,8 +47,7 @@ public class StudentServImpl implements com.example.service.StudentServ {
 
     private final TARepo taRepo;
 
-    @Autowired
-    private BCryptPasswordEncoder encoder; //for now it is autowired
+    private final BCryptPasswordEncoder encoder; //for now it is autowired
 
     public void saveAll(List<Student> students) {
         studentRepo.saveAll(students);
