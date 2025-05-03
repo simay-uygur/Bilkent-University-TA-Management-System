@@ -21,18 +21,17 @@ public class SectionMapper {
     public SectionDto toDto(Section section) {
         if (section == null) return null;
 
-        List<LessonDto> lessons = section.getLessons().stream()
+        SectionDto dto = new SectionDto();
+        dto.setSectionId(section.getSectionId());
+        dto.setSectionCode(section.getSectionCode());
+        dto.setLessons(section.getLessons().stream()
                 .map(lessonMapper::toDto)
-                .collect(Collectors.toList());
+                .collect(Collectors.toList()));
+        dto.setInstructor(instructorMapper.toDto(section.getInstructor()));
+        //dto.setTas(section.getTas().stream().map(taMapper::toDto).collect(Collectors.toList()));
+        //dto.setStudents(section.getStudents().stream().map(studentMapper::toDto).collect(Collectors.toList()));
 
-        InstructorDto instr = instructorMapper.toDto(section.getInstructor());
-
-        return new SectionDto(
-                section.getSectionId(),
-                section.getSectionCode(),
-                lessons,
-                instr
-        );
+        return dto;
     }
 
     /** DTO → Entity */

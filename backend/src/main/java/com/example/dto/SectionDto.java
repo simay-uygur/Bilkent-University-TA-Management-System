@@ -14,4 +14,6 @@ public class SectionDto {
     private String sectionCode;
     private List<LessonDto> lessons;
     private InstructorDto instructor;
+    private List<TaDto> tas;
+    private List<StudentDto> students;
 }

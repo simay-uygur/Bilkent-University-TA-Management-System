@@ -235,7 +235,7 @@ private List<CourseDto> mapToDtoList(List<Course> courses) {
         );
 
         /* ── students ───────────────────────────────────── */
-        dto.setStudents(
+       /*  dto.setStudents(
                 course.getStudentsList().stream()
                         .map(s -> new StudentDto(
                                 s.getStudentId(),
@@ -248,11 +248,11 @@ private List<CourseDto> mapToDtoList(List<Course> courses) {
                                 s.getIsGraduated()
                         ))
                         .collect(Collectors.toList())
-        );
+        ); */
 
 
         // inside CourseServImpl.mapToDto(...)
-        dto.setSections(
+       /*  dto.setSections(
                 course.getCourseOfferings().stream()
                         .flatMap(offering -> offering.getSections().stream())
                         .map(sec -> {
@@ -281,7 +281,7 @@ private List<CourseDto> mapToDtoList(List<Course> courses) {
                             );
                         })
                         .collect(Collectors.toList())                             // use Collectors.toList()
-        );
+        ); */
         /*
           private Long id;
     private String name;
@@ -294,7 +294,7 @@ private List<CourseDto> mapToDtoList(List<Course> courses) {
     private List<String> courses;
     private List<String> lessons;
     */
-        dto.setTas(
+        /* dto.setTas(
                 course.getCourseTas().stream()
                         .map(ta -> new TaDto(
                                 ta.getId(),
@@ -313,7 +313,7 @@ private List<CourseDto> mapToDtoList(List<Course> courses) {
                                         .collect(Collectors.toList())
                         ))
                         .collect(Collectors.toList())
-        );
+        ); */
 
         return dto;
     }

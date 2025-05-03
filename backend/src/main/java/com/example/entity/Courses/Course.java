@@ -85,7 +85,7 @@ public class Course {
     private Set<Student> studentsList = new HashSet<>();
 
     @Column(name = "prereq_list", unique = false, updatable = true, nullable = false)
-    //@NotEmpty(message = "The field can not be empty!")
+    
     private String prereqList;
     // do not use join table
 
