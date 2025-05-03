@@ -31,7 +31,7 @@ public interface SectionRepo extends JpaRepository<Section, Integer>{
         s.isGraduated
     )
     FROM Section sec
-      JOIN sec.students s
+      JOIN sec.registeredStudents s
     WHERE sec.sectionId = :sectionId
 """)
     List<StudentDto> findStudentDTOsBySectionId(@Param("sectionId") Long sectionId);
@@ -71,7 +71,7 @@ public interface SectionRepo extends JpaRepository<Section, Integer>{
     @Query("""
            SELECT  t
            FROM    Section  sec
-                   JOIN     sec.taAsStudents t
+                   JOIN     sec.registeredTas t
            WHERE   sec.sectionId = :sectionId
            """)
     List<TA> findTasBySectionId(@Param("sectionId") int sectionId);
