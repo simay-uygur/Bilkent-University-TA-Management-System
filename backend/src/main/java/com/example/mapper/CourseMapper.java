@@ -14,6 +14,7 @@ public class CourseMapper {
         dto.setCourseId(course.getCourseId());
         dto.setCourseCode(course.getCourseCode());
         dto.setCourseName(course.getCourseName());
+        dto.setDepartment(course.getDepartment().getName());
         return dto;
     }
 

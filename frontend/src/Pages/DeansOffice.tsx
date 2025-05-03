@@ -1,7 +1,7 @@
 // src/pages/DeansOfficePage.tsx
 import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import NavBarDeans from '../components/NavBarDeans'
+
 import styles from './DeansOffice.module.css'
 
 interface DeptStats {
@@ -23,7 +23,7 @@ const DeansOfficePage: React.FC = () => {
       const all = await Promise.all(DEPARTMENTS.map(async dept => {
         const [ins, cou, tas] = await Promise.all([
           fetch(`/api/instructors/department/${dept}`).then(r => r.json()),
-          fetch(`/api/course/department/${dept}`).then(r => r.json()),
+          fetch(`/api/v1/offerings/department/${dept}`).then(r => r.json()),
           fetch(`/api/ta/department/${dept}`).then(r => r.json()),
         ])
         return {

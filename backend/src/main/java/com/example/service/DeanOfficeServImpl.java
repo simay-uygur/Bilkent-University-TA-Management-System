@@ -21,7 +21,7 @@ public class DeanOfficeServImpl implements DeanOfficeServ {
     private final DeanOfficeRepo deanOfficeRepo;
     private final FacultyRepo facultyRepo;
     private final PasswordEncoder encoder;
-    private final DeanOfficeMapper deanOfficeMapper;
+    
 
     @Override
     @Transactional

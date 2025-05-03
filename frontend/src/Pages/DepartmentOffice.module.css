@@ -1,4 +1,54 @@
+/* src/pages/DepartmentOffice.module.css */
 .pageWrapper {
+  padding: 2rem;
+  background: #f9fafb;
+}
+
+.heading {
+  font-size: 1.75rem;
+  margin-bottom: 1.5rem;
+  text-align: center;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+}
+
+.card {
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.5rem;
+  padding: 1rem;
+}
+
+.tableHeading {
+  margin-bottom: 0.75rem;
+  font-size: 1.25rem;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.table th,
+.table td {
+  border: 1px solid #e2e8f0;
+  padding: 0.5rem;
+  text-align: left;
+}
+
+.table th {
+  background: #f3f4f6;
+}
+
+.table tbody tr:hover {
+  background: #f9fafb;
+}
+
+/* .pageWrapper {
   padding: 2rem;
   background: #f9fafb;
 }
@@ -40,4 +90,4 @@
   border: 1px solid #e5e7eb;
   padding: 0.5rem;
   text-align: left;
-}
+} */
