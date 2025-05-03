@@ -5,7 +5,8 @@ import com.example.entity.General.Event;
 import lombok.Data;
 
 @Data
-public class LeaveDTO extends RequestDto {
+public class SwapDto extends RequestDto {
     private Event duration;
-    private boolean isPending;
+    private String examName;
+    private int examId;
 }

@@ -2,25 +2,34 @@ package com.example.service;
 
 
 
-import com.example.ExcelHelpers.FailedRowInfo;
-import com.example.dto.InstructorDto;
-import com.example.entity.Actors.Instructor;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
-import com.example.entity.Courses.Department;
-import com.example.mapper.InstructorMapper;
-import com.example.repo.DepartmentRepo;
-import com.example.repo.InstructorRepo;
-import lombok.RequiredArgsConstructor;
-import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.usermodel.WorkbookFactory;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
-import com.example.entity.Actors.Role;
 
-import java.io.InputStream;
-import java.io.IOException;
-import java.util.*;
-import java.util.stream.Collectors;
+import com.example.ExcelHelpers.FailedRowInfo;
+import com.example.dto.InstructorDto;
+import com.example.entity.Actors.Instructor;
+import com.example.entity.Actors.Role;
+import com.example.entity.Courses.Department;
+import com.example.exception.GeneralExc;
+import com.example.mapper.InstructorMapper;
+import com.example.repo.DepartmentRepo;
+import com.example.repo.InstructorRepo;
+
+import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
@@ -253,14 +262,12 @@ public class InstructorServImpl implements InstructorServ {
 
     @Override
     public List<InstructorDto> getInstructorsByDepartment(String departmentName) {
-        Department dept = departmentRepo
-                .findDepartmentByName(departmentName)
-                .orElseThrow(() -> new RuntimeException("Department not found: " + departmentName));
-
-        return instructorRepo.findAll().stream()
-                .filter(i -> dept.equals(i.getDepartment()))
+        if(!departmentRepo.existsById(departmentName))
+            throw new GeneralExc("Department with name " + departmentName + " not found.");
+        Optional<List<Instructor>> instructors = instructorRepo.findByDepartmentName(departmentName);
+        List<Instructor> instructorList = instructors.orElseThrow(() -> new RuntimeException("No instructors found for department: " + departmentName));
+        return instructorList.stream()
                 .map(instructorMapper::toDto)
                 .collect(Collectors.toList());
     }
-
 }

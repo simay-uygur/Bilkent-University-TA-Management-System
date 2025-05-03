@@ -6,6 +6,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -48,14 +49,20 @@ public class Request {
     @Column(name = "isApproved", unique = false)
     private boolean isApproved = false;
 
+    @Column(name = "isRejected", unique = false)
+    private boolean isRejected = false;
+
+    @Column(name = "isPending", unique = false)
+    private boolean isPending = true;
+
     @Column(name = "sentTime", unique = false)
     private Date sentTime;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinColumn(name = "sender_id")
     private User sender;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinColumn(name = "receiver_id")
     private User receiver;
 

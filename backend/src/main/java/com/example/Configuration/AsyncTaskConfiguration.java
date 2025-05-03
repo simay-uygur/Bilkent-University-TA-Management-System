@@ -50,13 +50,13 @@ public class AsyncTaskConfiguration {
         return executor;
     }
 
-    @Bean("getExecutor")
+    @Bean("setExecutor")
     public Executor getExecutor() {
         ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
         executor.setCorePoolSize(2);
         executor.setMaxPoolSize(4); 
         executor.setQueueCapacity(200);
-        executor.setThreadNamePrefix("GetterThread-");
+        executor.setThreadNamePrefix("SetterThread-");
         executor.setRejectedExecutionHandler(new ThreadPoolExecutor.CallerRunsPolicy()); // Use Call
         executor.initialize();
         return executor;

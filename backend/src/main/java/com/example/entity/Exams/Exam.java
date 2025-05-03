@@ -2,6 +2,8 @@ package com.example.entity.Exams;
 
 import java.util.List;
 
+import com.example.entity.Requests.Swap;
+import com.example.entity.Requests.TransferProctoring;
 import com.example.entity.Tasks.Task;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -29,7 +31,7 @@ import lombok.Setter;
 public class Exam {
     @Id
     @Column(name = "exam_id", unique = true)
-    private int exam_id;
+    private int examId;
 
     @Column(name = "description", unique = false, updatable = true)
     private String description;
@@ -50,4 +52,24 @@ public class Exam {
         orphanRemoval = true
     )
     private List<ExamRoom> exam_rooms;
+
+    @OneToMany(
+        mappedBy = "exam",
+        fetch = FetchType.LAZY,
+        cascade = CascadeType.ALL,
+        orphanRemoval = true
+    )
+    private List<Swap> swapRequests; // this is used to get the swap requests for this exam
+
+    @OneToOne(
+        mappedBy = "exam",
+        fetch = FetchType.LAZY,
+        cascade = CascadeType.ALL,
+        orphanRemoval = true,
+        optional = true
+    )
+    private TransferProctoring transferProctoringRequest; // this is used to get the transfer proctoring requests for this exam
+
+    @Column(name = "swap_enabled", unique = false, updatable = true)
+    private boolean swapEnabled; // this is used to enable/disable the swap requests for this exam
 }

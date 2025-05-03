@@ -51,7 +51,7 @@ public class ExamServImpl implements ExamServ{
     @Override
     public boolean createExam(Exam exam) {
         examRepo.save(exam);
-        return examRepo.existsById(exam.getExam_id());
+        return examRepo.existsById(exam.getExamId());
     }
     
 

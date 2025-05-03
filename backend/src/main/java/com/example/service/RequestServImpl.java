@@ -2,13 +2,18 @@ package com.example.service;
 
 import java.util.List;
 
+import org.springframework.scheduling.annotation.Async;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import com.example.entity.Actors.User;
+import com.example.entity.General.Date;
+import com.example.entity.Requests.Leave;
 import com.example.entity.Requests.Request;
 import com.example.entity.Requests.RequestType;
 import com.example.exception.Requests.NoSuchRequestExc;
-import com.example.repo.RequestRepo;
+import com.example.repo.RequestRepos.LeaveRepo;
+import com.example.repo.RequestRepos.RequestRepo;
 
 import lombok.RequiredArgsConstructor;
 
@@ -17,6 +22,7 @@ import lombok.RequiredArgsConstructor;
 public class RequestServImpl implements RequestServ{
 
     private final RequestRepo requestRepo;
+    private final LeaveRepo leaveRepo;
 
     @Override
     public List<Request> getAllRequests() {
@@ -42,8 +48,8 @@ public class RequestServImpl implements RequestServ{
     }
 
     @Override
-    public List<Request> getTaInFacultyRequestsOfTheUser(User u) {
-        return requestRepo.findBySenderAndRequestType(u, RequestType.TaInFaculty);
+    public List<Request> getProctorTaInFacultyRequestsOfTheUser(User u) {
+        return requestRepo.findBySenderAndRequestType(u, RequestType.ProctorTaInFaculty);
     }
 
     @Override
@@ -54,16 +60,6 @@ public class RequestServImpl implements RequestServ{
     @Override
     public List<Request> getTransferProctoringRequestsOfTheUser(User u) {
         return requestRepo.findBySenderAndRequestType(u, RequestType.TransferProctoring);
-    }
-
-    @Override
-    public List<Request> getVolunteerProctoringRequestsOfTheUser(User u) {
-        return requestRepo.findBySenderAndRequestType(u, RequestType.VolunteerProctoring);
-    }
-
-    @Override
-    public List<Request> getTaFromOtherFacultiesRequestsOfTheUser(User u) {
-        return requestRepo.findBySenderAndRequestType(u, RequestType.TaFromOtherFaculties);
     }
 
     @Override
@@ -82,6 +78,16 @@ public class RequestServImpl implements RequestServ{
         return requestRepo.findById(req_id).orElseThrow(() -> new NoSuchRequestExc(req_id));
     }
 
-    
-    
+    //each day
+    @Scheduled(cron = "0 0 0 * * ?")
+    @Async("leaveExecutor")
+    private void checkLeaveRequests() {
+        List<Leave> leaves = leaveRepo.findAll();
+        for (Leave leave : leaves) {
+            if (leave.getDuration().getFinish().isBefore(new Date().currenDate())) {
+                leave.getSender().setIsActive(true);
+                leaveRepo.save(leave);
+            }
+        }
+    }// may require notofication 
 }
