@@ -35,19 +35,13 @@ public class Section {
     @Column(name = "section_code", nullable = false, unique = true) // CS-319-1
     private String sectionCode;
 
-    @ManyToMany(fetch = FetchType.LAZY,
-            cascade = { CascadeType.PERSIST, CascadeType.MERGE })
+    @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
             name               = "section_tasks",
             joinColumns        = @JoinColumn(name = "section_id"),
             inverseJoinColumns = @JoinColumn(name = "task_id")
     )
     private List<Task> sectionTasksList = new ArrayList<>();
-
-    @OneToMany(fetch = FetchType.LAZY,
-            cascade = { CascadeType.PERSIST, CascadeType.MERGE })
-    @JoinColumn(name = "section_id")
-    private List<ExamRoom> examRooms = new ArrayList<>(); // why ?
 
     //instead of course, now course id is being used
 //    @ManyToOne(fetch = FetchType.LAZY)
@@ -58,8 +52,9 @@ public class Section {
     @JoinColumn(name = "offering_id", nullable = false)
     private CourseOffering offering;
 
-    @ManyToMany(fetch = FetchType.LAZY,
-            cascade = { CascadeType.PERSIST, CascadeType.MERGE })
+    //    @ManyToMany(fetch = FetchType.LAZY,
+//            cascade = { CascadeType.PERSIST, CascadeType.MERGE })
+    @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
             name               = "section_students",
             joinColumns        = @JoinColumn(name = "section_id"),
@@ -76,8 +71,8 @@ public class Section {
     )
     private List<TA> taAsStudents = new ArrayList<>();
 
-    @ManyToOne(fetch = FetchType.LAZY,
-            cascade = { CascadeType.PERSIST, CascadeType.MERGE })
+    @ManyToOne(fetch = FetchType.LAZY)
+           // cascade = { CascadeType.PERSIST, CascadeType.MERGE }) - not to add the instructor
     @JoinColumn(name = "instructor_id", nullable = false)
     private Instructor instructor;
 
@@ -167,8 +162,6 @@ public class Section {
     private List<Lesson> lessons = new ArrayList<>();
 }
 */
-
-
 
 /*
 package com.example.entity.Courses;

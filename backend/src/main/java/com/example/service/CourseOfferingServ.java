@@ -3,6 +3,7 @@ package com.example.service;
 
 import com.example.entity.Courses.CourseOffering;
 import java.util.List;
+import java.util.Optional;
 
 public interface CourseOfferingServ {
     CourseOffering create(CourseOffering offering);
@@ -10,6 +11,7 @@ public interface CourseOfferingServ {
     CourseOffering getById(Long id);
     List<CourseOffering> getAll();
     void delete(Long id);
+    Optional<CourseOffering> getByCourseAndSemester(Long courseId, Long semesterId);
 }
 
 

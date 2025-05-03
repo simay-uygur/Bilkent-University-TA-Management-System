@@ -53,4 +53,10 @@ public class CourseOfferingServImpl implements CourseOfferingServ {
     public void delete(Long id) {
         repo.deleteById(id);
     }
+
+    @Override
+    public Optional<CourseOffering> getByCourseAndSemester(Long courseId, Long semesterId) {
+        return repo.findByCourse_CourseIdAndSemester_Id(courseId, semesterId);
+    }
+
 }

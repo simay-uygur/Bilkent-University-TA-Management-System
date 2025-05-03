@@ -1,6 +1,7 @@
 package com.example.repo;
 
 import java.util.List;
+import java.util.Optional;
 
 import com.example.dto.StudentDto;
 import com.example.dto.TaDto;
@@ -39,6 +40,7 @@ public interface SectionRepo extends JpaRepository<Section, Integer>{
 
     boolean existsBySectionCodeEqualsIgnoreCase(String sectionCode);
 
+    Optional<Section> findSectionByOffering_IdAndSectionCodeIgnoreCase(int offeringId, String sectionCode);
 //  @Query("""
 //    SELECT new com.example.dto.TaDto(
 //      t.id,
@@ -74,4 +76,5 @@ public interface SectionRepo extends JpaRepository<Section, Integer>{
            """)
     List<TA> findTasBySectionId(@Param("sectionId") int sectionId);
 
+    Optional<Section> findBySectionCodeIgnoreCase(String secCode);
 }
