@@ -1,6 +1,7 @@
 package com.example.entity.Tasks;
 
 import com.example.entity.Courses.Course;
+import com.example.entity.Courses.Section;
 import com.example.entity.Exams.Exam;
 import com.example.entity.General.Event;
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -55,9 +56,9 @@ public class Task {
     @Column(name = "size_of_tas", nullable = false)
     private int amountOfTas = 0;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "courseId")
-    private Course course;
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "section_id", nullable = false)
+    private Section section;
 
     @JsonIgnore
     @OneToOne(

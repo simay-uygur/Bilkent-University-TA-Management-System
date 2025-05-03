@@ -47,7 +47,7 @@ public interface TARepo extends JpaRepository<TA, Long> { // TA is the entity an
     @Query("""
       SELECT CASE WHEN COUNT(tsk)>0 THEN TRUE ELSE FALSE END
       FROM Section s
-      JOIN s.taAsStudents ta
+      JOIN s.registeredTas ta
       JOIN s.sectionTasksList tsk
       WHERE ta.id = :taId
         AND tsk.exam IS NOT NULL
@@ -79,7 +79,7 @@ public interface TARepo extends JpaRepository<TA, Long> { // TA is the entity an
       SELECT CASE WHEN COUNT(les)>0 THEN TRUE ELSE FALSE END
       FROM Lesson les
       JOIN les.section sec
-      JOIN sec.taAsStudents ta
+      JOIN sec.registeredTas ta
       WHERE ta.id = :taId
         AND (
              (les.duration.start.year > :endYear)
@@ -110,7 +110,7 @@ public interface TARepo extends JpaRepository<TA, Long> { // TA is the entity an
           SELECT l
             FROM Lesson l
             JOIN l.section s
-            JOIN s.taAsStudents tas
+            JOIN s.registeredTas tas
             WHERE tas       = ta
               AND l.duration.start  <= :to
               AND l.duration.finish >= :from
@@ -132,9 +132,9 @@ public interface TARepo extends JpaRepository<TA, Long> { // TA is the entity an
     @Query("""
        SELECT DISTINCT t
        FROM   Section  sec
-              JOIN     sec.taAsStudents t
-              LEFT JOIN FETCH t.courses
-              LEFT JOIN FETCH t.tasOwnLessons
+              JOIN     sec.registeredTas t
+              LEFT JOIN FETCH t.sectionsAsStudent
+              LEFT JOIN FETCH t.sectionsAsHelper
        WHERE  sec.sectionId = :sectionId
        """)
     List<TA> findTasWithAllRelations(@Param("sectionId") int sectionId);

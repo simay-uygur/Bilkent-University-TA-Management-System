@@ -85,7 +85,7 @@ public class ScheduleServImpl implements ScheduleServ {
             }
         }
 
-        for (Section sec : ta.getTasOwnLessons()) {
+        for (Section sec : ta.getSectionsAsStudent()) {
             // Obtain the Event from the lesson, which contains the start Date.
             for (Lesson lesson : sec.getLessons()){
                 Event event = lesson.getDuration();

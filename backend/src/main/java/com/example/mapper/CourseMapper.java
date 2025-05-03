@@ -2,6 +2,10 @@ package com.example.mapper;
 
 import com.example.dto.CourseDto;
 import com.example.entity.Courses.Course;
+import com.example.entity.Courses.Department;
+import com.example.entity.General.AcademicLevelType;
+import com.example.repo.DepartmentRepo;
+import lombok.RequiredArgsConstructor;
 
 import java.util.Arrays;
 import java.util.stream.Collectors;
@@ -9,7 +13,10 @@ import java.util.stream.Collectors;
 import org.springframework.stereotype.Component;
 
 @Component
+@RequiredArgsConstructor
 public class CourseMapper {
+
+    private final DepartmentRepo departmentRepo;
 
     public CourseDto toDto(Course course) {
         if (course == null) return null;
@@ -35,6 +42,12 @@ public class CourseMapper {
         course.setCourseId(dto.getCourseId());
         course.setCourseCode(dto.getCourseCode());
         course.setCourseName(dto.getCourseName());
+        course.setCourseAcademicStatus(AcademicLevelType.valueOf(dto.getCourseAcademicStatus()));
+        Department department = departmentRepo.findDepartmentByName(dto.getDepartment())
+                .orElseThrow(() -> new IllegalArgumentException("Department not found: " + dto.getDepartment()));
+        course.setDepartment(department);
+
+        // section is not set  - - (no need?)
         return course;
     }
 }

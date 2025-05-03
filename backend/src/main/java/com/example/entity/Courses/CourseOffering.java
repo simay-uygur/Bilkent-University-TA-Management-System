@@ -1,12 +1,9 @@
 package com.example.entity.Courses;
 
 
-import com.example.entity.Actors.Instructor;
 import com.example.entity.Actors.TA;
 import com.example.entity.General.Semester;
 import com.example.entity.General.Student;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -33,12 +30,10 @@ public class CourseOffering {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-        
-   @ManyToOne(fetch = FetchType.LAZY, optional = false)
-@JoinColumn(name = "course_id", nullable = false)
 
-private Course course;
-
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "course_id", nullable = false)
+    private Course course;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "semester_id", nullable = false)
@@ -52,41 +47,31 @@ private Course course;
     )
     private List<Section> sections = new ArrayList<>();
 
-    //prerequisites as simple Strings
-    @ElementCollection
-    @CollectionTable(
-      name = "course_offering_prereqs",
-      joinColumns = @JoinColumn(name = "offering_id")
-    )
-    @Column(name = "prereq_code")
-    private List<String> prereqs = new ArrayList<>();
-
-    // enrolled students
     @ManyToMany(fetch = LAZY)
     @JoinTable(
-      name = "course_offering_students",
-      joinColumns = @JoinColumn(name = "offering_id"),
-      inverseJoinColumns = @JoinColumn(name = "student_id")
+            name = "offering_ta_registrations",
+            joinColumns = @JoinColumn(name = "offering_id"),
+            inverseJoinColumns = @JoinColumn(name = "ta_id")
     )
-    private List<Student> students = new ArrayList<>();
+    private List<TA> registeredTas = new ArrayList<>();
 
-    // assigned TAs
+    /** TAs who are *assigned* to assist/teach this offering */
     @ManyToMany(fetch = LAZY)
     @JoinTable(
-      name = "course_offering_tas",
-      joinColumns = @JoinColumn(name = "offering_id"),
-      inverseJoinColumns = @JoinColumn(name = "ta_id")
+            name = "offering_ta_assignments",
+            joinColumns = @JoinColumn(name = "offering_id"),
+            inverseJoinColumns = @JoinColumn(name = "ta_id")
     )
-    private List<TA> tas = new ArrayList<>();
+    private List<TA> assignedTas = new ArrayList<>();
 
-    // course instructors / coordinators
-    @ManyToMany(fetch = LAZY)
+    @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
-      name = "course_offering_instructors",
-      joinColumns = @JoinColumn(name = "offering_id"),
-      inverseJoinColumns = @JoinColumn(name = "instructor_id")
+            name               = "offering_student_registrations",
+            joinColumns        = @JoinColumn(name = "offering_id"),
+            inverseJoinColumns = @JoinColumn(name = "student_id")
     )
-    private List<Instructor> instructors = new ArrayList<>();
+    private List<Student> registeredStudents = new ArrayList<>();
+
+
 }
-        
 

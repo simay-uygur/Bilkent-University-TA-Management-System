@@ -43,6 +43,8 @@ public interface CourseRepo extends JpaRepository<Course, Integer>{
 
     boolean existsCourseByCourseCodeEquals(String courseCode);
 
+    Optional<Course> findByCourseCodeIgnoreCase(String courseCode);
+
     @Query("""
     SELECT c
       FROM Course c

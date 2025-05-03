@@ -26,17 +26,45 @@ public class TaMapper {
         dto.setIsGraduated(ta.getIsGraduated());
         dto.setDepartment(ta.getDepartment());
 
-        List<String> courses = ta.getCourses().stream()
-                .map(Course::getCourseCode)
+        // “Courses” → the courseCode of each CourseOffering this TA is assigned to
+        List<String> courses = ta.getOfferingsAsHelper().stream()
+                .map(offering -> offering.getCourse().getCourseCode())
+                .distinct()
                 .collect(Collectors.toList());
         dto.setCourses(courses);
 
-        // section
-//        List<String> lessons = ta.getTas_own_lessons().stream()
-//                .map(Section::getSection_id)
-//                .collect(Collectors.toList());
-//        dto.setLessons(lessons);
+        // “Lessons” → the sectionCode of each Section this TA is registered in as a student
+        List<String> lessons = ta.getSectionsAsStudent().stream()
+                .map(Section::getSectionCode)
+                .distinct()
+                .collect(Collectors.toList());
+        dto.setLessons(lessons);
 
         return dto;
     }
+
+//    public TaDto toDto(TA ta) {
+//        TaDto dto = new TaDto();
+//        dto.setId(ta.getId());
+//        dto.setName(ta.getName());
+//        dto.setSurname(ta.getSurname());
+//        dto.setAcademicLevel(ta.getAcademicLevel().name());
+//        dto.setTotalWorkload(ta.getTotalWorkload());
+//        dto.setIsActive(ta.getIsActive());
+//        dto.setIsGraduated(ta.getIsGraduated());
+//        dto.setDepartment(ta.getDepartment());
+//
+//        List<String> courses = ta.getCourses().stream()
+//                .map(Course::getCourseCode)
+//                .collect(Collectors.toList());
+//        dto.setCourses(courses);
+//
+//        // section
+////        List<String> lessons = ta.getTas_own_lessons().stream()
+////                .map(Section::getSection_id)
+////                .collect(Collectors.toList());
+////        dto.setLessons(lessons);
+//
+//        return dto;
+//    }
 }
