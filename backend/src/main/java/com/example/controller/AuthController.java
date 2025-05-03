@@ -22,6 +22,7 @@ import com.example.entity.Actors.User;
 import com.example.exception.IncorrectWebMailException;
 import com.example.exception.UserExistsExc;
 import com.example.exception.UserNotFoundExc;
+import com.example.repo.UserRepo;
 import com.example.security.JwtResponse;
 import com.example.security.JwtTokenProvider;
 import com.example.security.SignInRequest;
@@ -37,14 +38,15 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class AuthController {
     
-   
-    private final UserServ serv ;
+
+    private final UserServ serv;
+    private final UserRepo userRepo;
 
     private final AuthenticationManager authenticationManager;
     private final JwtTokenProvider tokenProvider;
     private final UserDetailsServiceImpl userDetailsService;
     private final PasswordEncoder passwordEncoder; 
-    
+
     @PostMapping("/api/signUp")
     public ResponseEntity<User> createUser(@RequestBody User u) 
     {
@@ -69,17 +71,20 @@ public class AuthController {
 
     @PostMapping("/api/signIn")
     public ResponseEntity<?> signIn(@Valid @RequestBody SignInRequest request) {
+        if(!userRepo.existsById(request.getId())){
+            return ResponseEntity
+                    .status(HttpStatus.UNAUTHORIZED)
+                    .body(Map.of("error", "Invalid credentials"));
+        }
         // 1) Load user by ID
         UserDetailsImpl user = (UserDetailsImpl) 
             userDetailsService.loadUserByUsername(request.getId().toString());
-
         // 2) Check password
         if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
             return ResponseEntity
                     .status(HttpStatus.UNAUTHORIZED)
                     .body(Map.of("error", "Invalid credentials"));
         }
-
         // 3) Build an Authentication object so SecurityContext is populated
         UsernamePasswordAuthenticationToken auth =
             new UsernamePasswordAuthenticationToken(
@@ -88,10 +93,8 @@ public class AuthController {
                 user.getAuthorities()
             );
         SecurityContextHolder.getContext().setAuthentication(auth);
-
         // 4) Generate JWT
         String jwt = tokenProvider.generateJwtToken(auth);
-
         // 5) Return the token + user info
         JwtResponse body = new JwtResponse(
             jwt,

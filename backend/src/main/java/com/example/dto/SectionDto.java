@@ -6,15 +6,12 @@ import lombok.NoArgsConstructor;
 
 import java.util.List;
 
-/**
- * Data Transfer Object for Section entity.
- */
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 public class SectionDto {
-    private int sectionId;
+    private Long sectionId;          // was int → now Long
     private String sectionCode;
     private List<LessonDto> lessons;
-    private InstructorDto instructor;   // single, not list
+    private InstructorDto instructor;
 }

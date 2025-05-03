@@ -15,6 +15,7 @@ import com.example.dto.StudentDto;
 import com.example.entity.Actors.Instructor;
 import com.example.entity.Actors.TA;
 import com.example.entity.Courses.Course;
+import com.example.entity.Courses.CourseOffering;
 import com.example.entity.Courses.Department;
 import com.example.entity.Courses.Section;
 import com.example.entity.Tasks.Task;
@@ -23,6 +24,7 @@ import com.example.exception.Course.CourseNotFoundExc;
 import com.example.exception.Course.NoPrereqCourseFound;
 import com.example.exception.GeneralExc;
 import com.example.exception.NoPersistExc;
+import com.example.mapper.LessonMapper;
 import com.example.repo.CourseRepo;
 import com.example.repo.DepartmentRepo;
 import com.example.repo.SectionRepo;
@@ -47,6 +49,8 @@ public class CourseServImpl implements CourseServ {
     private final TaskServ taskServ;
     private final SectionRepo secRepo;
     private final DepartmentRepo departmentRepo;
+    private final LessonMapper lessonMapper;
+
     @Override
     public List<CourseDto> getCoursesByDepartment(String deptName) {
         List<Course> courses = courseRepo.findCourseByDepartmentName(deptName)
@@ -57,10 +61,19 @@ public class CourseServImpl implements CourseServ {
     public boolean addSection(String courseCode, Section section) {
         Course course = courseRepo.findCourseByCourseCode(courseCode)
                 .orElseThrow(() -> new CourseNotFoundExc(courseCode));
-        if (course.getSectionsList() == null) {
-            course.setSectionsList(new ArrayList<>());
+
+        if (course.getCourseOfferings() == null || course.getCourseOfferings().isEmpty()) {
+            throw new GeneralExc("No offering found for course: " + courseCode);
         }
-        course.getSectionsList().add(section);
+
+        // Assuming latest offering gets the section (you can change this logic)
+        CourseOffering offering = course.getCourseOfferings().get(0);
+        if (offering.getSections() == null) {
+            offering.setSections(new ArrayList<>());
+        }
+
+        offering.getSections().add(section);
+        section.setOffering(offering); // maintain bidirectional link
         secRepo.saveAndFlush(section);
         courseRepo.saveAndFlush(course);
         return true;
@@ -238,40 +251,36 @@ private List<CourseDto> mapToDtoList(List<Course> courses) {
         );
 
 
+        // inside CourseServImpl.mapToDto(...)
         dto.setSections(
-                course.getSectionsList().stream()
+                course.getCourseOfferings().stream()
+                        .flatMap(offering -> offering.getSections().stream())
                         .map(sec -> {
-
-                            /* lessons */
                             List<LessonDto> lessons = sec.getLessons().stream()
-                                    .map(l -> new LessonDto(
-                                            l.getDuration().toString(),
-                                            l.getLessonRoom().getClassCode()))
+                                    .map(lessonMapper::toDto)
                                     .collect(Collectors.toList());
 
-                            /* instructor + its courses */
+                            // — instructor
                             Instructor i = sec.getInstructor();
-                            List<String> courseCodes = i.getCourses().stream()
-                                    .map(Course::getCourseCode)
-                                    .collect(Collectors.toList());
-
                             InstructorDto instrDto = new InstructorDto(
-                                    i.getId(),                       // id
-                                    i.getName(),                     // name
-                                    i.getSurname(),                  // surname
-                                    i.getWebmail(),                  // webmail
-                                    i.getDepartment().getName(),     // department name
-                                    courseCodes                      // course codes list
+                                    i.getId(),
+                                    i.getName(),
+                                    i.getSurname(),
+                                    i.getWebmail(),
+                                    i.getDepartment().getName(),
+                                    i.getCourses().stream()
+                                            .map(Course::getCourseCode)
+                                            .collect(Collectors.toList())
                             );
 
                             return new SectionDto(
-                                    sec.getSectionId(),
+                                    sec.getSectionId(),                                  // now Long
                                     sec.getSectionCode(),
                                     lessons,
                                     instrDto
                             );
                         })
-                        .collect(Collectors.toList())
+                        .collect(Collectors.toList())                             // use Collectors.toList()
         );
         /*
           private Long id;
@@ -318,7 +327,7 @@ private List<CourseDto> mapToDtoList(List<Course> courses) {
             throw new GeneralExc("TA " + taId + " already assigned to " + courseCode);
         }
         if (ta.getTasOwnLessons().stream()
-                .anyMatch(sec -> sec.getCourse().getCourseCode().equals(courseCode))) {
+                .anyMatch(sec -> sec.getOffering().getCourse().getCourseCode().equals(courseCode))) {
             throw new GeneralExc("TA " + taId + " takes this course as a student");
         }
         course.getCourseTas().add(ta);
@@ -406,8 +415,6 @@ private List<CourseDto> mapToDtoList(List<Course> courses) {
             }
         }
     }
-
-   
 }
 
 

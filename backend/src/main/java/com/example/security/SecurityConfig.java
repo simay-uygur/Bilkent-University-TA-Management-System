@@ -38,6 +38,7 @@ public class SecurityConfig {
             .authenticationProvider(authenticationProvider())
             .csrf (csrf -> csrf.disable())
             .authorizeHttpRequests( req -> req
+            .requestMatchers("/error").permitAll()
             /*.requestMatchers("/api/ta/{id}").hasRole("TA")
             .requestMatchers("/api/admin/{id}").hasRole("ADMIN")
             .requestMatchers("/api/staff/{id}").hasRole("DEPARTMENT_STAFF")
@@ -55,7 +56,8 @@ public class SecurityConfig {
             .requestMatchers(HttpMethod.DELETE, "/api/**").permitAll()
             .anyRequest().authenticated()
         )
-        .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
+        .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+        .authenticationManager(authenticationManager(http));
         http.addFilterBefore(jwtAuthTokenFilter, UsernamePasswordAuthenticationFilter.class);
         return http.build() ;
     }

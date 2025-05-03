@@ -58,7 +58,7 @@ export interface LeaveRequest {
     message: string;
     attachmentUrl?: string;
   }
-  
+
   export function fetchLeaveRequests() {
     return axios.get<LeaveRequest[]>('/api/leave-requests/pending', { withCredentials:true });
   }

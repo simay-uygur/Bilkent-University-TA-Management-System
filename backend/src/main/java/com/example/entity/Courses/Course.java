@@ -5,8 +5,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import jakarta.persistence.*;
 import org.hibernate.annotations.DynamicUpdate;
 
 import com.example.entity.Actors.TA;
@@ -15,7 +13,21 @@ import com.example.entity.General.Student;
 import com.example.entity.Tasks.Task;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
-import jakarta.validation.constraints.NotEmpty;
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
+import jakarta.persistence.ManyToMany;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -55,9 +67,6 @@ public class Course {
     @Column(name = "course_academic_status", updatable = true, nullable = false)
     private AcademicLevelType courseAcademicStatus;
 
-    /*@NotEmpty(message = "The field can not be empty!")
-    @Column(name = "course_dep", unique = false, updatable = true)
-    private String course_dep ;*/
 
     @ManyToOne(fetch = FetchType.LAZY)
     private Department department;
@@ -80,13 +89,19 @@ public class Course {
     private String prereqList;
     // do not use join table
 
-    @OneToMany(
-        mappedBy = "course", // the other side of the relationship is the owner of the relationship
-        fetch = FetchType.LAZY,
-        orphanRemoval = true,
-        cascade= CascadeType.ALL
-    )
-    private List<Section> sectionsList; // this is the list of sections that are related to the course
+
+//    @OneToMany(
+//        mappedBy = "course", // the other side of the relationship is the owner of the relationship
+//        fetch = FetchType.LAZY,
+//        orphanRemoval = true,
+//        cascade= CascadeType.ALL
+//    )
+//    private List<Section> sectionsList; // this is the list of sections that are related to the course
+
+    //instead of sections, there is course offering 
+    @OneToMany(mappedBy = "course", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<CourseOffering> courseOfferings = new ArrayList<>();
+
 
     @ManyToMany(
         fetch = FetchType.LAZY,

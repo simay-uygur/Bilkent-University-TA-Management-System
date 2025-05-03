@@ -11,4 +11,6 @@ public interface DeanOfficeServ {
     List<DeanOfficeDto> getAll();
     DeanOffice getById(Long id);
     void deleteById(Long id);
+
+    DeanOffice saveFromDto(DeanOfficeDto deanOfficeDto, String facultyCode);
 }
