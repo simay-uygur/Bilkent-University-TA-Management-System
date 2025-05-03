@@ -59,7 +59,7 @@ public class Course {
     private AcademicLevelType courseAcademicStatus; //bs, ms, phd
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name="department_id", nullable=false) // added now
+    @JoinColumn(name="department_name", nullable=false) // added now
     private Department department;
 
     //there should be exam class
@@ -79,14 +79,6 @@ public class Course {
         Course course = (Course) obj ;
         return course.getCourseId() == this.courseId;
     }
-
-//    @OneToMany(
-//        mappedBy = "course",
-//        fetch    = FetchType.LAZY,
-//        cascade  = CascadeType.ALL,
-//        orphanRemoval = true
-//    )
-//    private List<Task> tasks = new ArrayList<>();
 
     //coordinator- deleted now only instructors
 }
