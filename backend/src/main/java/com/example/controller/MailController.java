@@ -1,5 +1,6 @@
 package com.example.controller;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -13,16 +14,11 @@ import com.example.service.UserServ;
 
 @RestController
 @RequestMapping("/api/mail")
+@RequiredArgsConstructor
 public class MailController {
 
     private final MailService mailService;
     private final UserServ userService;
-
-    @Autowired
-    public MailController(MailService mailService, UserServ userService) {
-        this.mailService = mailService;
-        this.userService = userService;
-    }
 
     /**
      * Sends the user's password to their email.
