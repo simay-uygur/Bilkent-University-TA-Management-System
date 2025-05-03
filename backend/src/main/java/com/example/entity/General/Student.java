@@ -1,9 +1,12 @@
 package com.example.entity.General;
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import com.example.entity.Courses.Course;
+import com.example.entity.Courses.CourseOffering;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import jakarta.persistence.CascadeType;
@@ -42,20 +45,17 @@ public class Student {
     @Column(name = "department", nullable = true)
     private String department;
 
+    //this will be deleted
     @Column(name = "is_active", nullable = false)
     private Boolean isActive;
 
     @Column(name = "is_graduated", nullable = false)
     private Boolean isGraduated = false;
 
-
-    // what is mappedBy?
-    // mappedBy is used to specify the owner of the relationship. In this case, the owner is the Course class.
-    @ManyToMany(
-        mappedBy = "studentsList",
-        fetch = FetchType.LAZY,
-        cascade = {CascadeType.PERSIST, CascadeType.MERGE}
-    )
+    //student registered courses
+    @ManyToMany(mappedBy = "registeredStudents", fetch = FetchType.LAZY)
     @JsonIgnore
-    private Set<Course> studentCourses = new HashSet<>();
+    private List<CourseOffering> registeredCourseOfferings = new ArrayList<>();
+
+
 }

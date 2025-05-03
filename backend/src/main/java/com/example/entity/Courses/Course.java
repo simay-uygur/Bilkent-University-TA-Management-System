@@ -43,7 +43,7 @@ import lombok.Setter;
 @DynamicUpdate // this is used to update only the changed fields in the database, not the whole object
 public class Course {
     @Id
-    @Column(name = "courseId", unique = true, updatable = true)
+    @Column(name = "courseId", unique = true, updatable = true) // make updatable false
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int courseId;
     
@@ -54,66 +54,23 @@ public class Course {
     //@NotEmpty(message = "The field can not be empty!")
     private String courseName;
 
-    // cs-319. id -> 'c' + 's' + 319 -> 319319
-/*
-    @PrePersist //before
-    private void setCourseId() {
-        if (this.courseCode != null)
-            this.courseId = new CourseCodeConverter().code_to_id(this.courseCode.toLowerCase()); //may be changed
-    }
-*/
-
     @Enumerated(EnumType.STRING)
     @Column(name = "course_academic_status", updatable = true, nullable = false)
-    private AcademicLevelType courseAcademicStatus;
-
+    private AcademicLevelType courseAcademicStatus; //bs, ms, phd
 
     @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name="department_id", nullable=false) // added now
     private Department department;
 
     //there should be exam class
 
-    // this should be deleted
-    @ManyToMany(
-        fetch = FetchType.LAZY,
-        cascade = {CascadeType.PERSIST, CascadeType.MERGE}
-    )
-    @JoinTable( // creates a table for many to many relationship
-        name = "students_list_table",
-        joinColumns = @JoinColumn(name = "courseId"),
-        inverseJoinColumns = @JoinColumn(name = "student_id")
-    )
-    private Set<Student> studentsList = new HashSet<>();
-
     @Column(name = "prereq_list", unique = false, updatable = true, nullable = false)
     //@NotEmpty(message = "The field can not be empty!")
-    private String prereqList;
-    // do not use join table
+    private String prereqList; //course prerequisites
 
-
-//    @OneToMany(
-//        mappedBy = "course", // the other side of the relationship is the owner of the relationship
-//        fetch = FetchType.LAZY,
-//        orphanRemoval = true,
-//        cascade= CascadeType.ALL
-//    )
-//    private List<Section> sectionsList; // this is the list of sections that are related to the course
-
-    //instead of sections, there is course offering 
+    //instead of sections, there are course offerings
     @OneToMany(mappedBy = "course", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<CourseOffering> courseOfferings = new ArrayList<>();
-
-
-    @ManyToMany(
-        fetch = FetchType.LAZY,
-        cascade = {CascadeType.PERSIST, CascadeType.MERGE}
-    )
-    @JoinTable(
-        name = "course_tas",
-        joinColumns = @JoinColumn(name = "section_id"),
-        inverseJoinColumns = @JoinColumn(name = "ta_id")
-    )
-    private List<TA> courseTas; // tas is the list of tas that are in the section
 
     @Override
     public boolean equals(Object obj){
@@ -123,16 +80,13 @@ public class Course {
         return course.getCourseId() == this.courseId;
     }
 
-    @OneToMany(
-        mappedBy = "course",
-        fetch    = FetchType.LAZY,
-        cascade  = CascadeType.ALL,
-        orphanRemoval = true
-    )
-    private List<Task> tasks = new ArrayList<>();
+//    @OneToMany(
+//        mappedBy = "course",
+//        fetch    = FetchType.LAZY,
+//        cascade  = CascadeType.ALL,
+//        orphanRemoval = true
+//    )
+//    private List<Task> tasks = new ArrayList<>();
 
-
-
-    //coordinator should be also added
+    //coordinator- deleted now only instructors
 }
-// only one prepersist call method
