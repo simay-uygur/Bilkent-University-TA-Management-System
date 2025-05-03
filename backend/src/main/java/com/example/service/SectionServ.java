@@ -1,6 +1,7 @@
 package com.example.service;
 
 import com.example.entity.Courses.Section;
+import jakarta.transaction.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.util.List;
@@ -13,4 +14,10 @@ public interface SectionServ {
     List<Section> getAll();
     void delete(Integer id);
     Map<String,Object> importFromExcel(MultipartFile file) throws IOException;
+
+    //@Transactional
+    //Map<String, Object> importSectionsFromExcel(MultipartFile file) throws IOException;
+
+    //@Transactional
+    Map<String,Object> importSectionStudentsFromExcel(MultipartFile file) throws IOException;
 }

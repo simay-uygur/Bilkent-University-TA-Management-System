@@ -73,6 +73,7 @@ public class Course {
 
     //there should be exam class
 
+    // this should be deleted
     @ManyToMany(
         fetch = FetchType.LAZY,
         cascade = {CascadeType.PERSIST, CascadeType.MERGE}

@@ -90,8 +90,8 @@ public class UploadController {
         }
     }
 
-    @PostMapping("/sections")
-    public ResponseEntity<?> importSections(@RequestParam("file") MultipartFile file) {
+    @PostMapping("/sections-instructor")
+    public ResponseEntity<?> importCourseSectionInstructorRelations(@RequestParam("file") MultipartFile file) {
         try {
             // now we _capture_ the real result map
             Map<String,Object> result = sectionService.importFromExcel(file);
@@ -114,4 +114,27 @@ public class UploadController {
                     ));
         }
     }
+
+    @PostMapping("/sections-student")
+    public ResponseEntity<?> importCourseSectionStudentRelations(@RequestParam("file") MultipartFile file) {
+        try {
+            Map<String,Object> result = sectionService.importSectionStudentsFromExcel(file);
+            return ResponseEntity.ok(result);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity
+                    .badRequest()
+                    .body(Map.of(
+                            "status",  "error",
+                            "message", e.getMessage()
+                    ));
+        } catch (IOException e) {
+            return ResponseEntity
+                    .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of(
+                            "status",  "error",
+                            "message", "Could not read file: " + e.getMessage()
+                    ));
+        }
+    }
+
 }

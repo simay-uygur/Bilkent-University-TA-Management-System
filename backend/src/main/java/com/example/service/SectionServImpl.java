@@ -2,14 +2,19 @@ package com.example.service;
 
 import com.example.dto.FailedRowInfo;
 import com.example.entity.Actors.Instructor;
+import com.example.entity.Actors.TA;
 import com.example.entity.Courses.Course;
 import com.example.entity.Courses.CourseOffering;
 import com.example.entity.Courses.Section;
 import com.example.entity.General.Semester;
+import com.example.entity.General.Student;
 import com.example.repo.CourseRepo;
 import com.example.repo.SectionRepo;
+import com.example.repo.StudentRepo;
+import com.example.repo.TARepo;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
@@ -29,6 +34,10 @@ public class SectionServImpl implements SectionServ {
     private final CourseOfferingServ offeringService;
     private final InstructorServ instructorService;
     private final CourseRepo courseRepo;
+    private final StudentServ studentService;
+    private final StudentRepo studentRepo;
+    private final TAServ taService;
+    private final TARepo taRepo;
 
     @Override
     public Section create(Section section) {
@@ -154,4 +163,120 @@ public class SectionServImpl implements SectionServ {
         return result;
     }
 
+    //@Transactional
+    @Override
+    public Map<String,Object> importSectionStudentsFromExcel(MultipartFile file) throws IOException {
+        List<Section> successful = new ArrayList<>();
+        List<FailedRowInfo> failed    = new ArrayList<>();
+
+        try (Workbook wb = new XSSFWorkbook(file.getInputStream())) {
+            Sheet sheet = wb.getSheetAt(0);
+            for (Row row : sheet) {
+                if (row.getRowNum() == 0) continue; // skip header
+
+                try {
+                    long   personId  = getLongCellValue(row.getCell(0));
+                    String deptCode  = getStringCellValue(row.getCell(1)).toUpperCase();
+                    int    courseNo  = (int) getNumericCellValue(row.getCell(2));
+                    int    sectionNo = (int) getNumericCellValue(row.getCell(3));
+                    int    year      = (int) getNumericCellValue(row.getCell(4));
+                    String termStr   = getStringCellValue(row.getCell(5)).toUpperCase();
+//                    long   personId  = (long) row.getCell(0).getNumericCellValue();
+//                    String deptCode  = row.getCell(1).getStringCellValue().trim().toUpperCase();
+//                    int    courseNo  = (int) row.getCell(2).getNumericCellValue();
+//                    int    sectionNo = (int) row.getCell(3).getNumericCellValue();
+//                    int    year      = (int) row.getCell(4).getNumericCellValue();
+//                    String termStr   = row.getCell(5).getStringCellValue().trim().toUpperCase();
+
+                    // 1) Semester
+                    Semester sem = semesterService
+                            .findByYearAndTerm(year, termStr)
+                            .orElseThrow(() -> new IllegalArgumentException(
+                                    "Semester not found: "+year+" "+termStr));
+
+                    // 2) Course
+                    String fullCode = deptCode + "-" + courseNo;
+                    Course course = courseRepo
+                            .findByCourseCodeIgnoreCase(fullCode)
+                            .orElseThrow(() -> new IllegalArgumentException(
+                                    "Course not found: "+fullCode));
+
+                    // 3) Offering (find or create)
+                    CourseOffering off = offeringService
+                            .getByCourseAndSemester((long) course.getCourseId(), sem.getId())
+                            .orElseGet(() -> {
+                                CourseOffering nf = new CourseOffering();
+                                nf.setCourse(course);
+                                nf.setSemester(sem);
+                                return offeringService.create(nf);
+                            });
+
+                    // 4) Section (must already exist)
+                    String secCode = fullCode + "-" + sectionNo;
+                    Section section = repo
+                            .findBySectionCodeIgnoreCase(secCode)
+                            .orElseThrow(() -> new IllegalArgumentException(
+                                    "Section not found: "+secCode));
+
+                    // 5) Attach person as Student or TA
+                    if (studentRepo.existsById(personId)) {
+                        Student s = studentService.getStudentById(personId);
+                        section.getStudents().add(s);
+
+                    } else if (taRepo.existsById(personId)) {
+                        TA ta = taService.getTAById(personId);
+                        section.getTaAsStudents().add(ta);
+
+                    } else {
+                        throw new IllegalArgumentException(
+                                "No student or TA with id: " + personId);
+                    }
+
+                    successful.add(section);
+
+                } catch (Exception ex) {
+                    failed.add(new FailedRowInfo(
+                            row.getRowNum(),
+                            ex.getClass().getSimpleName()+": "+ex.getMessage()
+                    ));
+                }
+            }
+        }
+
+        if (!successful.isEmpty()) {
+            repo.saveAll(successful);
+            repo.flush();
+        }
+
+        return Map.of(
+                "successCount", successful.size(),
+                "failedCount",  failed.size(),
+                "failedRows",   failed
+        );
+    }
+
+
+    private String getStringCellValue(Cell cell) {
+        if (cell == null) return "";
+        return switch (cell.getCellType()) {
+            case STRING -> cell.getStringCellValue().trim();
+            case NUMERIC -> String.valueOf((int) cell.getNumericCellValue()).trim();
+            case BOOLEAN -> String.valueOf(cell.getBooleanCellValue()).trim();
+            case FORMULA -> cell.getCellFormula(); // Optional: handle formulas
+            default -> throw new IllegalStateException("Unexpected cell type: " + cell.getCellType());
+        };
+    }
+
+    private double getNumericCellValue(Cell cell) {
+        if (cell == null) throw new IllegalArgumentException("Cell is null");
+        return switch (cell.getCellType()) {
+            case NUMERIC -> cell.getNumericCellValue();
+            case STRING -> Double.parseDouble(cell.getStringCellValue().trim());
+            default -> throw new IllegalStateException("Expected numeric cell, but got: " + cell.getCellType());
+        };
+    }
+
+    private long getLongCellValue(Cell cell) {
+        return (long) getNumericCellValue(cell);
+    }
 }
