@@ -78,7 +78,25 @@ public class TAServImpl implements TAServ {
             if (tas.isEmpty()) {
                 throw new UserNotFoundExc(deptName);
             }
-            return mapToDtoList(tas);
+            return tas.stream()
+                    .map(ta -> new TaDto(
+                            ta.getId(),
+                            ta.getName(),
+                            ta.getSurname(),
+                            ta.getAcademicLevel().name(),
+                            ta.getTotalWorkload(),
+                            ta.getIsActive(),
+                            ta.getIsGraduated(),
+                            ta.getDepartment(),
+                           
+                            ta.getSectionsAsStudent().stream()
+                                    .map(Section::getSectionCode)
+                                    .collect(Collectors.toList()),
+                            ta.getSectionsAsHelper().stream()
+                                    .map(Section::getSectionCode)
+                                    .collect(Collectors.toList())
+                    ))
+                    .collect(Collectors.toList());
     } 
 
     @Override
@@ -285,7 +303,7 @@ public class TAServImpl implements TAServ {
         return result;
     }
 
-    private List<TaDto> mapToDtoList(List<TA> tas) {
+  /*   private List<TaDto> mapToDtoList(List<TA> tas) {
         List<TaDto> taDtos = new ArrayList<>();
         for (TA ta : tas) {
             TaDto taDto = new TaDto(
@@ -307,5 +325,5 @@ public class TAServImpl implements TAServ {
             taDtos.add(taDto);
         }
         return taDtos;
-    }
+    } */
 }

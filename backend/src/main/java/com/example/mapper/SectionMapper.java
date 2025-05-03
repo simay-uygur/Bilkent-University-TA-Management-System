@@ -16,6 +16,8 @@ public class SectionMapper {
 
     private final LessonMapper lessonMapper;
     private final InstructorMapper instructorMapper;
+    private final TaMapper taMapper;
+    private final StudentMapper studentMapper;
 
     /** Entity → DTO */
     public SectionDto toDto(Section section) {
@@ -27,9 +29,10 @@ public class SectionMapper {
         dto.setLessons(section.getLessons().stream()
                 .map(lessonMapper::toDto)
                 .collect(Collectors.toList()));
-        dto.setInstructor(instructorMapper.toDto(section.getInstructor()));
-        //dto.setTas(section.getTas().stream().map(taMapper::toDto).collect(Collectors.toList()));
-        //dto.setStudents(section.getStudents().stream().map(studentMapper::toDto).collect(Collectors.toList()));
+        dto.setInstructor(instructorMapper.toDto(section.getInstructor())); 
+
+        dto.setTas(section.getRegisteredTas().stream().map(taMapper::toDto).collect(Collectors.toList()));
+        dto.setStudents(section.getRegisteredStudents().stream().map(studentMapper::toDto).collect(Collectors.toList()));
 
         return dto;
     }

@@ -59,7 +59,9 @@ public class CourseServImpl implements CourseServ {
     public List<CourseDto> getCoursesByDepartment(String deptName) {
         List<Course> courses = courseRepo.findCourseByDepartmentName(deptName)
                                          .orElse(Collections.emptyList());
-        return mapToDtoList(courses);
+        return courses.stream()
+                      .map(courseMapper::toDto)
+                      .collect(Collectors.toList());
     }
     @Override
     public boolean addSection(String courseCode, Section section) {

@@ -59,7 +59,7 @@ public class Course {
     private AcademicLevelType courseAcademicStatus; //bs, ms, phd
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name="department_id", nullable=false) // added now
+    @JoinColumn(name="department_name", nullable=false) // added now
     private Department department;
 
     //there should be exam class
