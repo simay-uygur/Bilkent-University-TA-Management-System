@@ -14,7 +14,7 @@ import com.example.entity.Tasks.Task;
 import org.springframework.web.multipart.MultipartFile;
 
 public interface TAServ {
-    public List<TA> getAllTAs();
+    public List<TaDto> getAllTAs();
     public boolean deleteTAById(Long id);
     public TA getTAById(Long id);
     public Task getTaskById(int task_id, Long ta_id);

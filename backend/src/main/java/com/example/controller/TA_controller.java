@@ -55,7 +55,7 @@ public class TA_controller {
     } // method should be sent to Admin controller*/
 
     @GetMapping("/api/ta/all")
-    public List<TA> getAllTAs() 
+    public List<TaDto> getAllTAs() 
     {
         return serv.getAllTAs();
     } // method should be sent to Admin controller

@@ -100,8 +100,29 @@ public class TAServImpl implements TAServ {
     } 
 
     @Override
-    public List<TA> getAllTAs() {
-        return repo.findAllTAs(); 
+    public List<TaDto> getAllTAs() {
+        List<TA> tas = repo.findAll();
+        if (tas.isEmpty()) {
+            throw new UserNotFoundExc("TAs");
+        }
+        return tas.stream()
+                .map(ta -> new TaDto(
+                        ta.getId(),
+                        ta.getName(),
+                        ta.getSurname(),
+                        ta.getAcademicLevel().name(),
+                        ta.getTotalWorkload(),
+                        ta.getIsActive(),
+                        ta.getIsGraduated(),
+                        ta.getDepartment(),
+                        ta.getSectionsAsStudent().stream()
+                                .map(Section::getSectionCode)
+                                .collect(Collectors.toList()),
+                        ta.getSectionsAsHelper().stream()
+                                .map(Section::getSectionCode)
+                                .collect(Collectors.toList())
+                ))
+                .collect(Collectors.toList());
     }
 
     @Override

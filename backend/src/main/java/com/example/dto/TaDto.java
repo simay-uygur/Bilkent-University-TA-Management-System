@@ -20,6 +20,7 @@ public class TaDto {
     private String department;
     private List<String> courses;
     private List<String> lessons;
+    //private List<RequestDto> sendedRequests;
 }
 
 

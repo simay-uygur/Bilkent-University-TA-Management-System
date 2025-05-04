@@ -1,10 +1,14 @@
 
 package com.example.mapper;
 
+import com.example.dto.RequestDto;
 import com.example.dto.TaDto;
 import com.example.entity.Actors.TA;
 import com.example.entity.Courses.Course;
 import com.example.entity.Courses.Section;
+import com.example.entity.Tasks.TaTask;
+import com.example.entity.Tasks.Task;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -39,6 +43,8 @@ public class TaMapper {
                 .distinct()
                 .collect(Collectors.toList());
         dto.setLessons(lessons);
+        // “tasks” → the sectionCode of each Section this TA is registered in as a TA
+      
 
         return dto;
     }
