@@ -13,6 +13,7 @@ import com.example.entity.Courses.Section;
 
 @Repository
 public interface InstructorRepo extends JpaRepository<Instructor, Long> {
+    @Query("SELECT i FROM Instructor i WHERE i.id = :id")
     Optional<Instructor> findById(Long id);
     // Spring-Data method in InstructorRepo
     //List<Instructor> findByCoursesCourseCode(String courseCode);

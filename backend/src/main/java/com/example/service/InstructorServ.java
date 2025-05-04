@@ -25,4 +25,6 @@ public interface InstructorServ {
     List<InstructorDto> getAllInstructorsDto();
 
     List<InstructorDto> getInstructorsByDepartment(String departmentName);
+
+    InstructorDto getInstructorById(Long id);
 }

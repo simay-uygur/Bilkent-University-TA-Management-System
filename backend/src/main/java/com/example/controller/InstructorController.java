@@ -37,6 +37,10 @@ public class InstructorController {
     public ResponseEntity<Instructor> createInstructor(@RequestBody Instructor instructor) {
         return ResponseEntity.ok(instructorServ.createInstructor(instructor));
     }
+    @GetMapping("/{id}")
+    public ResponseEntity<InstructorDto> getInstructorById(@PathVariable Long id) {
+        return ResponseEntity.ok(instructorServ.getInstructorById(id));
+    }
     @PutMapping("/{id}")
     public ResponseEntity<Instructor> updateInstructor(@PathVariable Long id, @RequestBody Instructor instructor){
         return ResponseEntity.ok(instructorServ.updateInstructor(id, instructor));

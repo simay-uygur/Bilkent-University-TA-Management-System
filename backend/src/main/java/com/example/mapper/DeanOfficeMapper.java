@@ -22,7 +22,7 @@ public class DeanOfficeMapper {
                 deanOffice.getName(),
                 deanOffice.getSurname(),
                 deanOffice.getWebmail(),
-                facultyCode
+                deanOffice.getFaculty().getCode()
         );
     }
 

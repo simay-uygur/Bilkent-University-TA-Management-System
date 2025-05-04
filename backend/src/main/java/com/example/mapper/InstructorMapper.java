@@ -62,11 +62,22 @@ public class InstructorMapper {
                 .map(o -> o.getCourse().getCourseCode())
                 .distinct()
                 .collect(Collectors.toList());
-        dto.setCourseCodes(codes);
+        dto.setSections(codes);
 
         return dto;
     }
-
+    public List<InstructorDto> toDtoList(List<Instructor> instructors) {
+        for (Instructor instructor : instructors) {
+            InstructorDto dto = toDto(instructor);
+            dto.setId(instructor.getId());
+            dto.setName(instructor.getName());
+            dto.setSurname(instructor.getSurname());
+            //dto.setIsActive(instructor.getIsActive()); -  active is not a field in dto
+        }
+        return instructors.stream()
+                .map(this::toDto)
+                .collect(Collectors.toList());
+    }
     public Instructor toEntity(InstructorDto dto) {
         if (dto == null) return null;
         Instructor inst = new Instructor();

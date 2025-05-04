@@ -14,4 +14,10 @@ public class CourseOfferingDto {
     private CourseDto course;
     private SemesterDto semester;
     private List<SectionDto> sections;
+    //private List<StudentDto> students;
+    //private List<TaDto> tas;
+    //private List<String> prereqs;
+    //private InstructorDto coordinator;
+    //private List<InstructorDto> instructors;
+    
 }

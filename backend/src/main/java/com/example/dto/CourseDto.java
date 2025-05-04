@@ -18,10 +18,11 @@ public class CourseDto {
     private String courseName;
     private String courseAcademicStatus;
     private String department;
-    private List<StudentDto> students;
-    private List<TaDto> tas;
     private List<String> prereqs;
+    /* private List<StudentDto> students;
+    private List<TaDto> tas;
+    
     //private InstructorDto coordinator;
     private List<InstructorDto> instructors;
-    private List<SectionDto> sections;
+    private List<SectionDto> sections; */
 }

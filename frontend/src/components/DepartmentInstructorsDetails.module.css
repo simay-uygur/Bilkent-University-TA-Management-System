@@ -1,0 +1,52 @@
+/* src/pages/InstructorDetails.module.css */
+
+.pageWrapper {
+    padding: 2rem;
+    background-color: #f5f5f5;
+    min-height: 100vh;
+  }
+  
+  .heading {
+    font-size: 1.75rem;
+    margin-bottom: 1rem;
+    color: #222;
+  }
+  
+  .sectionCard {
+    background-color: #fff;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    padding: 1rem;
+    margin-top: 1rem;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  }
+  
+  .sectionCard strong {
+    display: block;
+    margin-bottom: 0.5rem;
+    color: #333;
+  }
+  
+  .sectionCard ul {
+    margin: 0;
+    padding-left: 1.25rem;
+    list-style-type: disc;
+  }
+  
+  .sectionCard li {
+    margin-bottom: 0.25rem;
+    color: #444;
+  }
+  
+  .backLink {
+    display: inline-block;
+    margin-top: 1.5rem;
+    font-size: 0.95rem;
+    color: #3b82f6;
+    text-decoration: none;
+  }
+  
+  .backLink:hover {
+    text-decoration: underline;
+  }
+  

@@ -12,15 +12,16 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 public class DeanOfficeServImpl implements DeanOfficeServ {
-
+    private final DeanOfficeMapper deanOfficeMapper;
     private final DeanOfficeRepo deanOfficeRepo;
     private final FacultyRepo facultyRepo;
     private final PasswordEncoder encoder;
-    private final DeanOfficeMapper deanOfficeMapper;
+    
 
     @Override
     @Transactional
@@ -42,9 +43,16 @@ public class DeanOfficeServImpl implements DeanOfficeServ {
                 .getDeanOffice();
     }
 
-    @Override
+    /* @Override
     public List<DeanOffice> getAll() {
         return deanOfficeRepo.findAll();
+    } */
+    @Override
+    public List<DeanOfficeDto> getAll() {
+        List<DeanOffice> deanOffices = deanOfficeRepo.findAll();
+        return deanOffices.stream()
+                .map(deanOfficeMapper::toDto)
+                .collect(Collectors.toList());
     }
 
     @Override

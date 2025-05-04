@@ -1,6 +1,9 @@
 // com/example/service/CourseOfferingServiceImpl.java
 package com.example.service;
 
+import com.example.entity.Actors.TA;
+import com.example.entity.Courses.Course;
+import com.example.dto.CourseOfferingDto;
 import java.time.LocalDate;
 import java.time.Month;
 import java.util.ArrayList;
@@ -25,16 +28,35 @@ import com.example.entity.Tasks.Task;
 import com.example.entity.Tasks.TaskAccessType;
 import com.example.entity.Tasks.TaskType;
 import com.example.exception.GeneralExc;
+import com.example.mapper.CourseMapper;
+import com.example.mapper.CourseOfferingMapper;
 import com.example.repo.ClassRoomRepo;
 import com.example.repo.CourseOfferingRepo;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+
+
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 public class CourseOfferingServImpl implements CourseOfferingServ {
     private final CourseOfferingRepo repo;
     private final SemesterServ semesterServ;
+    private final CourseOfferingMapper courseMapper;
+
+    @Override
+    public List<CourseOfferingDto> getOfferingsByDepartment(String deptName){
+        List<CourseOffering> offerings = repo.findByCourseDepartmentName(deptName)
+                .orElseThrow(() -> new IllegalArgumentException("No offerings found for department: " + deptName));
+        
+                return offerings.stream()
+                .map(courseMapper::toDto)
+                .collect(Collectors.toList());
+    }
     private final CourseOfferingServ service;
     private final CourseOfferingRepo courseOfferingRepo;
     private final ClassRoomRepo classRoomRepo;
@@ -55,7 +77,9 @@ public class CourseOfferingServImpl implements CourseOfferingServ {
     }
     @Override
     public CourseOffering update(Long id, CourseOffering offering) {
-        CourseOffering existing = getById(id);
+
+        CourseOffering existing = repo.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Offering not found: " + id));
         existing.setSemester(offering.getSemester());
         existing.setCourse(offering.getCourse());
         // you could update other fields here
@@ -63,9 +87,20 @@ public class CourseOfferingServImpl implements CourseOfferingServ {
     }
 
     @Override
-    public CourseOffering getById(Long id) {
-        return repo.findById(id)
+    public CourseOfferingDto getById(Long id) {
+        CourseOffering off = repo.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Offering not found: " + id));
+
+        return courseMapper.toDto(off);
+    }
+    public CourseOfferingDto getByCourseCode(String code) {
+        List<CourseOffering> off = repo.findByCourseCode(code)
+                .orElseThrow(() -> new IllegalArgumentException("Offering not found: " + code));
+
+        return off.stream()
+                .map(courseMapper::toDto)
+                .findFirst()
+                .orElseThrow(() -> new IllegalArgumentException("Offering not found: " + code));
     }
 
     @Override
