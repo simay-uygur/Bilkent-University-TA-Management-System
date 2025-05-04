@@ -24,7 +24,7 @@ public class ProctorTaInFaculty extends Request{
     @JoinColumn(name = "exam_id", referencedColumnName = "exam_id")
     private Exam exam;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "proctor_ta_from_faculties_id", referencedColumnName = "request_id")
     private ProctorTaFromFaculties proctorTaFromFaculties;
 }

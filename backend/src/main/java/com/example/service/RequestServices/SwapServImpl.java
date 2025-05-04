@@ -3,9 +3,11 @@ package com.example.service.RequestServices;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
+import com.example.entity.Actors.Role;
 import com.example.entity.General.Date;
 import com.example.entity.Requests.Swap;
 import com.example.entity.Requests.SwapDto;
+import com.example.exception.GeneralExc;
 import com.example.exception.UserNotFoundExc;
 import com.example.repo.ExamRepo;
 import com.example.repo.RequestRepos.SwapRepo;
@@ -28,6 +30,13 @@ public class SwapServImpl implements SwapServ{
             .orElseThrow(() -> new UserNotFoundExc(senderId));
         var receiver = userRepo.findById(dto.getReceiverId())
             .orElseThrow(() -> new UserNotFoundExc(dto.getReceiverId()));
+        
+        if (receiver.getId() == sender.getId()) {
+            throw new GeneralExc("Sender and receiver cannot be the same.");
+        }
+        if (receiver.getRole() != Role.TA) {
+            throw new GeneralExc("Receiver must be a TA member.");
+        }
 
         // lookup your Exam however you’ve defined in ExamRepo
         var exam = examRepo.findById(dto.getExamId())

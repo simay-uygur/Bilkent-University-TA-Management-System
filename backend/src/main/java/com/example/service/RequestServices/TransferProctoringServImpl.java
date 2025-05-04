@@ -3,11 +3,13 @@ package com.example.service.RequestServices;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
+import com.example.entity.Actors.Role;
 import com.example.entity.Actors.User;
 import com.example.entity.Exams.Exam;
 import com.example.entity.General.Date;
 import com.example.entity.Requests.TransferProctoring;
 import com.example.entity.Requests.TransferProctoringDto;
+import com.example.exception.GeneralExc;
 import com.example.exception.UserNotFoundExc;
 import com.example.repo.ExamRepo;
 import com.example.repo.RequestRepos.TransferProctoringRepo;
@@ -31,8 +33,15 @@ public class TransferProctoringServImpl implements TransferProctoringServ {
         User receiver = userRepo.findById(dto.getReceiverId())
             .orElseThrow(() -> new UserNotFoundExc(dto.getReceiverId()));
 
-            Exam exam = examRepo.findById(dto.getExamId())
-            .orElseThrow(() -> new RuntimeException("Exam not found: " + dto.getExamName()));
+        if (receiver.getId() == sender.getId()) {
+            throw new GeneralExc("Sender and receiver cannot be the same.");
+        }
+        if (receiver.getRole() != Role.TA) {
+            throw new GeneralExc("Receiver must be a TA member.");
+        }
+
+        Exam exam = examRepo.findById(dto.getExamId())
+                     .orElseThrow(() -> new RuntimeException("Exam not found: " + dto.getExamName()));
 
         TransferProctoring req = new TransferProctoring();
         req.setRequestType(dto.getRequestType());
@@ -41,7 +50,6 @@ public class TransferProctoringServImpl implements TransferProctoringServ {
         req.setSender(sender);
         req.setReceiver(receiver);
         req.setExam(exam);
-        req.setRequiredTas(dto.getRequiredTas());
 
         transferRepo.save(req);
     }

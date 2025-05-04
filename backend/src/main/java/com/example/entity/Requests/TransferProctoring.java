@@ -14,9 +14,6 @@ import lombok.Data;
 @Entity
 @Table(name = "transfer_proctoring_requests")
 public class TransferProctoring extends Request{
-    @Column(name = "required_tas", unique = false, updatable = true)
-    private int requiredTas;
-
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "exam_id", referencedColumnName = "exam_id")
     private Exam exam;

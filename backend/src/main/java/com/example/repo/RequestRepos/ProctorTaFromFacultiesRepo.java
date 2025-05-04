@@ -7,5 +7,5 @@ import com.example.entity.Requests.ProctorTaFromFaculties;
 
 @Repository
 public interface ProctorTaFromFacultiesRepo extends JpaRepository<ProctorTaFromFaculties, Long>{
-    
+    boolean existsByExamIdAndSenderId(Long senderId, int examId);
 }

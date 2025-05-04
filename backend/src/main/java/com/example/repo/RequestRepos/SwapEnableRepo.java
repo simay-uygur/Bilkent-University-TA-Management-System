@@ -7,6 +7,5 @@ import com.example.entity.Requests.SwapEnable;
 
 @Repository
 public interface SwapEnableRepo extends JpaRepository<SwapEnable, Long> {
-    // Custom query methods can be defined here if needed
-    
+    boolean existsBySenderIdAndReceiverId(Long senderId, Long receiverId);
 }

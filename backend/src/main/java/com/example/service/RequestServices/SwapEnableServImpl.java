@@ -3,11 +3,13 @@ package com.example.service.RequestServices;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
+import com.example.entity.Actors.Role;
 import com.example.entity.Actors.User;
 import com.example.entity.Exams.Exam;
 import com.example.entity.General.Date;
 import com.example.entity.Requests.SwapEnable;
 import com.example.entity.Requests.SwapEnableDto;
+import com.example.exception.GeneralExc;
 import com.example.exception.UserNotFoundExc;
 import com.example.repo.ExamRepo;
 import com.example.repo.RequestRepos.SwapEnableRepo;
@@ -30,6 +32,13 @@ public class SwapEnableServImpl implements SwapEnableServ{
             .orElseThrow(() -> new UserNotFoundExc(senderId));
         User receiver = userRepo.findById(dto.getReceiverId())
             .orElseThrow(() -> new UserNotFoundExc(dto.getReceiverId()));
+
+        if (receiver.getId() == sender.getId()) {
+            throw new GeneralExc("Sender and receiver cannot be the same.");
+        }
+        if (receiver.getRole() != Role.DEPARTMENT_STAFF) {
+            throw new GeneralExc("Receiver must be a staff member.");
+        }
 
         Exam exam = examRepo.findById(dto.getExamId())
             .orElseThrow(() -> new RuntimeException("Exam not found: " + dto.getExamName()));

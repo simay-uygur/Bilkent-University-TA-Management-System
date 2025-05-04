@@ -1,6 +1,10 @@
 package com.example.entity.Requests;
 
+import java.util.List;
+
+import com.example.dto.TaskDto;
 import com.example.entity.General.Event;
+import com.example.entity.Tasks.Task;
 
 import lombok.Data;
 
@@ -8,4 +12,9 @@ import lombok.Data;
 public class LeaveDTO extends RequestDto {
     private Event duration;
     private boolean isPending;
+    private List<TaskDto> tasks;
+
+    private String attachmentFilename;
+    private String attachmentContentType;
+    private String attachmentUrl;
 }

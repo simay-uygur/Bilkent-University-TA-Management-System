@@ -40,5 +40,4 @@ public class SectionController {
     public Section createSection(@RequestBody Section section) {
         return sectionServ.create(section);
     }
-
 }

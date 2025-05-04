@@ -1,7 +1,9 @@
 package com.example.service.RequestServices;
 
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
+import com.example.entity.Actors.Role;
 import com.example.entity.Actors.User;
 import com.example.entity.Exams.Exam;
 import com.example.entity.General.Date;
@@ -10,6 +12,7 @@ import com.example.entity.Requests.ProctorTaFromFaculties;
 import com.example.entity.Requests.ProctorTaFromFacultiesDto;
 import com.example.entity.Requests.ProctorTaInFaculty;
 import com.example.entity.Requests.ProctorTaInFacultyDto;
+import com.example.exception.GeneralExc;
 import com.example.exception.UserNotFoundExc;
 import com.example.repo.ExamRepo;
 import com.example.repo.FacultyRepo;
@@ -29,6 +32,7 @@ public class ProctorTaFromOtherFacultiesServImpl implements ProctorTaFromFaculti
     private final FacultyRepo facultyRepo;
     private final ExamRepo examRepo;
 
+    @Async("setExecutor")
     @Override
     public void createProctorTaFromFacultiesRequest(ProctorTaFromFacultiesDto dto, Long senderId) {
         // 1. lookup sender & receiver
@@ -36,6 +40,13 @@ public class ProctorTaFromOtherFacultiesServImpl implements ProctorTaFromFaculti
                 .orElseThrow(() -> new UserNotFoundExc(senderId));
         User receiver = userRepo.findById(dto.getReceiverId())
                 .orElseThrow(() -> new UserNotFoundExc(dto.getReceiverId()));
+
+        if (receiver.getId() == sender.getId()) {
+            throw new GeneralExc("Sender and receiver cannot be the same.");
+        }
+        if (receiver.getRole() != Role.DEANS_OFFICE) {
+            throw new GeneralExc("Receiver must be a faculty member.");
+        }
 
         // 2. create & save parent
         ProctorTaFromFaculties parent = new ProctorTaFromFaculties();

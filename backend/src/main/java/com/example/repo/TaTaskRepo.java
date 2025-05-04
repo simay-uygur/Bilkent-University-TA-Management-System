@@ -10,6 +10,7 @@ import org.springframework.stereotype.Repository;
 
 import com.example.entity.General.Date;
 import com.example.entity.Tasks.TaTask;
+import com.example.entity.Tasks.Task;
 
 @Repository
 public interface TaTaskRepo extends JpaRepository<TaTask, Integer> {
@@ -96,5 +97,19 @@ public interface TaTaskRepo extends JpaRepository<TaTask, Integer> {
         @Param("taId") Long taId,
         @Param("from") Date  from,
         @Param("to")   Date  to
+      );
+
+      @Query("""
+        SELECT t
+          FROM TaTask tt
+          JOIN tt.task t
+         WHERE tt.taOwner.id       = :taId
+           AND t.duration.start    <= :to
+           AND t.duration.finish   >= :from
+      """)
+      List<Task> findTasksForTaInInterval(
+          @Param("taId") Long taId,
+          @Param("from") Date   from,
+          @Param("to")   Date   to
       );
 }

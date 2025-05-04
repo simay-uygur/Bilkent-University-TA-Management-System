@@ -5,8 +5,8 @@ import com.example.entity.General.Event;
 import lombok.Data;
 
 @Data
-public class TransferProctoringDto extends RequestDto {
+public class WorkLoadDto extends RequestDto{
+    private int taskId;
+    private String taskType;
     private Event duration;
-    private String examName;
-    private int examId;
 }

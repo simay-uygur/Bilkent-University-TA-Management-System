@@ -5,11 +5,14 @@ import com.example.entity.Exams.Exam;
 import com.example.entity.General.Event;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
+
 import jakarta.persistence.*;
 import lombok.*;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import com.example.entity.Requests.WorkLoad;
 
 @Entity
 @Table(name = "task_table")
@@ -68,6 +71,8 @@ public class Task {
     @JoinColumn(name = "exam_id")
     private Exam exam;
 
+    @OneToMany(mappedBy = "task", cascade = CascadeType.ALL)
+    private List<WorkLoad> workloadList = new ArrayList<>();
     /* ─── helper methods ─────────────────────────── */
 
     /** true if the task’s Event says it is currently ongoing */
@@ -97,6 +102,7 @@ public class Task {
                 ? duration.getStart().toString()
                 : null;
     }
+
 }
 
 /*

@@ -14,4 +14,7 @@ public class RequestDto {
     private Long receiverId;
     private String receiverName;
     private Date sentTime;
+    private boolean isApproved = false;
+    private boolean isRejected = false;
+    private boolean isPending = true;
 }
