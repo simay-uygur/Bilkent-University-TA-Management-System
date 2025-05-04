@@ -15,8 +15,6 @@ import lombok.Setter;
 @Setter
 public class Lesson {
 
-    /* ─────────────── identifiers ─────────────── */
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "lesson_id")
