@@ -25,5 +25,6 @@ public interface CourseServ {
     public List<CourseDto> getCourses();
     public Map<String, Object> importCoursesFromExcel(MultipartFile file) throws IOException;
     public List<CourseDto> getCoursesByDepartment(String deptName);
+    public Boolean deleteCourse(String course_code);
 
 }

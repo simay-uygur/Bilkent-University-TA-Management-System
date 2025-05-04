@@ -3,6 +3,8 @@ package com.example.service;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import com.example.ExcelHelpers.FailedRowInfo;
@@ -55,6 +57,14 @@ public class CourseServImpl implements CourseServ {
     private final LessonMapper lessonMapper;
     private final CourseMapper courseMapper;
 
+    @Override
+    public Boolean deleteCourse(String courseCode) {
+        Course course = courseRepo.findCourseByCourseCode(courseCode)
+                .orElseThrow(() -> new CourseNotFoundExc(courseCode));
+        
+        courseRepo.delete(course);
+        return true;
+    }
     @Override
     public List<CourseDto> getCoursesByDepartment(String deptName) {
         List<Course> courses = courseRepo.findCourseByDepartmentName(deptName)
@@ -344,8 +354,12 @@ public class CourseServImpl implements CourseServ {
                     int no = (int) row.getCell(1).getNumericCellValue();
                     String name = row.getCell(2).getStringCellValue().trim();
                     String code = deptName + "-" + no;
-                    String prereq = row.getCell(3) != null
-                            ? row.getCell(3).getStringCellValue().trim() : "";
+
+                    String prereqRaw = row.getCell(3) != null
+                        ? row.getCell(3).getStringCellValue().trim() : "";
+                String prereq = cleanPrerequisites(prereqRaw);
+                    /* String prereq = row.getCell(3) != null
+                            ? row.getCell(3).getStringCellValue().trim() : ""; */
                     String acs = row.getCell(4) != null
                             ? row.getCell(4).getStringCellValue().trim().toUpperCase() : "BS";
                     AcademicLevelType alt;
@@ -382,6 +396,65 @@ public class CourseServImpl implements CourseServ {
         res.put("failedRows", failed);
         return res;
     }
+   /**
+ * Processes a prerequisite expression by:
+ * 1. Keeping parenthesized groups intact
+ * 2. Converting top-level "and" operators to commas
+ * 3. Preserving "or" relationships within groups
+ * 
+ * Example: "(CS 102 or CS 114) and (MATH 225 or MATH 220)"
+ * becomes "(CS 102 or CS 114), (MATH 225 or MATH 220)"
+ */
+private String cleanPrerequisites(String prereqExpression) {
+    if (prereqExpression == null || prereqExpression.isEmpty()) {
+        return "";
+    }
+    
+    // Remove any "Prerequisite(s):" prefix if present
+    String cleaned = prereqExpression.replaceAll("(?i)Prerequisite\\(s\\):\\s*", "");
+    
+    // Replace top-level "and" with commas (not those inside parentheses)
+    StringBuilder result = new StringBuilder();
+    int parenDepth = 0;
+    boolean lastCharWasAnd = false;
+    
+    // First pass: Convert "and" outside parentheses to commas
+    for (int i = 0; i < cleaned.length(); i++) {
+        char c = cleaned.charAt(i);
+        
+        if (c == '(') {
+            parenDepth++;
+            result.append(c);
+            lastCharWasAnd = false;
+        } 
+        else if (c == ')') {
+            parenDepth--;
+            result.append(c);
+            lastCharWasAnd = false;
+        }
+        else if (parenDepth == 0 && i <= cleaned.length() - 5 && 
+                 cleaned.substring(i, i + 5).equalsIgnoreCase(" and ")) {
+            result.append(", ");
+            i += 4;  // Skip "and" (space already added)
+            lastCharWasAnd = true;
+        }
+        else {
+            if (!lastCharWasAnd || c != ' ') { // Avoid extra spaces after "and"
+                result.append(c);
+            }
+            lastCharWasAnd = false;
+        }
+    }
+    
+    // Second pass: Validate course codes inside groups by matching them with regex
+    String cleanedResult = result.toString();
+    Pattern coursePattern = Pattern.compile("[A-Z]{2,5}\\s*\\d{3}[A-Z]?");
+    
+    // Normalize spaces around operators for readability
+    cleanedResult = cleanedResult.replaceAll("\\s+or\\s+", " or ");
+    
+    return cleanedResult.trim();
+}
 
     private void checkPrerequisites(Course c) {
         if (c.getPrereqList() != null) {
