@@ -23,7 +23,7 @@ public class ExamRoom {
     private int examRoomId;          //auto generated
 
     @ManyToOne(fetch = FetchType.LAZY)
-    private ClassRoom examRoom;      // FK kept in the same table (no name override needed)
+    private ClassRoom classRoom;      // FK kept in the same table (no name override needed)
 
     @Column(name = "isApproved", nullable = false)
     private boolean approved = false;
@@ -45,7 +45,7 @@ public class ExamRoom {
     private Exam exam;
 
     public String getExamRoomCode() {
-        return examRoom != null ? examRoom.toString() : null; // hope it works
+        return classRoom != null ? classRoom.toString() : null; // hope it works
     }
 }
 
