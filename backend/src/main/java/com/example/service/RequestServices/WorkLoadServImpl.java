@@ -9,11 +9,13 @@ import com.example.entity.Actors.User;
 import com.example.entity.General.Date;
 import com.example.entity.Requests.WorkLoad;
 import com.example.entity.Requests.WorkLoadDto;
+import com.example.entity.Tasks.TaTask;
 import com.example.exception.GeneralExc;
 import com.example.exception.UserNotFoundExc;
-import com.example.repo.TARepo;
-import com.example.repo.UserRepo;
 import com.example.repo.RequestRepos.WorkLoadRepo;
+import com.example.repo.TARepo;
+import com.example.repo.TaTaskRepo;
+import com.example.repo.UserRepo;
 
 import lombok.RequiredArgsConstructor;
 
@@ -24,6 +26,7 @@ public class WorkLoadServImpl implements WorkLoadServ {
     private final UserRepo userRepo;
     private final WorkLoadRepo workLoadRepo;
     private final TARepo taRepo;
+    private final TaTaskRepo taTaskRepo;
 
     @Override
     public void createWorkLoad(WorkLoadDto dto, Long senderId) {
@@ -31,9 +34,10 @@ public class WorkLoadServImpl implements WorkLoadServ {
         .orElseThrow(() -> new UserNotFoundExc(senderId));
         User receiver = userRepo.findById(dto.getReceiverId())
         .orElseThrow(() -> new UserNotFoundExc(dto.getReceiverId()));
-        
-        if (receiver.getRole() != Role.DEPARTMENT_STAFF) {
-            throw new GeneralExc("Receiver must be a staff member.");
+        TaTask taTask = taTaskRepo.findByTaskIdAndTaId(dto.getTaskId(), senderId).
+                        orElseThrow(() -> new GeneralExc("TA with id " + senderId + " does not have task with id " + dto.getTaskId()));
+        if (receiver.getRole() != Role.INSTRUCTOR) {
+            throw new GeneralExc("Receiver must be an instructor.");
         }
         WorkLoad workloadReq = new WorkLoad();
         
@@ -41,7 +45,7 @@ public class WorkLoadServImpl implements WorkLoadServ {
         workloadReq.setSentTime(sent_time);
         workloadReq.setRequestType(dto.getRequestType());
         workloadReq.setDescription(dto.getDescription());
-        workloadReq.setDuration(dto.);
+        workloadReq.setTask(taTask.getTask());
         workloadReq.setSender(sender);
         workloadReq.setReceiver(receiver);
     }

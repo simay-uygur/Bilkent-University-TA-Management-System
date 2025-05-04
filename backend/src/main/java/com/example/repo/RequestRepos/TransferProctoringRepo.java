@@ -8,4 +8,5 @@ import com.example.entity.Requests.TransferProctoring;
 @Repository
 public interface TransferProctoringRepo extends JpaRepository<TransferProctoring, Long> {
     boolean existsBySenderIdAndReceiverId(Long senderId, Long receiverId);
+    boolean existsBySenderIdAndReceiverIdAndExamIdAndIsRejected(Long id, Long recId, int examId, boolean isRejected);
 }

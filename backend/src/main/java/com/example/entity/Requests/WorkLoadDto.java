@@ -9,4 +9,5 @@ public class WorkLoadDto extends RequestDto{
     private int taskId;
     private String taskType;
     private Event duration;
+    private int workload;
 }

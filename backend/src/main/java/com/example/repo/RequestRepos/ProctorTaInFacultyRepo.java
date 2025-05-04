@@ -8,4 +8,5 @@ import com.example.entity.Requests.ProctorTaInFaculty;
 @Repository
 public interface ProctorTaInFacultyRepo extends JpaRepository<ProctorTaInFaculty, Long>{
     boolean existsBySenderIdAndReceiverId(Long senderId, Long receiverId);
+    boolean existsBySenderIdAndReceiverIdAndExamIdAndIsRejected(Long id, Long receiverId, int examId, boolean isRejected);
 }

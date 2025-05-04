@@ -29,20 +29,20 @@ import com.example.entity.Requests.WorkLoadDto;
 import com.example.exception.UserNotFoundExc;
 import com.example.mapper.RequestMapper;
 import com.example.repo.InstructorRepo;
-import com.example.repo.UserRepo;
 import com.example.repo.RequestRepos.LeaveRepo;
 import com.example.repo.RequestRepos.ProctorTaFromFacultiesRepo;
 import com.example.repo.RequestRepos.ProctorTaInFacultyRepo;
-import com.example.repo.RequestRepos.RequestRepo;
 import com.example.repo.RequestRepos.SwapEnableRepo;
 import com.example.repo.RequestRepos.SwapRepo;
 import com.example.repo.RequestRepos.TransferProctoringRepo;
+import com.example.repo.RequestRepos.WorkLoadRepo;
 import com.example.service.RequestServices.LeaveServ;
 import com.example.service.RequestServices.ProctorTaFromFacultiesServ;
 import com.example.service.RequestServices.ProctorTaInFacultyServ;
 import com.example.service.RequestServices.SwapEnableServ;
 import com.example.service.RequestServices.SwapServ;
 import com.example.service.RequestServices.TransferProctoringServ;
+import com.example.service.RequestServices.WorkLoadServ;
 
 import lombok.RequiredArgsConstructor;
 
@@ -63,10 +63,12 @@ public class RequestController {
     private final ProctorTaInFacultyRepo inFacRepo;
     private final TransferProctoringServ transferProctoringServ;
     private final TransferProctoringRepo transferRepo;
+    private final WorkLoadServ workLoadServ;
+    private final WorkLoadRepo workLoadRepo;
 
     private final InstructorRepo insRepo;
     private final RequestMapper requestMapper;
-    
+
     @PostMapping(
         path = "/ta/{taId}/request/leave",
         consumes = MediaType.MULTIPART_FORM_DATA_VALUE   // ← **must** declare this
@@ -110,7 +112,7 @@ public class RequestController {
         @RequestBody SwapDto dto
     ) {
         swapServ.createSwapRequest(dto, taId);
-        boolean exists = swapRepo.existsBySenderIdAndReceiverId(taId, dto.getReceiverId());
+        boolean exists = swapRepo.existsBySenderIdAndReceiverIdAndExamIdAndIsRejected(taId, dto.getReceiverId(), dto.getExamId(), false);
         return new ResponseEntity<>(exists ? HttpStatus.CREATED : HttpStatus.BAD_REQUEST);
     }
 
@@ -120,7 +122,7 @@ public class RequestController {
             @RequestBody SwapEnableDto dto
     ) {
         swapEnableServ.createSwapEnableReq(dto, taId);
-        boolean exists = swapEnableRepo.existsBySenderIdAndReceiverId(taId, dto.getReceiverId());
+        boolean exists = swapEnableRepo.existsBySenderIdAndReceiverIdAndExamIdAndIsRejected(taId, dto.getReceiverId(), dto.getExamId(), false);
         return new ResponseEntity<>(exists ? HttpStatus.CREATED : HttpStatus.BAD_REQUEST);
     }
 
@@ -130,7 +132,7 @@ public class RequestController {
             @RequestBody TransferProctoringDto dto
     ) {
         transferProctoringServ.createTransferProctoringReq(dto, taId);
-        boolean exists = transferRepo.existsBySenderIdAndReceiverId(taId, dto.getReceiverId());
+        boolean exists = transferRepo.existsBySenderIdAndReceiverIdAndExamIdAndIsRejected(taId, dto.getReceiverId(), dto.getExamId(), false);
         return new ResponseEntity<>(exists ? HttpStatus.CREATED : HttpStatus.BAD_REQUEST);
     }
 
@@ -140,7 +142,7 @@ public class RequestController {
             @RequestBody ProctorTaFromFacultiesDto dto
     ) {
         proctorTaFromFacultiesServ.createProctorTaFromFacultiesRequest(dto, taId);
-        boolean exists = fromFacRepo.existsByExamIdAndSenderId(taId, dto.getExamid());
+        boolean exists = fromFacRepo.existsBySenderIdAndExamIdAndIsRejected(taId, dto.getExamid(), false);
         return new ResponseEntity<>(exists ? HttpStatus.CREATED : HttpStatus.BAD_REQUEST);
     }
 
@@ -150,7 +152,7 @@ public class RequestController {
             @RequestBody ProctorTaInFacultyDto dto
     ) {
         proctorTaInFacultyServ.createProctorTaInFacultyRequest(dto, taId);
-        boolean exists = inFacRepo.existsBySenderIdAndReceiverId(taId, dto.getReceiverId());
+        boolean exists = inFacRepo.existsBySenderIdAndReceiverIdAndExamIdAndIsRejected(taId, dto.getReceiverId(), dto.getExamId(), false);
         return new ResponseEntity<>(exists ? HttpStatus.CREATED : HttpStatus.BAD_REQUEST);
     }
 
@@ -159,7 +161,9 @@ public class RequestController {
         @PathVariable Long taId,
         @RequestBody WorkLoadDto dto
     ) {
-
+        workLoadServ.createWorkLoad(dto, taId);
+        boolean exists = workLoadRepo.existsBySenderIdAndTaskIdAndIsRejected(taId, dto.getTaskId(), false);
+        return new ResponseEntity<>(exists ? HttpStatus.CREATED : HttpStatus.BAD_REQUEST);
     }
 }
 /*
