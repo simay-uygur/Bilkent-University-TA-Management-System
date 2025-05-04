@@ -31,7 +31,12 @@ public class InstructorServImpl implements InstructorServ {
     private final DepartmentRepo departmentRepo;
     private final InstructorMapper instructorMapper;
 
-
+    @Override
+    public InstructorDto getInstructorById(Long id) {
+        Instructor instructor = instructorRepo.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Instructor not found: " + id));
+        return instructorMapper.toDto(instructor);
+    }
     @Override
     public Map<String, Object> importInstructorsFromExcel(MultipartFile file) throws IOException {
         List<Instructor> successfulInstructors = new ArrayList<>();
@@ -186,7 +191,7 @@ public class InstructorServImpl implements InstructorServ {
     }
 
 
-    @Override
+    /* @Override
     public List<InstructorDto> getInstructorsByDepartment(String departmentName) {
         Department dept = departmentRepo
                 .findDepartmentByName(departmentName)
@@ -196,7 +201,17 @@ public class InstructorServImpl implements InstructorServ {
                 .filter(i -> dept.equals(i.getDepartment()))
                 .map(instructorMapper::toDto)
                 .collect(Collectors.toList());
-    }
+    } */
+    @Override
+    public List<InstructorDto> getInstructorsByDepartment(String departmentName) {
+        List<Instructor> instructors = instructorRepo.findByDepartmentName(departmentName)
+                .orElseThrow(() -> new RuntimeException("Department not found: " + departmentName));
+
+      return instructors.stream()
+                .map(instructorMapper::toDto)
+                .collect(Collectors.toList());
+    //return instructorMapper.toDtoList(instructors);
+}
 
 }
 

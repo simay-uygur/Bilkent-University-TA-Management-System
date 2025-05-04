@@ -5,6 +5,9 @@ import com.example.entity.Courses.CourseOffering;
 import com.example.mapper.CourseOfferingMapper;
 import com.example.service.CourseOfferingServ;
 import lombok.RequiredArgsConstructor;
+
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -32,10 +35,30 @@ public class CourseOfferingController {
                 .map(mapper::toDto)
                 .collect(Collectors.toList());
     }
+   
+    @GetMapping("/department/{deptId}")
+    public ResponseEntity<List<CourseOfferingDto>> getOfferingsByDepartment(@PathVariable String deptId) {
+        
+        return new ResponseEntity<>(service.getOfferingsByDepartment(deptId), HttpStatus.FOUND);
 
+    }
     @GetMapping("/{id}")
-    public CourseOfferingDto get(@PathVariable Long id) {
-        return mapper.toDto(service.getById(id));
+    public ResponseEntity<CourseOfferingDto> get(@PathVariable Long id) {
+        //return mapper.toDto(service.getById(id));
+        CourseOfferingDto dto = service.getById(id);
+        if (dto == null) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+        return new ResponseEntity<>(dto, HttpStatus.FOUND);
+    }
+    @GetMapping("/courseCode/{code}")
+    public ResponseEntity<CourseOfferingDto> get(@PathVariable String code) {
+        //return mapper.toDto(service.getById(id));
+        CourseOfferingDto dto = service.getByCourseCode(code);
+        if (dto == null) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+        return new ResponseEntity<>(dto, HttpStatus.FOUND);
     }
 
     @PutMapping("/{id}")

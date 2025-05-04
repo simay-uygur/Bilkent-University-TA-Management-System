@@ -40,5 +40,14 @@ public class SectionController {
     public Section createSection(@RequestBody Section section) {
         return sectionServ.create(section);
     }
+   @PutMapping("/{id}")
+    public Section updateSection(@PathVariable int id,
+                                 @RequestBody Section section) {
+        return sectionServ.update(id, section);
+    }
 
+    @DeleteMapping("/{id}")
+    public void deleteSection(@PathVariable int id) {
+        sectionServ.delete(id);
+    } 
 }

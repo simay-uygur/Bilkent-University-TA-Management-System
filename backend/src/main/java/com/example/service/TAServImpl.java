@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
@@ -21,8 +22,11 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.example.dto.FailedRowInfo;
+import com.example.dto.TaDto;
 import com.example.entity.Actors.Role;
 import com.example.entity.Actors.TA;
+import com.example.entity.Courses.Course;
+import com.example.entity.Courses.Section;
 import com.example.entity.General.AcademicLevelType;
 import com.example.entity.General.Date;
 import com.example.entity.Schedule.Schedule;
@@ -35,9 +39,10 @@ import com.example.exception.UserNotFoundExc;
 import com.example.exception.taExc.TaNotFoundExc;
 import com.example.exception.taskExc.TaskIsNotActiveExc;
 import com.example.exception.taskExc.TaskNotFoundExc;
+import com.example.mapper.TaMapper;
 import com.example.repo.TARepo;
 import com.example.repo.TaTaskRepo;
-import com.example.repo.TaskRepo;
+
 
 import lombok.RequiredArgsConstructor;
 
@@ -48,9 +53,8 @@ public class TAServImpl implements TAServ {
     
     @Autowired
     private TARepo repo;
+    private final TaMapper taMapper;
 
-    @Autowired
-    private TaskRepo taskRepo;
 
     @Autowired
     private TaskServ taskServ;
@@ -65,14 +69,84 @@ public class TAServImpl implements TAServ {
 
 
     @Override
-    public TA getTAById(Long id){
-        return repo.findById(id)
-        .orElseThrow(() -> new UserNotFoundExc(id));
+    public TaDto getTAById(Long id){
+        TA ta = repo.findById(id)
+                .orElseThrow(() -> new UserNotFoundExc(id));
+        return taMapper.toDto(ta);
+        
     }
-    
+    public TA getTAByIdEntity(Long id){
+        return repo.findById(id)
+                .orElseThrow(() -> new UserNotFoundExc(id));
+        
+    }
     @Override
-    public List<TA> getAllTAs() {
-        return repo.findAllTAs(); 
+        public List<TaDto> getTAsByDepartment(String deptName){
+            List<TA> tas = repo.findByDepartment(deptName);
+            if (tas.isEmpty()) {
+                throw new UserNotFoundExc(deptName);
+            }
+            return tas.stream()
+                    .map(taMapper::toDto)
+                    .collect(Collectors.toList());
+            /* return tas.stream()
+                    .map(ta -> new TaDto(
+                            ta.getId(),
+                            ta.getName(),
+                            ta.getSurname(),
+                            ta.getAcademicLevel().name(),
+                            ta.getTotalWorkload(),
+                            ta.getIsActive(),
+                            ta.getIsGraduated(),
+                            ta.getDepartment(),
+                           
+                            ta.getSectionsAsStudent().stream()
+                                    .map(Section::getSectionCode)
+                                    .collect(Collectors.toList()),
+                            ta.getSectionsAsHelper().stream()
+                                    .map(Section::getSectionCode)
+                                    .collect(Collectors.toList()),
+                            ta.getOfferingsAsHelper().stream()
+                    ))
+                    .collect(Collectors.toList()); */
+    } 
+
+    @Override
+    public List<TaDto> getAllTAs() {
+        List<TA> tas = repo.findAll();
+        if (tas.isEmpty()) {
+            throw new UserNotFoundExc("TAs");
+        }   
+        return tas.stream()
+                .map(taMapper::toDto)
+                .collect(Collectors.toList());
+       /*  return tas.stream()
+                .map(ta -> new TaDto(
+                        ta.getId(),
+                        ta.getName(),
+                        ta.getSurname(),
+                        ta.getAcademicLevel().name(),
+                        ta.getTotalWorkload(),
+                        ta.getIsActive(),
+                        ta.getIsGraduated(),
+                        ta.getDepartment(),
+                        ta.getSectionsAsStudent().stream()
+                                .map(Section::getSectionCode)
+                                .collect(Collectors.toList()),
+                        ta.getSectionsAsHelper().stream()
+                                .map(Section::getSectionCode)
+                                .collect(Collectors.toList()),
+                        ta.getOfferingsAsHelper().stream()
+                                .map(offering -> offering.getCourse().getCourseCode())
+                                .collect(Collectors.toList()),
+                        ta.getTasOwnLessons().stream()
+                                .map(Section::getSectionCode)
+                                .collect(Collectors.toList()
+                )
+                )
+                )
+                .collect(Collectors.toList()); */
+
     }
 
     @Override
@@ -273,4 +347,28 @@ public class TAServImpl implements TAServ {
         result.put("failedRows", failedRows);
         return result;
     }
+
+  /*   private List<TaDto> mapToDtoList(List<TA> tas) {
+        List<TaDto> taDtos = new ArrayList<>();
+        for (TA ta : tas) {
+            TaDto taDto = new TaDto(
+                    ta.getId(),
+                    ta.getName(),
+                    ta.getSurname(),
+                    ta.getAcademicLevel().name(),
+                    ta.getTotalWorkload(),
+                    ta.getIsActive(),
+                    ta.getIsGraduated(),
+                    ta.getDepartment(),
+                    ta.getCourses().stream()
+                            .map(Course::getCourseCode)
+                            .collect(Collectors.toList()),
+                    ta.getTasOwnLessons().stream()
+                            .map(Section::getSectionCode)
+                            .collect(Collectors.toList())
+            );
+            taDtos.add(taDto);
+        }
+        return taDtos;
+    } */
 }

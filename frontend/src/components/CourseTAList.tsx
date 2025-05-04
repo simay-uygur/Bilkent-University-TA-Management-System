@@ -97,7 +97,7 @@ const CourseTAList: React.FC = () => {
 
   // Navigate to a form to request a NEW TA for this course
   const handleRequestNewTA = () => {
-    navigate(`/courses/${courseId}/request-ta`);
+    navigate(`/instructor/courses/${courseId}/request-ta`);
   };
 
   return (
