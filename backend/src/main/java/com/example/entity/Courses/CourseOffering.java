@@ -24,7 +24,7 @@ import static jakarta.persistence.FetchType.LAZY;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
+//@Builder
 public class CourseOffering {
 
     @Id

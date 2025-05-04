@@ -48,7 +48,7 @@ public interface TARepo extends JpaRepository<TA, Long> { // TA is the entity an
       SELECT CASE WHEN COUNT(tsk)>0 THEN TRUE ELSE FALSE END
       FROM Section s
       JOIN s.registeredTas ta
-      JOIN s.sectionTasksList tsk
+      JOIN s.tasks tsk
       WHERE ta.id = :taId
         AND tsk.exam IS NOT NULL
         AND (
