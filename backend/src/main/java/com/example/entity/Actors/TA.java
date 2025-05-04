@@ -106,6 +106,9 @@ public class TA extends User {
     public int hashCode() {
         return Objects.hashCode(getId());
     }
+
+    @Column(name = "is_active", nullable = false)
+    private boolean isActive = true; // added new
 }
 
 /*

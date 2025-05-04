@@ -6,6 +6,7 @@ import java.time.Month;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.Optional;
 
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
@@ -17,6 +18,7 @@ import com.example.entity.Courses.CourseOffering;
 import com.example.entity.Exams.Exam;
 import com.example.entity.Exams.ExamRoom;
 import com.example.entity.General.ClassRoom;
+import com.example.entity.General.Event;
 import com.example.entity.General.Student;
 import com.example.entity.General.Term;
 import com.example.entity.Tasks.Task;
@@ -143,7 +145,6 @@ public class CourseOfferingServImpl implements CourseOfferingServ {
         Task task = new Task();
         task.setTaskType(TaskType.Proctoring);
         task.setDuration(dto.getDuration());
-        task.setCourse(offering.getCourse());
         task.setRequiredTAs(dto.getRequiredTas());
         task.setAccessType(TaskAccessType.PUBLIC);
         Exam exam = new Exam();
@@ -155,7 +156,7 @@ public class CourseOfferingServImpl implements CourseOfferingServ {
             ClassRoom classRoom = classRoomRepo.findByClassroomId(roomDto.getRoom())
                     .orElseThrow(() -> new GeneralExc("Classroom not found: " + roomDto.getRoom()));
             room.setExamRoom(classRoom);
-            classRoom.setExamRoom(room);
+            classRoom.getExamRooms().add(room);
             List<Student> students = new ArrayList<>();
             for (StudentDto studentDto : roomDto.getStudents()) {
                 Student student = new Student();

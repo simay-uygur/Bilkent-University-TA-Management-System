@@ -15,8 +15,8 @@ public class TaDto {
     private String surname;
     private String academicLevel;
     private int totalWorkload;
-    private Boolean isActive;
-    private Boolean isGraduated;
+    private boolean isActive;
+    private boolean isGraduated;
     private String department;
     private List<String> courses;
     private List<String> lessons;

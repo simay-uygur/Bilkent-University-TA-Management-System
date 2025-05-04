@@ -39,7 +39,6 @@ public class Exam {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "exam_id", unique = true)
     private int examId;
 

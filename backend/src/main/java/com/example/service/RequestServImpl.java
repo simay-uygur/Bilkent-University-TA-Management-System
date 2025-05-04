@@ -6,6 +6,7 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
+import com.example.entity.Actors.TA;
 import com.example.entity.Actors.User;
 import com.example.entity.General.Date;
 import com.example.entity.Requests.Leave;
@@ -86,7 +87,8 @@ public class RequestServImpl implements RequestServ{
         List<Leave> leaves = leaveRepo.findAll();
         for (Leave leave : leaves) {
             if (leave.getDuration().getFinish().isBefore(new Date().currenDate())) {
-                leave.getSender().setIsActive(true);
+                TA sender = (TA)leave.getSender();
+                sender.setActive(false);
                 leaveRepo.save(leave);
             }
         }

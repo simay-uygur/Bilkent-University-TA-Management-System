@@ -22,7 +22,7 @@ public class TaMapper {
         dto.setSurname(ta.getSurname());
         dto.setAcademicLevel(ta.getAcademicLevel().name());
         dto.setTotalWorkload(ta.getTotalWorkload());
-        dto.setIsActive(ta.getIsActive());
+        dto.setIsActive(ta.getActive());
         dto.setIsGraduated(ta.getIsGraduated());
         dto.setDepartment(ta.getDepartment());
 

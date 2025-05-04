@@ -232,7 +232,7 @@ public class TAServImpl implements TAServ {
                     TA ta = optionalTA.map(existing -> { existing.setName(name);
                         existing.setSurname(surname);
                         existing.setAcademicLevel(level);
-                        existing.setIsActive(isActive);
+                        existing.setActive(isActive);
                         existing.setDeleted(false); // Just in case
                         return existing;
                     }).orElseGet(() -> {
@@ -242,7 +242,7 @@ public class TAServImpl implements TAServ {
                         newTa.setSurname(surname);
                         newTa.setWebmail(webmail);
                         newTa.setAcademicLevel(level);
-                        newTa.setIsActive(isActive);
+                        newTa.setActive(isActive);
                         newTa.setRole(Role.TA);
                         newTa.setPassword(encoder.encode("default123"));
                         newTa.setTotalWorkload(0);

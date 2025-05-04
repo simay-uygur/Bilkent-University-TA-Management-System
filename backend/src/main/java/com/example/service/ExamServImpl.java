@@ -42,7 +42,7 @@ public class ExamServImpl implements ExamServ{
             rooms.add(room_DTO);
         }
         dto.setCourseCode(exam.getTask().getSection().getOffering().getCourse().getCourseCode()); //this can be changed
-        dto.setDuration(exam.getTask().getDuration().toString());
+        dto.setDuration(exam.getTask().getDuration());
         dto.setExamRooms(rooms);
         return dto;
     }
