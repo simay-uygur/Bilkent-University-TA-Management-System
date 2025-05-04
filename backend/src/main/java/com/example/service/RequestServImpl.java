@@ -79,9 +79,10 @@ public class RequestServImpl implements RequestServ{
     }
 
     //each day
+    @Override
     @Scheduled(cron = "0 0 0 * * ?")
     @Async("leaveExecutor")
-    private void checkLeaveRequests() {
+    public void checkLeaveRequests() {
         List<Leave> leaves = leaveRepo.findAll();
         for (Leave leave : leaves) {
             if (leave.getDuration().getFinish().isBefore(new Date().currenDate())) {

@@ -28,7 +28,7 @@ public class LessonMapper {
         // classRoom → classCode + examRoom
         ClassRoom room = lesson.getLessonRoom();
         if (room != null) {
-            dto.setClassCode(room.getClassCode());
+            dto.setClassCode(room.getClassroomId());
             dto.setRoom(
                     room.getExamRoom() != null
                             ? room.getExamRoom().toString()

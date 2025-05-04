@@ -52,7 +52,7 @@ public class ClassRoomExcelHelper {
                         case 0 -> {
                             // Column for Room Code (as String)
                             DataFormatter formatter = new DataFormatter();
-                            classroom.setClassCode(formatter.formatCellValue(currentCell));
+                            classroom.setClassroomId(formatter.formatCellValue(currentCell));
                         }
                         case 1 -> // Column for Capacity (as numeric value; cast to integer)
                             classroom.setClassCapacity((int) currentCell.getNumericCellValue());

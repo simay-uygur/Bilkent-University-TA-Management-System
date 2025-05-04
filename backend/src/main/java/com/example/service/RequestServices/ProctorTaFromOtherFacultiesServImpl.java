@@ -1,5 +1,7 @@
 package com.example.service.RequestServices;
 
+import java.util.ArrayList;
+
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
@@ -16,9 +18,9 @@ import com.example.exception.GeneralExc;
 import com.example.exception.UserNotFoundExc;
 import com.example.repo.ExamRepo;
 import com.example.repo.FacultyRepo;
-import com.example.repo.UserRepo;
 import com.example.repo.RequestRepos.ProctorTaFromFacultiesRepo;
 import com.example.repo.RequestRepos.ProctorTaInFacultyRepo;
+import com.example.repo.UserRepo;
 
 import lombok.RequiredArgsConstructor;
 
@@ -41,9 +43,6 @@ public class ProctorTaFromOtherFacultiesServImpl implements ProctorTaFromFaculti
         User receiver = userRepo.findById(dto.getReceiverId())
                 .orElseThrow(() -> new UserNotFoundExc(dto.getReceiverId()));
 
-        if (receiver.getId() == sender.getId()) {
-            throw new GeneralExc("Sender and receiver cannot be the same.");
-        }
         if (receiver.getRole() != Role.DEANS_OFFICE) {
             throw new GeneralExc("Receiver must be a faculty member.");
         }
@@ -55,17 +54,18 @@ public class ProctorTaFromOtherFacultiesServImpl implements ProctorTaFromFaculti
         parent.setSentTime(new Date().currenDate());
         parent.setSender(sender);
         parent.setReceiver(receiver);
-        fromFacRepo.save(parent);
-
+        Exam exam = examRepo.findByExamId(dto.getExamId())
+                    .orElseThrow(() -> new GeneralExc(
+                        "Exam not found: " + dto.getExamName()));
+        parent.setExam(exam);
+        parent.setProctorTaInFaculties(new ArrayList<>()); 
         // 3. for each child DTO: create & save a ProctorTaInFaculty
         for (ProctorTaInFacultyDto childDto : dto.getProctorTaInFacultyDtos()) {
             Faculty faculty = facultyRepo.findByCode(childDto.getFacultyName())
-                    .orElseThrow(() -> new RuntimeException(
+                    .orElseThrow(() -> new GeneralExc(
                         "Faculty not found: " + childDto.getFacultyName()));
 
-            Exam exam = examRepo.findByExamId(childDto.getExamId())
-                    .orElseThrow(() -> new RuntimeException(
-                        "Exam not found: " + childDto.getExamName()));
+            
 
             ProctorTaInFaculty child = new ProctorTaInFaculty();
             child.setRequestType(dto.getRequestType());    // share the same type
@@ -75,7 +75,8 @@ public class ProctorTaFromOtherFacultiesServImpl implements ProctorTaFromFaculti
             child.setReceiver(receiver);
             child.setFaculty(faculty);
             child.setExam(exam);
-            parent.getProctorTaInFaculties().add(inFacRepo.save(child));
+            child.setProctorTaFromFaculties(parent);
+            parent.getProctorTaInFaculties().add(child);
         }
 
         fromFacRepo.save(parent); // save parent again to update the relationship

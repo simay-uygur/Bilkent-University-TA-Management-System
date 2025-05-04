@@ -19,10 +19,13 @@ import com.example.dto.TaDto;
 import com.example.dto.TaskDto;
 import com.example.entity.Courses.Course;
 import com.example.entity.Courses.Section;
+import com.example.entity.Exams.Exam;
 import com.example.entity.Tasks.TaTask;
 import com.example.entity.Tasks.Task;
+import com.example.exception.Course.CourseNotFoundExc;
 import com.example.repo.CourseRepo;
 import com.example.service.CourseServ;
+import com.example.service.ExamServ;
 
 import lombok.RequiredArgsConstructor;
 
@@ -31,11 +34,10 @@ import lombok.RequiredArgsConstructor;
 @RestController
 @RequiredArgsConstructor
 public class CourseController {
-    @Autowired
-    private CourseServ courseServ; // this is used to check if the course exists in the database
 
-    @Autowired
-    private CourseRepo courseRepo;
+    private final CourseServ courseServ; // this is used to check if the course exists in the database
+    private final CourseRepo courseRepo;
+    private final ExamServ examServ; // this is used to check if the exam exists in the database
 
     @PostMapping("api/course")
     public ResponseEntity<Boolean> createCourse(@RequestBody Course course) {
@@ -135,13 +137,4 @@ public class CourseController {
             task.getStatus().toString() // Convert enum to String
         );
     }
-
-
-
-    /*@PostMapping("/course/{course_code}/exam")
-    public ResponseEntity<Boolean> createExam(@RequestBody Exam exam, @PathVariable String course_code) {
-        return new ResponseEntity<>()
-    }*/
-    
-
 }

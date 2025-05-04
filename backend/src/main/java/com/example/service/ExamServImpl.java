@@ -3,14 +3,13 @@ package com.example.service;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.springframework.stereotype.Service;
+
 import com.example.dto.ExamDto;
 import com.example.dto.ExamRoomDto;
 import com.example.dto.StudentDto;
-import org.springframework.stereotype.Service;
-
 import com.example.entity.Exams.Exam;
 import com.example.entity.Exams.ExamRoom;
-
 import com.example.entity.General.Student;
 import com.example.repo.ExamRepo;
 
@@ -39,11 +38,11 @@ public class ExamServImpl implements ExamServ{
                 s.setDepartment(stud.getDepartment());
                 studDtos.add(s);
             }
-            ExamRoomDto room_DTO = new ExamRoomDto(room.getExamRoom().getClassCode(), studDtos);
+            ExamRoomDto room_DTO = new ExamRoomDto(room.getExamRoom().getClassroomId(), studDtos);
             rooms.add(room_DTO);
         }
         dto.setCourseCode(exam.getTask().getCourse().getCourseCode());
-        dto.setDuration(exam.getTask().getDuration().toString());
+        dto.setDuration(exam.getTask().getDuration());
         dto.setExamRooms(rooms);
         return dto;
     }

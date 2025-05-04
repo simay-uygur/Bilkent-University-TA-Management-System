@@ -44,10 +44,10 @@ public class Section {
     )
     private List<Task> sectionTasksList = new ArrayList<>();
 
-    @OneToMany(fetch = FetchType.LAZY,
+    /*@OneToMany(fetch = FetchType.LAZY,
             cascade = { CascadeType.PERSIST, CascadeType.MERGE })
     @JoinColumn(name = "section_id")
-    private List<ExamRoom> examRooms = new ArrayList<>(); // why ?
+    private List<ExamRoom> examRooms = new ArrayList<>(); // why ?*/
 
     //instead of course, now course id is being used
 //    @ManyToOne(fetch = FetchType.LAZY)

@@ -21,8 +21,9 @@ public class ExamRoom {
     @Column(name = "examroom_id", nullable = false, updatable = true)
     private int examRoomId;          // e.g. 3191, 3192 …
 
-    @OneToOne(fetch = FetchType.LAZY,
+    @ManyToOne(fetch = FetchType.LAZY,
             cascade = { CascadeType.PERSIST, CascadeType.MERGE })
+    @JoinColumn(name = "classroom_id", nullable = false)
     private ClassRoom examRoom;      // FK kept in the same table (no name override needed)
 
     @Column(name = "isApproved", nullable = false)
@@ -47,7 +48,7 @@ public class ExamRoom {
     /* ─────────────── helpers ─────────────── */
 
     public String getExamRoomCode() {
-        return examRoom != null ? examRoom.getClassCode() : null;
+        return examRoom != null ? examRoom.getClassroomId() : null;
     }
 }
 

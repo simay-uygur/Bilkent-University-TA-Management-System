@@ -1,6 +1,7 @@
 package com.example.repo;
 
 import java.util.List;
+import java.util.Optional;
 
 import com.example.dto.StudentDto;
 import com.example.dto.TaDto;
@@ -74,4 +75,5 @@ public interface SectionRepo extends JpaRepository<Section, Integer>{
            """)
     List<TA> findTasBySectionId(@Param("sectionId") int sectionId);
 
+    Optional<Section> findBySectionCode(String sectionCode);
 }

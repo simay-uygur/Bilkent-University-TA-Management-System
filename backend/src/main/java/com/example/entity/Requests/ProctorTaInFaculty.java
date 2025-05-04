@@ -17,10 +17,10 @@ import lombok.Data;
 @Table(name = "proctor_ta_in_faculty_requests")
 public class ProctorTaInFaculty extends Request{
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "faculty_id", referencedColumnName = "faculty_id")
+    @JoinColumn(name = "code", referencedColumnName = "code")
     private Faculty faculty;
 
-    @OneToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "exam_id", referencedColumnName = "exam_id")
     private Exam exam;
 

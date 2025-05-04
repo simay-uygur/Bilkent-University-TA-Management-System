@@ -1,10 +1,12 @@
 
 package com.example.repo;
 
-import com.example.entity.Courses.CourseOffering;
+import java.util.Optional;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 
-import java.util.Optional;
+import com.example.entity.Courses.CourseOffering;
+import com.example.entity.General.Term;
 
 public interface CourseOfferingRepo extends JpaRepository<CourseOffering, Long> {
 
@@ -16,4 +18,12 @@ public interface CourseOfferingRepo extends JpaRepository<CourseOffering, Long> 
     //Optional<CourseOffering> findCourseOfferingByCourse_CourseIdAndSemester_SemesterId(Integer courseId, Long semesterId);
     //Optional<CourseOffering> findByCourse_IdAndSemester_Id(Integer courseId, Long semesterId);
     //Optional<CourseOffering> findByCourse_IdAndSemester_Id(Integer courseId, Long semesterId);
+
+    Optional<CourseOffering> findByCourse_CourseCodeAndSemester_YearAndSemester_Term(
+        String courseCode,
+        int year,
+        Term term
+    );
+
+    Optional<CourseOffering> findByCourse_CourseCode(String courseCode);
 }

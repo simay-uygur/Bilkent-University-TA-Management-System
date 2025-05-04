@@ -17,4 +17,5 @@ public interface RequestServ {
     public List<Request> getProctorTaFromFacultiesRequestsOfTheUser(User u); // Ta from Faculties
     
     public boolean createRequest(Request req);
+    public void checkLeaveRequests();
 }

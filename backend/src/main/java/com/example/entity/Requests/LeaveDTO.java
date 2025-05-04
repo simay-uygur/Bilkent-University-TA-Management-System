@@ -4,10 +4,11 @@ import java.util.List;
 
 import com.example.dto.TaskDto;
 import com.example.entity.General.Event;
-import com.example.entity.Tasks.Task;
 
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
+@EqualsAndHashCode(callSuper = true)
 @Data
 public class LeaveDTO extends RequestDto {
     private Event duration;

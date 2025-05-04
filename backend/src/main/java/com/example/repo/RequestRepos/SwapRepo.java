@@ -8,5 +8,5 @@ import com.example.entity.Requests.Swap;
 @Repository
 public interface SwapRepo extends JpaRepository<Swap, Long>{
     boolean existsBySenderIdAndReceiverId(Long senderId, Long receiverId);
-    boolean existsBySenderIdAndReceiverIdAndExamIdAndIsRejected(Long id, Long receiverId, int taskId, boolean isRejected);
+    boolean existsBySenderIdAndReceiverIdAndExamExamIdAndIsRejected(Long id, Long receiverId, int examId, boolean isRejected);
 }

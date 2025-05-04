@@ -79,7 +79,7 @@ public class RequestController {
         @RequestPart(value = "file", required = false) MultipartFile file
     ) throws IOException {
         leaveServ.createLeaveRequest(dto, file, taId);
-        boolean exists = leaveRepo.existsBySenderIdAndReceiverId(taId, dto.getReceiverId());
+        boolean exists = leaveRepo.existsBySenderIdAndReceiverIdAndIsRejected(taId, dto.getReceiverId(), false);
         return new ResponseEntity<>(exists ? HttpStatus.CREATED : HttpStatus.BAD_REQUEST);
     }
 
@@ -112,7 +112,7 @@ public class RequestController {
         @RequestBody SwapDto dto
     ) {
         swapServ.createSwapRequest(dto, taId);
-        boolean exists = swapRepo.existsBySenderIdAndReceiverIdAndExamIdAndIsRejected(taId, dto.getReceiverId(), dto.getExamId(), false);
+        boolean exists = swapRepo.existsBySenderIdAndReceiverIdAndExamExamIdAndIsRejected(taId, dto.getReceiverId(), dto.getExamId(), false);
         return new ResponseEntity<>(exists ? HttpStatus.CREATED : HttpStatus.BAD_REQUEST);
     }
 
@@ -122,7 +122,7 @@ public class RequestController {
             @RequestBody SwapEnableDto dto
     ) {
         swapEnableServ.createSwapEnableReq(dto, taId);
-        boolean exists = swapEnableRepo.existsBySenderIdAndReceiverIdAndExamIdAndIsRejected(taId, dto.getReceiverId(), dto.getExamId(), false);
+        boolean exists = swapEnableRepo.existsBySenderIdAndReceiverIdAndExamExamIdAndIsRejected(taId, dto.getReceiverId(), dto.getExamId(), false);
         return new ResponseEntity<>(exists ? HttpStatus.CREATED : HttpStatus.BAD_REQUEST);
     }
 
@@ -132,7 +132,7 @@ public class RequestController {
             @RequestBody TransferProctoringDto dto
     ) {
         transferProctoringServ.createTransferProctoringReq(dto, taId);
-        boolean exists = transferRepo.existsBySenderIdAndReceiverIdAndExamIdAndIsRejected(taId, dto.getReceiverId(), dto.getExamId(), false);
+        boolean exists = transferRepo.existsBySenderIdAndReceiverIdAndExamExamIdAndIsRejected(taId, dto.getReceiverId(), dto.getExamId(), false);
         return new ResponseEntity<>(exists ? HttpStatus.CREATED : HttpStatus.BAD_REQUEST);
     }
 
@@ -142,7 +142,7 @@ public class RequestController {
             @RequestBody ProctorTaFromFacultiesDto dto
     ) {
         proctorTaFromFacultiesServ.createProctorTaFromFacultiesRequest(dto, taId);
-        boolean exists = fromFacRepo.existsBySenderIdAndExamIdAndIsRejected(taId, dto.getExamid(), false);
+        boolean exists = fromFacRepo.existsBySenderIdAndExamIdAndIsRejected(taId, dto.getExamId(), false);
         return new ResponseEntity<>(exists ? HttpStatus.CREATED : HttpStatus.BAD_REQUEST);
     }
 
@@ -152,7 +152,7 @@ public class RequestController {
             @RequestBody ProctorTaInFacultyDto dto
     ) {
         proctorTaInFacultyServ.createProctorTaInFacultyRequest(dto, taId);
-        boolean exists = inFacRepo.existsBySenderIdAndReceiverIdAndExamIdAndIsRejected(taId, dto.getReceiverId(), dto.getExamId(), false);
+        boolean exists = inFacRepo.existsBySenderIdAndReceiverIdAndExamExamIdAndIsRejected(taId, dto.getReceiverId(), dto.getExamId(), false);
         return new ResponseEntity<>(exists ? HttpStatus.CREATED : HttpStatus.BAD_REQUEST);
     }
 
@@ -162,7 +162,7 @@ public class RequestController {
         @RequestBody WorkLoadDto dto
     ) {
         workLoadServ.createWorkLoad(dto, taId);
-        boolean exists = workLoadRepo.existsBySenderIdAndTaskIdAndIsRejected(taId, dto.getTaskId(), false);
+        boolean exists = workLoadRepo.existsBySenderIdAndTaskTaskIdAndIsRejected(taId, dto.getTaskId(), false);
         return new ResponseEntity<>(exists ? HttpStatus.CREATED : HttpStatus.BAD_REQUEST);
     }
 }
@@ -188,3 +188,116 @@ Leave Request
     }
   }
 } */
+
+/*Swap*/
+/*SwapEnable*/
+/*{
+  "requestType": "SwapEnable",
+  "description": "Enable swap for my exam assignment",
+  "receiverId": 20310,
+  "examId": 550,
+  "examName": "CS315 Final",
+  "duration": {
+    "start": {
+      "day": 15,
+      "month": 5,
+      "year": 2025,
+      "hour": 14,
+      "minute": 0
+    },
+    "finish": {
+      "day": 15,
+      "month": 5,
+      "year": 2025,
+      "hour": 16,
+      "minute": 0
+    }
+  }
+}*/
+/*TransferProctoring*/
+/*{
+  "requestType": "TransferProctoring",
+  "description": "Please transfer my proctoring duty to another session",
+  "receiverId": 20320,
+  "examId": 560,
+  "examName": "CS319 Midterm",
+  "duration": {
+    "start": {
+      "day": 20,
+      "month": 5,
+      "year": 2025,
+      "hour": 10,
+      "minute": 0
+    },
+    "finish": {
+      "day": 20,
+      "month": 5,
+      "year": 2025,
+      "hour": 12,
+      "minute": 0
+    }
+  }
+}
+*/
+/*ProctorTaFromFaculties*/
+/*{
+  "requestType": "ProctorTaFromFaculties",
+  "description": "Requesting proctoring from other faculties",
+  "receiverId": 20330,
+  "examid": 570,
+  "examName": "CS401 Project Presentation",
+  "proctorTaInFacultyDtos": [
+    {
+      "facultyName": "Engineering Faculty",
+      "examId": 570,
+      "examName": "CS401 Project Presentation",
+      "requiredTas": 2
+    },
+    {
+      "facultyName": "Science Faculty",
+      "examId": 570,
+      "examName": "CS401 Project Presentation",
+      "requiredTas": 1
+    }
+  ]
+}
+*/
+/*ProctorTaInFaculty*/
+/*{
+  "requestType": "ProctorTaInFaculty",
+  "description": "I can proctor for another faculty’s exam",
+  "senderId": 30020,
+  "receiverId": 20330,
+  "examId": 580,
+  "examName": "CS320 Lab Exam",
+  "facultyName": "Science Faculty",
+  "requiredTas": 1
+}
+*/
+/*WorkLoad*/
+/*
+{
+  "requestType": "WorkLoad",
+  "description": "Requesting workload adjustment",
+  "receiverId": 20340,
+  "taskId": 900,
+  "taskType": "LAB_SUPERVISION",
+  "workload": 3,
+  "duration": {
+    "start": {
+      "day":  5,
+      "month":  6,
+      "year": 2025,
+      "hour": 8,
+      "minute": 30
+    },
+    "finish": {
+      "day": 5,
+      "month": 6,
+      "year": 2025,
+      "hour": 12,
+      "minute": 0
+    }
+  }
+}
+*/
