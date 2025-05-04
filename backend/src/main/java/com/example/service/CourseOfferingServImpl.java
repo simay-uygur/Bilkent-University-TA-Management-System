@@ -1,19 +1,18 @@
 // com/example/service/CourseOfferingServiceImpl.java
 package com.example.service;
 
-import com.example.entity.Actors.TA;
-import com.example.entity.Courses.Course;
-import com.example.dto.CourseOfferingDto;
 import java.time.LocalDate;
 import java.time.Month;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
+import com.example.dto.CourseOfferingDto;
 import com.example.dto.ExamDto;
 import com.example.dto.ExamRoomDto;
 import com.example.dto.StudentDto;
@@ -21,31 +20,27 @@ import com.example.entity.Courses.CourseOffering;
 import com.example.entity.Exams.Exam;
 import com.example.entity.Exams.ExamRoom;
 import com.example.entity.General.ClassRoom;
-import com.example.entity.General.Event;
 import com.example.entity.General.Student;
 import com.example.entity.General.Term;
 import com.example.entity.Tasks.Task;
 import com.example.entity.Tasks.TaskAccessType;
 import com.example.entity.Tasks.TaskType;
 import com.example.exception.GeneralExc;
-import com.example.mapper.CourseMapper;
 import com.example.mapper.CourseOfferingMapper;
 import com.example.repo.ClassRoomRepo;
 import com.example.repo.CourseOfferingRepo;
 
 import lombok.RequiredArgsConstructor;
 
-
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
-
 @Service
 @RequiredArgsConstructor
 public class CourseOfferingServImpl implements CourseOfferingServ {
+    
     private final CourseOfferingRepo repo;
     private final SemesterServ semesterServ;
     private final CourseOfferingMapper courseMapper;
+    private final CourseOfferingServ service;
+    private final ClassRoomRepo classRoomRepo;
 
     @Override
     public List<CourseOfferingDto> getOfferingsByDepartment(String deptName){
@@ -56,9 +51,6 @@ public class CourseOfferingServImpl implements CourseOfferingServ {
                 .map(courseMapper::toDto)
                 .collect(Collectors.toList());
     }
-    private final CourseOfferingServ service;
-    private final CourseOfferingRepo courseOfferingRepo;
-    private final ClassRoomRepo classRoomRepo;
 
     @Override
     public CourseOffering create(CourseOffering offering) {
@@ -205,6 +197,6 @@ public class CourseOfferingServImpl implements CourseOfferingServ {
         }
         offering.getExams().add(exam);
         exam.setCourseOffering(offering);
-        courseOfferingRepo.save(offering);
+        repo.save(offering);
     }
 }
