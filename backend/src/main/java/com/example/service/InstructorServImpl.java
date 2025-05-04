@@ -31,7 +31,12 @@ public class InstructorServImpl implements InstructorServ {
     private final DepartmentRepo departmentRepo;
     private final InstructorMapper instructorMapper;
 
-
+    @Override
+    public InstructorDto getInstructorById(Long id) {
+        Instructor instructor = instructorRepo.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Instructor not found: " + id));
+        return instructorMapper.toDto(instructor);
+    }
     @Override
     public Map<String, Object> importInstructorsFromExcel(MultipartFile file) throws IOException {
         List<Instructor> successfulInstructors = new ArrayList<>();

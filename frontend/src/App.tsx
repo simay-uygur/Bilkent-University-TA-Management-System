@@ -31,6 +31,8 @@ import DeanAssignProctors     from './components/DeanAssignProctors';
 import DepartmentOffice from './Pages/DepartmentOffice';
 import DeansProctoringPage from './components/DeansProctoringPage';
 import DeansDepartmentDetailPage from './components/DeansDepartmentDetailPage';
+import  CourseDetails  from './components/DepartmentCourseDetails';
+import InstructorDetails from './components/DepartmentInsturctorDetails';
 
 const App: React.FC = () => (
   <BrowserRouter>
@@ -71,6 +73,8 @@ const App: React.FC = () => (
       <Route element={<ProtectedRoute requiredRole="ROLE_DEPARTMENT_STAFF" />}>
         <Route path="/dept-office" element={<DepartmentLayout />}>
           <Route index                          element={<DepartmentOffice />} />
+          <Route path="course/:courseCode"        element={<CourseDetails />} />
+          <Route path="instructor/:id"         element={<InstructorDetails />} />
           <Route path="proctor"                 element={<ProctorAssignmentsPage />} />
           <Route path="proctor/:courseId/:mode" element={<ProctorAssignmentsPage />} />
           <Route path="leave"                   element={<LeaveRequestsPage />} />
