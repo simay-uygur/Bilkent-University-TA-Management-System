@@ -56,7 +56,7 @@ const DepartmentOffice: React.FC = () => {
 
   return (
     <>
-      <NavBarDeans onNotifications={() => alert('No new notifications')} />
+      
 
       <div className={styles.pageWrapper}>
         <h1 className={styles.heading}>Department Overview (CS)</h1>

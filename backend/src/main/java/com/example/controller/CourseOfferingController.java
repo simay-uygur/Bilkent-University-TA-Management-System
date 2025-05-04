@@ -43,8 +43,22 @@ public class CourseOfferingController {
 
     }
     @GetMapping("/{id}")
-    public CourseOfferingDto get(@PathVariable Long id) {
-        return mapper.toDto(service.getById(id));
+    public ResponseEntity<CourseOfferingDto> get(@PathVariable Long id) {
+        //return mapper.toDto(service.getById(id));
+        CourseOfferingDto dto = service.getById(id);
+        if (dto == null) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+        return new ResponseEntity<>(dto, HttpStatus.FOUND);
+    }
+    @GetMapping("/courseCode/{code}")
+    public ResponseEntity<CourseOfferingDto> get(@PathVariable String code) {
+        //return mapper.toDto(service.getById(id));
+        CourseOfferingDto dto = service.getByCourseCode(code);
+        if (dto == null) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+        return new ResponseEntity<>(dto, HttpStatus.FOUND);
     }
 
     @PutMapping("/{id}")

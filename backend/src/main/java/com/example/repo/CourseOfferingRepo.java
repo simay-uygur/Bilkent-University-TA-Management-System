@@ -31,6 +31,21 @@ public interface CourseOfferingRepo extends JpaRepository<CourseOffering, Long> 
 Optional<List<CourseOffering>> findByCourseDepartmentName(
   @Param("deptName") String deptName
 );
+@Query("""
+  SELECT co
+    FROM CourseOffering co
+   WHERE co.course.courseId = :courseId
+""")
+Optional<CourseOffering> findById(Long id);
+
+@Query("""
+  SELECT co
+    FROM CourseOffering co
+   WHERE co.course.courseCode = :code
+""")  
+Optional<List<CourseOffering>> findByCourseCode(String code);
+
+
 
     //Optional<CourseOffering> findCourseOfferingByCourse_CourseIdAndSemester_SemesterId(Integer courseId, Long semesterId);
     //Optional<CourseOffering> findByCourse_IdAndSemester_Id(Integer courseId, Long semesterId);

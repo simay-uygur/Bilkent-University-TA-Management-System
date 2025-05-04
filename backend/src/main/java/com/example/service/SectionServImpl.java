@@ -87,7 +87,7 @@ public class SectionServImpl implements SectionServ {
     }
 
     @Override
-    //@Transactional
+    @Transactional
     public Map<String,Object> importFromExcel(MultipartFile file) throws IOException {
         List<Section> successful = new ArrayList<>();
         List<FailedRowInfo> failed  = new ArrayList<>();
@@ -135,6 +135,14 @@ public class SectionServImpl implements SectionServ {
                     Instructor instr = instructorService.getById(staffId);
 
                     // 5) build section
+
+String sectionCode = course.getCourseCode() + "-" + sectionNo;
+
+// Check if section already exists
+if (repo.existsBySectionCodeEqualsIgnoreCase(sectionCode)) {
+    throw new IllegalArgumentException("Section with code '" + sectionCode + "' already exists.");
+}
+
                     Section sec = new Section();
                     sec.setSectionCode(course.getCourseCode() + "-" + sectionNo);
                     sec.setOffering(off);

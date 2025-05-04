@@ -51,7 +51,9 @@ public class CourseOfferingServImpl implements CourseOfferingServ {
     }
     @Override
     public CourseOffering update(Long id, CourseOffering offering) {
-        CourseOffering existing = getById(id);
+
+        CourseOffering existing = repo.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Offering not found: " + id));
         existing.setSemester(offering.getSemester());
         existing.setCourse(offering.getCourse());
         // you could update other fields here
@@ -59,9 +61,20 @@ public class CourseOfferingServImpl implements CourseOfferingServ {
     }
 
     @Override
-    public CourseOffering getById(Long id) {
-        return repo.findById(id)
+    public CourseOfferingDto getById(Long id) {
+        CourseOffering off = repo.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Offering not found: " + id));
+
+        return courseMapper.toDto(off);
+    }
+    public CourseOfferingDto getByCourseCode(String code) {
+        List<CourseOffering> off = repo.findByCourseCode(code)
+                .orElseThrow(() -> new IllegalArgumentException("Offering not found: " + code));
+
+        return off.stream()
+                .map(courseMapper::toDto)
+                .findFirst()
+                .orElseThrow(() -> new IllegalArgumentException("Offering not found: " + code));
     }
 
     @Override
