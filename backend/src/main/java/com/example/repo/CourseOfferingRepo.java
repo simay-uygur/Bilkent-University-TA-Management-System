@@ -13,7 +13,13 @@ public interface CourseOfferingRepo extends JpaRepository<CourseOffering, Long> 
 
     //Optional<CourseOffering> findByCourseCodeAndSemesterYearAndSemesterTerm(String courseCode, int year, String term); //not used
     //Optional<CourseOffering> findCourseOfferingByCourse_CourseIdAndSemester_SemesterId(Long courseId, Long semesterId);
+    @Query("""
 
+  SELECT co
+    FROM CourseOffering co
+   WHERE co.course.courseId = :courseId
+     AND co.semester.id = :semesterId
+""")
     Optional<CourseOffering> findByCourse_CourseIdAndSemester_Id(Long courseId, Long semesterId);
 
 

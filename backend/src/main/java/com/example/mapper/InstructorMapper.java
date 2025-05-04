@@ -62,7 +62,7 @@ public class InstructorMapper {
                 .map(o -> o.getCourse().getCourseCode())
                 .distinct()
                 .collect(Collectors.toList());
-        dto.setCourseCodes(codes);
+        dto.setSections(codes);
 
         return dto;
     }
