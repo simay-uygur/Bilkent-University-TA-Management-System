@@ -98,56 +98,56 @@ public class CourseController {
     public ResponseEntity<Boolean> updateTask(@PathVariable String course_code, @RequestBody int task_id, @RequestBody Task task) {
         return new ResponseEntity<>(courseServ.updateTask(course_code,task_id,task), HttpStatus.ACCEPTED);
     }
-
-    @GetMapping("api/course/{course_code}/task/{id}")
-    public ResponseEntity<TaskDto> getTask(
-            @PathVariable String course_code,
-            @PathVariable int id
-    ) {
-        Task task = courseServ.getTaskByID(course_code, id);
-        List<TaDto> taDtos = new ArrayList<>();
-        for (TaTask taTask : task.getTasList()){
-            /*
-    private Long id;
-    private String name;
-    private String surname;
-    private String academicLevel;
-    private int totalWorkload;
-    private Boolean isActive;
-    private Boolean isGraduated;
-    private String department;
-    private List<String> courses;
-    private List<String> lessons;
-             */
-            TaDto ta = new TaDto(
-                    taTask.getTaOwner().getId(),                       // id
-                    taTask.getTaOwner().getName(),                     // name
-                    taTask.getTaOwner().getSurname(),                  // surname
-                    taTask.getTaOwner().getAcademicLevel().name(),     // academicLevel
-                    taTask.getTaOwner().getTotalWorkload(),            // totalWorkload
-                    taTask.getTaOwner().getIsActive(),                 // isActive
-                    taTask.getTaOwner().getIsGraduated(),              // isGraduated
-                    taTask.getTaOwner().getDepartment(),               // department
-                    taTask.getTaOwner().getCourses().stream()          // courses → List<String>
-                            .map(Course::getCourseCode)
-                            .collect(Collectors.toList()),
-                    taTask.getTaOwner().getTasOwnLessons().stream()    // lessons → List<String>
-                            .map(Section::getSectionCode)
-                            .collect(Collectors.toList())
-            );
-
-            taDtos.add(ta);
-        }
-        String durationStr = task.getDuration() != null ? task.getDuration().toString() : null;
-        
-        return new TaskDto(
-            task.getTaskType().toString(), // Convert enum to String
-            taDtos,
-            "Task #" + task.getTaskId(), // Description or customize as needed
-            durationStr,
-            task.getStatus().toString() // Convert enum to String
-        );
-    }
+//
+//    @GetMapping("api/course/{course_code}/task/{id}")
+//    public ResponseEntity<TaskDto> getTask(
+//            @PathVariable String course_code,
+//            @PathVariable int id
+//    ) {
+//        Task task = courseServ.getTaskByID(course_code, id);
+//        List<TaDto> taDtos = new ArrayList<>();
+//        for (TaTask taTask : task.getTasList()){
+//            /*
+//    private Long id;
+//    private String name;
+//    private String surname;
+//    private String academicLevel;
+//    private int totalWorkload;
+//    private Boolean isActive;
+//    private Boolean isGraduated;
+//    private String department;
+//    private List<String> courses;
+//    private List<String> lessons;
+//             */
+//            TaDto ta = new TaDto(
+//                    taTask.getTaOwner().getId(),                       // id
+//                    taTask.getTaOwner().getName(),                     // name
+//                    taTask.getTaOwner().getSurname(),                  // surname
+//                    taTask.getTaOwner().getAcademicLevel().name(),     // academicLevel
+//                    taTask.getTaOwner().getTotalWorkload(),            // totalWorkload
+//                    taTask.getTaOwner().getIsActive(),                 // isActive
+//                    taTask.getTaOwner().getIsGraduated(),              // isGraduated
+//                    taTask.getTaOwner().getDepartment(),               // department
+//                    taTask.getTaOwner().getOfferingsAsStudent().stream()          // courses → List<String>
+//                            .map(Course::getCourseCode)
+//                            .collect(Collectors.toList()),
+//                    taTask.getTaOwner().getTasOwnLessons().stream()    // lessons → List<String>
+//                            .map(Section::getSectionCode)
+//                            .collect(Collectors.toList())
+//            );
+//
+//            taDtos.add(ta);
+//        }
+//        String durationStr = task.getDuration() != null ? task.getDuration().toString() : null;
+//
+//        return new TaskDto(
+//            task.getTaskType().toString(), // Convert enum to String
+//            taDtos,
+//            "Task #" + task.getTaskId(), // Description or customize as needed
+//            durationStr,
+//            task.getStatus().toString() // Convert enum to String
+//        );
+//    }
     /*@PostMapping("/course/{course_code}/exam")
     public ResponseEntity<Boolean> createExam(@RequestBody Exam exam, @PathVariable String course_code) {
         return new ResponseEntity<>()
