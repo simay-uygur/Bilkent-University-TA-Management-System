@@ -137,9 +137,45 @@ public class SectionServImpl implements SectionServ {
                     // 5) build section
 
 String sectionCode = course.getCourseCode() + "-" + sectionNo;
+try {
+    // Check if section exists - this should be in its own transaction
+    if (repo.existsBySectionCodeEqualsIgnoreCase(sectionCode)) {
+        failed.add(new FailedRowInfo(
+            row.getRowNum(),
+            "DuplicateKeyException: Section with code '" + sectionCode + "' already exists."
+        ));
+        continue; // Skip to next row
+    }
+
+    Section sec = new Section();
+    sec.setSectionCode(sectionCode);
+    sec.setOffering(off);
+    sec.setInstructor(instr);
+    
+    // Save immediately - don't collect for batch saving
+    Section saved = repo.save(sec);
+    repo.flush(); // Force immediate commit
+    successful.add(saved);
+    
+} catch (Exception e) {
+    // Catch duplicate key exceptions that might occur anyway
+    failed.add(new FailedRowInfo(
+        row.getRowNum(),
+        "Database error: " + e.getMessage()
+    ));
+}
+
+} catch (Exception e) {
+failed.add(new FailedRowInfo(
+    row.getRowNum(),
+    e.getClass().getSimpleName() + ": " + e.getMessage()
+));
+}
+}
+}
 
 // Check if section already exists
-if (repo.existsBySectionCodeEqualsIgnoreCase(sectionCode)) {
+/* if (repo.existsBySectionCodeEqualsIgnoreCase(sectionCode)) {
     throw new IllegalArgumentException("Section with code '" + sectionCode + "' already exists.");
 }
 
@@ -162,7 +198,7 @@ if (repo.existsBySectionCodeEqualsIgnoreCase(sectionCode)) {
         if (!successful.isEmpty()) {
             repo.saveAll(successful);
             repo.flush();
-        }
+        } */
 
         Map<String,Object> result = new HashMap<>();
         result.put("successCount", successful.size());
