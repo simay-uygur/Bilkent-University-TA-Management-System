@@ -16,12 +16,12 @@ import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.example.dto.RequestDto;
 import com.example.entity.Actors.Instructor;
 import com.example.entity.Requests.LeaveDTO;
 import com.example.entity.Requests.ProctorTaFromFacultiesDto;
 import com.example.entity.Requests.ProctorTaInFacultyDto;
 import com.example.entity.Requests.Request;
-import com.example.entity.Requests.RequestDto;
 import com.example.entity.Requests.SwapDto;
 import com.example.entity.Requests.SwapEnableDto;
 import com.example.entity.Requests.TransferProctoringDto;
@@ -96,12 +96,11 @@ public class RequestController {
                 .orElseThrow(() -> new UserNotFoundExc(insId));
 
         // fetch polymorphic Requests
-        List<Request> entities = instructor.getReceived_requests();
+        List<Request> entities = instructor.getReceivedRequests();
 
         // map to DTOs
-        List<RequestDto> dtos = entities.stream()
-                .map(requestMapper::toDto)
-                .collect(Collectors.toList());
+        List<RequestDto> dtos = entities.stream().map(requestMapper::toDto).collect(Collectors.toList());
+
 
         return ResponseEntity.ok(dtos);
     }

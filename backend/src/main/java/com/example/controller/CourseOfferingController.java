@@ -52,10 +52,10 @@ public class CourseOfferingController {
                 .collect(Collectors.toList());
     }
 
-    @GetMapping("/{id}")
+    /*@GetMapping("/{id}")
     public CourseOfferingDto get(@PathVariable Long id) {
         return mapper.toDto(service.getById(id));
-    }
+    }*/
 
     @PutMapping("/{id}")
     public CourseOfferingDto update(@PathVariable Long id,

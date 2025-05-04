@@ -2,6 +2,8 @@ package com.example.entity.Requests;
 
 import java.util.List;
 
+import com.example.dto.RequestDto;
+
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 

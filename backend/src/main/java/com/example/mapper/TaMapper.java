@@ -10,10 +10,13 @@ import com.example.entity.Tasks.TaTask;
 import com.example.entity.Tasks.Task;
 
 import lombok.RequiredArgsConstructor;
+
 import org.springframework.stereotype.Component;
 
 import java.util.List;
 import java.util.stream.Collectors;
+
+import com.example.entity.Requests.Request;
 
 @Component
 @RequiredArgsConstructor
@@ -31,8 +34,8 @@ public class TaMapper {
         dto.setSurname(ta.getSurname());
         dto.setAcademicLevel(ta.getAcademicLevel().name());
         dto.setTotalWorkload(ta.getTotalWorkload());
-        dto.setIsActive(ta.getActive());
-        dto.setIsGraduated(ta.getIsGraduated());
+        dto.setActive(ta.isActive());
+        dto.setGraduated(ta.getIsGraduated());
         dto.setDepartment(ta.getDepartment());
 
         // “Courses” → the courseCode of each CourseOffering this TA is assigned to
@@ -50,9 +53,9 @@ public class TaMapper {
         dto.setLessons(lessons);
         dto.setProctorType(ta.getProctorType().name());
         dto.setTaType(ta.getTaType().name());
-        dto.setSendedRequests(ta.getSended_requests().stream()
-                .map(re::toDto)
-                .collect(Collectors.toList()));
+        dto.setSendedRequests(ta.getSendedRequests().stream()
+                                .map(re::toDto)
+                                .collect(Collectors.toList()));
         // “tasks” → the sectionCode of each Section this TA is registered in as a TA
       
 

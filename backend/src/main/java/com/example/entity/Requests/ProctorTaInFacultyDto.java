@@ -1,5 +1,7 @@
 package com.example.entity.Requests;
 
+import com.example.dto.RequestDto;
+
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 

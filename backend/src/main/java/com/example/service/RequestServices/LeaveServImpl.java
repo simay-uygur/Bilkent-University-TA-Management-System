@@ -141,7 +141,7 @@ public class LeaveServImpl implements LeaveServ{
                 dto.setTasks(taTaskRepo.findTasksForTaInInterval(senderId, dto.getDuration().getStart(), dto.getDuration().getFinish()).stream()
                     .map(task -> {
                         TaskDto taskDto = new TaskDto();
-                        taskDto.setDuration(task.getDuration().toString());
+                        taskDto.setDuration(task.getDuration());
                         taskDto.setType(task.getTaskType().toString());
                         return taskDto;
                     })
@@ -169,7 +169,7 @@ public class LeaveServImpl implements LeaveServ{
                 dto.setTasks(taTaskRepo.findTasksForTaInInterval(leave.getSender().getId(), dto.getDuration().getStart(), dto.getDuration().getFinish()).stream()
                     .map(task -> {
                         TaskDto taskDto = new TaskDto();
-                        taskDto.setDuration(task.getDuration().toString());
+                        taskDto.setDuration(task.getDuration());
                         taskDto.setType(task.getTaskType().toString());
                         return taskDto;
                     })

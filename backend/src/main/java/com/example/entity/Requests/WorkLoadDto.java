@@ -1,5 +1,6 @@
 package com.example.entity.Requests;
 
+import com.example.dto.RequestDto;
 import com.example.entity.General.Event;
 
 import lombok.Data;

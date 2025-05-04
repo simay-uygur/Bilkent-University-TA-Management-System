@@ -6,7 +6,6 @@ import java.util.Objects;
 
 import org.hibernate.annotations.DynamicUpdate;
 
-import com.example.entity.Courses.Course;
 import com.example.entity.Courses.CourseOffering;
 import com.example.entity.Courses.Section;
 import com.example.entity.General.AcademicLevelType;
@@ -20,7 +19,7 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
-import jakarta.persistence.FetchType;
+import static jakarta.persistence.FetchType.LAZY;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
@@ -28,8 +27,6 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-
-import static jakarta.persistence.FetchType.LAZY;
 
 /**
  * Teaching-Assistant entity.
@@ -59,6 +56,9 @@ public class TA extends User {
 
     @Column(name = "department", nullable = false)
     private String department;
+
+    @Column(name = "is_active", nullable = false)
+    private boolean isActive = true; 
 
     @Enumerated(EnumType.STRING)
     @Column(name = "proctor_type")
@@ -106,9 +106,6 @@ public class TA extends User {
     public int hashCode() {
         return Objects.hashCode(getId());
     }
-
-    @Column(name = "is_active", nullable = false)
-    private boolean isActive = true; // added new
 }
 
 /*

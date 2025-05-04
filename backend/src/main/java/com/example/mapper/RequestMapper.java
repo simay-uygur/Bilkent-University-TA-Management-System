@@ -6,6 +6,7 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import com.example.dto.RequestDto;
 import com.example.dto.TaskDto;
 import com.example.entity.Requests.Leave;
 import com.example.entity.Requests.LeaveDTO;
@@ -14,7 +15,6 @@ import com.example.entity.Requests.ProctorTaFromFacultiesDto;
 import com.example.entity.Requests.ProctorTaInFaculty;
 import com.example.entity.Requests.ProctorTaInFacultyDto;
 import com.example.entity.Requests.Request;
-import com.example.entity.Requests.RequestDto;
 import com.example.entity.Requests.Swap;
 import com.example.entity.Requests.SwapDto;
 import com.example.entity.Requests.SwapEnable;
@@ -42,7 +42,7 @@ public class RequestMapper {
             dto.setTasks(taTaskRepo.findTasksForTaInInterval(leave.getSender().getId(), dto.getDuration().getStart(), dto.getDuration().getFinish()).stream()
                     .map(task -> {
                         TaskDto taskDto = new TaskDto();
-                        taskDto.setDuration(task.getDuration().toString());
+                        taskDto.setDuration(task.getDuration());
                         taskDto.setType(task.getTaskType().toString());
                         return taskDto;
                     })

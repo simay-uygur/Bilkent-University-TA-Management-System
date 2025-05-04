@@ -34,7 +34,6 @@ import com.example.repo.ClassRoomRepo;
 import com.example.repo.CourseOfferingRepo;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
 
 
 import java.util.List;
