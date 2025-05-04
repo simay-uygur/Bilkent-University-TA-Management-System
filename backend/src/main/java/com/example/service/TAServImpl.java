@@ -39,6 +39,7 @@ import com.example.exception.UserNotFoundExc;
 import com.example.exception.taExc.TaNotFoundExc;
 import com.example.exception.taskExc.TaskIsNotActiveExc;
 import com.example.exception.taskExc.TaskNotFoundExc;
+import com.example.mapper.TaMapper;
 import com.example.repo.TARepo;
 import com.example.repo.TaTaskRepo;
 
@@ -52,7 +53,7 @@ public class TAServImpl implements TAServ {
     
     @Autowired
     private TARepo repo;
-
+    private final TaMapper taMapper;
 
 
     @Autowired
@@ -68,9 +69,16 @@ public class TAServImpl implements TAServ {
 
 
     @Override
-    public TA getTAById(Long id){
+    public TaDto getTAById(Long id){
+        TA ta = repo.findById(id)
+                .orElseThrow(() -> new UserNotFoundExc(id));
+        return taMapper.toDto(ta);
+        
+    }
+    public TA getTAByIdEntity(Long id){
         return repo.findById(id)
-        .orElseThrow(() -> new UserNotFoundExc(id));
+                .orElseThrow(() -> new UserNotFoundExc(id));
+        
     }
     @Override
         public List<TaDto> getTAsByDepartment(String deptName){
@@ -79,6 +87,9 @@ public class TAServImpl implements TAServ {
                 throw new UserNotFoundExc(deptName);
             }
             return tas.stream()
+                    .map(taMapper::toDto)
+                    .collect(Collectors.toList());
+            /* return tas.stream()
                     .map(ta -> new TaDto(
                             ta.getId(),
                             ta.getName(),
@@ -94,9 +105,10 @@ public class TAServImpl implements TAServ {
                                     .collect(Collectors.toList()),
                             ta.getSectionsAsHelper().stream()
                                     .map(Section::getSectionCode)
-                                    .collect(Collectors.toList())
+                                    .collect(Collectors.toList()),
+                            ta.getOfferingsAsHelper().stream()
                     ))
-                    .collect(Collectors.toList());
+                    .collect(Collectors.toList()); */
     } 
 
     @Override
@@ -104,8 +116,11 @@ public class TAServImpl implements TAServ {
         List<TA> tas = repo.findAll();
         if (tas.isEmpty()) {
             throw new UserNotFoundExc("TAs");
-        }
+        }   
         return tas.stream()
+                .map(taMapper::toDto)
+                .collect(Collectors.toList());
+       /*  return tas.stream()
                 .map(ta -> new TaDto(
                         ta.getId(),
                         ta.getName(),
@@ -120,9 +135,18 @@ public class TAServImpl implements TAServ {
                                 .collect(Collectors.toList()),
                         ta.getSectionsAsHelper().stream()
                                 .map(Section::getSectionCode)
-                                .collect(Collectors.toList())
-                ))
-                .collect(Collectors.toList());
+                                .collect(Collectors.toList()),
+                        ta.getOfferingsAsHelper().stream()
+                                .map(offering -> offering.getCourse().getCourseCode())
+                                .collect(Collectors.toList()),
+                        ta.getTasOwnLessons().stream()
+                                .map(Section::getSectionCode)
+                                .collect(Collectors.toList()
+                )
+                )
+                )
+                .collect(Collectors.toList()); */
+
     }
 
     @Override

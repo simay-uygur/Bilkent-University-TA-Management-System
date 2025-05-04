@@ -61,7 +61,7 @@ public class TA_controller {
     } // method should be sent to Admin controller
 
     @GetMapping("/api/ta/{id}")
-    public TA getTAById(@PathVariable Long id) 
+    public TaDto getTAById(@PathVariable Long id) 
     {
         return serv.getTAById(id);
     }
@@ -119,14 +119,14 @@ public class TA_controller {
 
     @GetMapping("/api/ta/{id}/schedule")
     public ResponseEntity<?> getWeeklyScheduleForTA(@PathVariable Long id) {
-        TA ta = serv.getTAById(id);
+        TA ta = serv.getTAByIdEntity(id);
         Date date = new Date().currenDate() ;
         return new ResponseEntity<>(serv.getWeeklyScheduleForTA(ta, date), HttpStatus.OK);
     }
 
     @GetMapping("/api/ta/{id}/schedule/day") // date in format "yyyy-MM-dd"
     public ResponseEntity<?> getDaySchedule(@PathVariable Long id, @RequestParam String date) {
-        TA ta = serv.getTAById(id);
+        TA ta = serv.getTAByIdEntity(id);
         if (ta == null) {
             throw new TaNotFoundExc(-1l);
         }

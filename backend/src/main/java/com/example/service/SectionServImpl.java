@@ -224,8 +224,8 @@ public class SectionServImpl implements SectionServ {
                         section.getRegisteredStudents().add(s);
 
                     } else if (taRepo.existsById(personId)) {
-                        TA ta = taService.getTAById(personId);
-                        section.getRegisteredTas().add(ta);
+                      /*   TA ta = taService.getTAById(personId);
+                        section.getRegisteredTas().add(ta); */
 
                     } else {
                         throw new IllegalArgumentException(

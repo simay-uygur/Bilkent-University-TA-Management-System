@@ -19,6 +19,11 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class TaMapper {
 
+    private final RequestMapper re;
+    //private final CourseMapper courseMapper;
+   // private final SectionMapper sectionMapper;
+    //private final TaTaskMapper taTaskMapper;
+   // private final TaskMapper taskMapper;
     public TaDto toDto(TA ta) {
         TaDto dto = new TaDto();
         dto.setId(ta.getId());
@@ -43,6 +48,11 @@ public class TaMapper {
                 .distinct()
                 .collect(Collectors.toList());
         dto.setLessons(lessons);
+        dto.setProctorType(ta.getProctorType().name());
+        dto.setTaType(ta.getTaType().name());
+        dto.setSendedRequests(ta.getSended_requests().stream()
+                .map(re::toDto)
+                .collect(Collectors.toList()));
         // “tasks” → the sectionCode of each Section this TA is registered in as a TA
       
 

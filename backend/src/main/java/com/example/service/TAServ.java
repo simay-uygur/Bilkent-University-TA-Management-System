@@ -16,7 +16,8 @@ import org.springframework.web.multipart.MultipartFile;
 public interface TAServ {
     public List<TaDto> getAllTAs();
     public boolean deleteTAById(Long id);
-    public TA getTAById(Long id);
+    public TA getTAByIdEntity(Long id);
+    public TaDto getTAById(Long id);
     public Task getTaskById(int task_id, Long ta_id);
     public Set<Task> getAllTasks(Long id);
     public boolean assignTask(Task task, Long id);

@@ -3,9 +3,13 @@ package com.example.entity.Actors;
 import java.util.List;
 
 import com.example.entity.Requests.Request;
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -31,6 +35,14 @@ import lombok.Setter;
 @JsonInclude(JsonInclude.Include.NON_DEFAULT)
 @NoArgsConstructor
 @AllArgsConstructor
+@JsonIdentityInfo(
+  generator = ObjectIdGenerators.PropertyGenerator.class, 
+  property = "id" // this is the field that will be used to identify the object when it is serialized
+  // it is used to prevent infinite recursion when serializing the object
+  // for example when a user is serialized, it will include the requests that are sent by the user
+  // and the requests that are received by the user
+)
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "type")
 @JsonSubTypes({
     @JsonSubTypes.Type(value = TA.class, name = "TA"),
@@ -72,9 +84,13 @@ public class User {
     private boolean isDeleted = false ; 
 
     @OneToMany(mappedBy = "sender", cascade = CascadeType.ALL, fetch= FetchType.LAZY)
+    //@JsonManagedReference
+        @JsonIgnoreProperties("sender") // Only ignore the back-reference
     private List<Request> sended_requests;
     
 
-    @OneToMany(fetch= FetchType.LAZY, cascade= {CascadeType.REFRESH,CascadeType.MERGE})
+    @OneToMany(mappedBy = "receiver",fetch= FetchType.LAZY, cascade= {CascadeType.REFRESH,CascadeType.MERGE})
+    //@JsonManagedReference
+    @JsonIgnoreProperties("receiver") // Only ignore the back-reference
     private List<Request> received_requests;
 }

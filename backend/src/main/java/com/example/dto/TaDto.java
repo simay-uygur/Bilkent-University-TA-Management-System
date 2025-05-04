@@ -20,6 +20,13 @@ public class TaDto {
     private String department;
     private List<String> courses;
     private List<String> lessons;
+    private List<String> tasks;
+    private List<RequestDto> sendedRequests;
+    private List<RequestDto> receivedRequests;
+    private List<String> tasksAsStudent;
+    private List<String> tasksAsTA;
+    private String proctorType;
+    private String taType;
     //private List<RequestDto> sendedRequests;
 }
 
