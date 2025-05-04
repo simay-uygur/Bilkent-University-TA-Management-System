@@ -77,4 +77,5 @@ public interface SectionRepo extends JpaRepository<Section, Integer>{
     List<TA> findTasBySectionId(@Param("sectionId") int sectionId);
 
     Optional<Section> findBySectionCodeIgnoreCase(String secCode);
+
 }
