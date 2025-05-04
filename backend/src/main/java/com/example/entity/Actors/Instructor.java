@@ -26,7 +26,7 @@ import lombok.Setter;
 
 @Entity
 @Table(name = "instructor_table")
-@DynamicUpdate // for needed rows only in sql -
+@DynamicUpdate
 @Getter
 @Setter
 @AllArgsConstructor
@@ -34,13 +34,7 @@ import lombok.Setter;
 @JsonInclude(JsonInclude.Include.NON_DEFAULT)
 public class Instructor extends User{
 
-    @ManyToMany(fetch = FetchType.LAZY)
-    @JoinTable(
-        name = "course_instructor",
-        joinColumns = @JoinColumn(name = "instructor_id"),
-        inverseJoinColumns = @JoinColumn(name = "courseId")
-    )
-    private List<Course> courses = new ArrayList<>();
+    //no course of course offering direct relation from the instructor - but section
 
     @Column(name = "is_active", updatable = false,  nullable = false)  //added new
     private Boolean isActive = true;

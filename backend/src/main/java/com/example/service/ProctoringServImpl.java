@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import com.example.entity.Courses.Section;
 import org.springframework.stereotype.Service;
 
 import com.example.entity.Actors.TA;
@@ -58,15 +59,15 @@ public class ProctoringServImpl implements ProctoringServ{
 
     private List<TA> findTAsByRestricions(Exam exam, boolean[] restrictions){
         Task task = exam.getTask();
-        Course course = task.getCourse();
+        Section sec = task.getSection();
         
-        List<TA> course_tas = course.getCourseTas();
+        List<TA> course_tas = sec.getAssignedTas();
         List<TA> depTas = new ArrayList<>();
-        for(Course c : course.getDepartment().getCourses()){
-            depTas.addAll(c.getCourseTas());
+        for(Section s : sec.getOffering().getSections()){
+            depTas.addAll(s.getAssignedTas());
         }
         List<TA> filtered_by_date_tas = taRepo.findAllFreeBetween(task.getDuration().getStart(), task.getDuration().getFinish());
-        List<TA> filtered_by_acad_level_tas = filterByAcademicLevel(course.getCourseAcademicStatus(), filtered_by_date_tas, restrictions[2]);
+        List<TA> filtered_by_acad_level_tas = filterByAcademicLevel(sec.getOffering().getCourse().getCourseAcademicStatus(), filtered_by_date_tas, restrictions[2]);
         List<TA> filtered_by_availability_tas = findEligibleTAsForExam(task.getDuration().getStart(), filtered_by_acad_level_tas);
         if (filtered_by_availability_tas.size() < task.getRequiredTAs())
             throw new GeneralExc("System could not find enough TAs considering the requirements!");

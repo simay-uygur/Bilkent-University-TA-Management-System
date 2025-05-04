@@ -12,6 +12,8 @@ public interface CourseOfferingServ {
     List<CourseOffering> getAll();
     void delete(Long id);
     Optional<CourseOffering> getByCourseAndSemester(Long courseId, Long semesterId);
+
+    boolean assignTA(Long taId, String courseCode);
 }
 
 

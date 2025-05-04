@@ -19,38 +19,39 @@ public class LessonMapper {
         if (lesson == null) return null;
 
         LessonDto dto = new LessonDto();
-        // ISO-8601 duration string
+
+        // ISO-8601 duration string (e.g. "PT1H30M")
         dto.setDuration(lesson.getDuration() != null
                 ? lesson.getDuration().toString()
                 : null
         );
 
-        // classRoom → classCode + examRoom
+        // classRoom → use classroomId and examCapacity
         ClassRoom room = lesson.getLessonRoom();
         if (room != null) {
-            dto.setClassCode(room.getClassCode());
-            dto.setRoom(
-                    room.getExamRoom() != null
-                            ? room.getExamRoom().toString()
-                            : null
-            );
+            dto.setRoom(room.getClassroomId());
+            dto.setExamCapacity(room.getExamCapacity());
         }
+
         return dto;
     }
 
     /**
      * DTO → Entity
      *
-     * Note: we only parse the duration here.  If you need to look up
-     *       and assign a real ClassRoom/ExamRoom, do that in your service.
+     * Note: we only parse the duration here.
+     *       Assigning the real ClassRoom entity is done in the service.
      */
     public Lesson toEntity(LessonDto dto) {
         if (dto == null) return null;
 
         Lesson lesson = new Lesson();
-        // parse ISO-8601 duration (e.g. "PT1H30M")
-        //lesson.setDuration(Duration.parse(dto.getDuration()));
-        // lesson.setLessonRoom(...) must be done in service
+
+//        if (dto.getDuration() != null && !dto.getDuration().isEmpty()) {
+//            lesson.setDuration(Duration.parse(dto.getDuration()));
+//        }
+
+        // lesson.setLessonRoom(...) must be assigned in the service
         return lesson;
     }
 }

@@ -4,6 +4,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import com.example.dto.CourseDto;
+import com.example.dto.TaDto;
+import com.example.dto.TaskDto;
+import com.example.entity.Courses.CourseOffering;
+import com.example.mapper.TaMapper;
+import com.example.service.CourseOfferingServ;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -36,6 +42,10 @@ public class CourseController {
 
     @Autowired
     private CourseRepo courseRepo;
+
+    private final TaMapper taMapper;
+    @Autowired
+    private CourseOfferingServ courseOfferingServ;
 
     @PostMapping("api/course")
     public ResponseEntity<Boolean> createCourse(@RequestBody Course course) {
@@ -76,13 +86,13 @@ public class CourseController {
     
     @PostMapping("api/course/{course_code}/ta/{ta_id}")
     public ResponseEntity<Boolean> assignTA(@PathVariable String course_code, @PathVariable Long ta_id) {
-        return new ResponseEntity<>(courseServ.assignTA(ta_id, course_code), HttpStatus.OK);
+        return new ResponseEntity<>(courseOfferingServ.assignTA(ta_id, course_code), HttpStatus.OK);  // newly added
     }
-
-    @PostMapping("api/course/{course_code}/task")
-    public ResponseEntity<Boolean> createTask(@PathVariable String course_code, @RequestBody Task task) {
-        return new ResponseEntity<>(courseServ.addTask(course_code, task),HttpStatus.CREATED);
-    }
+//
+//    @PostMapping("api/course/{course_code}/task")
+//    public ResponseEntity<Boolean> createTask(@PathVariable String course_code, @RequestBody Task task) {
+//        return new ResponseEntity<>(courseServ.addTask(course_code, task),HttpStatus.CREATED);
+//    }
 
     @PutMapping("api/course/{course_code}/task/{task_id}")
     public ResponseEntity<Boolean> updateTask(@PathVariable String course_code, @RequestBody int task_id, @RequestBody Task task) {
@@ -90,7 +100,10 @@ public class CourseController {
     }
 
     @GetMapping("api/course/{course_code}/task/{id}")
-    public TaskDto getTask(@PathVariable String course_code, @PathVariable int id) {
+    public ResponseEntity<TaskDto> getTask(
+            @PathVariable String course_code,
+            @PathVariable int id
+    ) {
         Task task = courseServ.getTaskByID(course_code, id);
         List<TaDto> taDtos = new ArrayList<>();
         for (TaTask taTask : task.getTasList()){
@@ -139,4 +152,5 @@ public class CourseController {
     public ResponseEntity<Boolean> createExam(@RequestBody Exam exam, @PathVariable String course_code) {
         return new ResponseEntity<>()
     }*/
+    
 }

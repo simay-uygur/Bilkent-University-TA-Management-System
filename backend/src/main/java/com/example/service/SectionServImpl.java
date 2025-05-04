@@ -221,11 +221,11 @@ public class SectionServImpl implements SectionServ {
                     // 5) Attach person as Student or TA
                     if (studentRepo.existsById(personId)) {
                         Student s = studentService.getStudentById(personId);
-                        section.getStudents().add(s);
+                        section.getRegisteredStudents().add(s);
 
                     } else if (taRepo.existsById(personId)) {
                         TA ta = taService.getTAById(personId);
-                        section.getTaAsStudents().add(ta);
+                        section.getRegisteredTas().add(ta);
 
                     } else {
                         throw new IllegalArgumentException(
@@ -280,3 +280,16 @@ public class SectionServImpl implements SectionServ {
         return (long) getNumericCellValue(cell);
     }
 }
+
+/*
+ @Override
+    public boolean addTask(String courseCode, Task task) {
+        Course course = courseRepo.findCourseByCourseCode(courseCode)
+                .orElseThrow(() -> new CourseNotFoundExc(courseCode));
+        task.setCourse(course);
+        Task created = taskServ.createTask(task);
+        course.getTasks().add(created);
+        courseRepo.save(course);
+        return true;
+    }
+ */

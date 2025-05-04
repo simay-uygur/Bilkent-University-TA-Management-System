@@ -6,14 +6,7 @@ import com.example.entity.Tasks.Task;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
-import jakarta.persistence.CascadeType;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.Id;
-import jakarta.persistence.OneToMany;
-import jakarta.persistence.OneToOne;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -27,12 +20,14 @@ import lombok.Setter;
 @Table(name = "exam_table")
 @JsonInclude(JsonInclude.Include.NON_DEFAULT)
 public class Exam {
+
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "exam_id", unique = true)
     private int exam_id;
 
     @Column(name = "description", unique = false, updatable = true)
-    private String description;
+    private String description; // writing if it is midterm 1, 2 etc (flexible because
 
     @JsonIgnore
     @OneToOne(
@@ -51,3 +46,5 @@ public class Exam {
     )
     private List<ExamRoom> exam_rooms;
 }
+
+//converter is missing

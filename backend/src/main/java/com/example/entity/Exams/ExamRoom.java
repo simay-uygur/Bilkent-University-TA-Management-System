@@ -19,10 +19,10 @@ public class ExamRoom {
 
     @Id
     @Column(name = "examroom_id", nullable = false, updatable = true)
-    private int examRoomId;          // e.g. 3191, 3192 …
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private int examRoomId;          //auto generated
 
-    @OneToOne(fetch = FetchType.LAZY,
-            cascade = { CascadeType.PERSIST, CascadeType.MERGE })
+    @ManyToOne(fetch = FetchType.LAZY)
     private ClassRoom examRoom;      // FK kept in the same table (no name override needed)
 
     @Column(name = "isApproved", nullable = false)
@@ -44,10 +44,8 @@ public class ExamRoom {
     @JoinColumn(name = "exam_id", nullable = false)
     private Exam exam;
 
-    /* ─────────────── helpers ─────────────── */
-
     public String getExamRoomCode() {
-        return examRoom != null ? examRoom.getClassCode() : null;
+        return examRoom != null ? examRoom.toString() : null; // hope it works
     }
 }
 
