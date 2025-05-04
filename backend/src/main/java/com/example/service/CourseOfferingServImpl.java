@@ -67,14 +67,13 @@ public class CourseOfferingServImpl implements CourseOfferingServ {
 
         return courseMapper.toDto(off);
     }
-    public CourseOfferingDto getByCourseCode(String code) {
+    public List<CourseOfferingDto> getByCourseCode(String code) {
         List<CourseOffering> off = repo.findByCourseCode(code)
                 .orElseThrow(() -> new IllegalArgumentException("Offering not found: " + code));
 
         return off.stream()
                 .map(courseMapper::toDto)
-                .findFirst()
-                .orElseThrow(() -> new IllegalArgumentException("Offering not found: " + code));
+                .collect(Collectors.toList());
     }
 
     @Override

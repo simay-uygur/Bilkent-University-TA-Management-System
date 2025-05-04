@@ -26,9 +26,9 @@ public class SectionMapper {
         SectionDto dto = new SectionDto();
         dto.setSectionId(section.getSectionId());
         dto.setSectionCode(section.getSectionCode());
-        dto.setLessons(section.getLessons().stream()
+        /* dto.setLessons(section.getLessons().stream()
                 .map(lessonMapper::toDto)
-                .collect(Collectors.toList()));
+                .collect(Collectors.toList())); */
         dto.setInstructor(instructorMapper.toDto(section.getInstructor())); 
 
         dto.setTas(section.getRegisteredTas().stream().map(taMapper::toDto).collect(Collectors.toList()));

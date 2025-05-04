@@ -12,7 +12,7 @@ public interface CourseOfferingServ {
     CourseOffering create(CourseOffering offering);
     CourseOffering update(Long id, CourseOffering offering);
     CourseOfferingDto getById(Long id);
-    CourseOfferingDto getByCourseCode(String code);
+    List<CourseOfferingDto> getByCourseCode(String code);
     List<CourseOffering> getAll();
     void delete(Long id);
     Optional<CourseOffering> getByCourseAndSemester(Long courseId, Long semesterId);

@@ -52,13 +52,13 @@ public class CourseOfferingController {
         return new ResponseEntity<>(dto, HttpStatus.FOUND);
     }
     @GetMapping("/courseCode/{code}")
-    public ResponseEntity<CourseOfferingDto> get(@PathVariable String code) {
+    public ResponseEntity<List<CourseOfferingDto>> get(@PathVariable String code) {
         //return mapper.toDto(service.getById(id));
-        CourseOfferingDto dto = service.getByCourseCode(code);
-        if (dto == null) {
+        List<CourseOfferingDto> dtos = service.getByCourseCode(code);
+        if (dtos == null) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
-        return new ResponseEntity<>(dto, HttpStatus.FOUND);
+        return new ResponseEntity<>(dtos, HttpStatus.FOUND);
     }
 
     @PutMapping("/{id}")
