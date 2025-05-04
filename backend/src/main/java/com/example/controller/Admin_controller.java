@@ -11,8 +11,6 @@ import com.example.entity.General.ClassRoom;
 import com.example.service.AdminServImpl;
 
 import lombok.RequiredArgsConstructor;
-
-
 @RestController
 @RequiredArgsConstructor
 public class Admin_controller{

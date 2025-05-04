@@ -15,15 +15,11 @@ import com.example.dto.NotificationRequest;
 import com.example.service.NotificationService;
 
 import lombok.RequiredArgsConstructor;
-
-
 @RestController
 @RequestMapping("/api/notifications")
 @RequiredArgsConstructor
 public class NotificationController {
-
     private final NotificationService notificationService;
-
     /**
      * Creates a new notification.
      *

@@ -4,9 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import com.example.dto.CourseDto;
-import com.example.dto.TaDto;
-import com.example.dto.TaskDto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -17,11 +14,13 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.example.dto.CourseDto;
+import com.example.dto.TaDto;
+import com.example.dto.TaskDto;
 import com.example.entity.Courses.Course;
 import com.example.entity.Courses.Section;
 import com.example.entity.Tasks.TaTask;
 import com.example.entity.Tasks.Task;
-
 import com.example.repo.CourseRepo;
 import com.example.service.CourseServ;
 
@@ -96,7 +95,7 @@ public class CourseController {
         List<TaDto> taDtos = new ArrayList<>();
         for (TaTask taTask : task.getTasList()){
             /*
-               private Long id;
+    private Long id;
     private String name;
     private String surname;
     private String academicLevel;
@@ -136,13 +135,8 @@ public class CourseController {
             task.getStatus().toString() // Convert enum to String
         );
     }
-
-
-
     /*@PostMapping("/course/{course_code}/exam")
     public ResponseEntity<Boolean> createExam(@RequestBody Exam exam, @PathVariable String course_code) {
         return new ResponseEntity<>()
     }*/
-    
-
 }
