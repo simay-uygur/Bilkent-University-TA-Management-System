@@ -3,21 +3,30 @@ package com.example.entity.Actors;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.hibernate.annotations.DynamicUpdate;
+
 import com.example.entity.Courses.Course;
 import com.example.entity.Courses.Department;
 import com.example.entity.Courses.Section;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
+import jakarta.persistence.ManyToMany;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.hibernate.annotations.DynamicUpdate;
 
 @Entity
 @Table(name = "instructor_table")
-@DynamicUpdate // for needed rows only in sql -
+@DynamicUpdate
 @Getter
 @Setter
 @AllArgsConstructor
@@ -25,13 +34,7 @@ import org.hibernate.annotations.DynamicUpdate;
 @JsonInclude(JsonInclude.Include.NON_DEFAULT)
 public class Instructor extends User{
 
-    @ManyToMany(fetch = FetchType.LAZY)
-    @JoinTable(
-        name = "course_instructor",
-        joinColumns = @JoinColumn(name = "instructor_id"),
-        inverseJoinColumns = @JoinColumn(name = "courseId")
-    )
-    private List<Course> courses = new ArrayList<>();
+    //no course of course offering direct relation from the instructor - but section
 
     @Column(name = "is_active", updatable = false,  nullable = false)  //added new
     private Boolean isActive = true;

@@ -15,7 +15,8 @@ import com.example.entity.Courses.Section;
 public interface InstructorRepo extends JpaRepository<Instructor, Long> {
     Optional<Instructor> findById(Long id);
     // Spring-Data method in InstructorRepo
-    List<Instructor> findByCoursesCourseCode(String courseCode);
+    //List<Instructor> findByCoursesCourseCode(String courseCode);
+    List<Instructor> findDistinctBySections_Offering_Course_CourseCode(String courseCode);
 
     // JPQL to list sections for a given instructor
     @Query("select s from Section s where s.instructor.id = :instId")

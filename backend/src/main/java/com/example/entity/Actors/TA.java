@@ -7,6 +7,7 @@ import java.util.Objects;
 import org.hibernate.annotations.DynamicUpdate;
 
 import com.example.entity.Courses.Course;
+import com.example.entity.Courses.CourseOffering;
 import com.example.entity.Courses.Section;
 import com.example.entity.General.AcademicLevelType;
 import com.example.entity.General.ProctorType;
@@ -27,6 +28,8 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+
+import static jakarta.persistence.FetchType.LAZY;
 
 /**
  * Teaching-Assistant entity.
@@ -59,33 +62,26 @@ public class TA extends User {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "proctor_type")
-    private ProctorType proctorType = ProctorType.ALL_COURSES;
+    private ProctorType proctorType = ProctorType.ALL_COURSES; // default
 
     @Column(name = "is_graduated", nullable = false)
     private Boolean isGraduated = false;
 
+    @ManyToMany(mappedBy = "registeredTas", fetch = LAZY)
+    private List<CourseOffering> offeringsAsStudent = new ArrayList<>();
 
-    /** Courses for which this user is an official TA */
-    @ManyToMany(
-            mappedBy = "courseTas",
-            fetch = FetchType.LAZY,
-            cascade = { CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REFRESH }
-    )
-    private List<Course> courses = new ArrayList<>();
+    @ManyToMany(mappedBy = "assignedTas", fetch = LAZY)
+    private List<CourseOffering> offeringsAsHelper = new ArrayList<>();
 
-    /** Sections the TA attends as a student */
-    @ManyToMany(
-            mappedBy = "taAsStudents",
-            fetch = FetchType.LAZY,
-            cascade = { CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REFRESH }
-    )
-    private List<Section> tasOwnLessons = new ArrayList<>();
+    @ManyToMany(mappedBy = "registeredTas", fetch = LAZY)
+    private List<Section> sectionsAsStudent = new ArrayList<>();
+
+    @ManyToMany(mappedBy = "assignedTas", fetch = LAZY)
+    private List<Section> sectionsAsHelper = new ArrayList<>();
 
     /** Individual tasks (grading, proctoring, etc.) */
     @OneToMany(mappedBy = "taOwner", cascade = CascadeType.ALL)
     private List<TaTask> taTasks = new ArrayList<>();
-
-    /* ─────────────── helpers ─────────────── */
 
     public void increaseWorkload(int load) {
         totalWorkload += load;
@@ -98,7 +94,6 @@ public class TA extends User {
         totalWorkload -= load;
     }
 
-    /* ─────────────── equality ─────────────── */
 
     @Override
     public boolean equals(Object o) {
@@ -164,6 +159,7 @@ public class TA extends User{
     private Boolean isActive = true;
     
     @Column(name = "ta_type", unique = false, updatable = true, nullable = false)
+    @Enumerated(EnumType.STRING)
     private TAType ta_type;
 
     @Column(name = "department", nullable = false)

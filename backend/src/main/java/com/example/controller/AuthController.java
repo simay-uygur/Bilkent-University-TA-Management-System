@@ -32,16 +32,12 @@ import com.example.service.UserServ;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-
 // better to use different controllers for each role, because the logic for each role is different
 @RestController
 @RequiredArgsConstructor
-public class AuthController {
-    
-
+public class AuthController {    
     private final UserServ serv;
     private final UserRepo userRepo;
-
     private final AuthenticationManager authenticationManager;
     private final JwtTokenProvider tokenProvider;
     private final UserDetailsServiceImpl userDetailsService;

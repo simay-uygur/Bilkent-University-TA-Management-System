@@ -27,25 +27,20 @@ import lombok.RequiredArgsConstructor;
 @RequestMapping("/api/instructors")
 @RequiredArgsConstructor
 public class InstructorController {
-
     private final InstructorServ instructorServ;
     private final InstructorMapper instructorMapper;
-
     @PostMapping("/upload")
     public ResponseEntity<Map<String, Object>> uploadInstructors(@RequestParam("file") MultipartFile file) throws IOException {
         return ResponseEntity.ok(instructorServ.importInstructorsFromExcel(file));
     }
-
     @PostMapping
     public ResponseEntity<Instructor> createInstructor(@RequestBody Instructor instructor) {
         return ResponseEntity.ok(instructorServ.createInstructor(instructor));
     }
-
     @PutMapping("/{id}")
     public ResponseEntity<Instructor> updateInstructor(@PathVariable Long id, @RequestBody Instructor instructor){
         return ResponseEntity.ok(instructorServ.updateInstructor(id, instructor));
     }
-
     @DeleteMapping("/{id}")
     public ResponseEntity<String> deleteInstructor(@PathVariable Long id) {
         instructorServ.deleteInstructor(id);
@@ -56,7 +51,6 @@ public class InstructorController {
 //    public ResponseEntity<List<Instructor>> getAllInstructors() {
 //        return ResponseEntity.ok(instructorServ.getAllInstructors());
 //    }
-
     //this will be used to get all instructor dto's
     @GetMapping("/dto")
     public ResponseEntity<List<InstructorDto>> getAllInstructorDtos() {
@@ -66,7 +60,6 @@ public class InstructorController {
 
         return ResponseEntity.ok(dtos);
     }
-
     /**
      * GET /api/v1/instructors
      * Returns all instructors as DTOs.
@@ -76,7 +69,6 @@ public class InstructorController {
         List<InstructorDto> dtos = instructorServ.getAllInstructorsDto();
         return ResponseEntity.ok(dtos);
     }
-
     /**
      * GET /api/v1/instructors/department/{deptName}
      * Returns all instructors in the given department as DTOs.

@@ -19,7 +19,8 @@ public class ExamRoom {
 
     @Id
     @Column(name = "examroom_id", nullable = false, updatable = true)
-    private int examRoomId;          // e.g. 3191, 3192 …
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private int examRoomId;          //auto generated
 
     @ManyToOne(fetch = FetchType.LAZY,
             cascade = { CascadeType.PERSIST, CascadeType.MERGE })
@@ -44,8 +45,6 @@ public class ExamRoom {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "exam_id", nullable = false)
     private Exam exam;
-
-    /* ─────────────── helpers ─────────────── */
 
     public String getExamRoomCode() {
         return examRoom != null ? examRoom.getClassroomId() : null;

@@ -1,5 +1,6 @@
 package com.example.controller;
 
+import com.example.service.AdminServ;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -11,14 +12,12 @@ import com.example.entity.General.ClassRoom;
 import com.example.service.AdminServImpl;
 
 import lombok.RequiredArgsConstructor;
-
-
 @RestController
 @RequiredArgsConstructor
 public class Admin_controller{
 
     @Autowired
-    private AdminServImpl adminServ ;
+    private AdminServ adminServ ;
 
     @PostMapping("api/admin/room")
     public ResponseEntity<?> createClassroom(@RequestBody ClassRoom room) {

@@ -1,6 +1,8 @@
 package com.example.controller;
 
 import com.example.entity.General.Student;
+import com.example.repo.InstructorRepo;
+import com.example.repo.StudentRepo;
 import com.example.service.StudentServ;
 import com.example.exception.StudentNotFoundExc;
 import lombok.RequiredArgsConstructor;
@@ -13,6 +15,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @RestController
 @RequiredArgsConstructor
@@ -20,6 +23,7 @@ public class StudentController {
 
     @Autowired
     private StudentServ studentServ;
+    private StudentRepo studentRepo;
 
     @GetMapping("/api/student/all")
     public List<Student> getAllStudents() {
@@ -51,7 +55,21 @@ public class StudentController {
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
-
+    //this method should be written
+//    @GetMapping("/{id}/sections")
+//    public ResponseEntity<List<SectionDto>> getSectionsForStudent(@PathVariable Long id) {
+//        return studentRepo.findById(id)
+//                .map(student -> {
+//                    // Force‑initialize if lazy:
+//                    List<Section> sections = student.getOfferings();
+//                    // Map to DTO if you want to hide fields
+//                    List<SectionDto> dtos = sections.stream()
+//                            .map(s -> new SectionDto(s.getSectionId(), s.getSectionCode()))
+//                            .collect(Collectors.toList());
+//                    return ResponseEntity.ok(dtos);
+//                })
+//                .orElseGet(() -> ResponseEntity.notFound().build());
+//    }
 
     @PostMapping("/api/student")
     public ResponseEntity<Student> createStudent(@RequestBody Student student) {

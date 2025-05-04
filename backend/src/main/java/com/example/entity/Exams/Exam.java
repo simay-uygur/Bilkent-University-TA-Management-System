@@ -36,13 +36,15 @@ import lombok.Setter;
 @Table(name = "exam_table")
 @JsonInclude(JsonInclude.Include.NON_DEFAULT)
 public class Exam {
+
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "exam_id", unique = true)
     private int examId;
 
     @Column(name = "description", unique = false, updatable = true)
-    private String description;
+    private String description; // writing if it is midterm 1, 2 etc (flexible because
 
     @JsonIgnore
     @OneToOne(

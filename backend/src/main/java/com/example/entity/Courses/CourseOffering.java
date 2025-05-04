@@ -1,6 +1,10 @@
 package com.example.entity.Courses;
 
 
+import com.example.entity.General.Semester;
+import jakarta.persistence.*;
+import lombok.*;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -35,7 +39,7 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
+//@Builder
 public class CourseOffering {
 
     @Id
@@ -64,5 +68,32 @@ public class CourseOffering {
             fetch = FetchType.LAZY
     )
     private List<Section> sections = new ArrayList<>();
+
+    @ManyToMany(fetch = LAZY)
+    @JoinTable(
+            name = "offering_ta_registrations",
+            joinColumns = @JoinColumn(name = "offering_id"),
+            inverseJoinColumns = @JoinColumn(name = "ta_id")
+    )
+    private List<TA> registeredTas = new ArrayList<>();
+
+    /** TAs who are *assigned* to assist/teach this offering */
+    @ManyToMany(fetch = LAZY)
+    @JoinTable(
+            name = "offering_ta_assignments",
+            joinColumns = @JoinColumn(name = "offering_id"),
+            inverseJoinColumns = @JoinColumn(name = "ta_id")
+    )
+    private List<TA> assignedTas = new ArrayList<>();
+
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(
+            name               = "offering_student_registrations",
+            joinColumns        = @JoinColumn(name = "offering_id"),
+            inverseJoinColumns = @JoinColumn(name = "student_id")
+    )
+    private List<Student> registeredStudents = new ArrayList<>();
+
+
 }
 

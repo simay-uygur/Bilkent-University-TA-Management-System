@@ -13,8 +13,10 @@ import java.util.List;
         name = "semesters",
         uniqueConstraints = @UniqueConstraint(columnNames = {"year", "term"})
 )
-@Getter @Setter
-@NoArgsConstructor @AllArgsConstructor @Builder
+@Getter
+@Setter
+@NoArgsConstructor @AllArgsConstructor
+//@Builder
 @JsonIgnoreProperties("offerings")   // avoid cycles when serializing
 public class Semester {
 

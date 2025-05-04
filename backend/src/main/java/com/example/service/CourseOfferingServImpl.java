@@ -6,7 +6,6 @@ import java.time.Month;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
-import java.util.Optional;
 
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
@@ -76,7 +75,34 @@ public class CourseOfferingServImpl implements CourseOfferingServ {
     public void delete(Long id) {
         repo.deleteById(id);
     }
+    @Override
+    public Optional<CourseOffering> getByCourseAndSemester(Long courseId, Long semesterId) {
+        return repo.findByCourse_CourseIdAndSemester_Id(courseId, semesterId);
+    }
 
+    //this should be written
+    @Override
+    public boolean assignTA(Long taId, String courseCode) {
+        return false;
+    }
+    //old one - fix needed
+//    @Override
+//    public boolean assignTA(Long taId, String courseCode) {
+//        Course course = repo.findCourseByCourseCode(courseCode)
+//                .orElseThrow(() -> new CourseNotFoundExc(courseCode));
+//        TA ta = taServ.getTAById(taId);
+//        if (ta.getSectionsAsHelper().contains(course)) {
+//            throw new GeneralExc("TA " + taId + " already assigned to " + courseCode);
+//        }
+//        if (ta.get().stream()
+//                .anyMatch(sec -> sec.getOffering().getCourse().getCourseCode().equals(courseCode))) {
+//            throw new GeneralExc("TA " + taId + " takes this course as a student");
+//        }
+//        course.getCourseTas().add(ta);
+//        courseRepo.save(course);
+//        return true;
+//    }
+//
     @Override
     public CourseOffering getCurrentOffering(String courseCode) {
         LocalDate today = LocalDate.now();

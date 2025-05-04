@@ -10,4 +10,8 @@ import lombok.Setter;
 public class SignInRequest {
     private Long id;
     private String password;
+
+    public Long getId() {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
 }

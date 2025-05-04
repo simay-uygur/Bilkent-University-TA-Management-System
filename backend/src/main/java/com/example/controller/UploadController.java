@@ -8,6 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -20,8 +21,9 @@ public class UploadController {
     private final TAServ taServ;
     private final CourseServ courseServ;
     private final UploadService uploadService;
-
+    private final SectionServ sectionService;
     private final InstructorServ instructorServ;
+    private final ClassRoomServ classRoomService;
 
     //for uploading students and ta's (from the same excel file)
     @PostMapping("/students")
@@ -87,4 +89,62 @@ public class UploadController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
         }
     }
+
+    @PostMapping("/sections-instructor")
+    public ResponseEntity<?> importCourseSectionInstructorRelations(@RequestParam("file") MultipartFile file) {
+        try {
+            // now we _capture_ the real result map
+            Map<String,Object> result = sectionService.importFromExcel(file);
+            return ResponseEntity.ok(result);
+        } catch (IllegalArgumentException e) {
+            // bad data in Excel
+            return ResponseEntity
+                    .badRequest()
+                    .body(Map.of(
+                            "status",  "error",
+                            "message", e.getMessage()
+                    ));
+        } catch (IOException e) {
+            // file‐I/O problem
+            return ResponseEntity
+                    .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of(
+                            "status",  "error",
+                            "message", "Could not read file: " + e.getMessage()
+                    ));
+        }
+    }
+
+    @PostMapping("/sections-student")
+    public ResponseEntity<?> importCourseSectionStudentRelations(@RequestParam("file") MultipartFile file) {
+        try {
+            Map<String,Object> result = sectionService.importSectionStudentsFromExcel(file);
+            return ResponseEntity.ok(result);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity
+                    .badRequest()
+                    .body(Map.of(
+                            "status",  "error",
+                            "message", e.getMessage()
+                    ));
+        } catch (IOException e) {
+            return ResponseEntity
+                    .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of(
+                            "status",  "error",
+                            "message", "Could not read file: " + e.getMessage()
+                    ));
+        }
+    }
+
+    //to upload classrooms from excel file
+    @PostMapping("/classrooms")
+    public ResponseEntity<?> importFromExcel(@RequestParam("file") MultipartFile file) {
+        try {
+            return ResponseEntity.ok(classRoomService.importClassRoomsFromExcel(file));
+        } catch (IOException e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("File processing failed: " + e.getMessage());
+        }
+    }
+
 }
