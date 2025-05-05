@@ -43,7 +43,7 @@ import lombok.Setter;
 @DynamicUpdate // this is used to update only the changed fields in the database, not the whole object
 public class Course {
     @Id
-    @Column(name = "courseId", unique = true, updatable = true) // make updatable false
+    @Column(name = "course_id", unique = true, updatable = true) // make updatable false
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int courseId;
     
