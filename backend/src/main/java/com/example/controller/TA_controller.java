@@ -64,7 +64,7 @@ public class TA_controller {
     @GetMapping("/api/ta/{id}")
     public TaDto getTAById(@PathVariable Long id) 
     {
-        return serv.getTAById(id);
+        return serv.getTAByIdDto(id);
     }
 
     @GetMapping("/api/ta/department/{deptName}")
@@ -76,7 +76,7 @@ public class TA_controller {
     @DeleteMapping("/api/ta/{id}")
     public ResponseEntity<HttpStatus> deleteTAById(@PathVariable Long id) 
     {
-        if (serv.getTAById(id) == null)
+        if (serv.getTAByIdDto(id) == null)
             throw new UserNotFoundExc(id);
         serv.deleteTAById(id);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
