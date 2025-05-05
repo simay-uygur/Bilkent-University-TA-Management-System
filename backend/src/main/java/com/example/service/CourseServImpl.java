@@ -2,26 +2,38 @@ package com.example.service;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.usermodel.WorkbookFactory;
+import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
+
 import com.example.ExcelHelpers.FailedRowInfo;
 import com.example.dto.CourseDto;
-import com.example.dto.SectionDto;
-import com.example.dto.LessonDto;
 import com.example.dto.InstructorDto;
-import com.example.dto.TaDto;
+import com.example.dto.LessonDto;
+import com.example.dto.SectionDto;
 import com.example.dto.StudentDto;
+import com.example.dto.TaDto;
 import com.example.entity.Actors.Instructor;
 import com.example.entity.Actors.TA;
 import com.example.entity.Courses.Course;
 import com.example.entity.Courses.CourseOffering;
 import com.example.entity.Courses.Department;
 import com.example.entity.Courses.Section;
-import com.example.entity.Tasks.Task;
 import com.example.entity.General.AcademicLevelType;
+import com.example.entity.Tasks.Task;
 import com.example.exception.Course.CourseNotFoundExc;
 import com.example.exception.Course.NoPrereqCourseFound;
 import com.example.exception.GeneralExc;
@@ -32,13 +44,6 @@ import com.example.mapper.LessonMapper;
 import com.example.repo.CourseRepo;
 import com.example.repo.DepartmentRepo;
 import com.example.repo.SectionRepo;
-
-import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.ss.usermodel.Workbook;
-import org.apache.poi.ss.usermodel.WorkbookFactory;
-import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;

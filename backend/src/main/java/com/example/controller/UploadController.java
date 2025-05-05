@@ -22,8 +22,9 @@ public class UploadController {
     private final CourseServ courseServ;
     private final UploadService uploadService;
     private final SectionServ sectionService;
-
     private final InstructorServ instructorServ;
+    private final ClassRoomServ classRoomService;
+    private final LessonServ lessonService;
 
     //for uploading students and ta's (from the same excel file)
     @PostMapping("/students")
@@ -135,6 +136,23 @@ public class UploadController {
                             "message", "Could not read file: " + e.getMessage()
                     ));
         }
+    }
+
+    //to upload classrooms from excel file
+    @PostMapping("/classrooms")
+    public ResponseEntity<?> importFromExcel(@RequestParam("file") MultipartFile file) {
+        try {
+            return ResponseEntity.ok(classRoomService.importClassRoomsFromExcel(file));
+        } catch (IOException e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("File processing failed: " + e.getMessage());
+        }
+    }
+
+
+    @PostMapping("/lessons")
+    public ResponseEntity<Map<String, Object>> importLessons(@RequestParam("file") MultipartFile file) throws IOException {
+        Map<String, Object> result = lessonService.importLessonsFromExcel(file);
+        return ResponseEntity.ok(result);
     }
 
 }

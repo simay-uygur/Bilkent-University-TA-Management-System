@@ -57,6 +57,7 @@ public class TA_controller {
     @GetMapping("/api/ta/all")
     public List<TaDto> getAllTAs() 
     {
+        System.out.println("ilmayyyyy");
         return serv.getAllTAs();
     } // method should be sent to Admin controller
 

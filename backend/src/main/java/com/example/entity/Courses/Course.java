@@ -80,13 +80,5 @@ public class Course {
         return course.getCourseId() == this.courseId;
     }
 
-//    @OneToMany(
-//        mappedBy = "course",
-//        fetch    = FetchType.LAZY,
-//        cascade  = CascadeType.ALL,
-//        orphanRemoval = true
-//    )
-//    private List<Task> tasks = new ArrayList<>();
-
     //coordinator- deleted now only instructors
 }
