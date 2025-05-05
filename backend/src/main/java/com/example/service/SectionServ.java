@@ -20,4 +20,5 @@ public interface SectionServ {
 
     //@Transactional
     Map<String,Object> importSectionStudentsFromExcel(MultipartFile file) throws IOException;
+    Section getBySectionCode(String sectionCode);
 }

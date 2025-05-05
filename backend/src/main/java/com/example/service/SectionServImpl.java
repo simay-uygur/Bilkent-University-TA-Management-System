@@ -143,7 +143,10 @@ public class SectionServImpl implements SectionServ {
         return repo.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Section not found: " + id));
     }
-
+    public Section getBySectionCode(String sectionCode) {
+        return repo.findBySectionCodeIgnoreCase(sectionCode)
+                .orElseThrow(() -> new IllegalArgumentException("Section not found: " + sectionCode));
+    }
     @Override
     public List<Section> getAll() {
         return repo.findAll();
