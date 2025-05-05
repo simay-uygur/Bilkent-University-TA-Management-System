@@ -42,7 +42,7 @@ interface CourseOfferingDto {
   }
   semester: {
     id: number
-    term: string
+    term: string   // "SPRING" or "FALL"
     year: number
   }
   sections: SectionDto[]
@@ -50,9 +50,10 @@ interface CourseOfferingDto {
 
 const CourseDetails: React.FC = () => {
   const { courseCode } = useParams<{ courseCode: string }>()
-  const [offering, setOffering] = useState<CourseOfferingDto | null>(null)
-  const [loading, setLoading]   = useState(true)
-  const [error, setError]       = useState<string | null>(null)
+  const [offerings, setOfferings] = useState<CourseOfferingDto[]>([])
+  const [selected, setSelected]   = useState<CourseOfferingDto | null>(null)
+  const [loading, setLoading]     = useState(true)
+  const [error, setError]         = useState<string | null>(null)
 
   useEffect(() => {
     if (!courseCode) {
@@ -60,22 +61,32 @@ const CourseDetails: React.FC = () => {
       setLoading(false)
       return
     }
-
     fetch(`/api/v1/offerings/courseCode/${courseCode}`)
       .then(res => {
-        if (res.status != 302) throw new Error(`Offering for “${courseCode}” not found`)
+        if (res.status != 302) throw new Error(`No offerings for “${courseCode}”`)
         return res.json()
       })
-      .then((data: CourseOfferingDto) => setOffering(data))
+      .then((data: CourseOfferingDto[]) => {
+        // sort by year desc, then term FALL > SPRING
+        const termOrder: Record<string, number> = { FALL: 1, SPRING: 0 }
+        const sorted = data.sort((a, b) => {
+          if (b.semester.year !== a.semester.year) {
+            return b.semester.year - a.semester.year
+          }
+          return (termOrder[b.semester.term] || 0) - (termOrder[a.semester.term] || 0)
+        })
+        setOfferings(sorted)
+        setSelected(sorted[0])
+      })
       .catch(err => setError(err.message))
       .finally(() => setLoading(false))
   }, [courseCode])
 
   if (loading)   return <div className={styles.pageWrapper}>Loading…</div>
   if (error)     return <div className={styles.pageWrapper}>Error: {error}</div>
-  if (!offering) return <div className={styles.pageWrapper}>No data</div>
+  if (!selected) return <div className={styles.pageWrapper}>No data</div>
 
-  const { course, semester, sections } = offering
+  const { course, semester, sections } = selected
 
   return (
     <div className={styles.pageWrapper}>
@@ -83,28 +94,52 @@ const CourseDetails: React.FC = () => {
         {course.courseCode} — {course.courseName}
       </h1>
       <p>
-        Status: {course.courseAcademicStatus} | Dept: {course.department} | Term: {semester.term} {semester.year}
+        <strong>Status:</strong> {course.courseAcademicStatus} |{' '}
+        <strong>Dept:</strong> {course.department}
       </p>
+
+      {/* Semester selector */}
+      <label htmlFor="semSelect">Semester:&nbsp;</label>
+      <select
+        id="semSelect"
+        value={selected.id}
+        onChange={e => {
+          const id = Number(e.target.value)
+          const off = offerings.find(o => o.id === id) || null
+          setSelected(off)
+        }}
+      >
+        {offerings.map(o => (
+          <option key={o.id} value={o.id}>
+            {o.semester.term} {o.semester.year}
+          </option>
+        ))}
+      </select>
+
       {course.prereqs.length > 0 && (
-        <p>Prerequisites: {course.prereqs.join(', ')}</p>
+        <p><strong>Prerequisites:</strong> {course.prereqs.join(', ')}</p>
       )}
 
       {sections.length === 0 ? (
-        <p>No sections available for this offering.</p>
+        <p>No sections available for this semester.</p>
       ) : (
         sections.map(sec => (
           <div key={sec.sectionId} className={styles.sectionCard}>
             <h2>Section {sec.sectionCode}</h2>
             <p>
-              Instructor: {sec.instructor.name} {sec.instructor.surname} (
-              <a href={`mailto:${sec.instructor.webmail}`}>{sec.instructor.webmail}</a>
-              )
+              <strong>Instructor:</strong> {sec.instructor.name}{' '}
+              {sec.instructor.surname}{' '}
+              (<a href={`mailto:${sec.instructor.webmail}`}>{sec.instructor.webmail}</a>)
             </p>
 
             <div>
               <strong>TAs:</strong>{' '}
               {sec.tas.length > 0
-                ? <ul>{sec.tas.map(ta => <li key={ta.id}>{ta.name} {ta.surname}</li>)}</ul>
+                ? <ul>
+                    {sec.tas.map(ta => (
+                      <li key={ta.id}>{ta.name} {ta.surname}</li>
+                    ))}
+                  </ul>
                 : <span>None</span>
               }
             </div>
@@ -112,11 +147,13 @@ const CourseDetails: React.FC = () => {
             <div>
               <strong>Students:</strong>{' '}
               {sec.students.length > 0
-                ? <ul>{sec.students.map(s => (
-                    <li key={s.studentId}>
-                      {s.studentName} {s.studentSurname} ({s.academicStatus})
-                    </li>
-                  ))}</ul>
+                ? <ul>
+                    {sec.students.map(s => (
+                      <li key={s.studentId}>
+                        {s.studentName} {s.studentSurname} ({s.academicStatus})
+                      </li>
+                    ))}
+                  </ul>
                 : <span>None</span>
               }
             </div>
@@ -132,6 +169,7 @@ const CourseDetails: React.FC = () => {
 }
 
 export default CourseDetails
+
 
 /* // src/pages/CourseDetails.tsx
 import React, { useState, useEffect } from 'react'

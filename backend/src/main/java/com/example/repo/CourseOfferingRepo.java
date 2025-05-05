@@ -43,7 +43,14 @@ Optional<CourseOffering> findById(Long id);
     FROM CourseOffering co
    WHERE co.course.courseCode = :code
 """)  
-Optional<List<CourseOffering>> findByCourseCode(String code);
+Optional<List<CourseOffering>> findByCoursesCode(String code);
+
+@Query("""
+  SELECT co
+    FROM CourseOffering co
+   WHERE co.course.courseCode = :code
+""")
+Optional<CourseOffering>findByCourseCode(@Param("code") String code);
 
 
 
