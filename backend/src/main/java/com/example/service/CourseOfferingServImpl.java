@@ -39,7 +39,6 @@ public class CourseOfferingServImpl implements CourseOfferingServ {
     private final CourseOfferingRepo repo;
     private final SemesterServ semesterServ;
     private final CourseOfferingMapper courseMapper;
-    private final CourseOfferingServ service;
     private final ClassRoomRepo classRoomRepo;
 
     @Override
@@ -164,7 +163,7 @@ public class CourseOfferingServImpl implements CourseOfferingServ {
     @Async("setExecutor")
     @Override
     public void createExam(ExamDto dto, String courseCode) {
-        CourseOffering offering = service.getCurrentOffering(courseCode);
+        CourseOffering offering = getCurrentOffering(courseCode);
         if (offering == null) {
             throw new GeneralExc("No current offering found for course: " + courseCode);
         }
