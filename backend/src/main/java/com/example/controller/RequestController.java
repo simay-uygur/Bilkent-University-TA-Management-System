@@ -141,7 +141,7 @@ public class RequestController {
             @RequestBody ProctorTaFromFacultiesDto dto
     ) {
         proctorTaFromFacultiesServ.createProctorTaFromFacultiesRequest(dto, taId);
-        boolean exists = fromFacRepo.existsBySenderIdAndExamIdAndIsRejected(taId, dto.getExamId(), false);
+        boolean exists = fromFacRepo.existsBySenderIdAndExamExamIdAndIsRejected(taId, dto.getExamId(), false);
         return new ResponseEntity<>(exists ? HttpStatus.CREATED : HttpStatus.BAD_REQUEST);
     }
 
