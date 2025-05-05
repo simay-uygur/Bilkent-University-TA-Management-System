@@ -1,115 +1,285 @@
-import React, { useState } from 'react';
+// src/pages/DepartmentOffice.tsx
+import React, { useState, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
+import styles from './DepartmentOffice.module.css'
 
-import styles from './DepartmentOffice.module.css';
-
-interface LeaveRequest {
-  id: number;
-  taName: string;
-  course: string;
-  proctoringDate: string;
-  requestedTime: string;
-  excuse: string;
-  message: string;
-  attachmentUrl?: string;
+interface InstructorDto {
+  id: number
+  name: string
+  surname: string
+  academicLevel: string
+  totalWorkload: number
+  isActive: boolean
+  isGraduated: boolean
+  department: string
+  courses: string[]
+  lessons: string[]
 }
 
-const initialRequests: LeaveRequest[] = [
-  {
-    id: 1,
-    taName: 'Alice Smith',
-    course: 'CS-101',
-    proctoringDate: 'April 10, 2025',
-    requestedTime: '08:00 – 10:00',
-    excuse: 'Medical Appointment',
-    message: 'A lightning struck to me.',
-    attachmentUrl: '/attachments/attachment1.pdf',
-  },
-  {
-    id: 2,
-    taName: 'John Doe',
-    course: 'CS-224',
-    proctoringDate: 'April 11, 2025',
-    requestedTime: '13:00 – 15:00',
-    excuse: 'Family Emergency',
-    message: 'I need to attend a family meeting due to an emergency.',
-    // no attachment
-  },
-];
+interface CourseDto {
+  courseId: number
+  courseCode: string
+  courseName: string
+  courseAcademicStatus: string
+  department: string
+}
+
+interface TaDto {
+  id: number
+  name: string
+  surname: string
+  academicLevel: string
+  totalWorkload: number
+  isActive: boolean
+  isGraduated: boolean
+  department: string
+  courses: string[]
+  lessons: string[]
+}
 
 const DepartmentOffice: React.FC = () => {
-  const [requests, setRequests] = useState<LeaveRequest[]>(initialRequests);
+  const navigate = useNavigate()
+  const [instructors, setInstructors] = useState<InstructorDto[]>([])
+  const [courses, setCourses]         = useState<CourseDto[]>([])
+  const [tas, setTAs]                 = useState<TaDto[]>([])
 
-  const handleApprove = (id: number) => {
-    // TODO: call API to approve, then remove from list
-    setRequests(reqs => reqs.filter(r => r.id !== id));
-  };
+  useEffect(() => {
+    fetch('/api/instructors/department/CS')
+      .then(res => res.json())
+      .then((data: InstructorDto[]) => setInstructors(data))
+      .catch(console.error)
 
-  const handleReject = (id: number) => {
-    // TODO: call API to reject, then remove from list
-    setRequests(reqs => reqs.filter(r => r.id !== id));
-  };
+    fetch('/api/course/department/CS')
+      .then(res => res.json())
+      .then((data: CourseDto[]) => setCourses(data))
+      .catch(console.error)
+
+    fetch('/api/ta/department/CS')
+      .then(res => res.json())
+      .then((data: TaDto[]) => setTAs(data))
+      .catch(console.error)
+  }, [])
 
   return (
     <div className={styles.pageWrapper}>
-      
+      <h1 className={styles.heading}>Department Overview (CS)</h1>
+      <div className={styles.grid}>
 
-      <div className={styles.content}>
-        <h1 className={styles.heading}>Pending Leave Requests</h1>
-
+        {/* Instructors */}
         <div className={styles.card}>
+          <h2 className={styles.tableHeading}>Instructors</h2>
           <table className={styles.table}>
             <thead>
               <tr>
-                <th>TA Name</th>
-                <th>Course</th>
-                <th>Proctoring Date</th>
-                <th>Requested Time</th>
-                <th>Excuse</th>
-                <th>Message</th>
-                <th>Attachment</th>
-                <th>Actions</th>
+                <th>Name</th>
+                <th>Level</th>
+                <th>Action</th>
               </tr>
             </thead>
             <tbody>
-              {requests.map(req => (
-                <tr key={req.id}>
-                  <td>{req.taName}</td>
-                  <td>{req.course}</td>
-                  <td>{req.proctoringDate}</td>
-                  <td>{req.requestedTime}</td>
-                  <td>{req.excuse}</td>
-                  <td>{req.message}</td>
+              {instructors.map(i => (
+                <tr key={i.id}>
+                  <td>{i.name} {i.surname}</td>
+                  <td>{i.academicLevel}</td>
                   <td>
-                    {req.attachmentUrl
-                      ? <a href={req.attachmentUrl} target="_blank" rel="noopener noreferrer">View</a>
-                      : 'No File'}
-                  </td>
-                  <td className={styles.actions}>
                     <button
-                      className={styles.approve}
-                      onClick={() => handleApprove(req.id)}
+                      type="button"
+                      onClick={() => navigate(`instructor/${i.id}`)}
                     >
-                      Approve
-                    </button>
-                    <button
-                      className={styles.reject}
-                      onClick={() => handleReject(req.id)}
-                    >
-                      Reject
+                      Details
                     </button>
                   </td>
                 </tr>
               ))}
             </tbody>
           </table>
-
-          {requests.length === 0 && (
-            <p className={styles.noRequests}>No pending requests.</p>
-          )}
         </div>
+
+        {/* Courses */}
+        <div className={styles.card}>
+          <h2 className={styles.tableHeading}>Courses</h2>
+          <table className={styles.table}>
+            <thead>
+              <tr><th>Code</th><th>Name</th><th>Action</th></tr>
+            </thead>
+            <tbody>
+              {courses.map(c => (
+                <tr key={c.courseId}>
+                  <td>{c.courseCode}</td>
+                  <td>{c.courseName}</td>
+                  <td>
+                    <button
+                      type="button"
+                      onClick={() => navigate(`course/${c.courseCode}`)}
+                    >
+                      Details
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+
+        {/* TAs */}
+        <div className={styles.card}>
+          <h2 className={styles.tableHeading}>TAs</h2>
+          <table className={styles.table}>
+            <thead>
+              <tr><th>Name</th><th>Workload</th></tr>
+            </thead>
+            <tbody>
+              {tas.map(t => (
+                <tr key={t.id}>
+                  <td>{t.name} {t.surname}</td>
+                  <td>{t.totalWorkload}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default DepartmentOffice;
+export default DepartmentOffice
+
+/*
+// src/pages/DepartmentOffice.tsx
+import React, { useState, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
+import styles from './DepartmentOffice.module.css'
+
+interface InstructorDto {
+  id: number
+  name: string
+  surname: string
+  academicLevel: string
+  totalWorkload: number
+  isActive: boolean
+  isGraduated: boolean
+  department: string
+  courses: string[]
+  lessons: string[]
+}
+
+interface CourseDto {
+  courseId: number
+  courseCode: string
+  courseName: string
+  courseAcademicStatus: string
+  department: string
+}
+
+interface TaDto {
+  id: number
+  name: string
+  surname: string
+  academicLevel: string
+  totalWorkload: number
+  isActive: boolean
+  isGraduated: boolean
+  department: string
+  courses: string[]
+  lessons: string[]
+}
+
+const DepartmentOffice: React.FC = () => {
+  const navigate = useNavigate()
+  const [instructors, setInstructors] = useState<InstructorDto[]>([])
+  const [courses, setCourses]         = useState<CourseDto[]>([])
+  const [tas, setTAs]                 = useState<TaDto[]>([])
+
+  useEffect(() => {
+    fetch('/api/instructors/department/CS')
+      .then(res => res.json())
+      .then((data: InstructorDto[]) => setInstructors(data))
+      .catch(console.error)
+
+    fetch('/api/course/department/CS')
+      .then(res => res.json())
+      .then((data: CourseDto[]) => setCourses(data))
+      .catch(console.error)
+
+    fetch('/api/ta/department/CS')
+      .then(res => res.json())
+      .then((data: TaDto[]) => setTAs(data))
+      .catch(console.error)
+  }, [])
+
+  return (
+    <div className={styles.pageWrapper}>
+      <h1 className={styles.heading}>Department Overview (CS)</h1>
+      <div className={styles.grid}>
+
+       
+        <div className={styles.card}>
+          <h2 className={styles.tableHeading}>Instructors</h2>
+          <table className={styles.table}>
+            <thead>
+              <tr><th>Name</th><th>Level</th></tr>
+            </thead>
+            <tbody>
+              {instructors.map(i => (
+                <tr key={i.id}>
+                  <td>{i.name} {i.surname}</td>
+                  <td>{i.academicLevel}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+
+        
+        <div className={styles.card}>
+          <h2 className={styles.tableHeading}>Courses</h2>
+          <table className={styles.table}>
+            <thead>
+              <tr><th>Code</th><th>Name</th><th>Action</th></tr>
+            </thead>
+            <tbody>
+              {courses.map(c => (
+                <tr key={c.courseId}>
+                  <td>{c.courseCode}</td>
+                  <td>{c.courseName}</td>
+                  <td>
+                    <button
+                      type="button"
+                      onClick={() => navigate(`course/${c.courseCode}`)}
+                    >
+                      Details
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+
+        
+        <div className={styles.card}>
+          <h2 className={styles.tableHeading}>TAs</h2>
+          <table className={styles.table}>
+            <thead>
+              <tr><th>Name</th><th>Workload</th></tr>
+            </thead>
+            <tbody>
+              {tas.map(t => (
+                <tr key={t.id}>
+                  <td>{t.name} {t.surname}</td>
+                  <td>{t.totalWorkload}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+
+      </div>
+    </div>
+  )
+}
+
+export default DepartmentOffice
+*/

@@ -5,6 +5,8 @@ import java.util.List;
 import java.util.Map;
 
 import com.example.dto.CourseDto;
+
+
 import org.springframework.web.multipart.MultipartFile;
 
 import com.example.entity.Courses.Course;
@@ -22,5 +24,7 @@ public interface CourseServ {
     public Task getTaskByID(String course_code, int task_id);
     public List<CourseDto> getCourses();
     public Map<String, Object> importCoursesFromExcel(MultipartFile file) throws IOException;
+    public List<CourseDto> getCoursesByDepartment(String deptName);
+    public Boolean deleteCourse(String course_code);
 
 }

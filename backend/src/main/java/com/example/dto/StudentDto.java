@@ -17,7 +17,3 @@ public class StudentDto {
     private Boolean isActive;
     private Boolean isGraduated;
 }
-
-
-
-

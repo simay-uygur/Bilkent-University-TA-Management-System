@@ -1,5 +1,6 @@
 package com.example.controller;
 
+import com.example.dto.InstructorDto;
 import com.example.entity.Actors.DepartmentStaff;
 import com.example.service.DepartmentStaffServ;
 import lombok.RequiredArgsConstructor;
@@ -35,4 +36,11 @@ public class DepartmentStaffController {
     public ResponseEntity<List<DepartmentStaff>> getAll() {
         return ResponseEntity.ok(staffServ.getAllDepartmentStaff());
     }
+    /*  @GetMapping("/department/{deptName}")
+    public ResponseEntity<List<InstructorDto>> getByDepartment(
+            @PathVariable("deptName") String deptName
+    ) {
+        List<InstructorDto> dtos = staffServ.getInstructorsByDepartment(deptName);
+        return ResponseEntity.ok(dtos);
+    } */
 }

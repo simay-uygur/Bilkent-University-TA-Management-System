@@ -1,17 +1,31 @@
 package com.example.entity.Courses;
 
 
-import com.example.entity.Actors.TA;
-import com.example.entity.General.Semester;
-import com.example.entity.General.Student;
-import jakarta.persistence.*;
-import lombok.*;
-
 import java.util.ArrayList;
 import java.util.List;
 
-import static jakarta.persistence.CascadeType.ALL;
-import static jakarta.persistence.FetchType.LAZY;
+import com.example.entity.Actors.TA;
+import com.example.entity.Exams.Exam;
+import com.example.entity.General.Semester;
+import com.example.entity.General.Student;
+
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
+import jakarta.persistence.ManyToMany;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 
 @Entity
@@ -40,6 +54,13 @@ public class CourseOffering {
     private Semester semester;
 
     @OneToMany(
+        mappedBy = "courseOffering",
+        cascade = CascadeType.ALL,
+        orphanRemoval = true,
+        fetch = FetchType.LAZY)
+    private List<Exam> exams = new ArrayList<>();
+
+    @OneToMany(
             mappedBy = "offering",
             cascade = CascadeType.ALL,
             orphanRemoval = true,
@@ -47,7 +68,7 @@ public class CourseOffering {
     )
     private List<Section> sections = new ArrayList<>();
 
-    @ManyToMany(fetch = LAZY)
+    @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
             name = "offering_ta_registrations",
             joinColumns = @JoinColumn(name = "offering_id"),
@@ -56,7 +77,7 @@ public class CourseOffering {
     private List<TA> registeredTas = new ArrayList<>();
 
     /** TAs who are *assigned* to assist/teach this offering */
-    @ManyToMany(fetch = LAZY)
+    @ManyToMany(fetch =  FetchType.LAZY)
     @JoinTable(
             name = "offering_ta_assignments",
             joinColumns = @JoinColumn(name = "offering_id"),

@@ -1,45 +1,41 @@
+/* src/pages/DeansOffice.module.css */
+
 .pageWrapper {
-    background: #f7f7f7;
-    min-height: 100vh;
-  }
-  
-  .heading {
-    text-align: center;
-    padding: 1rem 0;
-    font-size: 1.5rem;
-  }
-  
-  .courseList {
-    display: grid;
-    gap: 1rem;
-    padding: 0 1rem;
-  }
-  
-  .courseCard {
-    display: flex;
-    justify-content: space-between;
-    background: #fff;
-    padding: 1rem;
-    border-radius: 6px;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-  }
-  
-  .courseInfo > div {
-    margin-top: 0.25rem;
-  }
-  
-  .actions {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-  }
-  
-  .btn {
-    background: #2563EB;
-    color: white;
-    border: none;
-    padding: 0.5rem 1rem;
-    border-radius: 4px;
-    cursor: pointer;
-  }
-  
+  padding: 2rem;
+  background-color: #f3f4f6;
+}
+
+.heading {
+  font-size: 2rem;
+  text-align: center;
+  margin-bottom: 1.5rem;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1rem;
+}
+
+.card {
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.5rem;
+  padding: 1rem;
+  cursor: pointer;
+  transition: box-shadow .2s;
+}
+
+.card:hover {
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.deptName {
+  margin: 0 0 .5rem;
+  font-size: 1.25rem;
+}
+
+.metric {
+  margin: .25rem 0;
+  font-size: .95rem;
+}

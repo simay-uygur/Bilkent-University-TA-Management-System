@@ -1,12 +1,12 @@
 package com.example.mapper;
 
+import org.springframework.stereotype.Component;
+
 import com.example.dto.LessonDto;
 import com.example.entity.Courses.Lesson;
 import com.example.entity.General.ClassRoom;
-import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Component;
 
-import java.time.Duration;
+import lombok.RequiredArgsConstructor;
 
 @Component
 @RequiredArgsConstructor
@@ -21,10 +21,7 @@ public class LessonMapper {
         LessonDto dto = new LessonDto();
 
         // ISO-8601 duration string (e.g. "PT1H30M")
-        dto.setDuration(lesson.getDuration() != null
-                ? lesson.getDuration().toString()
-                : null
-        );
+        dto.setDuration(lesson.getDuration() != null ? lesson.getDuration() : null);
 
         // classRoom → use classroomId and examCapacity
         ClassRoom room = lesson.getLessonRoom();

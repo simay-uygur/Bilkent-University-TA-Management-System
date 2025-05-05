@@ -1,22 +1,48 @@
 package com.example.controller;
 
 import java.io.IOException;
+import java.util.List;
+import java.util.stream.Collectors;
 
-import org.springframework.http.MediaType;               // ← correct import
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;            
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.example.entity.Actors.User;
-import com.example.entity.Requests.Leave;
+import com.example.dto.RequestDto;
+import com.example.entity.Actors.Instructor;
 import com.example.entity.Requests.LeaveDTO;
+import com.example.entity.Requests.ProctorTaFromFacultiesDto;
+import com.example.entity.Requests.ProctorTaInFacultyDto;
+import com.example.entity.Requests.Request;
+import com.example.entity.Requests.SwapDto;
+import com.example.entity.Requests.SwapEnableDto;
+import com.example.entity.Requests.TransferProctoringDto;
+import com.example.entity.Requests.WorkLoadDto;
 import com.example.exception.UserNotFoundExc;
-import com.example.repo.UserRepo;
-import com.example.service.RequestServ;
+import com.example.mapper.RequestMapper;
+import com.example.repo.InstructorRepo;
+import com.example.repo.RequestRepos.LeaveRepo;
+import com.example.repo.RequestRepos.ProctorTaFromFacultiesRepo;
+import com.example.repo.RequestRepos.ProctorTaInFacultyRepo;
+import com.example.repo.RequestRepos.SwapEnableRepo;
+import com.example.repo.RequestRepos.SwapRepo;
+import com.example.repo.RequestRepos.TransferProctoringRepo;
+import com.example.repo.RequestRepos.WorkLoadRepo;
+import com.example.service.RequestServices.LeaveServ;
+import com.example.service.RequestServices.ProctorTaFromFacultiesServ;
+import com.example.service.RequestServices.ProctorTaInFacultyServ;
+import com.example.service.RequestServices.SwapEnableServ;
+import com.example.service.RequestServices.SwapServ;
+import com.example.service.RequestServices.TransferProctoringServ;
+import com.example.service.RequestServices.WorkLoadServ;
 
 import lombok.RequiredArgsConstructor;
 
@@ -24,38 +50,253 @@ import lombok.RequiredArgsConstructor;
 @RequestMapping("/api")
 @RequiredArgsConstructor
 public class RequestController {
-    
-    private final RequestServ reqServ;
-    private final UserRepo   userRepo;
+
+    private final SwapServ swapServ;
+    private final SwapRepo swapRepo;
+    private final SwapEnableServ swapEnableServ;
+    private final SwapEnableRepo swapEnableRepo;
+    private final LeaveServ leaveServ;
+    private final LeaveRepo leaveRepo;
+    private final ProctorTaFromFacultiesServ proctorTaFromFacultiesServ;
+    private final ProctorTaFromFacultiesRepo fromFacRepo;
+    private final ProctorTaInFacultyServ proctorTaInFacultyServ;
+    private final ProctorTaInFacultyRepo inFacRepo;
+    private final TransferProctoringServ transferProctoringServ;
+    private final TransferProctoringRepo transferRepo;
+    private final WorkLoadServ workLoadServ;
+    private final WorkLoadRepo workLoadRepo;
+
+    private final InstructorRepo insRepo;
+    private final RequestMapper requestMapper;
 
     @PostMapping(
         path = "/ta/{taId}/request/leave",
         consumes = MediaType.MULTIPART_FORM_DATA_VALUE   // ← **must** declare this
     )
-    public ResponseEntity<Boolean> sendLeaveRequest(
+    public ResponseEntity<Void> sendLeaveRequest(
         @PathVariable Long taId,
-        @RequestPart("data") LeaveDTO dto,               // ← name matches form‐data key “data”
+        @RequestPart("data") LeaveDTO dto,   
         @RequestPart(value = "file", required = false) MultipartFile file
     ) throws IOException {
-        User sender = userRepo.findById(taId)
-            .orElseThrow(() -> new UserNotFoundExc(taId));
-        User receiver = userRepo.findById(dto.getReceiverId())
-            .orElseThrow(() -> new UserNotFoundExc(dto.getReceiverId()));
+        leaveServ.createLeaveRequest(dto, file, taId);
+        boolean exists = leaveRepo.existsBySenderIdAndReceiverIdAndIsRejected(taId, dto.getReceiverId(), false);
+        return new ResponseEntity<>(exists ? HttpStatus.CREATED : HttpStatus.BAD_REQUEST);
+    }
 
-        Leave leaveRequest = new Leave();
-        leaveRequest.setRequestType(dto.getRequestType());
-        leaveRequest.setDescription(dto.getDescription());
-        leaveRequest.setDuration(dto.getDuration());
-        leaveRequest.setSender(sender);
-        leaveRequest.setReceiver(receiver);
+    @GetMapping("/ta/{taId}/request/leave/all")
+    public ResponseEntity<List<LeaveDTO>> getLeaveRequests(@PathVariable Long taId) {
+        return new ResponseEntity<>(leaveServ.getAllLeaveRequestsByUserId(taId), HttpStatus.OK);
+    }
 
-        if (file != null && !file.isEmpty()) {
-            leaveRequest.setAttachment(file.getBytes());
-            leaveRequest.setAttachmentFilename(file.getOriginalFilename());
-            leaveRequest.setAttachmentContentType(file.getContentType());
-        }
+    @GetMapping("/instructor/{insId}/request/received/all")
+    public ResponseEntity<List<RequestDto>> getAllForReceiver(
+            @PathVariable Long insId
+    ) {
+        Instructor instructor = insRepo.findById(insId)
+                .orElseThrow(() -> new UserNotFoundExc(insId));
 
-        boolean created = reqServ.createRequest(leaveRequest);
-        return ResponseEntity.status(created ? 201 : 400).body(created);
+        // fetch polymorphic Requests
+        List<Request> entities = instructor.getReceivedRequests();
+
+        // map to DTOs
+        List<RequestDto> dtos = entities.stream().map(requestMapper::toDto).collect(Collectors.toList());
+
+
+        return ResponseEntity.ok(dtos);
+    }
+
+    @PostMapping("/swap")
+    public ResponseEntity<?> sendSwap(
+        @PathVariable Long taId,
+        @RequestBody SwapDto dto
+    ) {
+        swapServ.createSwapRequest(dto, taId);
+        boolean exists = swapRepo.existsBySenderIdAndReceiverIdAndExamExamIdAndIsRejected(taId, dto.getReceiverId(), dto.getExamId(), false);
+        return new ResponseEntity<>(exists ? HttpStatus.CREATED : HttpStatus.BAD_REQUEST);
+    }
+
+    @PostMapping("/swap-enable")
+    public ResponseEntity<Void> sendSwapEnable(
+            @PathVariable Long taId,
+            @RequestBody SwapEnableDto dto
+    ) {
+        swapEnableServ.createSwapEnableReq(dto, taId);
+        boolean exists = swapEnableRepo.existsBySenderIdAndReceiverIdAndExamExamIdAndIsRejected(taId, dto.getReceiverId(), dto.getExamId(), false);
+        return new ResponseEntity<>(exists ? HttpStatus.CREATED : HttpStatus.BAD_REQUEST);
+    }
+
+    @PostMapping("/transfer-proctoring")
+    public ResponseEntity<Void> sendTransferProctoring(
+            @PathVariable Long taId,
+            @RequestBody TransferProctoringDto dto
+    ) {
+        transferProctoringServ.createTransferProctoringReq(dto, taId);
+        boolean exists = transferRepo.existsBySenderIdAndReceiverIdAndExamExamIdAndIsRejected(taId, dto.getReceiverId(), dto.getExamId(), false);
+        return new ResponseEntity<>(exists ? HttpStatus.CREATED : HttpStatus.BAD_REQUEST);
+    }
+
+    @PostMapping("/proctor-from-faculties")
+    public ResponseEntity<Void> sendProctorTaFromFaculties(
+            @PathVariable Long taId,
+            @RequestBody ProctorTaFromFacultiesDto dto
+    ) {
+        proctorTaFromFacultiesServ.createProctorTaFromFacultiesRequest(dto, taId);
+        boolean exists = fromFacRepo.existsBySenderIdAndExamExamIdAndIsRejected(taId, dto.getExamId(), false);
+        return new ResponseEntity<>(exists ? HttpStatus.CREATED : HttpStatus.BAD_REQUEST);
+    }
+
+    @PostMapping("/proctor-in-faculty")
+    public ResponseEntity<Void> sendProctorTaInFaculty(
+            @PathVariable Long taId,
+            @RequestBody ProctorTaInFacultyDto dto
+    ) {
+        proctorTaInFacultyServ.createProctorTaInFacultyRequest(dto, taId);
+        boolean exists = inFacRepo.existsBySenderIdAndReceiverIdAndExamExamIdAndIsRejected(taId, dto.getReceiverId(), dto.getExamId(), false);
+        return new ResponseEntity<>(exists ? HttpStatus.CREATED : HttpStatus.BAD_REQUEST);
+    }
+
+    @PostMapping("/ta/{taId}/request/workload")
+    public ResponseEntity<Void> sendWorkloadRequest(
+        @PathVariable Long taId,
+        @RequestBody WorkLoadDto dto
+    ) {
+        workLoadServ.createWorkLoad(dto, taId);
+        boolean exists = workLoadRepo.existsBySenderIdAndTaskTaskIdAndIsRejected(taId, dto.getTaskId(), false);
+        return new ResponseEntity<>(exists ? HttpStatus.CREATED : HttpStatus.BAD_REQUEST);
     }
 }
+/*
+Leave Request
+{"requestType":"Leave",
+  "description":"Medical leave — PNG attached",
+"receiverId":20300,
+"duration": {
+    "start": {
+      "day": 28,
+      "month": 3,
+      "year": 2025,
+      "hour": 1,
+      "minute": 0
+    },
+    "finish": {
+      "day": 28,
+      "month": 3,
+      "year": 2025,
+      "hour": 1,
+      "minute": 5
+    }
+  }
+} */
+
+/*Swap*/
+/*SwapEnable*/
+/*{
+  "requestType": "SwapEnable",
+  "description": "Enable swap for my exam assignment",
+  "receiverId": 20310,
+  "examId": 550,
+  "examName": "CS315 Final",
+  "duration": {
+    "start": {
+      "day": 15,
+      "month": 5,
+      "year": 2025,
+      "hour": 14,
+      "minute": 0
+    },
+    "finish": {
+      "day": 15,
+      "month": 5,
+      "year": 2025,
+      "hour": 16,
+      "minute": 0
+    }
+  }
+}*/
+/*TransferProctoring*/
+/*{
+  "requestType": "TransferProctoring",
+  "description": "Please transfer my proctoring duty to another session",
+  "receiverId": 20320,
+  "examId": 560,
+  "examName": "CS319 Midterm",
+  "duration": {
+    "start": {
+      "day": 20,
+      "month": 5,
+      "year": 2025,
+      "hour": 10,
+      "minute": 0
+    },
+    "finish": {
+      "day": 20,
+      "month": 5,
+      "year": 2025,
+      "hour": 12,
+      "minute": 0
+    }
+  }
+}
+*/
+/*ProctorTaFromFaculties*/
+/*{
+  "requestType": "ProctorTaFromFaculties",
+  "description": "Requesting proctoring from other faculties",
+  "receiverId": 20330,
+  "examid": 570,
+  "examName": "CS401 Project Presentation",
+  "proctorTaInFacultyDtos": [
+    {
+      "facultyName": "Engineering Faculty",
+      "examId": 570,
+      "examName": "CS401 Project Presentation",
+      "requiredTas": 2
+    },
+    {
+      "facultyName": "Science Faculty",
+      "examId": 570,
+      "examName": "CS401 Project Presentation",
+      "requiredTas": 1
+    }
+  ]
+}
+*/
+/*ProctorTaInFaculty*/
+/*{
+  "requestType": "ProctorTaInFaculty",
+  "description": "I can proctor for another faculty’s exam",
+  "senderId": 30020,
+  "receiverId": 20330,
+  "examId": 580,
+  "examName": "CS320 Lab Exam",
+  "facultyName": "Science Faculty",
+  "requiredTas": 1
+}
+*/
+/*WorkLoad*/
+/*
+{
+  "requestType": "WorkLoad",
+  "description": "Requesting workload adjustment",
+  "receiverId": 20340,
+  "taskId": 900,
+  "taskType": "LAB_SUPERVISION",
+  "workload": 3,
+  "duration": {
+    "start": {
+      "day":  5,
+      "month":  6,
+      "year": 2025,
+      "hour": 8,
+      "minute": 30
+    },
+    "finish": {
+      "day": 5,
+      "month": 6,
+      "year": 2025,
+      "hour": 12,
+      "minute": 0
+    }
+  }
+}
+*/

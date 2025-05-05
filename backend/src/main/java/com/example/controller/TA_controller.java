@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.example.dto.TaDto;
 import com.example.entity.Actors.TA;
 import com.example.entity.General.Date;
 import com.example.entity.Tasks.Task;
@@ -52,18 +53,24 @@ public class TA_controller {
         return new ResponseEntity<>((TA) userServ.createUser(ta), HttpStatus.CREATED) ;
         //return ResponseEntity.created(URI.create("/signIn/{id}")).body(serv.createUser(u)) ;
     } // method should be sent to Admin controller*/
-
+    
     @GetMapping("/api/ta/all")
-    public List<TA> getAllTAs() 
+    public List<TaDto> getAllTAs() 
     {
         System.out.println("ilmayyyyy");
         return serv.getAllTAs();
     } // method should be sent to Admin controller
 
     @GetMapping("/api/ta/{id}")
-    public TA getTAById(@PathVariable Long id) 
+    public TaDto getTAById(@PathVariable Long id) 
     {
         return serv.getTAById(id);
+    }
+
+    @GetMapping("/api/ta/department/{deptName}")
+    public ResponseEntity<List<TaDto>> getTAByDepartment(@PathVariable String deptName) 
+    {
+        return new ResponseEntity<>(serv.getTAsByDepartment(deptName), HttpStatus.OK);
     }
 
     @DeleteMapping("/api/ta/{id}")
@@ -113,14 +120,14 @@ public class TA_controller {
 
     @GetMapping("/api/ta/{id}/schedule")
     public ResponseEntity<?> getWeeklyScheduleForTA(@PathVariable Long id) {
-        TA ta = serv.getTAById(id);
+        TA ta = serv.getTAByIdEntity(id);
         Date date = new Date().currenDate() ;
         return new ResponseEntity<>(serv.getWeeklyScheduleForTA(ta, date), HttpStatus.OK);
     }
 
     @GetMapping("/api/ta/{id}/schedule/day") // date in format "yyyy-MM-dd"
     public ResponseEntity<?> getDaySchedule(@PathVariable Long id, @RequestParam String date) {
-        TA ta = serv.getTAById(id);
+        TA ta = serv.getTAByIdEntity(id);
         if (ta == null) {
             throw new TaNotFoundExc(-1l);
         }

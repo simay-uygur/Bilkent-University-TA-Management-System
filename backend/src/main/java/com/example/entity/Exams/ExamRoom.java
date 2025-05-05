@@ -22,7 +22,9 @@ public class ExamRoom {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int examRoomId;          //auto generated
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY,
+            cascade = { CascadeType.PERSIST, CascadeType.MERGE })
+    @JoinColumn(name = "classroom_id", nullable = false)
     private ClassRoom examRoom;      // FK kept in the same table (no name override needed)
 
     @Column(name = "isApproved", nullable = false)
@@ -45,7 +47,7 @@ public class ExamRoom {
     private Exam exam;
 
     public String getExamRoomCode() {
-        return examRoom != null ? examRoom.toString() : null; // hope it works
+        return examRoom != null ? examRoom.getClassroomId() : null;
     }
 }
 

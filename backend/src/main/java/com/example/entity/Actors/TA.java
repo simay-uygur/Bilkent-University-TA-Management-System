@@ -1,6 +1,11 @@
 package com.example.entity.Actors;
 
-import com.example.entity.Courses.Course;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+
+import org.hibernate.annotations.DynamicUpdate;
+
 import com.example.entity.Courses.CourseOffering;
 import com.example.entity.Courses.Section;
 import com.example.entity.General.AcademicLevelType;
@@ -8,15 +13,20 @@ import com.example.entity.General.ProctorType;
 import com.example.entity.Tasks.TaTask;
 import com.example.exception.NoPersistExc;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import jakarta.persistence.*;
-import lombok.*;
-import org.hibernate.annotations.DynamicUpdate;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import static jakarta.persistence.FetchType.LAZY;
+import jakarta.persistence.ManyToMany;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.Table;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 /**
  * Teaching-Assistant entity.
@@ -40,15 +50,15 @@ public class TA extends User {
     @Column(name = "total_workload", nullable = false)
     private int totalWorkload = 0;
 
-    @Column(name = "is_active", updatable = false, nullable = false)
-    private Boolean isActive = true;
-
     @Enumerated(EnumType.STRING)
     @Column(name = "ta_type", nullable = false)
     private TAType taType;
 
     @Column(name = "department", nullable = false)
     private String department;
+
+    @Column(name = "is_active", nullable = false)
+    private boolean isActive = true; 
 
     @Enumerated(EnumType.STRING)
     @Column(name = "proctor_type")

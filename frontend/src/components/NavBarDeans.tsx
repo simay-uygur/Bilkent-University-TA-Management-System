@@ -1,5 +1,5 @@
 import React from 'react';
-import { Home, Bell, Settings, LogOut } from 'lucide-react';
+import { Home, Bell, ClipboardList, Settings, LogOut } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import logo from '../assets/react.svg';
 import styles from './NavBarDeans.module.css';
@@ -16,10 +16,18 @@ const NavBarDeans: React.FC<{ onNotifications: () => void }> = ({ onNotification
   const { pathname } = useLocation();
 
   const navItems: NavItem[] = [
-    { label: 'Home', icon: <Home size={18} />, to: '/deans-office' },
-    { label: 'Notifications', icon: <Bell size={18} />, onClick: onNotifications },
-    { label: 'Settings', icon: <Settings size={18} />, to: '/settings' },
-    { label: 'Logout', icon: <LogOut size={18} />, to: '/login' },
+    { label: 'Home',           icon: <Home    size={18} />, to: '/deans-office' },
+    { label: 'Proctoring',     icon: <ClipboardList size={18} />, to: '/deans-office/proctor' },
+    { label: 'Notifications',  icon: <Bell    size={18} />, onClick: onNotifications },
+    { label: 'Settings',       icon: <Settings size={18} />, to: '/settings' },
+    {
+      label: 'Logout',
+      icon: <LogOut size={18} />,
+      onClick: () => {
+        localStorage.removeItem('jwt');
+        navigate('/login', { replace: true });
+      }
+    },
   ];
 
   return (
@@ -36,8 +44,7 @@ const NavBarDeans: React.FC<{ onNotifications: () => void }> = ({ onNotification
               item.to && pathname.startsWith(item.to) ? styles.active : ''
             }`}
             onClick={() => {
-              if (item.to) navigate(item.to);
-              else if (item.onClick) item.onClick();
+              item.to ? navigate(item.to) : item.onClick?.();
             }}
           >
             <span className={styles.icon}>{item.icon}</span>

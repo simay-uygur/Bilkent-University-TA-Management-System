@@ -3,14 +3,13 @@ package com.example.service;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.springframework.stereotype.Service;
+
 import com.example.dto.ExamDto;
 import com.example.dto.ExamRoomDto;
 import com.example.dto.StudentDto;
-import org.springframework.stereotype.Service;
-
 import com.example.entity.Exams.Exam;
 import com.example.entity.Exams.ExamRoom;
-
 import com.example.entity.General.Student;
 import com.example.repo.ExamRepo;
 
@@ -43,7 +42,7 @@ public class ExamServImpl implements ExamServ{
             rooms.add(room_DTO);
         }
         dto.setCourseCode(exam.getTask().getSection().getOffering().getCourse().getCourseCode()); //this can be changed
-        dto.setDuration(exam.getTask().getDuration().toString());
+        dto.setDuration(exam.getTask().getDuration());
         dto.setExamRooms(rooms);
         return dto;
     }
@@ -51,7 +50,7 @@ public class ExamServImpl implements ExamServ{
     @Override
     public boolean createExam(Exam exam) {
         examRepo.save(exam);
-        return examRepo.existsById(exam.getExam_id());
+        return examRepo.existsById(exam.getExamId());
     }
     
 

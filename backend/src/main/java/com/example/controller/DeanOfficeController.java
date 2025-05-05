@@ -31,10 +31,8 @@ public class DeanOfficeController {
     }
 
     @GetMapping
-    public List<DeanOfficeDto> list() {
-        return deanOfficeServ.getAll().stream()
-                .map(deanOfficeMapper::toDto)
-                .toList();
+    public List<DeanOfficeDto> list(){
+        return deanOfficeServ.getAll();
     }
 
     @GetMapping("/{id}")

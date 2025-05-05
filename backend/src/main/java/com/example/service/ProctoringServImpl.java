@@ -28,7 +28,7 @@ import lombok.AllArgsConstructor;
 /*restrictions:
  - from the same faculty(can be overriden) [0]
  - one day after/before the another proctoring(can be overriden) [1]
- - only phd stud to ms or phd. ms stud only to ms (can be overriden) [2]
+ - only phd stud to ms or phd. ms stud only to ms , bs only to bs(can be overriden) [2]
  - is not student in the course
  - does not have exams or another task
  - is on leave

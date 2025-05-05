@@ -6,12 +6,16 @@ import lombok.NoArgsConstructor;
 
 import java.util.List;
 
+import com.example.entity.General.Event;
+
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 public class ExamDto {
-    private String duration;
+    private Event    duration;
     private String courseCode;
+    private String       type;
     private List<ExamRoomDto> examRooms;
+    private int   requiredTas;
 }

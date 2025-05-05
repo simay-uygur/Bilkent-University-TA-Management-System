@@ -1,0 +1,16 @@
+package com.example.entity.Requests;
+
+import java.util.List;
+
+import com.example.dto.RequestDto;
+
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+
+@EqualsAndHashCode(callSuper = true)
+@Data
+public class ProctorTaFromFacultiesDto extends RequestDto {
+    private List<ProctorTaInFacultyDto> proctorTaInFacultyDtos;
+    private String examName;
+    private int    examId;
+}

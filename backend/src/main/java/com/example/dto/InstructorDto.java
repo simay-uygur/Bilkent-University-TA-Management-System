@@ -16,7 +16,7 @@ public class InstructorDto {
     private String surname;
     private String webmail;        // added
     private String departmentName;
-    private List<String> courseCodes;
+    private List<String> sections;
 }
 
 /*

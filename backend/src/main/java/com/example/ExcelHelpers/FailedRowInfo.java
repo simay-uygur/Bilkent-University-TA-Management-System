@@ -1,13 +1,16 @@
 package com.example.ExcelHelpers;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
+/**
+ * DTO class for representing failed rows during Excel import.
+ */
 @Data
-@NoArgsConstructor
+@Getter
+@Setter
 @AllArgsConstructor
+@NoArgsConstructor
 public class FailedRowInfo {
-    private int rowIndex;
-    private String message;
+    private int rowNumber;
+    private String errorMessage;
 }

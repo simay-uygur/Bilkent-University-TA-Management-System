@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import com.example.dto.CourseDto;
+import com.example.dto.InstructorDto;
 import com.example.dto.TaDto;
 import com.example.dto.TaskDto;
 import com.example.entity.Courses.CourseOffering;
@@ -13,6 +14,7 @@ import com.example.service.CourseOfferingServ;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -47,6 +49,11 @@ public class CourseController {
     @Autowired
     private CourseOfferingServ courseOfferingServ;
 
+    @DeleteMapping("api/course/{course_code}")
+    public ResponseEntity<Boolean> deleteCourse(@PathVariable String course_code) {
+        return new ResponseEntity<>(courseServ.deleteCourse(course_code), HttpStatus.OK);
+    }
+
     @PostMapping("api/course")
     public ResponseEntity<Boolean> createCourse(@RequestBody Course course) {
         // checkPrerequisities(course); //still not done
@@ -71,6 +78,13 @@ public class CourseController {
                 "section_code" : "cs319-1"
             }
         */
+    }
+    @GetMapping("api/course/department/{deptName}")
+    public ResponseEntity<List<CourseDto>> getByDepartment(
+            @PathVariable String deptName ) {
+        return new ResponseEntity<>(courseServ.getCoursesByDepartment(deptName), HttpStatus.FOUND);
+       /*  List<CourseDto> dtos = courseServ.getCoursesByDepartment(deptName);
+        return ResponseEntity.ok(dtos); */
     }
 
     @GetMapping("api/course/{course_code}")
@@ -152,5 +166,6 @@ public class CourseController {
     public ResponseEntity<Boolean> createExam(@RequestBody Exam exam, @PathVariable String course_code) {
         return new ResponseEntity<>()
     }*/
+    
     
 }

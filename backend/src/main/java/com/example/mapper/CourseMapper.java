@@ -6,6 +6,10 @@ import com.example.entity.Courses.Department;
 import com.example.entity.General.AcademicLevelType;
 import com.example.repo.DepartmentRepo;
 import lombok.RequiredArgsConstructor;
+
+import java.util.Arrays;
+import java.util.stream.Collectors;
+
 import org.springframework.stereotype.Component;
 
 @Component
@@ -21,6 +25,13 @@ public class CourseMapper {
         dto.setCourseId(course.getCourseId());
         dto.setCourseCode(course.getCourseCode());
         dto.setCourseName(course.getCourseName());
+        dto.setDepartment(course.getDepartment().getName());
+        dto.setCourseAcademicStatus(course.getCourseAcademicStatus().name());
+        dto.setPrereqs(
+                Arrays.stream(course.getPrereqList().split("\\s*,\\s*"))
+                        .filter(s -> !s.isBlank())
+                        .collect(Collectors.toList())
+        );
         return dto;
     }
 

@@ -1,4 +1,4 @@
-package com.example.repo;
+package com.example.repo.RequestRepos;
 
 import java.util.List;
 
@@ -10,7 +10,7 @@ import com.example.entity.Requests.Request;
 import com.example.entity.Requests.RequestType;
 
 @Repository
-public interface RequestRepo extends JpaRepository<Request, Integer>{
+public interface RequestRepo extends JpaRepository<Request, Long>{
     List<Request> findByRequestType(RequestType requestType ); // Find all requests of a specific type
     List<Request> findBySender(User sender);
     List<Request> findByReceiver(User receiver);
