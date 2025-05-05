@@ -3,8 +3,10 @@ import React, { useState, useEffect } from 'react';
 import { Outlet } from 'react-router-dom';
 import NavBarDepartment from './NavBarDepartment';
 import NotificationPanel from './NotificationPanel';
+import SearchSelect from './SearchSelect';
 import { fetchNotifications, markAllRead, Notification } from '../api'; 
 import styles from './DepartmentLayout.module.css';
+import MultiSearch from './MultiSearch';
 
 export default function DepartmentLayout() {
   const [showNotif, setShowNotif] = useState(false);
@@ -27,7 +29,9 @@ export default function DepartmentLayout() {
   return (
     <div className={styles.wrapper}>
       <NavBarDepartment onNotifications={() => setShowNotif(true)} />
-
+      <div className={styles.searchContainer}>
+        <MultiSearch />
+      </div>
       {showNotif && (
         <NotificationPanel
           notifications={notifications}
@@ -35,7 +39,7 @@ export default function DepartmentLayout() {
           onMarkAllRead={handleMarkAllRead}
         />
       )}
-
+  
       <main className={styles.main}>
         <Outlet />
       </main>

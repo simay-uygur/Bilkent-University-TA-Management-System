@@ -1,0 +1,48 @@
+.multiSearch {
+    width: 100%;
+    max-width: 800px;
+    margin: 0 auto;
+  }
+  
+  .tabs {
+    display: flex;
+    margin-bottom: 10px;
+  }
+  
+  .tab {
+    flex: 1;
+    padding: 8px 16px;
+    border: none;
+    background: #f0f0f0;
+    cursor: pointer;
+    transition: background-color 0.2s;
+  }
+  
+  .tab.active {
+    background: #007bff;
+    color: white;
+  }
+  
+  .courseOption {
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .courseCode {
+    font-weight: bold;
+  }
+  
+  .courseName {
+    color: #666;
+    font-size: 0.9em;
+  }
+  
+  .personOption {
+    padding: 4px 0;
+  }
+  
+  .loading {
+    text-align: center;
+    padding: 10px;
+    color: #666;
+  }

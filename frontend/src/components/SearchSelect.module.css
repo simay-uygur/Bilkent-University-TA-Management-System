@@ -1,0 +1,45 @@
+.container {
+    position: relative;
+    width: 100%;
+    max-width: 300px;
+  }
+  
+  .input {
+    width: 100%;
+    padding: 8px 12px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    outline: none;
+    font-size: 1rem;
+  }
+  
+  .input:focus {
+    border-color: #007bff;
+  }
+  
+  .dropdown {
+    position: absolute;
+    top: calc(100% + 4px);
+    left: 0;
+    right: 0;
+    max-height: 200px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    background: #fff;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    overflow-y: auto;
+    z-index: 1000;
+  }
+  
+  .item {
+    padding: 8px 12px;
+    cursor: pointer;
+    transition: background-color 0.1s ease-in-out;
+  }
+  
+  .item:hover {
+    background-color: #f0f0f0;
+  }
+  
