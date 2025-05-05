@@ -10,7 +10,6 @@ import java.util.Optional;
 @Repository
 public interface ClassRoomRepo extends JpaRepository<ClassRoom, String> {
     boolean existsByClassroomId(String id);
-
     Optional<ClassRoom> findClassRoomByClassroomId(String classroomId);
     Optional<ClassRoom> findClassRoomByClassroomIdEqualsIgnoreCase(String classroomId);
 }

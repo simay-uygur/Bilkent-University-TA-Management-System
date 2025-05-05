@@ -6,11 +6,14 @@ import com.example.dto.FailedRowInfo;
 import com.example.dto.LessonDto;
 import com.example.entity.Courses.Lesson;
 import com.example.entity.Courses.Section;
+import com.example.entity.General.ClassRoom;
 import com.example.entity.General.Date;
 import com.example.entity.General.Event;
 import com.example.repo.ClassRoomRepo;
 import com.example.repo.LessonRepo;
 import com.example.repo.SectionRepo;
+
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
@@ -20,6 +23,8 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
@@ -32,7 +37,172 @@ public class LessonServImpl implements LessonServ {
     private final LessonRepo lessonRepo;
     private final SectionRepo sectionRepo;
     private final ClassRoomRepo classRoomRepo;
+/*     @Override
+@Transactional
+public Map<String, Object> importLessonsFromExcel(MultipartFile file) throws IOException {
+    List<Lesson> successful = new ArrayList<>();
+    List<FailedRowInfo> failed = new ArrayList<>();
 
+    try (Workbook wb = new XSSFWorkbook(file.getInputStream())) {
+        Sheet sheet = wb.getSheetAt(0);
+        for (Row row : sheet) {
+            if (row.getRowNum() == 0) continue;  // Skip header
+            
+            try {
+                // 1) Extract data from Excel
+                String sectionCode = getCellStringValue(row, 0); // CS-319-1-2025-SPRING
+                String dayString = getCellStringValue(row, 1);    // Monday
+                String startTime = getCellStringValue(row, 2);    // 10:40
+                String endTime = getCellStringValue(row, 3);      // 12:30
+                String roomCode = getCellStringValue(row, 4);     // B-201
+                
+                if (sectionCode == null || dayString == null || startTime == null || 
+                    endTime == null || roomCode == null) {
+                    throw new IllegalArgumentException("Missing required data in row " + row.getRowNum());
+                }
+                
+                // 2) Find the section
+                Section section = sectionRepo.findBySectionCodeIgnoreCase(sectionCode)
+                    .orElseThrow(() -> new IllegalArgumentException(
+                        "Section not found with code: " + sectionCode));
+                
+                // 3) Find or create classroom
+                ClassRoom room = classRoomRepo.findClassRoomByClassroomId(roomCode)
+                    .orElseGet(() -> {
+                        ClassRoom newRoom = new ClassRoom();
+                        newRoom.setClassroomId(roomCode);
+                        newRoom.setClassCapacity(50); // Default values
+                        newRoom.setExamCapacity(30);
+                        return classRoomRepo.save(newRoom);
+                    });
+                
+                // 4) Parse times and create event
+                String[] startParts = startTime.split(":");
+                String[] endParts = endTime.split(":");
+                
+                int startHour = Integer.parseInt(startParts[0]);
+                int startMinute = Integer.parseInt(startParts[1]);
+                int endHour = Integer.parseInt(endParts[0]);
+                int endMinute = Integer.parseInt(endParts[1]);
+                
+                // Get day index from string (0 = Monday, 6 = Sunday)
+                int dayOfWeek = mapDayStringToDayIndex(dayString); 
+                
+                // Get current date info for the day of week
+                Calendar calendar = Calendar.getInstance();
+                while (calendar.get(Calendar.DAY_OF_WEEK) != mapDayIndexToCalendarDay(dayOfWeek)) {
+                    calendar.add(Calendar.DAY_OF_MONTH, 1);
+                }
+                
+                // Create start Date
+                Date startDate = new Date();
+                startDate.setYear(calendar.get(Calendar.YEAR));
+                startDate.setMonth(calendar.get(Calendar.MONTH) + 1); // Calendar months are 0-based
+                startDate.setDay(calendar.get(Calendar.DAY_OF_MONTH));
+                startDate.setHour(startHour);
+                startDate.setMinute(startMinute);
+                
+                // Create end Date
+                Date endDate = new Date();
+                endDate.setYear(calendar.get(Calendar.YEAR));
+                endDate.setMonth(calendar.get(Calendar.MONTH) + 1);
+                endDate.setDay(calendar.get(Calendar.DAY_OF_MONTH));
+                endDate.setHour(endHour);
+                endDate.setMinute(endMinute);
+                
+                // Create Event
+                Event event = new Event(startDate, endDate);
+                
+                // 5) Check for time conflicts
+                checkForTimeConflict(event, room);
+                
+                // 6) Create and save Lesson
+                Lesson lesson = new Lesson();
+                lesson.setSection(section);
+                lesson.setLessonRoom(room);
+                lesson.setDuration(event);
+                lesson.setLessonType(Lesson.LessonType.LESSON);
+                
+                Lesson savedLesson = lessonRepo.save(lesson);
+                successful.add(savedLesson);
+                
+            } catch (Exception e) {
+                failed.add(new FailedRowInfo(
+                    row.getRowNum(), 
+                    e.getClass().getSimpleName() + ": " + e.getMessage()
+                ));
+            }
+        }
+    }
+    
+    Map<String, Object> result = new HashMap<>();
+    result.put("successCount", successful.size());
+    result.put("failedCount", failed.size());
+    result.put("failedRows", failed);
+    return result;
+}
+private String getCellStringValue(Row row, int cellIndex) {
+    Cell cell = row.getCell(cellIndex);
+    if (cell == null) {
+        return null;
+    }
+    
+    switch (cell.getCellType()) {
+        case STRING:
+            return cell.getStringCellValue().trim();
+        case NUMERIC:
+            if (DateUtil.isCellDateFormatted(cell)) {
+                return cell.getLocalDateTimeCellValue().toString();
+            }
+            return String.valueOf((int)cell.getNumericCellValue());
+        default:
+            return "";
+    }
+} */
+
+// Helper method to convert day string to day index (0-6)
+/* private int mapDayStringToDayIndex(String dayString) {
+    switch (dayString.toLowerCase()) {
+        case "monday": return 0;
+        case "tuesday": return 1;
+        case "wednesday": return 2;
+        case "thursday": return 3;
+        case "friday": return 4;
+        case "saturday": return 5;
+        case "sunday": return 6;
+        default: throw new IllegalArgumentException("Invalid day: " + dayString);
+    }
+}
+
+// Helper method to convert day index to Calendar day constant
+private int mapDayIndexToCalendarDay(int dayIndex) {
+    switch (dayIndex) {
+        case 0: return Calendar.MONDAY;
+        case 1: return Calendar.TUESDAY;
+        case 2: return Calendar.WEDNESDAY;
+        case 3: return Calendar.THURSDAY;
+        case 4: return Calendar.FRIDAY;
+        case 5: return Calendar.SATURDAY;
+        case 6: return Calendar.SUNDAY;
+        default: throw new IllegalArgumentException("Invalid day index: " + dayIndex);
+    }
+}
+
+// Check for time conflicts in the same room
+private void checkForTimeConflict(Event newEvent, ClassRoom room) {
+    List<Lesson> existingLessons = lessonRepo.findByLessonRoom(room);
+    
+    for (Lesson existingLesson : existingLessons) {
+        Event existingEvent = existingLesson.getDuration();
+        
+        // Use your existing has() method to detect overlap
+        if (existingEvent.has(newEvent) || newEvent.has(existingEvent)) {
+            throw new IllegalStateException(
+                "Time conflict detected in room " + room.getClassroomId() + 
+                " between " + newEvent + " and existing lesson " + existingEvent);
+        }
+    }
+} */
     @Override
     public Map<String, Object> importLessonsFromExcel(MultipartFile file) throws IOException {
         List<Lesson> saved = new ArrayList<>();

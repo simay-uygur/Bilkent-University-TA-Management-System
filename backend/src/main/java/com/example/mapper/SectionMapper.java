@@ -26,9 +26,9 @@ public class SectionMapper {
         SectionDto dto = new SectionDto();
         dto.setSectionId(section.getSectionId());
         dto.setSectionCode(section.getSectionCode());
-        /* dto.setLessons(section.getLessons().stream()
+         dto.setLessons(section.getLessons().stream()
                 .map(lessonMapper::toDto)
-                .collect(Collectors.toList())); */
+                .collect(Collectors.toList())); 
         dto.setInstructor(instructorMapper.toDto(section.getInstructor())); 
 
         dto.setTas(section.getRegisteredTas().stream().map(taMapper::toDto).collect(Collectors.toList()));
@@ -38,13 +38,21 @@ public class SectionMapper {
     }
 
     /** DTO → Entity */
-    public Section toEntity(SectionDto dto) {
-        if (dto == null) return null;
-        Section s = new Section();
-        s.setSectionId(dto.getSectionId());
-        s.setSectionCode(dto.getSectionCode());
-        // wiring s.setOffering(...), s.setInstructor(...) and s.setLessons(...)
-        // should happen in your service before saving
-        return s;
+ 
+public Section toEntity(SectionDto dto) {
+    if (dto == null) return null;
+    Section s = new Section();
+    s.setSectionId(dto.getSectionId());
+    s.setSectionCode(dto.getSectionCode());
+    
+    // Also handle lessons here if needed
+    if (dto.getLessons() != null) {
+        s.setLessons(dto.getLessons().stream()
+                .map(lessonMapper::toEntity)
+                .collect(Collectors.toList()));
     }
+    
+    // Other fields will be set in service
+    return s;
+}
 }
