@@ -85,49 +85,5 @@ public class LessonMapper {
                 )
         );
     }
-//
-//    /**
-//     * Entity → DTO
-//     */
-//    public LessonDto toDto(Lesson lesson) {
-//        if (lesson == null) return null;
-//
-//        LessonDto dto = new LessonDto();
-//
-//        // Duration
-//        dto.setDuration(lesson.getDuration());
-//
-//        // Room
-//        ClassRoom room = lesson.getLessonRoom();
-//        if (room != null) {
-//            dto.setClassroomId(room.getClassroomId());
-//            dto.setExamCapacity(room.getExamCapacity());
-//        }
-//
-//        // Lesson Type
-//        dto.setLessonType(lesson.getLessonType().name());
-//
-//        // Section ID
-//        dto.setSectionId(lesson.getSection() != null ? lesson.getSection().getId() : null);
-//
-//        return dto;
-//    }
-//
-//    /**
-//     * DTO → Entity
-//     * ClassRoom and Section should be set in the Service.
-//     */
-//    public Lesson toEntity(LessonDto dto) {
-//        if (dto == null) return null;
-//
-//        Lesson lesson = new Lesson();
-//
-//        lesson.setDuration(dto.getDuration());
-//
-//        if (dto.getLessonType() != null) {
-//            lesson.setLessonType(Lesson.LessonType.valueOf(dto.getLessonType()));
-//        }
-//
-//        return lesson;
-//    }
+
 }
