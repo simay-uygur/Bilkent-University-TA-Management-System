@@ -56,8 +56,6 @@ const AssignTA: React.FC = () => {
       const newPotential = [...potential, ta];
       setAssigned(newAssigned);
       setPotential(newPotential);
-      examData.assignedTAs = newAssigned;
-      examData.potentialTAs = newPotential;
     } else {
       if (assigned.length >= needed) {
         setErrorMsg(`Cannot select more than ${needed} TAs.`);
@@ -67,8 +65,6 @@ const AssignTA: React.FC = () => {
       const newPotential = potential.filter(a => a.id !== ta.id);
       setAssigned(newAssigned);
       setPotential(newPotential);
-      examData.assignedTAs = newAssigned;
-      examData.potentialTAs = newPotential;
     }
     examData.tasLeft = needed - examData.assignedTAs.length;
   };
@@ -110,8 +106,6 @@ const AssignTA: React.FC = () => {
 
     setAssigned(newAssigned);
     setPotential(newPotential);
-    examData.assignedTAs = newAssigned;
-    examData.potentialTAs = newPotential;
     examData.tasLeft = needed - newAssigned.length;
 
     // Use ErrPopUp for both success & partial-info
