@@ -189,7 +189,7 @@ const CourseDetails: React.FC = () => {
                         : <span>None</span>
                       }
                     </div>
-                    // Replace the lessons display section
+                   
 <div>
   <strong>Lessons:</strong>{' '}
   {sec.lessons && sec.lessons.length > 0
