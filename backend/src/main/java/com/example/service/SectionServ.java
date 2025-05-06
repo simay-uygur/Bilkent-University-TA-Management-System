@@ -25,6 +25,9 @@ public interface SectionServ {
     Section getBySectionCode(String sectionCode);
 
     @Transactional
+    Map<String,Object> importSectionsAndInstructorsExcelWithCoordinators(MultipartFile file) throws IOException;
+
+    @Transactional
     boolean assignTA(Long taId, String sectionCode);
     //List<SectionDto> getByDepartment(String deptName);
 }
