@@ -47,9 +47,6 @@ public interface SectionRepo extends JpaRepository<Section, Integer>{
 
 
 
-
-
-
     Optional<Section> findSectionByOffering_IdAndSectionCodeIgnoreCase(int offeringId, String sectionCode);
 //  @Query("""
 //    SELECT new com.example.dto.TaDto(
