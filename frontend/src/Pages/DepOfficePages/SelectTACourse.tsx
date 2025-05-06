@@ -89,7 +89,7 @@ const SelectTACourse: React.FC = () => {
 
   return (
     <div className={styles.pageWrapper}>
-      <DepOfNavBar />
+      
 
       <header className={styles.header}>
         <BackBut to="/asgnTAC" />

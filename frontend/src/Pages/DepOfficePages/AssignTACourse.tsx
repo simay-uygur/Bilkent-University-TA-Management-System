@@ -48,7 +48,7 @@ const AssignTACourse: React.FC = () => {
 
   return (
     <div className={styles.pageWrapper}>
-      <DepOfNavBar />
+      
 
       <div className={styles.headerRow}>
         <BackBut to="/man" />

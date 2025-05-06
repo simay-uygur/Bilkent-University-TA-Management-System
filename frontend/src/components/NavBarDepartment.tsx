@@ -4,6 +4,8 @@ import { Bell, Home, LogOut, Settings, ClipboardList, Calendar } from 'lucide-re
 import logo from '../assets/react.svg';
 import { useNavigate, useLocation } from 'react-router-dom';
 import styles from './NavBarDepartment.module.css';
+import AssignTACourse from '../Pages/DepOfficePages/AssignTACourse';
+import SelectTACourse from '../Pages/DepOfficePages/SelectTACourse';
 
 interface Props {
   onNotifications: () => void;
@@ -27,6 +29,11 @@ const NavBarDepartment: React.FC<Props> = ({ onNotifications }) => {
                       localStorage.removeItem('jwt');
               }
             },
+  { label: 'Assign TA Course',    icon: <ClipboardList size={18}/>, path: '/dept-office/assign-ta-course', onClick: () => navigate('/dept-office/assign-ta-course') },
+  { label: 'Select TA Course',    icon: <ClipboardList size={18}/>, path: '/dept-office/select-ta-course', onClick: () => navigate('/dept-office/select-ta-course') },
+
+
+
   ];
 
   return (

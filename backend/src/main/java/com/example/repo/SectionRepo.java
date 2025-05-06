@@ -1,8 +1,10 @@
 package com.example.repo;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
+import com.example.dto.SectionDto;
 import com.example.dto.StudentDto;
 import com.example.dto.TaDto;
 import com.example.dto.TaMiniDto;
@@ -95,4 +97,10 @@ public interface SectionRepo extends JpaRepository<Section, Integer>{
 //           WHERE   sec.sectionId = :sectionId
 //           """)
 //    Optional<List<Section>> findSectionsBySectionCodeIgnoreCase(String secCode);
+  /*   @Query("""
+           SELECT  sec
+           FROM    Section  sec
+           WHERE   sec.sectionCode.instructor.department.name = :deptName
+           """)
+    List<SectionDto> findByDepartment(String deptName); */
 }

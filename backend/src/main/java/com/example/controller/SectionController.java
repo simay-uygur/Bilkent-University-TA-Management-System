@@ -33,6 +33,10 @@ public class SectionController {
         Section sec = sectionServ.getBySectionCode(sectionCode);
         return sectionMapper.toDto(sec);
     }
+    /* @GetMapping("/department/{deptName}")
+    public List<SectionDto> getByDepartment(@PathVariable String deptName) {
+        return sectionServ.getByDepartment(deptName);
+    } */
     
 
     @GetMapping

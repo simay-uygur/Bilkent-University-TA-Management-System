@@ -1,9 +1,11 @@
 package com.example.service;
 
+import com.example.dto.SectionDto;
 import com.example.entity.Courses.Section;
 import jakarta.transaction.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
@@ -21,4 +23,5 @@ public interface SectionServ {
     //@Transactional
     Map<String,Object> importSectionStudentsFromExcel(MultipartFile file) throws IOException;
     Section getBySectionCode(String sectionCode);
+    //List<SectionDto> getByDepartment(String deptName);
 }

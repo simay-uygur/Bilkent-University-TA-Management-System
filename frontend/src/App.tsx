@@ -50,6 +50,8 @@ import DepartmentInsturctorDetails from './components/DepartmentInsturctorDetail
 import AssignProctor from './Pages/DepOfficePages/AssignProctor';
 import AssignTA from './Pages/DepOfficePages/AssignTA';
 
+
+
 const App: React.FC = () => (
   <BrowserRouter>
     <Routes>
@@ -117,10 +119,12 @@ const App: React.FC = () => (
           <Route path="proctor/assign/:examId" element={<AssignTA />} />
           <Route path="course/:courseCode"        element={<DepartmentCourseDetails />} />
           <Route path="instructor/:id"         element={<DepartmentInsturctorDetails />} />
+          
 
           <Route path="leave"                   element={<LeaveRequestsPage />} />
 
-          
+          <Route path="assign-ta-course" element={<AssignTACourse />} />
+          <Route path="select-ta-course" element={<SelectTACourse />} />
       
 
 
