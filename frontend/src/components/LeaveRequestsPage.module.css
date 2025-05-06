@@ -1,0 +1,8 @@
+.pageWrapper { padding:20px; }
+.heading     { font-size:24px; margin-bottom:12px; }
+.table       { width:100%; border-collapse:collapse; margin-bottom:12px; }
+.table th, .table td { border:1px solid #ddd; padding:8px; }
+.actions button { margin-right:6px; padding:6px 12px; border:none; border-radius:4px; cursor:pointer; }
+.approve { background:#4caf50; color:#fff }
+.reject  { background:#f44336; color:#fff }
+.none    { text-align:center; color:#666; }

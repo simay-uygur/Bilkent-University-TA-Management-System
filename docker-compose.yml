@@ -9,6 +9,8 @@ services:
     command: ["./mvnw", "spring-boot:run"]
     ports:
       - "8080:8080"
+    env_file:
+      - .env
     environment:
       - SPRING_DATASOURCE_URL=${SPRING_DATASOURCE_URL}
       - SPRING_DATASOURCE_USERNAME=${SPRING_DATASOURCE_USERNAME}
@@ -22,11 +24,13 @@ services:
   frontend:
     build: ./frontend
     ports:
-      - "3000:80"
+      - "5173:5173"
     environment:
       - REACT_APP_API_URL=${REACT_APP_API_URL}
     networks:
       - shared_network
+    depends_on:
+      - backend
 
 networks:
   shared_network:

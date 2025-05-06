@@ -5,12 +5,16 @@ import jakarta.persistence.AttributeOverrides;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 import jakarta.persistence.Embedded;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Embeddable
 @Getter
 @Setter
+@NoArgsConstructor
+@AllArgsConstructor
 public class Event {
     @Embedded
     @AttributeOverrides({
@@ -32,9 +36,42 @@ public class Event {
     })
     private Date finish;
 
-    // Utility method to check if event is ongoing
+
     public boolean isOngoing() {
+        if (start == null || finish == null) return false;
+
         Date current = new Date().currenDate();
         return (current.isAfter(start) || current.isBefore(start)) && current.isBefore(finish);
+    }
+
+//    public boolean isOngoing() {
+//        Date current = new Date().currenDate();
+//        return (current.isAfter(start) || current.isBefore(start)) && current.isBefore(finish);
+//    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) return true;
+        if (obj == null || getClass() != obj.getClass()) return false;
+        Event event = (Event) obj;
+        return this.start.equals(event.start) && this.finish.equals(event.finish);
+    }
+
+    //not checked
+    public boolean has(Event dur){
+        return ((dur.getStart().equals(start) && dur.getFinish().equals(finish)) || 
+                ((dur.getStart().getHour() >= start.getHour() && 
+                  dur.getStart().getMinute() >= start.getMinute()) && 
+                  (dur.getStart().getHour() <= finish.getHour() &&
+                  dur.getStart().getMinute() >= finish.getMinute())) ||
+                ((dur.getFinish().getHour() >= start.getHour() &&
+                  dur.getFinish().getMinute() >= start.getMinute()) && 
+                  (dur.getFinish().getHour() <= finish.getHour() &&
+                   dur.getFinish().getMinute() <= finish.getMinute())));
+    }
+
+    @Override
+    public String toString(){
+        return "Start at: " + start.toString() + "\nFinish at: " + finish.toString();
     }
 }

@@ -2,6 +2,7 @@ package com.example.repo;
 
 
 import java.util.HashSet;
+import java.util.List;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -17,7 +18,7 @@ public interface TaskRepo extends JpaRepository<Task, Integer>{
 
     // Find all PENDING tasks 
     @Query("SELECT t FROM Task t WHERE t.status = 'PENDING'")
-    HashSet<Task> findPendingTasks();
+    List<Task> findPendingTasks();
 
     // Find all REJECTED tasks
     @Query("SELECT t FROM Task t WHERE t.status = 'REJECTED'")

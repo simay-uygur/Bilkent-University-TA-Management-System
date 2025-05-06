@@ -1,32 +1,37 @@
 package com.example.service;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Async;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import com.example.entity.Actors.TA;
-import com.example.entity.Tasks.TA_Task;
-import com.example.entity.Tasks.TA_TaskId;
+import com.example.entity.Courses.Lesson;
+import com.example.entity.Courses.Section;
+import com.example.entity.Tasks.TaTask;
 import com.example.entity.Tasks.Task;
-import com.example.entity.Tasks.TaskAccessType;
 import com.example.entity.Tasks.TaskState;
 import com.example.exception.GeneralExc;
 import com.example.exception.NoPersistExc;
+import com.example.exception.taExc.TaNotFoundExc;
 import com.example.exception.taskExc.TaskLimitExc;
 import com.example.exception.taskExc.TaskNoTasExc;
 import com.example.exception.taskExc.TaskNotFoundExc;
 import com.example.repo.TARepo;
-import com.example.repo.TA_TaskRepo;
+import com.example.repo.TaTaskRepo;
 import com.example.repo.TaskRepo;
 
 import jakarta.transaction.Transactional;
+import lombok.extern.slf4j.Slf4j;
 
 @Service
+@Slf4j
 @Transactional(rollbackOn = Exception.class)
 public class TaskServImpl implements TaskServ {
 
@@ -37,7 +42,7 @@ public class TaskServImpl implements TaskServ {
     private TARepo taRepo;
 
     @Autowired
-    private TA_TaskRepo taTaskRepo;
+    private TaTaskRepo taTaskRepo;
 
     @Override
     public Task createTask(Task task) {
@@ -45,7 +50,7 @@ public class TaskServImpl implements TaskServ {
             throw new GeneralExc("Task cannot be null!");
         }
         checkAndUpdateStatusTask(task);
-        return taskRepo.saveAndFlush(task);
+        return taskRepo.save(task);
     }
 
     @Override
@@ -108,71 +113,100 @@ public class TaskServImpl implements TaskServ {
     }
 
     @Override
-    public boolean updateTask(Task task) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'updateTask'");
+    public boolean updateTask(int task_id, Task incoming) {
+        Task existing = taskRepo.findById(task_id)
+            .orElseThrow(() -> new TaskNotFoundExc(task_id));
+        
+        existing.setDuration(incoming.getDuration());
+        existing.setTimePassed(incoming.isTimePassed());
+        existing.setWorkload(incoming.getWorkload());
+        existing.setTaskType(incoming.getTaskType());
+        existing.setStatus(incoming.getStatus());
+        existing.setRequiredTAs(incoming.getRequiredTAs());
+        existing.setSection(incoming.getSection());
+        existing.setExam(incoming.getExam());
+        
+        taskRepo.save(existing);
+        return taskRepo.existsById(task_id);
     }
 
     @Override
     public TA getTAById(int task_id, Long ta_id) {
         Task task = taskRepo.findById(task_id)
                 .orElseThrow(() -> new TaskNotFoundExc(task_id));
-        List<TA_Task> task_list = task.getTas_list() ;
-        for (TA_Task t : task_list){
-            if (Objects.equals(t.getTa_owner().getId(), ta_id))
-                return t.getTa_owner() ;
+        List<TaTask> task_list = task.getTasList() ;
+        for (TaTask t : task_list){
+            if (Objects.equals(t.getTaOwner().getId(), ta_id))
+                return t.getTaOwner() ;
         }
         throw new GeneralExc("TA with ID " + ta_id + " not found for task with ID " + task_id);
-            /*if (task instanceof Task Task)
-            {
-            if (Task.getTas_list() == null) {
-            throw new TaskNoTasExc();
-            }
-            for (TA ta : Task.getTas_list()) {
-            if (ta.getId().equals(ta_id)) {
-            return ta;
-            }
-            }
-            throw new GeneralExc("TA with ID " + ta_id + " not found for task with ID " + task_id);
-            }
-            else
-            {
-            Task Task = (Task) task;
-            if (Task.getTa_owner() == null) {
-            throw new GeneralExc("TA owner not found for task with ID " + task_id);
-            }
-            if (!Task.getTa_owner().getId().equals(ta_id)) {
-            throw new GeneralExc("TA with ID " + ta_id + " is not the owner of task with ID " + task_id);
-            }
-            return Task.getTa_owner();
-            }*/
     }
 
     @Override
-    public boolean assignTA(int task_id, TA ta, TaskAccessType type) {
-        Optional<Task> taskOptional = taskRepo.findById(task_id);
-        if (taskOptional.isEmpty()) {
-            throw new TaskNotFoundExc(task_id);
+    public boolean assignProctoring(int task_id, List<Long> ta_ids){
+        Task task = taskRepo.findById(task_id)
+                    .orElseThrow(() -> new TaskNotFoundExc(task_id));
+        for (Long ta_id : ta_ids){
+            TA ta = taRepo.findById(ta_id).orElseThrow(() -> new TaNotFoundExc(ta_id));
+            if (taTaskRepo.exists(task_id, ta.getId())) {
+                throw new GeneralExc("TA is already assigned to this task");
+            }
+            if (task.getAmountOfTas() == task.getRequiredTAs()) {
+                throw new TaskLimitExc();
+            }
+            // Create new TaTask relationship
+            TaTask taTask = new TaTask(task, ta, task.getAccessType());
+            // Update task side
+            task.setAmountOfTas(task.getAmountOfTas() + 1);
+            if (task.getTasList() == null) {
+                task.setTasList(new ArrayList<>());
+            }
+            // Update TA side
+            if (ta.getTaTasks() == null) {
+                ta.setTaTasks(new ArrayList<>());
+            }
+            taTaskRepo.saveAndFlush(taTask);
         }
+        return true;
+    }
 
-        Task task = (Task) taskOptional.get();
-        if (task.getAmount_of_tas() == task.getRequiredTAs()) {
+    @Override
+    public boolean assignTA(int task_id, TA ta) {
+        // Find existing entities
+        Task task = taskRepo.findById(task_id)
+                    .orElseThrow(() -> new TaskNotFoundExc(task_id));
+        // Check if assignment already exists
+        if (taTaskRepo.exists(task_id, ta.getId())) {
+            throw new GeneralExc("TA is already assigned to this task");
+        }
+        //check if ta has the task on the same duration
+        for (TaTask taTask : ta.getTaTasks()) {
+            if (taTask.getTask().getDuration().equals(task.getDuration())) {
+                throw new GeneralExc("TA already has task on the same duration");
+            }
+        }
+        for(Section sec : ta.getSectionsAsStudent()){
+            for (Lesson lesson : sec.getLessons()){
+                if(task.getDuration().has(lesson.getDuration()))
+                    throw new GeneralExc("TA has lesson during that duration");
+            }
+        }
+        // Check task limits
+        if (task.getAmountOfTas() == task.getRequiredTAs()) {
             throw new TaskLimitExc();
         }
-
-        TA_TaskId id = new TA_TaskId(task_id,ta.getId()) ;
-        TA_Task tas_task = new TA_Task(task, ta, type, id) ;
-        task.getTas_list().add(tas_task);
-        ta.getTa_tasks().add(tas_task);
-        task.addTA();
-        taskRepo.saveAndFlush(task);
-        taRepo.saveAndFlush(ta);
-        taTaskRepo.saveAndFlush(tas_task);
-
-        Optional<TA_Task> tas_taskOptional = taTaskRepo.findById(id);
-        if (tas_taskOptional.isEmpty()) {
-            throw new NoPersistExc("Assignment");
+        
+        TaTask taTask = new TaTask( task, ta, task.getAccessType());
+        // Update task side
+        task.setAmountOfTas(task.getAmountOfTas() + 1);
+        if (task.getTasList() == null) {
+            task.setTasList(new ArrayList<>());
         }
+        // Update TA side
+        if (ta.getTaTasks() == null) {
+            ta.setTaTasks(new ArrayList<>());
+        }
+        taTaskRepo.saveAndFlush(taTask);
         return true;
     }
 
@@ -184,25 +218,25 @@ public class TaskServImpl implements TaskServ {
         }
 
         Task task = (Task) taskOptional.get();
-        if (task.getAmount_of_tas() == 0) {
+        if (task.getAmountOfTas() == 0) {
             throw new TaskNoTasExc();
         }
 
-        TA_TaskId id = new TA_TaskId(task_id,ta.getId()) ;
-        Optional<TA_Task> tas_taskOptional = taTaskRepo.findById(id);
+        //TaTaskId id = new TaTaskId(task_id,ta.getId()) ;
+        Optional<TaTask> tas_taskOptional = taTaskRepo.findByTaskIdAndTaId(task_id, ta.getId());
         if (tas_taskOptional.isEmpty()) {
             throw new GeneralExc("TA not assigned to task");
         }
-        TA_Task taTask = tas_taskOptional.get();
+        TaTask taTask = tas_taskOptional.get();
         taTaskRepo.delete(taTask);
-        task.getTas_list().remove(taTask);
-        ta.getTa_tasks().remove(taTask);
+        task.getTasList().remove(taTask);
+        ta.getTaTasks().remove(taTask);
         task.removeTA();
         taskRepo.saveAndFlush(task);
         taRepo.saveAndFlush(ta);
         taTaskRepo.saveAndFlush(taTask);
 
-        tas_taskOptional = taTaskRepo.findById(id);
+        tas_taskOptional = taTaskRepo.findByTaskIdAndTaId(task_id, ta.getId());
         if (tas_taskOptional.isEmpty()) {
             throw new NoPersistExc("Unassignment");
         }
@@ -210,30 +244,30 @@ public class TaskServImpl implements TaskServ {
     }
 
     @Override
-    public Set<TA> getTAsByTaskId(int task_id) {
+    public List<TA> getTAsByTaskId(int task_id) {
         Optional<Task> taskOptional = taskRepo.findById(task_id);
         if (taskOptional.isEmpty()) {
             throw new TaskNotFoundExc(task_id);
         }
 
         Task task = (Task) taskOptional.get();
-        if (task.getAmount_of_tas() == 0) {
+        if (task.getAmountOfTas() == 0) {
             throw new TaskNoTasExc();
         }
 
-        if (task.getTas_list() == null) {
+        if (task.getTasList() == null) {
             throw new TaskNoTasExc();
         }
         
-        Set<TA> tas_list = new HashSet<>();
-        for (TA_Task t : task.getTas_list()) {
-            if (t.getTa_owner() == null) {
+        List<TA> tas_list = new ArrayList<>();
+        for (TaTask t : task.getTasList()) {
+            if (t.getTaOwner() == null) {
                 throw new GeneralExc("TA owner not found for task with ID " + task_id);
             }
-            if (t.getTa_owner().getId() == null) {
-                throw new GeneralExc("TA with ID " + t.getTa_owner().getId() + " not found for task with ID " + task_id);
+            if (t.getTaOwner().getId() == null) {
+                throw new GeneralExc("TA with ID " + t.getTaOwner().getId() + " not found for task with ID " + task_id);
             }
-            tas_list.add(t.getTa_owner()) ;
+            tas_list.add(t.getTaOwner()) ;
         }
         return tas_list;
     }
@@ -281,16 +315,19 @@ public class TaskServImpl implements TaskServ {
         if (task == null) {
             throw new GeneralExc("Task not found!");
         }
-        if (task.isTaskActive())
-        {
-            mark_pending(task);
+        
+        TaskState newStatus = task.isTaskActive() ? TaskState.PENDING : TaskState.NORESPOND;
+        if (task.getStatus() != newStatus) {
+            if (task.isTaskActive()) {
+                mark_pending(task);
+            } else {
+                mark_not_responded(task);
+                task.setTimePassed(true);
+            }
             taskRepo.saveAndFlush(task);
             return true;
         }
-        mark_not_responded(task);
-        task.setTimePassed(true);
-        taskRepo.saveAndFlush(task);
-        return true; // warning if ta forgot to enter task and he enters task with past duration and system sends warning to him if he wrote correct duration or not
+        return false;
     }
 
     @Override
@@ -299,7 +336,7 @@ public class TaskServImpl implements TaskServ {
     }
 
     @Override
-    public HashSet<Task> getPendingTasks() {
+    public List<Task> getPendingTasks() {
         return taskRepo.findPendingTasks();
     }
 
@@ -338,4 +375,16 @@ public class TaskServImpl implements TaskServ {
     private void mark_pending(Task t) {
         t.setStatus(TaskState.PENDING);
     }
+
+    @Async("taskCheckExecutor")
+    @Scheduled(cron = "0 * * * * *")
+    public void checkTasksForTime(){
+        List<Task> tasks = taskRepo.findAll();
+        for(Task task : tasks){
+            //log.info("status I " + task.getStatus() + " " + task.getDuration().getStart().getHour()+":"+task.getDuration().getStart().getMinute() + "/" + task.getDuration().getFinish().getHour()+":"+task.getDuration().getFinish().getMinute() + " " + "-" + Thread.currentThread().getName());
+            checkAndUpdateStatusTask(task);
+            //log.info("status II " + task.getStatus() + " " + task.getDuration().getStart().getHour()+":"+task.getDuration().getStart().getMinute() + "/" + task.getDuration().getFinish().getHour()+":"+task.getDuration().getFinish().getMinute() + " " + "-" + Thread.currentThread().getName());
+        }
+    }
+
 }

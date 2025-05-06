@@ -11,20 +11,21 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.example.dto.TaDto;
 import com.example.entity.Actors.TA;
 import com.example.entity.General.Date;
 import com.example.entity.Tasks.Task;
 import com.example.entity.Tasks.TaskAccessType;
+import com.example.exception.GeneralExc;
 import com.example.exception.UserNotFoundExc;
+import com.example.exception.taExc.TaNotFoundExc;
 import com.example.service.TAServ;
 import com.example.service.TaskServ;
-import com.example.service.UserServ;
 
 import lombok.RequiredArgsConstructor;
-
 
 
 @RestController
@@ -32,8 +33,6 @@ import lombok.RequiredArgsConstructor;
 public class TA_controller {
     @Autowired
     private TAServ serv;
-
-    private UserServ userServ;
 
     @Autowired
     private TaskServ taskServ;
@@ -56,25 +55,30 @@ public class TA_controller {
     } // method should be sent to Admin controller*/
 
     @GetMapping("/api/ta/all")
-    public List<TA> getAllTAs() 
+    public List<TaDto> getAllTAs() 
     {
+        System.out.println("ilmayyyyy");
         return serv.getAllTAs();
     } // method should be sent to Admin controller
 
     @GetMapping("/api/ta/{id}")
-    public TA getTAById(@PathVariable Long id) 
+    public TaDto getTAById(@PathVariable Long id) 
     {
-        return serv.getTAById(id);
+        return serv.getTAByIdDto(id);
+    }
+
+    @GetMapping("/api/ta/department/{deptName}")
+    public ResponseEntity<List<TaDto>> getTAByDepartment(@PathVariable String deptName) 
+    {
+        return new ResponseEntity<>(serv.getTAsByDepartment(deptName), HttpStatus.OK);
     }
 
     @DeleteMapping("/api/ta/{id}")
     public ResponseEntity<HttpStatus> deleteTAById(@PathVariable Long id) 
     {
-        if (serv.getTAById(id) == null)
+        if (serv.getTAByIdDto(id) == null)
             throw new UserNotFoundExc(id);
         serv.deleteTAById(id);
-        TA a = serv.getTAById(id);
-        System.out.println("ta2: " + a.isDeleted());
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     } // method should be sent to Admin controller
 
@@ -90,15 +94,17 @@ public class TA_controller {
         return serv.getAllTasks(id);
     }
     
-    @PostMapping("/api/ta/{id}/task")
-    public Task createTask(@RequestBody Task task, @PathVariable Long id, @PathVariable String type) 
+    @PostMapping("/api/ta/{id}/task/{task_id}")
+    public ResponseEntity<?> createTask(@PathVariable Long id, @PathVariable int task_id) 
     {
-        TaskAccessType taskType = TaskAccessType.valueOf(type.toUpperCase());
-        if (taskType == null) {
-            throw new IllegalArgumentException("Invalid task type: " + type);
+        Task task = taskServ.getTaskById(task_id);
+        if (task == null) {
+            throw new GeneralExc("Task with ID " + task_id + " not found.");
         }
-        serv.assignTask(task, id, taskType);
-        return serv.getTaskById(task.getTask_id(), id);
+        if (task.getAccessType() == TaskAccessType.PRIVATE && task.getRequiredTAs() > 1) {
+            throw new GeneralExc("Private tasks can only have one TA assigned.");
+        }
+        return new ResponseEntity<>(serv.assignTask(task, id),HttpStatus.CREATED);
     }
     
     @DeleteMapping("/api/ta/{ta_id}/task/{task_id}")
@@ -107,18 +113,30 @@ public class TA_controller {
         return new ResponseEntity<>(serv.deleteTaskById(task_id, ta_id),HttpStatus.OK);
     }
 
-    @PutMapping("api/ta/{id}")
+    @PutMapping("/api/ta/{id}")
     public ResponseEntity<?> restoreTA(@PathVariable Long id) {
         return new ResponseEntity<>(serv.restoreTAById(id), HttpStatus.OK);
     } 
 
     @GetMapping("/api/ta/{id}/schedule")
     public ResponseEntity<?> getWeeklyScheduleForTA(@PathVariable Long id) {
-        TA ta = serv.getTAById(id);
+        TA ta = serv.getTAByIdEntity(id);
         Date date = new Date().currenDate() ;
         return new ResponseEntity<>(serv.getWeeklyScheduleForTA(ta, date), HttpStatus.OK);
     }
-    
+
+    @GetMapping("/api/ta/{id}/schedule/day") // date in format "yyyy-MM-dd"
+    public ResponseEntity<?> getDaySchedule(@PathVariable Long id, @RequestParam String date) {
+        TA ta = serv.getTAByIdEntity(id);
+        if (ta == null) {
+            throw new TaNotFoundExc(-1l);
+        }
+        date = date.substring(1,date.length()-1) ; // remove quotes
+        return new ResponseEntity<>(serv.getScheduleOfTheDay(ta, date), HttpStatus.OK);
+    }
+
+
+
 }
 /*{
   "task_type" : "Lab",
@@ -140,5 +158,5 @@ public class TA_controller {
   },
   "requiredTAs": 2,
   "workload": 4,
-  "type": "PUBLIC"
+  "access_type": "PUBLIC"
 }*/

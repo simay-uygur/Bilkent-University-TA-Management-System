@@ -1,5 +1,8 @@
 package com.example.entity.General;
 
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 import lombok.Getter;
@@ -24,16 +27,25 @@ public class Date {
     @Column(nullable = false)
     private int minute;
 
+    @Override
     public String toString() {
-        return String.format("%02d/%02d/%04d %02d:%02d", day, month, year, hour, minute);
+        return String.format("%04d-%02d-%02d", year, month, day); // yyyy-mm-dd
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) return true;
+        if (obj == null || getClass() != obj.getClass()) return false;
+        Date date = (Date) obj;
+        return day == date.day && month == date.month && year == date.year && hour == date.hour && minute == date.minute;
     }
     
-    public boolean isBefore(Date other) {
-        if (this.year != other.year) return this.year < other.year;
+    public boolean isBefore(Date other) { // other - 16:48, this - 16:45
+        if (this.year != other.year) return this.year < other.year; 
         if (this.month != other.month) return this.month < other.month;
         if (this.day != other.day) return this.day < other.day;
         if (this.hour != other.hour) return this.hour < other.hour;
-        return this.minute < other.minute;
+        return this.minute <= other.minute;
     }
     
     public boolean isAfter(Date other) {
@@ -51,7 +63,8 @@ public class Date {
     }
 
     public Date currenDate() {
-        java.time.LocalDateTime now = java.time.LocalDateTime.now();
+        //java.time.ZonedDateTime now = java.time.ZonedDateTime.now(java.time.ZoneId.of("UTC"));
+        ZonedDateTime now = ZonedDateTime.now(ZoneId.of("Europe/Istanbul"));
         Date currentDate = new Date();
         currentDate.setDay(now.getDayOfMonth());
         currentDate.setMonth(now.getMonthValue());

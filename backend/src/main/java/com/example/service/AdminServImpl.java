@@ -2,12 +2,27 @@ package com.example.service;
 
 import java.util.HashSet;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
 import com.example.entity.Actors.TA;
 import com.example.entity.Actors.User;
 import com.example.entity.Courses.Course;
+import com.example.entity.General.ClassRoom;
 import com.example.entity.Tasks.Task;
+import com.example.exception.NoPersistExc;
+import com.example.repo.ClassRoomRepo;
 
+import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
+
+@Service
+@Transactional(rollbackOn = Exception.class)
+@RequiredArgsConstructor
 public class AdminServImpl implements AdminServ{
+
+    @Autowired
+    private ClassRoomRepo classRoomRepo;
 
     @Override
     public HashSet<Task> getAllApprovedTasks() {
@@ -169,6 +184,24 @@ public class AdminServImpl implements AdminServ{
     public boolean updateCourse(Course c) {
         // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'updateCourse'");
+    }
+
+    @Override
+    public boolean createClassroom(ClassRoom room) {
+        classRoomRepo.saveAndFlush(room);
+        if (classRoomRepo.findById(room.getClassroomId()).isPresent())
+            return true;
+        throw new NoPersistExc("Classroom creation ");
+    }
+    /*{
+        "class_code" : ""
+        "class_capacity"   :
+    }*/
+
+    @Override
+    public boolean deleteClassroom(int id) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'deleteClassroom'");
     }
     
 }

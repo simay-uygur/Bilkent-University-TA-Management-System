@@ -1,0 +1,132 @@
+/* Login.module.css */
+
+/* 1. Import Exo Thin */
+@import url('https://fonts.googleapis.com/css?family=Exo:100');
+
+/* 2. Custom props for the tiled background + originals */
+:global(:root) {
+  --nav-bg: #2563EB;
+  --bg-page: #EFF6FF;
+  --bg-card: #FFFFFF;
+  --text-default: #111827;
+  --text-muted: #6B7280;
+  --error-color: #DC2626;
+  --font-base: 'Inter', sans-serif;
+  --radius: 0.5rem;
+  --spacing: 1rem;
+
+  --bg-tile: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADIAAAAyCAIAAACRXR/mAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAIGNIUk0AAHolAACAgwAA+f8AAIDpAAB1MAAA6mAAADqYAAAXb5JfxUYAAABnSURBVHja7M5RDYAwDEXRDgmvEocnlrQS2SwUFST9uEfBGWs9c97nbGtDcquqiKhOImLs/UpuzVzWEi1atGjRokWLFi1atGjRokWLFi1atGjRokWLFi1af7Ukz8xWp8z8AAAA//8DAJ4LoEAAlL1nAAAAAElFTkSuQmCC");
+  --bg-tile-size: 50px 50px;
+  --scroll-speed: 2s;
+}
+
+@keyframes bg-scroll {
+  from { background-position: 0 0; }
+  to   { background-position: var(--bg-tile-size); }
+}
+
+/* 4. Your page wrapper gets the same tiled background too */
+.loginPageWrapper {
+  position: relative;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  /* you can optionally keep the animated-tile here too */
+  background: var(--bg-tile) repeat;
+  background-size: var(--bg-tile-size);
+  animation: bg-scroll var(--scroll-speed) linear infinite;
+}
+
+/* Watermark behind everything */
+.pageWrapper::before {
+  position: absolute;
+  top: 2rem;
+  left: 50%;
+  transform: translateX(-50%);
+  font-family: 'Exo', sans-serif;
+  font-size: 8rem;
+  font-weight: 100;
+  color: rgba(0,0,0,0.05);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Bring your actual content above that watermark */
+.NavBar,
+.container,
+.card {
+  position: relative;
+  z-index: 1;
+}
+
+.container {
+  flex: 1;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding-top: 5rem;
+  background: transparent;
+}
+
+.card {
+  width: 100%;
+  max-width: 500px;
+  background-color: var(--bg-card);
+  padding: 2rem;
+  border-radius: var(--radius);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+}
+
+.title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--text-default);
+  text-align: center;
+  margin-bottom: 1.5rem;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+}
+
+.formGroup {
+  margin-bottom: 1.25rem;
+}
+
+.label {
+  display: block;
+  font-size: 0.875rem;
+  color: var(--text-muted);
+  margin-bottom: 0.5rem;
+}
+
+.input {
+  width: 100%;
+  padding: 0.75rem;
+  font-size: 1rem;
+  border: 1px solid #D1D5DB;
+  border-radius: var(--radius);
+}
+
+.errorText {
+  margin-top: 0.5rem;
+  font-size: 0.875rem;
+  color: var(--error-color);
+}
+
+.button {
+  margin-top: 1.2rem;
+  padding: 0.75rem;
+  font-size: 1rem;
+  color: #fff;
+  background-color: var(--nav-bg);
+  border: none;
+  border-radius: var(--radius);
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.button:hover {
+  background-color: #1E40AF;
+}

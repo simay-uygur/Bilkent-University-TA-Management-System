@@ -1,37 +1,108 @@
+// src/App.tsx
 import React from 'react';
-import { BrowserRouter ,Router, Routes, Route, Navigate} from 'react-router-dom';//BrowserRouter as Router
-import "react-toastify/dist/ReactToastify.css";
-import Login from './Pages/CommonPages/Login';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+
+import ProtectedRoute from './Pages/ProtectedRoute';
+
+import Login               from './Pages/Login';
+import AdminDashboard      from './components/AdminDashboard';
+import TADashboard         from './Pages/TADashboard';
+import VolunteerProctoring from './Pages/VolunteerProctoring';
+import Notifications       from './Pages/Notifications';
+import Settings            from './Pages/Settings';
+import LeaveRequestForm    from './components/LeaveRequestForm';
+
+import TALayout            from './components/TALayout';
+import InstructorLayout    from './components/InstructorLayout';
+import DepartmentLayout    from './components/DepartmentLayout';
+import DeansLayout         from './components/DeansLayout';
+
+import InsMainPage         from './Pages/InsMainPage';
+import ExamProctoringPage  from './components/ExamProctoringPage';
+import CourseTAList        from './components/CourseTAList';
+import RequestTAForm       from './components/RequestTAForm';
+import SettingsTA          from './components/SettingsTA';
+import ManageWorkload      from './components/ManageWorkload';
+
+import ProctorAssignmentsPage from './components/ProctorAssignmentPage';
+import LeaveRequestsPage      from './components/LeaveRequestPage';
+import DeansOffice            from './Pages/DeansOffice';
+import DeanAssignProctors     from './components/DeanAssignProctors';
+import DepartmentOffice from './Pages/DepartmentOffice';
+import DeansProctoringPage from './components/DeansProctoringPage';
+import DeansDepartmentDetailPage from './components/DeansDepartmentDetailPage';
+import  CourseDetails  from './components/DepartmentCourseDetails';
+import InstructorDetails from './components/DepartmentInsturctorDetails';
 import TAMainPage from './Pages/TAPages/TAMainPage';
-import InsMainPage from './Pages/InstructorPages/InsMainPage';
-import ManageWorkload from './Pages/InstructorPages/ManageWorkload';
-import Settings from './Pages/CommonPages/Settings';
-import MakeLeaveReq from './Pages/TAPages/MakeLeaveReq';
-import TAMonSchPage from './Pages/TAPages/TAMonSchPage';
-import AdminMainPage from './Pages/AdminPages/AdminMainPage';
-import TAViewPPage from './Pages/TAPages/TAViewPPage';
-import Not from './Pages/CommonPages/Not';
-import LeaveReqMes from './components/Messages/LeaveReqMes';
-import ProtectedRoute from './ProtectedRoute';
-import ViewLogs from './Pages/AdminPages/ViewLogs';
-import ExamProctorPage from './Pages/InstructorPages/ExamProctorPage';
-import SearchSelect from './components/SearchSelect';
-import CourseInfoPanel from './Pages/InstructorPages/CourseInfoPanel';
-import ExamProctorReq from './Pages/InstructorPages/ExamProctorReq';
-import AssignProctor from './Pages/DepOfficePages/AssignProctor';
-import AssignTA from './Pages/DepOfficePages/AssignTA';
-import DeansOffice from './Pages/DeanOfficePages/DeansOffice';
-import DeansProctoringPage from './Pages/DeanOfficePages/DeansProctoringPage';
-import DeansDepartmentDetailPage from './Pages/DeanOfficePages/DeansDepartmentDetailPage';
-import CourseTAReq from './Pages/InstructorPages/CourseTAReq';
-import AssignTATask from './Pages/InstructorPages/AssignTATask';
-import AssignTACourse from './Pages/DepOfficePages/AssignTACourse';
-import SelectTACourse from './Pages/DepOfficePages/SelectTACourse';
-import ViewAddExam from './Pages/DepOfficePages/ViewAddExam';
-import ProctorLeftTA from './Pages/DeanOfficePages/ProctorLeftTA';
 
+const App: React.FC = () => (
+  <BrowserRouter>
+    <Routes>
 
+      {/* Public */}
+      <Route path="/login" element={<Login />} />
+      <Route path="/admin" element={<AdminDashboard />} />
 
+      {/* Shared */}
+      <Route path="/notifications" element={<Notifications />} />
+      <Route path="/settings"      element={<Settings />} />
+
+      {/* TA Area (requires ROLE_TA) */}
+      <Route element={<ProtectedRoute requiredRole="ROLE_TA" />}>
+        <Route element={<TALayout />}>
+          <Route path="/dashboard"             element={<TADashboard />} />
+          <Route path="/volunteer"             element={<VolunteerProctoring />} />
+          <Route path="/leave-request/:scheduleId" element={<LeaveRequestForm />} />
+        </Route>
+      </Route>
+
+      {/* Instructor Area (requires ROLE_INSTRUCTOR) */}
+      <Route element={<ProtectedRoute requiredRole="ROLE_INSTRUCTOR" />}>
+        <Route element={<InstructorLayout />}>
+          <Route path="/instructor"                          element={<InsMainPage />} />
+          <Route path="/instructor/exam-proctoring/:examId"  element={<ExamProctoringPage />} />
+          <Route path="/instructor/exam-printing/:courseId"  element={<ExamProctoringPage />} />
+          <Route path="/instructor/courses/:courseId/tas"    element={<CourseTAList />} />
+          <Route path="/instructor/courses/:courseId/request-ta" element={<RequestTAForm />} />
+          <Route path="/instructor/settings"                 element={<SettingsTA />} />
+          <Route path="/instructor/workload"                 element={<ManageWorkload />} />
+          <Route path="/instructor/workload/:courseId"       element={<ManageWorkload />} />
+        </Route>
+      </Route>
+
+      {/* Department Office Area (requires ROLE_DEPARTMENT) */}
+      <Route element={<ProtectedRoute requiredRole="ROLE_DEPARTMENT_STAFF" />}>
+        <Route path="/dept-office" element={<DepartmentLayout />}>
+          <Route index                          element={<DepartmentOffice />} />
+          <Route path="course/:courseCode"        element={<CourseDetails />} />
+          <Route path="instructor/:id"         element={<InstructorDetails />} />
+          <Route path="proctor"                 element={<ProctorAssignmentsPage />} />
+          <Route path="proctor/:courseId/:mode" element={<ProctorAssignmentsPage />} />
+          <Route path="leave"                   element={<LeaveRequestsPage />} />
+        </Route>
+      </Route>
+
+      {/* Dean’s Office Area (requires ROLE_DEAN) */}
+      <Route element={<ProtectedRoute requiredRole="ROLE_DEANS_OFFICE" />}>
+        <Route path="/deans-office" element={<DeansLayout />}>
+          <Route index                          element={<DeansOffice />} />
+          <Route path= "proctor"                          element={<DeansProctoringPage />} />
+          <Route
+    path="/deans-office/department/:dept"
+    element={<DeansDepartmentDetailPage />}
+  />
+
+          <Route path="proctor/:courseId/:mode"  element={<DeanAssignProctors />} />
+        </Route>
+      </Route>
+
+      {/* Fallback */}
+      <Route path="*" element={<Navigate to="/login" replace />} />
+    </Routes>
+  </BrowserRouter>
+);
+
+/* 
 const App: React.FC = () => (
   <BrowserRouter>
     <Routes>
@@ -62,7 +133,7 @@ const App: React.FC = () => (
       <Route path="/inotfac" element={<ProctorLeftTA />} />
       <Route path="*" element={<Navigate to="/login" replace />} />
     </Routes>
-  </BrowserRouter>
+  </BrowserRouter> */
   /*<Router>
           <Routes>
             {}

@@ -1,0 +1,36 @@
+/* ExamProctoringPage.module.css */
+
+.pageWrapper {
+    padding: 20px;
+    background-color: #f4f7f9;
+  }
+  
+  h1 {
+    font-size: 24px;
+    margin-bottom: 20px;
+  }
+  
+  label {
+    font-size: 18px;
+    margin-right: 10px;
+  }
+  
+  input {
+    padding: 5px;
+    font-size: 16px;
+    margin-bottom: 20px;
+  }
+  
+  button {
+    background-color: #0288d1;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+  
+  button:hover {
+    background-color: #0277bd;
+  }
+  

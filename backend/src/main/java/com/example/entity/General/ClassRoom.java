@@ -1,35 +1,42 @@
 package com.example.entity.General;
 
-
+import com.example.entity.Courses.Lesson;
 import com.example.entity.Exams.ExamRoom;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.OneToOne;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Entity
+@Table(name = "class_room")
 @Getter
 @Setter
-@Table(name = "class_room")
 public class ClassRoom {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.TABLE)
-    @Column(name = "classroom_id", unique = true, updatable = true, nullable = false)
-    private int classroom_id; // ex. 3191, 3192 etc, where 1 is the exam room number
+    @Column(name = "classroom_id", nullable = false, updatable = false, unique = true)
+    private String classroomId;  // A-Z02
 
-    @Column(nullable = false)
-    private String class_code;
+    // this is for holding the whole capacity of the classroom
+    @Column(name = "class_capacity", nullable = false)
+    private int classCapacity;
 
-    @Column(nullable = false)
-    private int class_capacity;
+    @Column(name = "exam_capacity", nullable = false )
+    private int examCapacity;
 
-    @OneToOne(mappedBy = "exam_room")
-    private ExamRoom section_exam; // this is the section that the class room is related to, not the course
+    //this is for holding the capacity according to exam rules - provided in the excel
+    @Column(name = "exam_rooms", nullable = false)
+    @OneToMany(mappedBy = "classRoom", fetch = FetchType.LAZY)
+    private List<ExamRoom> examRooms = new ArrayList<>();
+
+    @OneToMany(
+            mappedBy = "lessonRoom",
+            fetch = FetchType.LAZY,
+            cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REFRESH}
+    )
+    private List<Lesson> lessons = new ArrayList<>();
+
 }

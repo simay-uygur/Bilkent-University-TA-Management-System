@@ -1,9 +1,12 @@
 package com.example.entity.General;
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import com.example.entity.Courses.Course;
+import com.example.entity.Courses.CourseOffering;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import jakarta.persistence.CascadeType;
@@ -24,20 +27,35 @@ public class Student {
 
     @Id
     @Column(name = "student_id", unique = true, updatable = true, nullable = false)
-    private int student_id;
+    private Long studentId;
 
     @Column(name = "student_name", unique = false, updatable = true, nullable = false)
-    private String student_name;
+    private String studentName;
 
     @Column(name = "student_surname", unique = false, updatable = true, nullable = false)
-    private String student_surname;
-    // what is mappedBy?
-    // mappedBy is used to specify the owner of the relationship. In this case, the owner is the Course class.
-    @ManyToMany(
-        mappedBy = "students_list",
-        fetch = FetchType.LAZY,
-        cascade = {CascadeType.PERSIST, CascadeType.MERGE}
-    )
+    private String studentSurname;
+
+    @Column(name = "webmail", nullable = true) // newly added - should ,t be nullable or not?
+    private String webmail;
+
+    //not sure about nullables
+    @Column(name = "academic_status", nullable = true)
+    private String academicStatus;
+
+    @Column(name = "department", nullable = true)
+    private String department;
+
+    //this will be deleted
+    @Column(name = "is_active", nullable = false)
+    private Boolean isActive;
+
+    @Column(name = "is_graduated", nullable = false)
+    private Boolean isGraduated = false;
+
+    //student registered courses
+    @ManyToMany(mappedBy = "registeredStudents", fetch = FetchType.LAZY)
     @JsonIgnore
-    private Set<Course> student_courses = new HashSet<>();
+    private List<CourseOffering> registeredCourseOfferings = new ArrayList<>();
+
+
 }

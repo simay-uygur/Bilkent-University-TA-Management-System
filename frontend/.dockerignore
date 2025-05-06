@@ -1,0 +1,12 @@
+# ignore local dependencies & build outputs
+node_modules
+dist
+build
+
+# ignore Docker files themselves
+Dockerfile
+.dockerignore
+
+# ignore git
+.git
+.gitignore

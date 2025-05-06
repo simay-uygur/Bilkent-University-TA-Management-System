@@ -1,8 +1,61 @@
 package com.example.entity.Exams;
 
+import com.example.entity.General.ClassRoom;
+import com.example.entity.General.Student;
+import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
+
 import java.util.List;
 
-import com.example.entity.Courses.Section;
+/**
+ * An individual room assignment for a single exam.
+ */
+@Entity
+@Table(name = "examroom")
+@Getter
+@Setter
+public class ExamRoom {
+
+    @Id
+    @Column(name = "examroom_id", nullable = false, updatable = true)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private int examRoomId;          //auto generated
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    private ClassRoom classRoom;      // FK kept in the same table (no name override needed)
+
+    @Column(name = "isApproved", nullable = false)
+    private boolean approved = false;
+
+    @Column(name = "workload", nullable = false)
+    private int workload;
+
+    @ManyToMany(fetch = FetchType.LAZY,
+            cascade = { CascadeType.PERSIST, CascadeType.MERGE })
+    @JoinTable(
+            name               = "examroom_student_list",
+            joinColumns        = @JoinColumn(name = "examroom_id"),
+            inverseJoinColumns = @JoinColumn(name = "student_id")
+    )
+    private List<Student> studentsList;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "exam_id", nullable = false)
+    private Exam exam;
+
+    public String getExamRoomCode() {
+        return classRoom != null ? classRoom.toString() : null; // hope it works
+    }
+}
+
+
+
+/*
+package com.example.entity.Exams;
+
+import java.util.List;
+
 import com.example.entity.General.ClassRoom;
 import com.example.entity.General.Student;
 
@@ -54,12 +107,13 @@ public class ExamRoom {
     private List<Student> students_list ;
 
     @ManyToOne(
-        fetch = FetchType.LAZY,
-        cascade = {CascadeType.PERSIST, CascadeType.MERGE}
+        fetch = FetchType.LAZY
     )
-    private Section section_exam; // this is the section that the exam room is related to, not the course
+    @JoinColumn(name = "exam_id", nullable = false)
+    private Exam exam;
 
     public String getExamRoom(){
         return this.exam_room.getClass_code();
     }
 }
+*/

@@ -7,6 +7,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+import com.example.exception.Course.CourseNotFoundExc;
+import com.example.exception.Course.NoPrereqCourseFound;
 import com.example.exception.taskExc.TaskIsNotActiveExc;
 import com.example.exception.taskExc.TaskLimitExc;
 import com.example.exception.taskExc.TaskNoTasExc;
@@ -41,13 +43,13 @@ public class AppExceptionHandler {
 
     @ExceptionHandler(GeneralExc.class)
     public ResponseEntity<Map<String, String>> handleUserNotFoundException(GeneralExc ex) {
-        return ResponseEntity.status(HttpStatus.NO_CONTENT)
+        return ResponseEntity.status(HttpStatus.CONFLICT)
                 .body(Map.of("error", ex.getMessage()));
     }
 
     @ExceptionHandler(NoPersistExc.class)
     public ResponseEntity<Map<String, String>> handleUserNotFoundException(NoPersistExc ex) {
-        return ResponseEntity.status(HttpStatus.NO_CONTENT)
+        return ResponseEntity.status(HttpStatus.CONFLICT)
                 .body(Map.of("error", ex.getMessage()));
     }
 
@@ -76,5 +78,15 @@ public class AppExceptionHandler {
                 .body(Map.of("error", ex.getMessage()));
     }
 
-    //TA exceptions
+    @ExceptionHandler(CourseNotFoundExc.class)
+    public ResponseEntity<Map<String, String>> handleCourseNotFoundException(CourseNotFoundExc ex) {
+        return ResponseEntity.status(HttpStatus.CONFLICT)
+                .body(Map.of("error", ex.getMessage()));
+    }
+
+    @ExceptionHandler(NoPrereqCourseFound.class)
+    public ResponseEntity<Map<String, String>> handleCourseNotFoundException(NoPrereqCourseFound ex) {
+        return ResponseEntity.status(HttpStatus.CONFLICT)
+                .body(Map.of("error", ex.getMessage()));
+    }
 }

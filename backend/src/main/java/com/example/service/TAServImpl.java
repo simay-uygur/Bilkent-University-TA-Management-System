@@ -1,62 +1,160 @@
 package com.example.service;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.usermodel.WorkbookFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
+import com.example.dto.FailedRowInfo;
+import com.example.dto.TaDto;
+import com.example.entity.Actors.Role;
 import com.example.entity.Actors.TA;
+import com.example.entity.General.AcademicLevelType;
 import com.example.entity.General.Date;
 import com.example.entity.Schedule.Schedule;
 import com.example.entity.Schedule.ScheduleItem;
-import com.example.entity.Tasks.TA_Task;
-import com.example.entity.Tasks.TA_TaskId;
+import com.example.entity.Tasks.TaTask;
 import com.example.entity.Tasks.Task;
-import com.example.entity.Tasks.TaskAccessType;
 import com.example.exception.GeneralExc;
 import com.example.exception.NoPersistExc;
 import com.example.exception.UserNotFoundExc;
 import com.example.exception.taExc.TaNotFoundExc;
 import com.example.exception.taskExc.TaskIsNotActiveExc;
 import com.example.exception.taskExc.TaskNotFoundExc;
+import com.example.mapper.TaMapper;
 import com.example.repo.TARepo;
-import com.example.repo.TA_TaskRepo;
-import com.example.repo.TaskRepo;
+import com.example.repo.TaTaskRepo;
+
 
 import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
+@Transactional(rollbackFor = Exception.class)
 public class TAServImpl implements TAServ {
     
     @Autowired
     private TARepo repo;
+    private final TaMapper taMapper;
 
-    @Autowired
-    private TaskRepo taskRepo;
 
     @Autowired
     private TaskServ taskServ;
-
     @Autowired
-    private TA_TaskRepo taTaskRepo;
+    private TaTaskRepo taTaskRepo;
     
     @Autowired
     private ScheduleServ scheduleServ;
 
+    @Autowired
+    private PasswordEncoder encoder;
+
+
     @Override
-    public TA getTAById(Long id){
-        return repo.findById(id)
-        .orElseThrow(() -> new UserNotFoundExc(id));
+    public TaDto getTAByIdDto(Long id){
+        TA ta = repo.findById(id)
+                .orElseThrow(() -> new UserNotFoundExc(id));
+        return taMapper.toDto(ta);
     }
-    
+
     @Override
-    public List<TA> getAllTAs() {
-        return repo.findAllTAs(); 
+    public TA getTAByIdTa(Long id){
+        TA ta = repo.findById(id)
+                .orElseThrow(() -> new UserNotFoundExc(id));
+        return ta;
+
+    }
+
+    @Override
+    public TA getTAByIdEntity(Long id){
+        return repo.findById(id)
+                .orElseThrow(() -> new UserNotFoundExc(id));
+        
+    }
+
+    @Override
+        public List<TaDto> getTAsByDepartment(String deptName){
+            List<TA> tas = repo.findByDepartment(deptName);
+            if (tas.isEmpty()) {
+                throw new UserNotFoundExc(deptName);
+            }
+            return tas.stream()
+                    .map(taMapper::toDto)
+                    .collect(Collectors.toList());
+            /* return tas.stream()
+                    .map(ta -> new TaDto(
+                            ta.getId(),
+                            ta.getName(),
+                            ta.getSurname(),
+                            ta.getAcademicLevel().name(),
+                            ta.getTotalWorkload(),
+                            ta.getIsActive(),
+                            ta.getIsGraduated(),
+                            ta.getDepartment(),
+                           
+                            ta.getSectionsAsStudent().stream()
+                                    .map(Section::getSectionCode)
+                                    .collect(Collectors.toList()),
+                            ta.getSectionsAsHelper().stream()
+                                    .map(Section::getSectionCode)
+                                    .collect(Collectors.toList()),
+                            ta.getOfferingsAsHelper().stream()
+                    ))
+                    .collect(Collectors.toList()); */
+    } 
+
+    @Override
+    public List<TaDto> getAllTAs() {
+        List<TA> tas = repo.findAll();
+        if (tas.isEmpty()) {
+            throw new UserNotFoundExc("TAs");
+        }   
+        return tas.stream()
+                .map(taMapper::toDto)
+                .collect(Collectors.toList());
+       /*  return tas.stream()
+                .map(ta -> new TaDto(
+                        ta.getId(),
+                        ta.getName(),
+                        ta.getSurname(),
+                        ta.getAcademicLevel().name(),
+                        ta.getTotalWorkload(),
+                        ta.getIsActive(),
+                        ta.getIsGraduated(),
+                        ta.getDepartment(),
+                        ta.getSectionsAsStudent().stream()
+                                .map(Section::getSectionCode)
+                                .collect(Collectors.toList()),
+                        ta.getSectionsAsHelper().stream()
+                                .map(Section::getSectionCode)
+                                .collect(Collectors.toList()),
+                        ta.getOfferingsAsHelper().stream()
+                                .map(offering -> offering.getCourse().getCourseCode())
+                                .collect(Collectors.toList()),
+                        ta.getTasOwnLessons().stream()
+                                .map(Section::getSectionCode)
+                                .collect(Collectors.toList()
+                )
+                )
+                )
+                .collect(Collectors.toList()); */
+
     }
 
     @Override
@@ -80,7 +178,6 @@ public class TAServImpl implements TAServ {
         
         return true;
     }
-
     @Override
     @Transactional(rollbackFor = Exception.class)
     public boolean restoreTAById(Long id)
@@ -105,37 +202,21 @@ public class TAServImpl implements TAServ {
     
     @Override
     public Task getTaskById(int task_id, Long ta_id) {
-        /*Optional<TA> taOptional = repo.findById(ta_id);
-        if (taOptional.isEmpty()) {
-            throw new TaNotFoundExc(ta_id);
-        }  
-        TA ta = taOptional.get();
-        for (Task task : ta.getTa_public_tasks_list()) {
-            if (task.getTask_id() == task_id) {
-                return task;
-            }
-        }
-        for (Task task : ta.getTa_private_tasks_list()) {
-            if (task.getTask_id() == task_id) {
-                return task;
-            }
-        }*/
-        TA_TaskId taTaskId = new TA_TaskId(task_id, ta_id);
-        Optional<TA_Task> optTaTask = taTaskRepo.findById(taTaskId);
-        TA_Task taTask = optTaTask.orElseThrow(() -> new TaskNotFoundExc(task_id));
+        Optional<TaTask> optTaTask = taTaskRepo.findByTaskIdAndTaId(task_id, ta_id);
+        TaTask taTask = optTaTask.orElseThrow(() -> new TaskNotFoundExc(task_id));
         return taTask.getTask();
     }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public boolean assignTask(Task task, Long id, TaskAccessType type) {
+    public boolean assignTask(Task task, Long id) {
         TA existingTA = repo.findById(id)
         .orElseThrow(() -> new TaNotFoundExc(id));
         
         if (!taskServ.checkAndUpdateStatusTask(task)) {
             throw new TaskIsNotActiveExc();
         }
-        taskServ.assignTA(task.getTask_id(), existingTA, type) ;
+        taskServ.assignTA(task.getTaskId(), existingTA) ;
         return true ;
     }
     
@@ -149,14 +230,14 @@ public class TAServImpl implements TAServ {
         taskServ.unassignTA(task_id, ta) ; 
         return true ;
     }
-    
+
     @Override
     public Set<Task> getAllTasks(Long id) {
         TA existingTA = repo.findById(id)
             .orElseThrow(() -> new TaNotFoundExc(id));
-        List<TA_Task> ta_tasks = taTaskRepo.findAllByTaId(id);
+        List<TaTask> ta_tasks = taTaskRepo.findAllByTaId(id);
         Set<Task> tasks_list = new HashSet<>();
-        for (TA_Task ta_task : ta_tasks) {
+        for (TaTask ta_task : ta_tasks) {
             Task task = ta_task.getTask();
             if (task != null) {
                 tasks_list.add(task);
@@ -165,16 +246,16 @@ public class TAServImpl implements TAServ {
         return tasks_list;
     }
 
-    private void mark_deleted(TA ta) {
+    private void markDeleted(TA ta) {
         if (ta.isDeleted()) {
             throw new GeneralExc("User already deleted");
         }
         ta.setDeleted(true);
-        List<TA_Task> ta_tasks = taTaskRepo.findAllByTaId(ta.getId());
-        for (TA_Task ta_task : ta_tasks) {
+        List<TaTask> ta_tasks = taTaskRepo.findAllByTaId(ta.getId());
+        for (TaTask ta_task : ta_tasks) {
             Task task = ta_task.getTask();
             if (task != null) {
-                taskServ.unassignTA(task.getTask_id(), ta);
+                taskServ.unassignTA(task.getTaskId(), ta);
             }
         }
         taTaskRepo.deleteAll(ta_tasks);
@@ -183,7 +264,7 @@ public class TAServImpl implements TAServ {
     }
 
     private void delete(TA ta){
-        mark_deleted(ta);
+        markDeleted(ta);
     }
 
     private void restore(TA ta) {
@@ -198,43 +279,104 @@ public class TAServImpl implements TAServ {
         if (ta == null) {
             throw new TaNotFoundExc(-1L);
         }
-        ta.setSchedule(scheduleServ.getWeeklyScheduleForTA(ta, anyCustomDate));
-        return ta.getSchedule();
+        return scheduleServ.getWeeklyScheduleForTA(ta, anyCustomDate);
     }
 
     @Override
-    public List<ScheduleItem> getScheduleOfTheDay(TA ta, String day) {
-        if (ta == null) {
-            throw new TaNotFoundExc(-1L);
-        }
-        if (ta.getSchedule() != null)
-            return ta.getSchedule().getDailySchedule().get(indexOf(day)).getScheduleItems() ;
-        else 
-        {
-            Date date = new Date().currenDate();
-            ta.setSchedule(scheduleServ.getWeeklyScheduleForTA(ta, date));
-            return ta.getSchedule().getDailySchedule().get(indexOf(day)).getScheduleItems() ;
-        }
+    public List<ScheduleItem> getScheduleOfTheDay(TA ta, String date) {
+        return scheduleServ.getDaySchedule(ta, date);
     }
 
-    private int indexOf(String day) {
-        switch (day) {
-            case "Monday":
-                return 0;
-            case "Tuesday":
-                return 1;
-            case "Wednesday":
-                return 2;
-            case "Thursday":
-                return 3;
-            case "Friday":
-                return 4;
-            case "Saturday":
-                return 5;
-            case "Sunday":
-                return 6;
-            default:
-                throw new IllegalArgumentException("Invalid day: " + day);
+    //rows are
+    @Override
+    public Map<String, Object> importTAsFromExcel(MultipartFile file) throws IOException {
+        List<TA> successfulTAs = new ArrayList<>();
+        List<FailedRowInfo> failedRows = new ArrayList<>();
+
+        try (InputStream inputStream = file.getInputStream(); Workbook workbook = WorkbookFactory.create(inputStream)) {
+            Sheet sheet = workbook.getSheetAt(0);
+
+            for (Row row : sheet) {
+                if (row.getRowNum() == 0) continue;
+
+                try {
+                    long id = (long) row.getCell(0).getNumericCellValue();
+                    String name = row.getCell(1).getStringCellValue().trim();
+                    String surname = row.getCell(2).getStringCellValue().trim();
+                    String webmail = row.getCell(3).getStringCellValue().trim();
+                    String levelStr = row.getCell(5).getStringCellValue().trim().toUpperCase();
+                    int inactiveFlag = (int) row.getCell(6).getNumericCellValue();
+                    boolean isActive = (inactiveFlag == 0);
+                    AcademicLevelType level = AcademicLevelType.valueOf(levelStr);
+
+                    Optional<TA> optionalTA = repo.findByIdAndWebmail(id, webmail);
+
+                    TA ta = optionalTA.map(existing -> { existing.setName(name);
+                        existing.setSurname(surname);
+                        existing.setAcademicLevel(level);
+                        existing.setIsActive(isActive);
+                        existing.setDeleted(false); // Just in case
+                        return existing;
+                    }).orElseGet(() -> {
+                        TA newTa = new TA();
+                        newTa.setId(id);
+                        newTa.setName(name);
+                        newTa.setSurname(surname);
+                        newTa.setWebmail(webmail);
+                        newTa.setAcademicLevel(level);
+                        newTa.setIsActive(isActive);
+                        newTa.setRole(Role.TA);
+                        newTa.setPassword(encoder.encode("default123"));
+                        newTa.setTotalWorkload(0);
+                        return newTa;
+                    });
+                    // Add to save list
+                    successfulTAs.add(ta);
+
+                } catch (Exception e) {
+                    StringBuilder rawData = new StringBuilder();
+                    row.forEach(cell -> rawData.append(cell.toString()).append(" | "));
+                    failedRows.add(new FailedRowInfo(
+                            row.getRowNum(),
+                            e.getClass().getSimpleName() + ": " + e.getMessage()
+                    ));
+                }
+            }
         }
+
+        if (!successfulTAs.isEmpty()) {
+            repo.saveAll(successfulTAs);
+            repo.flush();
+        }
+
+        Map<String, Object> result = new HashMap<>();
+        result.put("successCount", successfulTAs.size());
+        result.put("failedCount", failedRows.size());
+        result.put("failedRows", failedRows);
+        return result;
     }
+
+  /*   private List<TaDto> mapToDtoList(List<TA> tas) {
+        List<TaDto> taDtos = new ArrayList<>();
+        for (TA ta : tas) {
+            TaDto taDto = new TaDto(
+                    ta.getId(),
+                    ta.getName(),
+                    ta.getSurname(),
+                    ta.getAcademicLevel().name(),
+                    ta.getTotalWorkload(),
+                    ta.getIsActive(),
+                    ta.getIsGraduated(),
+                    ta.getDepartment(),
+                    ta.getCourses().stream()
+                            .map(Course::getCourseCode)
+                            .collect(Collectors.toList()),
+                    ta.getTasOwnLessons().stream()
+                            .map(Section::getSectionCode)
+                            .collect(Collectors.toList())
+            );
+            taDtos.add(taDto);
+        }
+        return taDtos;
+    } */
 }

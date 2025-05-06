@@ -4,7 +4,7 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.example.entity.Actors.TA;
@@ -22,14 +22,11 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class UserServImpl implements UserServ{
 
-    @Autowired 
-    private UserRepo repo; 
 
-    @Autowired
-    private TARepo taRepo;
+    private final UserRepo repo; 
+    private final TARepo taRepo;
+    private final PasswordEncoder encoder;
 
-    @Autowired
-    private final BCryptPasswordEncoder encoder ;
     
     @Override
     public List<User> getAllUsers(){
@@ -37,21 +34,21 @@ public class UserServImpl implements UserServ{
     }
     @Override
     public User createUser(User u) {
-    if (repo.findById(u.getId()).isPresent()) {
-        throw new UserExistsExc(u.getId());
-    }
-
-    String hashedPass = encoder.encode(u.getPassword());
-    u.setPassword(hashedPass);
-
-    switch (u.getRole()) {
-        case ADMIN -> {
+        if (repo.findById(u.getId()).isPresent()) {
+            throw new UserExistsExc(u.getId());
+        }
+    
+        String hashedPass = encoder.encode(u.getPassword());
+        u.setPassword(hashedPass);
+    
+        switch (u.getRole()) {
+            case ADMIN -> {
+                return repo.save(u);
             }
-
-        case DEANS_OFFICE -> {
+            case DEANS_OFFICE -> {
+                return repo.save(u);
             }
-
-        case TA -> {
+            case TA -> {
                 if (u instanceof TA) {
                     TA ta = (TA) u;
                     return taRepo.save(ta); 
@@ -59,20 +56,19 @@ public class UserServImpl implements UserServ{
                     throw new GeneralExc("User is not a TA instance.");
                 }
             }
-
-        case FACULTY_MEMBER -> {
+            case INSTRUCTOR -> {
+                // Add return statement here
+                return repo.save(u);
             }
-
-        case DEPARTMENT_STAFF -> {
+            case DEPARTMENT_STAFF -> {
+                // Add return statement here
+                return repo.save(u);
             }
-
-        case DEPARTMENT_CHAIR -> {
-            }
-
-        default -> throw new GeneralExc("Unsupported role: " + u.getRole());
+            default -> throw new GeneralExc("Unsupported role: " + u.getRole());
+        }
+        // This line should never be reached, but you can leave it as a fallback
+        // return null;
     }
-    return null;
-}
     
     @Override
     public void deleteUser(User u) {
@@ -84,4 +80,9 @@ public class UserServImpl implements UserServ{
         Optional<User> u = repo.findById(id) ;
         return u.orElse(null);
     }
+    @Override
+    public User getUserByEmail(String email) {
+        return repo.findUserByWebmail(email).orElse(null);
+    }
+    
 }
