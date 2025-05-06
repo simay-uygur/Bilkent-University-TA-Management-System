@@ -13,7 +13,6 @@ import com.example.repo.CourseRepo;
 import com.example.repo.SectionRepo;
 import com.example.repo.StudentRepo;
 import com.example.repo.TARepo;
-
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.apache.poi.ss.usermodel.Cell;
@@ -91,23 +90,19 @@ public class SectionServImpl implements SectionServ {
                                 " in semester " + year + " " + term));
 
         if (section.getInstructor() == null || section.getInstructor().getId() == null) {
-            throw new IllegalArgumentException("instructor.id must be provided");
+            throw new IllegalArgumentException("Instructor must be specified.");
         }
-        Instructor instr = instructorService.getById(section.getInstructor().getId());
 
-
-        section.setSectionCode(code);
-        section.setOffering(off);
-        section.setInstructor(instr);
-
-        if (repo.existsBySectionCodeEqualsIgnoreCase(code)) {
-            throw new IllegalArgumentException(
-                    "Section with code '" + code + "' already exists.");
+        if (section.getOffering() == null || section.getOffering().getId() == null) {
+            throw new IllegalArgumentException("Offering must be specified.");
         }
+
+        // Optional: You may fetch the actual instructor and offering from DB to ensure they exist
+        // e.g., instructorRepo.findById(id).orElseThrow(...)
+        // and set them again if needed
 
         return repo.save(section);
     }
-
     @Override
     public Section update(Integer id, Section section) {
         Section existing = getById(id);
@@ -138,7 +133,7 @@ public class SectionServImpl implements SectionServ {
     }
 
     @Override
-    @Transactional
+    //@Transactional
     public Map<String,Object> importFromExcel(MultipartFile file) throws IOException {
         List<Section> successful = new ArrayList<>();
         List<FailedRowInfo> failed  = new ArrayList<>();
@@ -187,9 +182,13 @@ public class SectionServImpl implements SectionServ {
                     CourseOffering off = offeringService
                             .getByCourseAndSemester((long) course.getCourseId(), sem.getId())
                             .orElseGet(() -> {
+                                // build a brand‑new offering for this course + semester
                                 CourseOffering newOff = new CourseOffering();
                                 newOff.setCourse(course);
                                 newOff.setSemester(sem);
+                                // this will persist it (and because of your unique constraint
+                                // on (course,semester) it won't duplicate if another thread snuck one
+                                // in between)
                                 return offeringService.create(newOff);
                             });
 
@@ -208,9 +207,10 @@ public class SectionServImpl implements SectionServ {
                     }
 
                     Section sec = new Section();
-                    sec.setSectionCode(sectionCode);
+                    sec.setSectionCode(course.getCourseCode() + "-" + sectionNo);
                     sec.setOffering(off);
                     sec.setInstructor(instr);
+
                     successful.add(sec);
 
                 } catch (Exception e) {
@@ -380,7 +380,6 @@ public class SectionServImpl implements SectionServ {
                 }
 
                 try {
-                    // 1) read core fields
                     long   personId  = getLongCellValue(row.getCell(0));
                     String deptCode  = getStringCellValue(row.getCell(1)).toUpperCase();
                     int    courseNo  = (int) getNumericCellValue(row.getCell(2));
