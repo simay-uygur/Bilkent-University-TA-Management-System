@@ -9,10 +9,8 @@ import java.util.concurrent.CompletableFuture;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
-import com.example.dto.ExamDto;
 import com.example.dto.ProctoringDto;
 import com.example.entity.Actors.TA;
-import com.example.entity.Courses.CourseOffering;
 import com.example.entity.Courses.Lesson;
 import com.example.entity.Courses.Section;
 import com.example.entity.Exams.Exam;
@@ -38,7 +36,6 @@ public class ProctoringServImpl implements ProctoringServ{
         List<ProctoringDto> availableTas = new ArrayList<>();
         Exam exam = examRepo.findById(examId).orElseThrow(() -> new RuntimeException("Exam not found"));
         Event examDuration = exam.getDuration();
-        CourseOffering offering = courseOfferingServ.getCurrentOffering(courseCode);
         //List<TA> tas = offering.getAssignedTas();
         List<TA> tas = taRepo.findAll();
         for (TA ta : tas) {

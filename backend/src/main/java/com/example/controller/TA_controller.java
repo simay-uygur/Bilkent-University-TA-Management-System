@@ -18,7 +18,6 @@ import com.example.dto.TaDto;
 import com.example.entity.Actors.TA;
 import com.example.entity.General.Date;
 import com.example.entity.Tasks.Task;
-import com.example.entity.Tasks.TaskAccessType;
 import com.example.exception.GeneralExc;
 import com.example.exception.UserNotFoundExc;
 import com.example.exception.taExc.TaNotFoundExc;
@@ -101,9 +100,9 @@ public class TA_controller {
         if (task == null) {
             throw new GeneralExc("Task with ID " + task_id + " not found.");
         }
-        if (task.getAccessType() == TaskAccessType.PRIVATE && task.getRequiredTAs() > 1) {
+        /*if (task.getAccessType() == TaskAccessType.PRIVATE && task.getRequiredTAs() > 1) {
             throw new GeneralExc("Private tasks can only have one TA assigned.");
-        }
+        }*/
         return new ResponseEntity<>(serv.assignTask(task, id),HttpStatus.CREATED);
     }
     

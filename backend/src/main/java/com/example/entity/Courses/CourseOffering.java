@@ -6,10 +6,12 @@ import java.util.List;
 
 import com.example.entity.Actors.TA;
 import com.example.entity.Exams.Exam;
+import com.example.entity.General.Event;
 import com.example.entity.General.Semester;
 import com.example.entity.General.Student;
 
 import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
@@ -97,6 +99,7 @@ public class CourseOffering {
     @OrderBy("studentSurname ASC, studentName ASC")
     private List<Student> registeredStudents = new ArrayList<>();
 
-
+    @Column(name = "semester_duration", nullable = false, updatable = true)
+    private Event semesterDuration; // the duration of the semester in which this offering is held
 }
 

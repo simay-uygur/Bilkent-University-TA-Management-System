@@ -199,7 +199,7 @@ public class SectionServImpl implements SectionServ {
                     // 6) build & collect section
 
                     String sectionCode = String.format("%s-%d-%d-%s",
-                            course.getCourseCode(), sectionNo, year, termEnum);
+                            course.getCourseId(), sectionNo, year, termEnum);
 
 // Check for duplicates before adding to successful list
                     if (repo.existsBySectionCodeEqualsIgnoreCase(sectionCode)) {
