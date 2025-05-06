@@ -1,15 +1,12 @@
 package com.example.entity.General;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
-import com.example.entity.Courses.Course;
 import com.example.entity.Courses.CourseOffering;
+import com.example.entity.Exams.Exam;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
-import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -56,6 +53,13 @@ public class Student {
     @ManyToMany(mappedBy = "registeredStudents", fetch = FetchType.LAZY)
     @JsonIgnore
     private List<CourseOffering> registeredCourseOfferings = new ArrayList<>();
+
+    @ManyToMany(
+      mappedBy = "assignedStudents",
+      fetch    = FetchType.LAZY
+    )
+    private List<Exam> exams = new ArrayList<>();
+
 
 
 }

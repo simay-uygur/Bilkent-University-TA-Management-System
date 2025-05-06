@@ -4,31 +4,36 @@ package com.example.service;
 import java.time.LocalDate;
 import java.time.Month;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.Objects;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.example.dto.CourseOfferingDto;
 import com.example.dto.ExamDto;
-import com.example.dto.ExamRoomDto;
-import com.example.dto.StudentDto;
+import com.example.dto.StudentMiniDto;
+import com.example.entity.Actors.TA;
 import com.example.entity.Courses.CourseOffering;
 import com.example.entity.Exams.Exam;
 import com.example.entity.Exams.ExamRoom;
 import com.example.entity.General.ClassRoom;
 import com.example.entity.General.Student;
 import com.example.entity.General.Term;
-import com.example.entity.Tasks.Task;
-import com.example.entity.Tasks.TaskAccessType;
-import com.example.entity.Tasks.TaskType;
 import com.example.exception.GeneralExc;
+import com.example.exception.NoPersistExc;
 import com.example.mapper.CourseOfferingMapper;
 import com.example.repo.ClassRoomRepo;
 import com.example.repo.CourseOfferingRepo;
+import com.example.repo.ExamRepo;
+import com.example.repo.StudentRepo;
+import com.example.repo.TARepo;
 
 import lombok.RequiredArgsConstructor;
 
@@ -40,6 +45,9 @@ public class CourseOfferingServImpl implements CourseOfferingServ {
     private final SemesterServ semesterServ;
     private final CourseOfferingMapper courseMapper;
     private final ClassRoomRepo classRoomRepo;
+    private final TARepo taRepo;
+    private final StudentRepo studentRepo;
+    private final ExamRepo examRepo;
 
     @Override
     public List<CourseOfferingDto> getOfferingsByDepartment(String deptName){
@@ -160,42 +168,126 @@ public class CourseOfferingServImpl implements CourseOfferingServ {
         }
     }
 
+    @Transactional
     @Async("setExecutor")
     @Override
-    public void createExam(ExamDto dto, String courseCode) {
+    public CompletableFuture<Boolean> createExam(ExamDto dto, String courseCode) {
         CourseOffering offering = getCurrentOffering(courseCode);
         if (offering == null) {
             throw new GeneralExc("No current offering found for course: " + courseCode);
         }
-        Task task = new Task();
-        task.setTaskType(TaskType.Proctoring);
-        task.setDuration(dto.getDuration());
-        task.setRequiredTAs(dto.getRequiredTas());
-        task.setAccessType(TaskAccessType.PUBLIC);
         Exam exam = new Exam();
-        exam.setTask(task);
+        exam.setDuration(dto.getDuration());
+        exam.setSwapEnabled(dto.getSwapIsEnabled());
         exam.setDescription(dto.getType());
-        List<ExamRoom> rooms = new ArrayList<>();
-        for (ExamRoomDto roomDto : dto.getExamRooms()) {
-            ExamRoom room = new ExamRoom();
-            ClassRoom classRoom = classRoomRepo.findByClassroomId(roomDto.getRoom())
-                    .orElseThrow(() -> new GeneralExc("Classroom not found: " + roomDto.getRoom()));
-            room.setExamRoom(classRoom);
-            classRoom.getExamRooms().add(room);
-            List<Student> students = new ArrayList<>();
-            for (StudentDto studentDto : roomDto.getStudents()) {
-                Student student = new Student();
-                student.setStudentId(studentDto.getStudentId());
-                student.setStudentName(studentDto.getStudentName());
-                student.setStudentSurname(studentDto.getStudentSurname());
-                students.add(student);
-            }
-            room.setStudentsList(students);
-            rooms.add(room);
-            classRoomRepo.save(classRoom);
-        }
+        exam.setRequiredTAs(dto.getRequiredTas());
+        exam.setWorkload(dto.getWorkload());
+        List<StudentMiniDto> studentsAndTas = getSortedListOfStudentsAndTas(offering);
+        List<ExamRoom> examRooms = findAndAssignToTheExamRooms(dto.getExamRooms(), studentsAndTas, exam);
+        exam.setExamRooms(examRooms);
         offering.getExams().add(exam);
         exam.setCourseOffering(offering);
-        repo.save(offering);
+        examRepo.save(exam);
+        int size = offering.getExams().size();
+        CourseOffering savedOffering = repo.save(offering);
+        if (savedOffering.getExams().size() != size) {
+            throw new NoPersistExc("Exam creation");
+        }
+        return CompletableFuture.completedFuture(true);
+    }
+
+    private List<StudentMiniDto> getSortedListOfStudentsAndTas(CourseOffering offering) {
+        List<StudentMiniDto> studentsAndTas = getStudentsDto(offering);
+        return studentsAndTas.stream()
+                    .sorted(
+                        Comparator
+                        .comparing(StudentMiniDto::getSurname)    // primary key: surname
+                        .thenComparing(StudentMiniDto::getName)    // secondary key: name
+                    )
+                    .collect(Collectors.toList());
+    }
+
+    private List<StudentMiniDto> getStudentsDto(CourseOffering offering) {
+        List<StudentMiniDto> studentsDto = new ArrayList<>();
+        for (Student student : offering.getRegisteredStudents()) {
+            StudentMiniDto dto = new StudentMiniDto();
+            dto.setId(student.getStudentId());
+            dto.setName(student.getStudentName());
+            dto.setSurname(student.getStudentSurname());
+            studentsDto.add(dto);
+        }
+        for(TA ta : offering.getRegisteredTas()) {
+            StudentMiniDto dto = new StudentMiniDto();
+            dto.setId(ta.getId());
+            dto.setName(ta.getName());
+            dto.setSurname(ta.getSurname());
+            dto.setIsTa(true);
+            studentsDto.add(dto);
+        }
+        return studentsDto;
+    }
+
+    private List<ExamRoom> findAndAssignToTheExamRooms(List<String> examRoomsDto, List<StudentMiniDto> students, Exam exam) {
+        List<ExamRoom> examRooms = new ArrayList<>();
+        int c = 0 ;
+        for (String code : examRoomsDto){
+            ExamRoom examRoom = new ExamRoom();
+            examRoom.setExam(exam);
+            ClassRoom classRoom = classRoomRepo.findByClassroomId(code)
+                    .orElseThrow(() -> new GeneralExc("Classroom not found: " + code));
+            for (ExamRoom examroom : classRoom.getExamRooms()) {
+                if (examroom.getExam().getDuration().equals(exam.getDuration())) {
+                    throw new GeneralExc("Classroom " + code + " already assigned to an exam for that time " + exam.getDuration());
+                }
+            }
+            for(int i = 0; i < classRoom.getExamCapacity() && i < students.size(); i++) {
+                final int index = i; 
+                final StudentMiniDto currentStudent = students.get(index);
+                if (students.get(index).getIsTa()) {
+                    TA ta = taRepo.findById(currentStudent.getId()).orElseThrow(() -> new GeneralExc("TA not found: " + currentStudent.getId()));
+                    examRoom.getTasAsStudentsList().add(ta);
+                }
+                else{
+                    Student student = studentRepo.findById(students.get(index).getId()).orElseThrow(() -> new GeneralExc("Student not found: " + students.get(index).getId()));
+                    examRoom.getStudentsList().add(student);
+                }
+                c++;
+            }
+            examRoom.setExamRoom(classRoom);
+            examRooms.add(examRoom);
+            if (c == students.size()) {
+                return examRooms;
+            }
+        }
+        return examRooms;
+    }
+
+    @Transactional
+    @Async("setExecutor")
+    @Override
+    public CompletableFuture<Boolean> addTAs(String courseCode, Integer examId, List<Long> tas) throws GeneralExc {
+        CourseOffering offering = getCurrentOffering(courseCode);
+        if (offering == null) {
+            throw new GeneralExc("No current offering found for course: " + courseCode);
+        }
+        Exam exam = examRepo.findById(examId)
+                .orElseThrow(() -> new GeneralExc("Exam not found: " + examId));
+        if(tas.size() > exam.getRequiredTAs() || Objects.equals(exam.getRequiredTAs(), exam.getAmountOfAssignedTAs())) {
+            throw new GeneralExc("Number of TAs exceeds the required number for this exam.");
+        }
+        List<TA> tasList = new ArrayList<>();
+        for (Long i : tas) {
+            TA ta = taRepo.findById(i)
+                    .orElseThrow(() -> new GeneralExc("TA not found: " + i));
+            tasList.add(ta);
+        } 
+        Integer prevAmount = exam.getAmountOfAssignedTAs();
+        exam.setAmountOfAssignedTAs(exam.getAmountOfAssignedTAs() + tas.size());
+        exam.setAssignedTas(tasList);
+        Exam checkExam = examRepo.save(exam);
+        if (checkExam.getAmountOfAssignedTAs() != prevAmount + tas.size()) {
+            throw new GeneralExc("TA assignment to exam failed."); // Ensure GeneralExc is correctly imported
+        }
+        return CompletableFuture.completedFuture(true);
     }
 }

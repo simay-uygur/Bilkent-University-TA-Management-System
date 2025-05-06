@@ -20,6 +20,7 @@ import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.OrderBy;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 import lombok.AllArgsConstructor;
@@ -74,6 +75,7 @@ public class CourseOffering {
             joinColumns = @JoinColumn(name = "offering_id"),
             inverseJoinColumns = @JoinColumn(name = "ta_id")
     )
+    @OrderBy("surname ASC, name ASC")
     private List<TA> registeredTas = new ArrayList<>();
 
     /** TAs who are *assigned* to assist/teach this offering */
@@ -83,6 +85,7 @@ public class CourseOffering {
             joinColumns = @JoinColumn(name = "offering_id"),
             inverseJoinColumns = @JoinColumn(name = "ta_id")
     )
+    @OrderBy("totalWorkload ASC")
     private List<TA> assignedTas = new ArrayList<>();
 
     @ManyToMany(fetch = FetchType.LAZY)
@@ -91,6 +94,7 @@ public class CourseOffering {
             joinColumns        = @JoinColumn(name = "offering_id"),
             inverseJoinColumns = @JoinColumn(name = "student_id")
     )
+    @OrderBy("studentSurname ASC, studentName ASC")
     private List<Student> registeredStudents = new ArrayList<>();
 
 

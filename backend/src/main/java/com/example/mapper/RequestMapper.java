@@ -65,7 +65,6 @@ public class RequestMapper {
             dto.setReceiverName(swap.getReceiver().getName() + " " + swap.getReceiver().getSurname());
             dto.setExamName(swap.getExam().getDescription());
             dto.setExamId(swap.getExam().getExamId());
-            dto.setDuration(swap.getExam().getTask().getDuration());
             return dto;
         }
         else if (req instanceof SwapEnable se) {
@@ -73,7 +72,7 @@ public class RequestMapper {
             BeanUtils.copyProperties(se, dto);
             dto.setSenderName(se.getSender().getName() + " " + se.getSender().getSurname());
             dto.setReceiverName(se.getReceiver().getName() + " " + se.getReceiver().getSurname());
-            dto.setDuration(se.getExam().getTask().getDuration());
+            dto.setDuration(se.getExam().getDuration());
             dto.setExamName(se.getExam().getDescription());
             dto.setExamId(se.getExam().getExamId());
             return dto;
@@ -83,7 +82,7 @@ public class RequestMapper {
             BeanUtils.copyProperties(tp, dto);
             dto.setSenderName(tp.getSender().getName() + " " + tp.getSender().getSurname());
             dto.setReceiverName(tp.getReceiver().getName() + " " + tp.getReceiver().getSurname());
-            dto.setDuration(tp.getExam().getTask().getDuration());
+            dto.setDuration(tp.getExam().getDuration());
             dto.setExamId(tp.getExam().getExamId());
             dto.setExamName(tp.getExam().getDescription());
             return dto;

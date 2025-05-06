@@ -44,7 +44,7 @@ public interface TARepo extends JpaRepository<TA, Long> { // TA is the entity an
     /**
      * Check if TA as a student has any exam (Task with an Exam) conflicting with the given range.
      */
-    @Query("""
+    /*@Query("""
       SELECT CASE WHEN COUNT(tsk)>0 THEN TRUE ELSE FALSE END
       FROM Section s
       JOIN s.registeredTas ta
@@ -70,7 +70,7 @@ public interface TARepo extends JpaRepository<TA, Long> { // TA is the entity an
         @Param("endYear") int endYear,
         @Param("endMonth") int endMonth,
         @Param("endDay") int endDay
-    );
+    );*/
 
     /**
      * Check if TA as a student has any lesson conflicting with the given date range.

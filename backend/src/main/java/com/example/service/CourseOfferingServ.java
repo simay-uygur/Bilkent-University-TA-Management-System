@@ -1,15 +1,14 @@
 // com/example/service/CourseOfferingService.java
 package com.example.service;
 
-import com.example.dto.CourseDto;
-import com.example.dto.CourseOfferingDto;
-import com.example.entity.Courses.Course;
-import com.example.entity.Courses.CourseOffering;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 
+import com.example.dto.CourseOfferingDto;
 import com.example.dto.ExamDto;
 import com.example.entity.Courses.CourseOffering;
+import com.example.exception.GeneralExc;
 
 public interface CourseOfferingServ {
     CourseOffering create(CourseOffering offering);
@@ -24,7 +23,8 @@ public interface CourseOfferingServ {
      public List<CourseOfferingDto> getOfferingsByDepartment(String deptName);
 
     CourseOffering getCurrentOffering(String courseCode);
-    void createExam(ExamDto exam, String courseCode); // Assuming you have an ExamDto class
+    CompletableFuture<Boolean> createExam(ExamDto exam, String courseCode); // Assuming you have an ExamDto class
+    CompletableFuture<Boolean> addTAs(String courseCode, Integer examId, List<Long> tas) throws GeneralExc; // Assuming you have an ExamDto class
 }
 
 

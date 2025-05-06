@@ -16,7 +16,7 @@ import lombok.Data;
 @Table(name = "swap_requests")
 @AllArgsConstructor
 public class Swap extends Request {
-    @OneToOne(fetch = FetchType.LAZY, optional = false)
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "exam_id", referencedColumnName = "exam_id")
     private Exam exam;
 }

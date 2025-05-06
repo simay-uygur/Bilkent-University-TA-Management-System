@@ -94,24 +94,20 @@ public class RequestController {
     ) {
         Instructor instructor = insRepo.findById(insId)
                 .orElseThrow(() -> new UserNotFoundExc(insId));
-
         // fetch polymorphic Requests
         List<Request> entities = instructor.getReceivedRequests();
-
         // map to DTOs
         List<RequestDto> dtos = entities.stream().map(requestMapper::toDto).collect(Collectors.toList());
-
-
         return ResponseEntity.ok(dtos);
     }
 
-    @PostMapping("/swap")
+    @PostMapping("/ta/{taId}/swap")
     public ResponseEntity<?> sendSwap(
         @PathVariable Long taId,
         @RequestBody SwapDto dto
     ) {
         swapServ.createSwapRequest(dto, taId);
-        boolean exists = swapRepo.existsBySenderIdAndReceiverIdAndExamExamIdAndIsRejected(taId, dto.getReceiverId(), dto.getExamId(), false);
+        boolean exists = swapRepo.existsBySenderIdAndReceiverIdAndExamExamIdAndIsRejectedFalse(taId, dto.getReceiverId(), dto.getExamId());
         return new ResponseEntity<>(exists ? HttpStatus.CREATED : HttpStatus.BAD_REQUEST);
     }
 

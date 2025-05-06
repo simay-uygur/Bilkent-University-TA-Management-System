@@ -50,7 +50,7 @@ public class SwapServImpl implements SwapServ{
         req.setReceiver(receiver);
         req.setExam(exam);
 
-        swapRepo.save(req);
+        swapRepo.saveAndFlush(req);
     }
 
     @Override

@@ -85,7 +85,7 @@ public interface TaTaskRepo extends JpaRepository<TaTask, Integer> {
           @Param("toDay")    int toDay
       );
 
-      @Query("""
+      /*@Query("""
         SELECT CASE WHEN COUNT(tt)>0 THEN TRUE ELSE FALSE END
           FROM TaTask tt
         WHERE tt.taOwner.id     = :taId
@@ -97,7 +97,7 @@ public interface TaTaskRepo extends JpaRepository<TaTask, Integer> {
         @Param("taId") Long taId,
         @Param("from") Date  from,
         @Param("to")   Date  to
-      );
+      );*/
 
       @Query("""
         SELECT t

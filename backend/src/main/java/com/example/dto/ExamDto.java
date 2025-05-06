@@ -1,12 +1,12 @@
 package com.example.dto;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-
 import java.util.List;
 
 import com.example.entity.General.Event;
+
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 
 @Data
@@ -16,6 +16,8 @@ public class ExamDto {
     private Event    duration;
     private String courseCode;
     private String       type;
-    private List<ExamRoomDto> examRooms;
+    private List<String> examRooms;
     private int   requiredTas;
+    private Boolean swapIsEnabled;
+    private Integer workload;
 }

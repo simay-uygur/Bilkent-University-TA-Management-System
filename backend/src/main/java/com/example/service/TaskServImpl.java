@@ -124,7 +124,6 @@ public class TaskServImpl implements TaskServ {
         existing.setStatus(incoming.getStatus());
         existing.setRequiredTAs(incoming.getRequiredTAs());
         existing.setSection(incoming.getSection());
-        existing.setExam(incoming.getExam());
         
         taskRepo.save(existing);
         return taskRepo.existsById(task_id);
