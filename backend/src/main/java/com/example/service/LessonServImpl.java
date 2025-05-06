@@ -37,128 +37,7 @@ public class LessonServImpl implements LessonServ {
     private final LessonRepo lessonRepo;
     private final SectionRepo sectionRepo;
     private final ClassRoomRepo classRoomRepo;
-/*     @Override
-@Transactional
-public Map<String, Object> importLessonsFromExcel(MultipartFile file) throws IOException {
-    List<Lesson> successful = new ArrayList<>();
-    List<FailedRowInfo> failed = new ArrayList<>();
-
-    try (Workbook wb = new XSSFWorkbook(file.getInputStream())) {
-        Sheet sheet = wb.getSheetAt(0);
-        for (Row row : sheet) {
-            if (row.getRowNum() == 0) continue;  // Skip header
-            
-            try {
-                // 1) Extract data from Excel
-                String sectionCode = getCellStringValue(row, 0); // CS-319-1-2025-SPRING
-                String dayString = getCellStringValue(row, 1);    // Monday
-                String startTime = getCellStringValue(row, 2);    // 10:40
-                String endTime = getCellStringValue(row, 3);      // 12:30
-                String roomCode = getCellStringValue(row, 4);     // B-201
-                
-                if (sectionCode == null || dayString == null || startTime == null || 
-                    endTime == null || roomCode == null) {
-                    throw new IllegalArgumentException("Missing required data in row " + row.getRowNum());
-                }
-                
-                // 2) Find the section
-                Section section = sectionRepo.findBySectionCodeIgnoreCase(sectionCode)
-                    .orElseThrow(() -> new IllegalArgumentException(
-                        "Section not found with code: " + sectionCode));
-                
-                // 3) Find or create classroom
-                ClassRoom room = classRoomRepo.findClassRoomByClassroomId(roomCode)
-                    .orElseGet(() -> {
-                        ClassRoom newRoom = new ClassRoom();
-                        newRoom.setClassroomId(roomCode);
-                        newRoom.setClassCapacity(50); // Default values
-                        newRoom.setExamCapacity(30);
-                        return classRoomRepo.save(newRoom);
-                    });
-                
-                // 4) Parse times and create event
-                String[] startParts = startTime.split(":");
-                String[] endParts = endTime.split(":");
-                
-                int startHour = Integer.parseInt(startParts[0]);
-                int startMinute = Integer.parseInt(startParts[1]);
-                int endHour = Integer.parseInt(endParts[0]);
-                int endMinute = Integer.parseInt(endParts[1]);
-                
-                // Get day index from string (0 = Monday, 6 = Sunday)
-                int dayOfWeek = mapDayStringToDayIndex(dayString); 
-                
-                // Get current date info for the day of week
-                Calendar calendar = Calendar.getInstance();
-                while (calendar.get(Calendar.DAY_OF_WEEK) != mapDayIndexToCalendarDay(dayOfWeek)) {
-                    calendar.add(Calendar.DAY_OF_MONTH, 1);
-                }
-                
-                // Create start Date
-                Date startDate = new Date();
-                startDate.setYear(calendar.get(Calendar.YEAR));
-                startDate.setMonth(calendar.get(Calendar.MONTH) + 1); // Calendar months are 0-based
-                startDate.setDay(calendar.get(Calendar.DAY_OF_MONTH));
-                startDate.setHour(startHour);
-                startDate.setMinute(startMinute);
-                
-                // Create end Date
-                Date endDate = new Date();
-                endDate.setYear(calendar.get(Calendar.YEAR));
-                endDate.setMonth(calendar.get(Calendar.MONTH) + 1);
-                endDate.setDay(calendar.get(Calendar.DAY_OF_MONTH));
-                endDate.setHour(endHour);
-                endDate.setMinute(endMinute);
-                
-                // Create Event
-                Event event = new Event(startDate, endDate);
-                
-                // 5) Check for time conflicts
-                checkForTimeConflict(event, room);
-                
-                // 6) Create and save Lesson
-                Lesson lesson = new Lesson();
-                lesson.setSection(section);
-                lesson.setLessonRoom(room);
-                lesson.setDuration(event);
-                lesson.setLessonType(Lesson.LessonType.LESSON);
-                
-                Lesson savedLesson = lessonRepo.save(lesson);
-                successful.add(savedLesson);
-                
-            } catch (Exception e) {
-                failed.add(new FailedRowInfo(
-                    row.getRowNum(), 
-                    e.getClass().getSimpleName() + ": " + e.getMessage()
-                ));
-            }
-        }
-    }
-    
-    Map<String, Object> result = new HashMap<>();
-    result.put("successCount", successful.size());
-    result.put("failedCount", failed.size());
-    result.put("failedRows", failed);
-    return result;
-}
-private String getCellStringValue(Row row, int cellIndex) {
-    Cell cell = row.getCell(cellIndex);
-    if (cell == null) {
-        return null;
-    }
-    
-    switch (cell.getCellType()) {
-        case STRING:
-            return cell.getStringCellValue().trim();
-        case NUMERIC:
-            if (DateUtil.isCellDateFormatted(cell)) {
-                return cell.getLocalDateTimeCellValue().toString();
-            }
-            return String.valueOf((int)cell.getNumericCellValue());
-        default:
-            return "";
-    }
-} */
+// older one deleted
 
 // Helper method to convert day string to day index (0-6)
 /* private int mapDayStringToDayIndex(String dayString) {
@@ -203,6 +82,77 @@ private void checkForTimeConflict(Event newEvent, ClassRoom room) {
         }
     }
 } */
+//
+//    @Override
+//    public Map<String, Object> importLessonsFromExcel(MultipartFile file) throws IOException {
+//        List<Lesson> saved = new ArrayList<>();
+//        List<FailedRowInfo> failed = new ArrayList<>();
+//
+//        try (Workbook wb = new XSSFWorkbook(file.getInputStream())) {
+//            Sheet sheet = wb.getSheetAt(0);
+//
+//            for (Row row : sheet) {
+//                if (row.getRowNum() == 0) continue;
+//
+//                try {
+//                    String sectionCode = row.getCell(0).getStringCellValue().trim(); // CS-102-1
+//                    String dayStr = row.getCell(1).getStringCellValue().trim().toUpperCase(); // MONDAY
+//                    String startTimeStr = row.getCell(2).getStringCellValue().trim(); // 08:30
+//                    String endTimeStr = row.getCell(3).getStringCellValue().trim();   // 10:20
+//                    String typeStr = row.getCell(4).getStringCellValue().trim().toUpperCase(); // LESSON / SPARE_HOUR
+//                    String roomCode = row.getCell(5).getStringCellValue().trim();
+//
+//                    Section section = sectionRepo.findBySectionCodeIgnoreCase(sectionCode)
+//                            .orElseThrow(() -> new IllegalArgumentException("Section not found: " + sectionCode));
+//
+//                    String[] startTokens = startTimeStr.split(":");
+//                    String[] endTokens = endTimeStr.split(":");
+//
+//                    int startHour = Integer.parseInt(startTokens[0]);
+//                    int startMinute = Integer.parseInt(startTokens[1]);
+//                    int endHour = Integer.parseInt(endTokens[0]);
+//                    int endMinute = Integer.parseInt(endTokens[1]);
+//
+//                    java.time.DayOfWeek targetDay = java.time.DayOfWeek.valueOf(dayStr);
+//                    java.time.LocalDate baseDate = java.time.LocalDate.of(2025, 5, 1);
+//                    java.time.LocalDate lessonDate = baseDate.with(java.time.temporal.TemporalAdjusters.nextOrSame(targetDay));
+//                    int lessonDay = lessonDate.getDayOfMonth();
+//
+//                    com.example.entity.General.Date start = new com.example.entity.General.Date(lessonDay, 5, 2025, startHour, startMinute);
+//                    com.example.entity.General.Date end = new com.example.entity.General.Date(lessonDay, 5, 2025, endHour, endMinute);
+//
+//                    Event event = new Event(start, end);
+//
+//                    Lesson lesson = new Lesson();
+//                    lesson.setSection(section);
+//                    lesson.setDuration(event);
+//                    lesson.setLessonType(Lesson.LessonType.valueOf(typeStr));
+//                    lesson.setLessonRoom(
+//                            classRoomRepo.findClassRoomByClassroomIdEqualsIgnoreCase(roomCode).orElse(null)
+//                    );
+//
+//                    saved.add(lesson);
+//
+//                } catch (Exception e) {
+//                    failed.add(new FailedRowInfo(
+//                            row.getRowNum(),
+//                            e.getClass().getSimpleName() + ": " + e.getMessage()
+//                    ));
+//                }
+//            }
+//        }
+//
+//        if (!saved.isEmpty()) {
+//            lessonRepo.saveAll(saved);
+//        }
+//
+//        return Map.of(
+//                "successCount", saved.size(),
+//                "failedCount", failed.size(),
+//                "failedRows", failed
+//        );
+//    }
+
     @Override
     public Map<String, Object> importLessonsFromExcel(MultipartFile file) throws IOException {
         List<Lesson> saved = new ArrayList<>();
@@ -215,43 +165,49 @@ private void checkForTimeConflict(Event newEvent, ClassRoom room) {
                 if (row.getRowNum() == 0) continue;
 
                 try {
-                    String sectionCode = row.getCell(0).getStringCellValue().trim(); // CS-102-1
-                    String dayStr = row.getCell(1).getStringCellValue().trim().toUpperCase(); // MONDAY
-                    String startTimeStr = row.getCell(2).getStringCellValue().trim(); // 08:30
-                    String endTimeStr = row.getCell(3).getStringCellValue().trim();   // 10:20
-                    String typeStr = row.getCell(4).getStringCellValue().trim().toUpperCase(); // LESSON / SPARE_HOUR
+                    String sectionCode = row.getCell(0).getStringCellValue().trim();
+                    String dayStr = row.getCell(1).getStringCellValue().trim().toUpperCase();
+                    String startTimeStr = row.getCell(2).getStringCellValue().trim();
+                    String endTimeStr = row.getCell(3).getStringCellValue().trim();
+                    String typeStr = row.getCell(4).getStringCellValue().trim().toUpperCase();
                     String roomCode = row.getCell(5).getStringCellValue().trim();
 
                     Section section = sectionRepo.findBySectionCodeIgnoreCase(sectionCode)
                             .orElseThrow(() -> new IllegalArgumentException("Section not found: " + sectionCode));
-
-                    String[] startTokens = startTimeStr.split(":");
-                    String[] endTokens = endTimeStr.split(":");
-
-                    int startHour = Integer.parseInt(startTokens[0]);
-                    int startMinute = Integer.parseInt(startTokens[1]);
-                    int endHour = Integer.parseInt(endTokens[0]);
-                    int endMinute = Integer.parseInt(endTokens[1]);
 
                     java.time.DayOfWeek targetDay = java.time.DayOfWeek.valueOf(dayStr);
                     java.time.LocalDate baseDate = java.time.LocalDate.of(2025, 5, 1);
                     java.time.LocalDate lessonDate = baseDate.with(java.time.temporal.TemporalAdjusters.nextOrSame(targetDay));
                     int lessonDay = lessonDate.getDayOfMonth();
 
-                    com.example.entity.General.Date start = new com.example.entity.General.Date(lessonDay, 5, 2025, startHour, startMinute);
-                    com.example.entity.General.Date end = new com.example.entity.General.Date(lessonDay, 5, 2025, endHour, endMinute);
+                    ClassRoom room = classRoomRepo.findClassRoomByClassroomIdEqualsIgnoreCase(roomCode)
+                            .orElse(null);
 
-                    Event event = new Event(start, end);
+                    String[] startTokens = startTimeStr.split(":");
+                    String[] endTokens = endTimeStr.split(":");
+                    java.time.LocalTime startTime = java.time.LocalTime.of(Integer.parseInt(startTokens[0]), Integer.parseInt(startTokens[1]));
+                    java.time.LocalTime endTime = java.time.LocalTime.of(Integer.parseInt(endTokens[0]), Integer.parseInt(endTokens[1]));
 
-                    Lesson lesson = new Lesson();
-                    lesson.setSection(section);
-                    lesson.setDuration(event);
-                    lesson.setLessonType(Lesson.LessonType.valueOf(typeStr));
-                    lesson.setLessonRoom(
-                            classRoomRepo.findClassRoomByClassroomIdEqualsIgnoreCase(roomCode).orElse(null)
-                    );
+                    while (startTime.plusMinutes(50).isBefore(endTime) || startTime.plusMinutes(50).equals(endTime)) {
+                        java.time.LocalTime chunkEnd = startTime.plusMinutes(50);
 
-                    saved.add(lesson);
+                        // Convert LocalTime and lessonDate to your Date class
+                        com.example.entity.General.Date start = new com.example.entity.General.Date(lessonDay, 5, 2025, startTime.getHour(), startTime.getMinute());
+                        com.example.entity.General.Date end = new com.example.entity.General.Date(lessonDay, 5, 2025, chunkEnd.getHour(), chunkEnd.getMinute());
+
+                        Event event = new Event(start, end);
+
+                        Lesson lesson = new Lesson();
+                        lesson.setSection(section);
+                        lesson.setDuration(event);
+                        lesson.setLessonType(Lesson.LessonType.valueOf(typeStr));
+                        lesson.setLessonRoom(room);
+
+                        saved.add(lesson);
+
+                        // Add 10-minute break
+                        startTime = chunkEnd.plusMinutes(10);
+                    }
 
                 } catch (Exception e) {
                     failed.add(new FailedRowInfo(
@@ -287,11 +243,66 @@ private void checkForTimeConflict(Event newEvent, ClassRoom room) {
         return convertToDto(lesson);
     }
 
+//    @Override
+//    public LessonDto createLesson(LessonDto dto) {
+//        Lesson lesson = convertToEntity(dto);
+//        return convertToDto(lessonRepo.save(lesson));
+//    }
+
     @Override
     public LessonDto createLesson(LessonDto dto) {
-        Lesson lesson = convertToEntity(dto);
-        return convertToDto(lessonRepo.save(lesson));
+        EventDto duration = dto.getDuration();
+
+        // Extract times
+        java.time.LocalTime startTime = java.time.LocalTime.of(
+                duration.getStart().getHour(),
+                duration.getStart().getMinute()
+        );
+        java.time.LocalTime endTime = java.time.LocalTime.of(
+                duration.getFinish().getHour(),
+                duration.getFinish().getMinute()
+        );
+
+        int day = duration.getStart().getDay();
+        int month = duration.getStart().getMonth();
+        int year = duration.getStart().getYear();
+
+        List<Lesson> chunks = new ArrayList<>();
+
+        // Shared info
+        Section section = sectionRepo.findBySectionCodeIgnoreCase(dto.getSectionId())
+                .orElseThrow(() -> new IllegalArgumentException("Section not found"));
+        ClassRoom room = classRoomRepo.findClassRoomByClassroomIdEqualsIgnoreCase(dto.getClassroomId())
+                .orElse(null);
+        Lesson.LessonType type = Lesson.LessonType.valueOf(dto.getLessonType());
+
+        // Create 50-min blocks
+        while (startTime.plusMinutes(50).isBefore(endTime) || startTime.plusMinutes(50).equals(endTime)) {
+            java.time.LocalTime chunkEnd = startTime.plusMinutes(50);
+
+            Date start = new Date(day, month, year, startTime.getHour(), startTime.getMinute());
+            Date end = new Date(day, month, year, chunkEnd.getHour(), chunkEnd.getMinute());
+
+            Lesson lesson = new Lesson();
+            lesson.setDuration(new Event(start, end));
+            lesson.setSection(section);
+            lesson.setLessonRoom(room);
+            lesson.setLessonType(type);
+
+            chunks.add(lesson);
+
+            startTime = chunkEnd.plusMinutes(10); // skip 10-min break
+        }
+
+        // Save all and return first as representative
+        if (!chunks.isEmpty()) {
+            lessonRepo.saveAll(chunks);
+            return convertToDto(chunks.get(0)); // or return a list if preferred
+        } else {
+            throw new IllegalArgumentException("No valid 50-minute chunks could be created");
+        }
     }
+
 
     @Override
     public void deleteLesson(Long id) {
@@ -353,6 +364,59 @@ private void checkForTimeConflict(Event newEvent, ClassRoom room) {
     }
 }
 
+/*
+create returning list dto
+@Override
+public List<LessonDto> createLesson(LessonDto dto) {
+    EventDto duration = dto.getDuration();
+
+    java.time.LocalTime startTime = java.time.LocalTime.of(
+            duration.getStart().getHour(),
+            duration.getStart().getMinute()
+    );
+    java.time.LocalTime endTime = java.time.LocalTime.of(
+            duration.getFinish().getHour(),
+            duration.getFinish().getMinute()
+    );
+
+    int day = duration.getStart().getDay();
+    int month = duration.getStart().getMonth();
+    int year = duration.getStart().getYear();
+
+    List<Lesson> chunks = new ArrayList<>();
+
+    Section section = sectionRepo.findBySectionCodeIgnoreCase(dto.getSectionId())
+            .orElseThrow(() -> new IllegalArgumentException("Section not found: " + dto.getSectionId()));
+    ClassRoom room = classRoomRepo.findClassRoomByClassroomIdEqualsIgnoreCase(dto.getClassroomId())
+            .orElse(null);
+    Lesson.LessonType type = Lesson.LessonType.valueOf(dto.getLessonType());
+
+    while (startTime.plusMinutes(50).isBefore(endTime) || startTime.plusMinutes(50).equals(endTime)) {
+        java.time.LocalTime chunkEnd = startTime.plusMinutes(50);
+
+        Date start = new Date(day, month, year, startTime.getHour(), startTime.getMinute());
+        Date end = new Date(day, month, year, chunkEnd.getHour(), chunkEnd.getMinute());
+
+        Lesson lesson = new Lesson();
+        lesson.setDuration(new Event(start, end));
+        lesson.setSection(section);
+        lesson.setLessonRoom(room);
+        lesson.setLessonType(type);
+
+        chunks.add(lesson);
+        startTime = chunkEnd.plusMinutes(10);
+    }
+
+    if (!chunks.isEmpty()) {
+        lessonRepo.saveAll(chunks);
+        return chunks.stream()
+                .map(this::convertToDto)
+                .collect(Collectors.toList());
+    } else {
+        throw new IllegalArgumentException("No valid 50-minute lesson chunks could be created");
+    }
+}
+ */
 /*
 
 package com.example.service;
