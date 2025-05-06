@@ -3,7 +3,7 @@ import React, { useState, FocusEvent } from 'react';
 import { useLocation } from 'react-router-dom';
 import InsNavBar from '../../components/NavBars/InsNavBar';
 import BackBut from '../../components/Buttons/BackBut';
-import SearchSelect from '../../components/SearchSelect';
+import SearchSelect from '../../Benim/SearchSelect';
 import GreenBut from '../../components/Buttons/GreenBut';
 import ErrPopUp from '../../components/PopUp/ErrPopUp';
 import ConPop from '../../components/PopUp/ConPop';
@@ -96,7 +96,7 @@ const CourseTAReq: React.FC = () => {
 
   return (
     <div className={styles.container}>
-      <InsNavBar />
+      
       <div className={styles.headerRow}>
         <BackBut to="/ins" />
         <h1 className={styles.title}>Course TA Request</h1>

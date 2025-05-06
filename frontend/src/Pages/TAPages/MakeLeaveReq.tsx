@@ -47,7 +47,7 @@ const MakeLeaveReq: React.FC = () => {
 
   return (
     <div className={styles.pageWrapper}>
-      <TANavBar />
+     
 
       <main className={styles.content}>
         <div className={styles.leaveRequestForm}>

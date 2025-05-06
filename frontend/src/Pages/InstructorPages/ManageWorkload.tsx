@@ -144,7 +144,7 @@ const ManageWorkload: React.FC = () => {
 
   return (
     <div className={styles.pageWrapper}>
-      <InsNavBar />
+      
 
       <div className={styles.headerRow}>
         <BackBut to="/ins"/>

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Outlet } from 'react-router-dom';
 import NavBarDeans from './NavBarDeans';
-import NotificationPanel from './NotificationPanel';
+import NotificationPanel from '../Benim/NotificationPanel';
 import { fetchNotifications, markAllRead } from '../api';
 import styles from './DeansLayout.module.css';
 

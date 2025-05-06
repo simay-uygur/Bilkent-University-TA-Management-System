@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import NavBarDeans from '../components/NavBarDeans';
+
 import styles from './DeanAssignProctors.module.css';
 
 interface TA {
