@@ -13,6 +13,8 @@ import com.example.repo.CourseRepo;
 import com.example.repo.SectionRepo;
 import com.example.repo.StudentRepo;
 import com.example.repo.TARepo;
+
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
@@ -158,6 +160,7 @@ public class SectionServImpl implements SectionServ {
     }
 
     @Override
+    @Transactional
     public Map<String,Object> importFromExcel(MultipartFile file) throws IOException {
         List<Section> successful = new ArrayList<>();
         List<FailedRowInfo> failed  = new ArrayList<>();
@@ -214,13 +217,21 @@ public class SectionServImpl implements SectionServ {
                     Instructor instr = instructorService.getById(staffId);
 
                     // 6) build & collect section
-                    Section sec = new Section();
-                    sec.setSectionCode(
-                            String.format("%s-%d-%d-%s",
-                                    course.getCourseCode(), sectionNo, year, termEnum));
-                    sec.setOffering(off);
-                    sec.setInstructor(instr);
-                    successful.add(sec);
+                    
+String sectionCode = String.format("%s-%d-%d-%s", 
+course.getCourseCode(), sectionNo, year, termEnum);
+
+// Check for duplicates before adding to successful list
+if (repo.existsBySectionCodeEqualsIgnoreCase(sectionCode)) {
+throw new IllegalArgumentException(
+    "Section with code '" + sectionCode + "' already exists.");
+}
+
+Section sec = new Section();
+sec.setSectionCode(sectionCode);
+sec.setOffering(off);
+sec.setInstructor(instr);
+successful.add(sec);
 
                 } catch (Exception e) {
                     failed.add(new FailedRowInfo(

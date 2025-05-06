@@ -1,26 +1,54 @@
 .multiSearch {
     width: 100%;
-    max-width: 800px;
+    max-width: 600px; /* Reduced from 800px for a more compact look */
     margin: 0 auto;
+    padding: 10px 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center; /* Center children horizontally */
   }
   
   .tabs {
     display: flex;
     margin-bottom: 10px;
+    width: 100%;
+    justify-content: center;
+    border-radius: 4px;
+    overflow: hidden;
+    border: 1px solid #dee2e6;
   }
   
   .tab {
     flex: 1;
-    padding: 8px 16px;
+    max-width: 120px;
+    padding: 10px 16px;
     border: none;
-    background: #f0f0f0;
+    background: #ffffff; /* White background */
     cursor: pointer;
-    transition: background-color 0.2s;
+    transition: all 0.2s;
+    text-align: center;
+    font-weight: 500;
+    color: #495057; /* Darker text for contrast */
+    border-right: 1px solid #dee2e6; /* Lighter border color */
+  }
+  
+  .tab:last-child {
+    border-right: none;
+  }
+  
+  .tab:hover {
+    background: #e9ecef; /* Subtle hover effect */
   }
   
   .tab.active {
     background: #007bff;
     color: white;
+    box-shadow: none; /* Remove shadow for cleaner look */
+  }
+  
+  /* Add this to make the SearchSelect component take appropriate width */
+  .multiSearch > div:not(.tabs):not(.loading) {
+    width: 100%;
   }
   
   .courseOption {
