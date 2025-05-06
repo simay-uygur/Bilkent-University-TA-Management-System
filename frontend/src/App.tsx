@@ -45,6 +45,8 @@ import SelectTACourse from './Pages/DepOfficePages/SelectTACourse';
 import ViewAddExam from './Pages/DepOfficePages/ViewAddExam';
 import DeansProctoringPage from './components/DeansProctoringPage';
 import ProctorLeftTA from './Pages/DeanOfficePages/ProctorLeftTA';
+import DepartmentCourseDetails from './components/DepartmentCourseDetails';
+import DepartmentInsturctorDetails from './components/DepartmentInsturctorDetails';
 
 const App: React.FC = () => (
   <BrowserRouter>
@@ -107,7 +109,11 @@ const App: React.FC = () => (
         <Route path="/dept-office" element={<DepartmentLayout />}>
           <Route index                          element={<DepartmentOffice />} />
           <Route path="proctor"                 element={<ProctorAssignmentsPage />} />
+          
           <Route path="proctor/:courseId/:mode" element={<ProctorAssignmentsPage />} />
+          <Route path="course/:courseCode"        element={<DepartmentCourseDetails />} />
+          <Route path="instructor/:id"         element={<DepartmentInsturctorDetails />} />
+
           <Route path="leave"                   element={<LeaveRequestsPage />} />
 
 
