@@ -35,7 +35,7 @@ public class ClassRoom {
 
     //this is for holding the capacity according to exam rules - provided in the excel
     @Column(name = "exam_rooms", nullable = false)
-    @OneToMany(mappedBy = "examRoom", fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "classRoom", fetch = FetchType.LAZY)
     private List<ExamRoom> examRooms = new ArrayList<>();
 
     @OneToMany(

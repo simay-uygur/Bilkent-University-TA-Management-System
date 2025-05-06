@@ -5,12 +5,16 @@ import jakarta.persistence.AttributeOverrides;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 import jakarta.persistence.Embedded;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Embeddable
 @Getter
 @Setter
+@NoArgsConstructor
+@AllArgsConstructor
 public class Event {
     @Embedded
     @AttributeOverrides({
@@ -32,10 +36,18 @@ public class Event {
     })
     private Date finish;
 
+
     public boolean isOngoing() {
+        if (start == null || finish == null) return false;
+
         Date current = new Date().currenDate();
         return (current.isAfter(start) || current.isBefore(start)) && current.isBefore(finish);
     }
+
+//    public boolean isOngoing() {
+//        Date current = new Date().currenDate();
+//        return (current.isAfter(start) || current.isBefore(start)) && current.isBefore(finish);
+//    }
 
     @Override
     public boolean equals(Object obj) {

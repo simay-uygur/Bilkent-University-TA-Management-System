@@ -1,0 +1,33 @@
+/* ErrorPopup.module.css */
+.overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(4px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+  }
+  
+  .popup {
+    background: #fff;
+    padding: 1.5rem;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    max-width: 90%;
+    width: 320px;
+    text-align: center;
+  }
+  
+  .label {
+    font-size: 1.125rem;
+    margin-bottom: 1rem;
+    color: #333;
+  }
+  
+  .buttonWrapper {
+    display: flex;
+    justify-content: center;
+  }
+  

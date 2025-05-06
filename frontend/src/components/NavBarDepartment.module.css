@@ -1,12 +1,85 @@
-/* DepOfNavBar.module.css */
+/* 
 .header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    background-color: #0288d1;
-    padding: 10px 20px;
-    color: white;
-  }
+  margin-bottom: 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #1b7ad8; 
+  padding: 12px 24px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  margin-bottom: 0px;
+}
+
+.logoSection {
+  display: flex;
+  align-items: center;
+}
+
+.logo {
+  width: 56px;
+  height: 56px;
+  margin-right: 12px;
+  background-color: #ffffff;
+  border-radius: 50%;
+  padding: 4px;
+}
+
+.title {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: #F8F8FF;
+}
+
+.navActions {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.navButton {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background-color: rgba(255, 255, 255, 0.15);
+  border: none;
+  color: #e0e7ff;
+  font-size: 1rem;
+  font-weight: 500;
+  padding: 8px 14px;
+  border-radius: 6px;
+  transition: background-color 0.2s, color 0.2s;
+}
+
+.navButton:hover {
+  background-color: rgba(255, 255, 255, 0.3);
+  color: #ffffff;
+}
+
+.active {
+  background-color: #ffffff;
+  color: #3b82f6;
+  box-shadow: inset 0 0 0 2px #ffffff;
+}
+
+.icon {
+  display: flex;
+  align-items: center;
+  color: inherit;
+} 
+ */
+
+
+ .header {
+  margin-bottom: 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #1b7ad8; 
+  padding: 12px 24px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  margin-bottom: 0px;
+ }
+
   
   .logoSection {
     display: flex;
@@ -20,8 +93,9 @@
   }
   
   .title {
-    font-size: 20px;
-    font-weight: bold;
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: #F8F8FF;
   }
   
   .navActions {
@@ -38,7 +112,10 @@
     cursor: pointer;
     padding: 5px 10px;
     font-size: 16px;
+    border-radius: 6px;
+    transition: background-color 0.2s, color 0.2s;
   }
+  
   
   .navButton:hover {
     background-color: #0277bd;
@@ -52,4 +129,4 @@
     font-weight: bold;
     border-bottom: 2px solid white;
   }
-  
+   

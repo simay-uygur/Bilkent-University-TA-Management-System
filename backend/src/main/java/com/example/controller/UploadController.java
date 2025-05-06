@@ -24,6 +24,7 @@ public class UploadController {
     private final SectionServ sectionService;
     private final InstructorServ instructorServ;
     private final ClassRoomServ classRoomService;
+    private final LessonServ lessonService;
 
     //for uploading students and ta's (from the same excel file)
     @PostMapping("/students")
@@ -145,6 +146,13 @@ public class UploadController {
         } catch (IOException e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("File processing failed: " + e.getMessage());
         }
+    }
+
+
+    @PostMapping("/lessons")
+    public ResponseEntity<Map<String, Object>> importLessons(@RequestParam("file") MultipartFile file) throws IOException {
+        Map<String, Object> result = lessonService.importLessonsFromExcel(file);
+        return ResponseEntity.ok(result);
     }
 
 }

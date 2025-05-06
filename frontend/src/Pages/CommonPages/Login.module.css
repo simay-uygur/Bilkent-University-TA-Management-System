@@ -20,13 +20,15 @@
   --scroll-speed: 2s;
 }
 
-/* 3. Put the infinite scroll on <body> */
-.body {
-  margin: 0;
+/* 3. Put the infinite scroll only on Login page (specific wrapper) */
+.loginPageWrapper {
+  position: relative;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
   background: var(--bg-tile) repeat;
   background-size: var(--bg-tile-size);
   animation: bg-scroll var(--scroll-speed) linear infinite;
-  font-family: var(--font-base);
 }
 
 @keyframes bg-scroll {

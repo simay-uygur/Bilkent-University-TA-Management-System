@@ -10,4 +10,6 @@ import lombok.Setter;
 public class SignInRequest {
     private Long id;
     private String password;
+
+    
 }

@@ -1,0 +1,41 @@
+/* BulkUpload.module.css */
+.bulkUpload {
+    
+    width: 95%;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    background-color: #ffdc74;
+    padding: 1rem;
+    border-radius: 8px;
+  }
+  
+  .label {
+    flex: 1;
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #333;
+  }
+  
+  .uploadSection {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  
+  .chooseText {
+    font-size: 1.1rem;
+    color: #000000;
+    text-decoration: underline;
+    cursor: pointer;
+  }
+  
+  .fileInput {
+    display: none;
+  }
+  
+  .buttonGroup {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }

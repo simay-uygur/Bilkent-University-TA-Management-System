@@ -1,0 +1,42 @@
+/* src/pages/ProctoringAssignmentsPage.module.css */
+.pageWrapper {
+    padding: 1.5rem;
+    background: #fafafa;
+  }
+  .heading {
+    font-size: 1.75rem;
+    margin-bottom: 1rem;
+    text-align: center;
+  }
+  .courseList {
+    display: grid;
+    gap: 1rem;
+  }
+  .courseCard {
+    background: #fff;
+    border: 1px solid #e2e8f0;
+    border-radius: .5rem;
+    padding: 1rem;
+    display: flex;
+    justify-content: space-between;
+  }
+  .courseInfo > div {
+    margin-top: .25rem;
+  }
+  .actions {
+    display: flex;
+    flex-direction: column;
+    gap: .5rem;
+  }
+  .btn {
+    padding: .5rem 1rem;
+    border: none;
+    background: #2563eb;
+    color: #fff;
+    border-radius: .375rem;
+    cursor: pointer;
+  }
+  .btn:hover {
+    background: #1e40af;
+  }
+  

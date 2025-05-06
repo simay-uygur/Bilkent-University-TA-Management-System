@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import NotificationPanel from '../components/NotificationPanel';
+import NotificationPanel from '../Benim/NotificationPanel';
 import { fetchNotifications, Notification } from '../api';
 import styles from './Notifications.module.css';
 

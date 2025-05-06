@@ -1,0 +1,8 @@
+.searchContainer {
+    padding: 1rem;
+    background-color: #f8f9fa; /* Lighter background for better contrast */
+    border-bottom: 1px solid #e0e0e0;
+    display: flex;
+    justify-content: center;
+    width: 100%;
+  }
