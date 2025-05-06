@@ -19,9 +19,9 @@ public class LessonController {
     private final LessonServ lessonServ;
 
     // CREATE a new lesson
-    @PostMapping("/create")
-    public ResponseEntity<LessonDto> createLesson(@RequestBody LessonDto dto) {
-        LessonDto created = lessonServ.createLesson(dto);
+    @PostMapping()
+    public ResponseEntity<List<LessonDto>> createLesson(@RequestBody LessonDto dto) {
+        List<LessonDto> created = lessonServ.createLessonDtoList(dto);
         return ResponseEntity.ok(created);
     }
 
