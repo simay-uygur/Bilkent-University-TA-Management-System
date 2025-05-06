@@ -197,21 +197,21 @@ public class SectionServImpl implements SectionServ {
                     Instructor instr = instructorService.getById(staffId);
 
                     // 6) build & collect section
-                    
-String sectionCode = String.format("%s-%d-%d-%s", 
-course.getCourseCode(), sectionNo, year, termEnum);
+
+                    String sectionCode = String.format("%s-%d-%d-%s",
+                            course.getCourseCode(), sectionNo, year, termEnum);
 
 // Check for duplicates before adding to successful list
-if (repo.existsBySectionCodeEqualsIgnoreCase(sectionCode)) {
-throw new IllegalArgumentException(
-    "Section with code '" + sectionCode + "' already exists.");
-}
+                    if (repo.existsBySectionCodeEqualsIgnoreCase(sectionCode)) {
+                        throw new IllegalArgumentException(
+                                "Section with code '" + sectionCode + "' already exists.");
+                    }
 
-Section sec = new Section();
-sec.setSectionCode(sectionCode);
-sec.setOffering(off);
-sec.setInstructor(instr);
-successful.add(sec);
+                    Section sec = new Section();
+                    sec.setSectionCode(sectionCode);
+                    sec.setOffering(off);
+                    sec.setInstructor(instr);
+                    successful.add(sec);
 
                 } catch (Exception e) {
                     failed.add(new FailedRowInfo(
@@ -423,12 +423,15 @@ successful.add(sec);
                     // 6) attach person
                     if (studentRepo.existsById(personId)) {
                         Student s = studentService.getStudentById(personId);
-                        section.getRegisteredStudents().add(s);
-
+                        if (section.getRegisteredStudents().stream()
+                                .noneMatch(stu -> stu.getStudentId().equals(s.getStudentId()))) {
+                            section.getRegisteredStudents().add(s);
+                        }
                     } else if (taRepo.existsById(personId)) {
                         TA t = taService.getTAByIdTa(personId);
-                        section.getRegisteredTas().add(t);
-
+                        if (section.getRegisteredTas().stream().noneMatch(ta -> ta.getId().equals(t.getId()))) {
+                            section.getRegisteredTas().add(t);
+                        }
                     } else {
                         throw new IllegalArgumentException(
                                 "No student or TA with id: " + personId);

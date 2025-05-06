@@ -62,11 +62,21 @@ public class Section {
     @JoinColumn(name = "offering_id", nullable = false)
     private CourseOffering offering;
 
-    @ManyToMany(fetch = LAZY)
+//    @ManyToMany(fetch = LAZY)
+//    @JoinTable(
+//            name               = "section_students",
+//            joinColumns        = @JoinColumn(name = "section_id"),
+//            inverseJoinColumns = @JoinColumn(name = "student_id")
+//    )
+//    private List<Student> registeredStudents = new ArrayList<>();
+
+    // unique constraint
+    @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
-            name               = "section_students",
-            joinColumns        = @JoinColumn(name = "section_id"),
-            inverseJoinColumns = @JoinColumn(name = "student_id")
+            name = "section_students",
+            joinColumns = @JoinColumn(name = "section_id"),
+            inverseJoinColumns = @JoinColumn(name = "student_id"),
+            uniqueConstraints = @UniqueConstraint(columnNames = {"section_id", "student_id"})
     )
     private List<Student> registeredStudents = new ArrayList<>();
 
@@ -74,7 +84,8 @@ public class Section {
     @JoinTable(
             name = "section_ta_registrations",
             joinColumns = @JoinColumn(name = "section_id"),
-            inverseJoinColumns = @JoinColumn(name = "ta_id")
+            inverseJoinColumns = @JoinColumn(name = "ta_id"),
+            uniqueConstraints = @UniqueConstraint(columnNames = {"section_id", "ta_id"}) //newly added
     )
     private List<TA> registeredTas = new ArrayList<>(); // ta's which are taking this course (registered)
 
@@ -83,7 +94,8 @@ public class Section {
     @JoinTable(
             name = "section_ta_assignments",
             joinColumns = @JoinColumn(name = "section_id"),
-            inverseJoinColumns = @JoinColumn(name = "ta_id")
+            inverseJoinColumns = @JoinColumn(name = "ta_id"),
+            uniqueConstraints = @UniqueConstraint(columnNames = {"section_id", "ta_id"}) //newly added
     )
     private List<TA> assignedTas = new ArrayList<>(); // ta's which are assigned to this section/course to help
 
