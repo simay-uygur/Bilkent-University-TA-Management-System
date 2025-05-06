@@ -1,6 +1,7 @@
 package com.example.entity.Courses;
 
 
+import com.example.entity.Actors.Instructor;
 import com.example.entity.Actors.TA;
 import com.example.entity.General.Semester;
 import com.example.entity.General.Student;
@@ -72,6 +73,9 @@ public class CourseOffering {
     )
     private List<Student> registeredStudents = new ArrayList<>();
 
+    @ManyToOne(fetch = LAZY )
+    @JoinColumn(name = "coordinator_id", nullable = true, updatable = true)  // to test it now, nullable is true (database will be changed)
+    private Instructor coordinator;
 
 }
 

@@ -130,9 +130,8 @@ public class DepartmentController {
     private final DepartmentRepo departmentRepo;
     private final DepartmentMapper departmentMapper;
 
-  *//*
+  */
 
-*/
 /*  @GetMapping
     public ResponseEntity<List<Department>> getAllDepartments(@RequestParam(required = false) String name) {
         if (name != null) {
@@ -197,7 +196,9 @@ public class DepartmentController {
         return ResponseEntity.ok(dtos);
     }
 
-}*//*
+}*/
+
+/*
 
 package com.example.controller;
 

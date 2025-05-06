@@ -37,23 +37,6 @@ public class TA_controller {
     @Autowired
     private TaskServ taskServ;
 
-    /*@PostMapping("/api/ta/signUp")
-    public ResponseEntity<TA> createTA(@RequestBody TA ta) 
-    {
-        //System.out.println("role: " + u.getRole() + "id: " + u.getId());
-        TA ta_to_check = serv.getTAById(ta.getId());
-        if (ta_to_check != null)
-            throw new UserExistsExc(ta.getId()) ;
-        String check_mail = ta.getName().toLowerCase() + 
-                            "." + 
-                            ta.getSurname().toLowerCase() + 
-                            "@ug.bilkent.edu.tr";
-        if (!check_mail.matches(ta_to_check.getWebmail().toLowerCase()) && !Objects.equals(ta_to_check.getId(), ta_to_check.getId()))
-            throw new IncorrectWebMailException() ;
-        return new ResponseEntity<>((TA) userServ.createUser(ta), HttpStatus.CREATED) ;
-        //return ResponseEntity.created(URI.create("/signIn/{id}")).body(serv.createUser(u)) ;
-    } // method should be sent to Admin controller*/
-
     @GetMapping("/api/ta/all")
     public List<TaDto> getAllTAs() 
     {

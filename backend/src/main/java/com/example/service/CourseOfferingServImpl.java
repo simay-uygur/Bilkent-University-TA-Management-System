@@ -5,11 +5,13 @@ import com.example.entity.Actors.TA;
 import com.example.entity.Courses.Course;
 import com.example.dto.CourseOfferingDto;
 import com.example.entity.Courses.CourseOffering;
+import com.example.entity.Courses.Section;
 import com.example.exception.Course.CourseNotFoundExc;
 import com.example.exception.GeneralExc;
 import com.example.mapper.CourseMapper;
 import com.example.mapper.CourseOfferingMapper;
 import com.example.repo.CourseOfferingRepo;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -25,9 +27,9 @@ public class CourseOfferingServImpl implements CourseOfferingServ {
     private final SemesterServ semesterServ;
     private final CourseOfferingMapper courseMapper;
 
-        @Override
+    @Override
     public CourseOfferingDto getCourseByCourseCode(String code) {
-      CourseOffering off = repo.findByCourseCode(code)
+        CourseOffering off = repo.findByCourseCode(code)
                 .orElseThrow(() -> new IllegalArgumentException("Offering not found: " + code));
 
         return courseMapper.toDto(off);
@@ -45,8 +47,8 @@ public class CourseOfferingServImpl implements CourseOfferingServ {
     public List<CourseOfferingDto> getOfferingsByDepartment(String deptName){
         List<CourseOffering> offerings = repo.findByCourseDepartmentName(deptName)
                 .orElseThrow(() -> new IllegalArgumentException("No offerings found for department: " + deptName));
-        
-                return offerings.stream()
+
+        return offerings.stream()
                 .map(courseMapper::toDto)
                 .collect(Collectors.toList());
     }
@@ -107,27 +109,8 @@ public class CourseOfferingServImpl implements CourseOfferingServ {
         return repo.findByCourse_CourseIdAndSemester_Id(courseId, semesterId);
     }
 
-    //this should be written
-    @Override
-    public boolean assignTA(Long taId, String courseCode) {
-        return false;
-    }
-    //old one - fix needed
-//    @Override
-//    public boolean assignTA(Long taId, String courseCode) {
-//        Course course = repo.findCourseByCourseCode(courseCode)
-//                .orElseThrow(() -> new CourseNotFoundExc(courseCode));
-//        TA ta = taServ.getTAById(taId);
-//        if (ta.getSectionsAsHelper().contains(course)) {
-//            throw new GeneralExc("TA " + taId + " already assigned to " + courseCode);
-//        }
-//        if (ta.get().stream()
-//                .anyMatch(sec -> sec.getOffering().getCourse().getCourseCode().equals(courseCode))) {
-//            throw new GeneralExc("TA " + taId + " takes this course as a student");
-//        }
-//        course.getCourseTas().add(ta);
-//        courseRepo.save(course);
-//        return true;
-//    }
-//
+
+
+
+
 }

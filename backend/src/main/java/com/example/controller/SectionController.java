@@ -5,9 +5,11 @@ import com.example.entity.Courses.Section;
 import com.example.mapper.SectionMapper;
 import com.example.service.SectionServ;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
 @RestController
@@ -28,6 +30,7 @@ public class SectionController {
         Section sec = sectionServ.getById(id);
         return sectionMapper.toDto(sec);
     }
+
     @GetMapping("/sectionCode/{sectionCode}")
     public SectionDto getBySectionCode(@PathVariable String sectionCode) {
         Section sec = sectionServ.getBySectionCode(sectionCode);
@@ -37,7 +40,6 @@ public class SectionController {
     public List<SectionDto> getByDepartment(@PathVariable String deptName) {
         return sectionServ.getByDepartment(deptName);
     } */
-    
 
     @GetMapping
     public List<SectionDto> getAll() {
@@ -59,5 +61,21 @@ public class SectionController {
     @DeleteMapping("/{id}")
     public void deleteSection(@PathVariable int id) {
         sectionServ.delete(id);
-    } 
+    }
+
+    //if this takes sectiondto update that  and also ta dto
+    @PostMapping("/{sectionCode}/tas/{taId}")
+    public CompletableFuture<ResponseEntity<Void>> assignTaToSection(
+            @PathVariable String sectionCode,
+            @PathVariable Long taId
+    ) {
+        return CompletableFuture.supplyAsync(() -> {
+            sectionServ.assignTA(taId, sectionCode);
+            return ResponseEntity.ok().build();
+        });
+    }
+//
+//    @PostMapping("/{sectionCode}/tasWithDtos/{taId}")
+//    public CompletableFuture<ResponseEntity<Void>> assignTaToSectionWithDtos()
+
 }

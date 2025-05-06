@@ -1,6 +1,5 @@
 package com.example.entity.Tasks;
 
-import com.example.entity.Courses.Course;
 import com.example.entity.Courses.Section;
 import com.example.entity.Exams.Exam;
 import com.example.entity.General.Event;

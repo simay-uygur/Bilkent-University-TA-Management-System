@@ -41,6 +41,8 @@ public class SectionServImpl implements SectionServ {
     private final TAServ taService;
     private final TARepo taRepo;
 
+    private final SectionRepo sectionRepo;
+
     @Override
     public Section create(Section section) {
         // 1) sectionCode must be supplied in the right format
@@ -137,6 +139,7 @@ public class SectionServImpl implements SectionServ {
         repo.deleteById(id);
     }
 
+    // this is for uploading sections with instructors (coordinator row non-existent in the excel file)
     @Override
     @Transactional
     public Map<String,Object> importFromExcel(MultipartFile file) throws IOException {
@@ -577,17 +580,25 @@ public class SectionServImpl implements SectionServ {
     private long getLongCellValue(Cell cell) {
         return (long) getNumericCellValue(cell);
     }
-}
 
-/*
- @Override
-    public boolean addTask(String courseCode, Task task) {
-        Course course = courseRepo.findCourseByCourseCode(courseCode)
-                .orElseThrow(() -> new CourseNotFoundExc(courseCode));
-        task.setCourse(course);
-        Task created = taskServ.createTask(task);
-        course.getTasks().add(created);
-        courseRepo.save(course);
+
+    @Transactional
+    @Override
+    public boolean assignTA(Long taId, String sectionCode) {
+        Section section = sectionRepo
+                .findBySectionCodeIgnoreCase(sectionCode)
+                .orElseThrow(() -> new IllegalArgumentException("Section not found: " + sectionCode));
+
+        // get through the service so you pick up any TA‑specific logic
+        TA ta = taService.getTAByIdTa(taId);
+
+        if (section.getAssignedTas().contains(ta)) {
+            throw new IllegalStateException(
+                    "TA " + taId + " is already assigned to section " + sectionCode);
+        }
+
+        section.getAssignedTas().add(ta); // hope it makes that
+        sectionRepo.save(section);
         return true;
     }
- */
+}
