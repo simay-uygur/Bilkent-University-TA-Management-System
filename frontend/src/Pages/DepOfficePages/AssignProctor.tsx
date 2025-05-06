@@ -22,7 +22,7 @@ const AssignProctor: React.FC = () => {
   const [demandConfirmMsg, setDemandConfirmMsg] = useState<string | null>(null);
 
   const handleAuto = (id: string) => {
-    navigate(`/assign/${id}`);
+    navigate(`assign/${id}`);
   };
 
   const handleFinish = (id: string) => {
@@ -73,7 +73,7 @@ const AssignProctor: React.FC = () => {
 
   return (
     <div className={styles.pageWrapper}>
-      <DepOfNavBar />
+      
 
       <div className={styles.container}>
         <h1 className={styles.title}>Exams of Courses</h1>

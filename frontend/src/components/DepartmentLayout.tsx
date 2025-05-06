@@ -28,9 +28,7 @@ export default function DepartmentLayout() {
   return (
     <div className={styles.wrapper}>
       <NavBarDepartment onNotifications={() => setShowNotif(true)} />
-      <div className={styles.searchContainer}>
-        <MultiSearch />
-      </div>
+      
       {showNotif && (
         <NotificationPanel
           notifications={notifications}

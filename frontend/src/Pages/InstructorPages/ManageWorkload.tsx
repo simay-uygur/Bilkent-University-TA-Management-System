@@ -147,7 +147,7 @@ const ManageWorkload: React.FC = () => {
       
 
       <div className={styles.headerRow}>
-        <BackBut to="/ins"/>
+        <BackBut to="/instructor"/>
         <h1 className={styles.title}>{courseCode} Workload</h1>
       </div>
 
