@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Outlet } from 'react-router-dom';
-import TANavBar from './TaNavBar.tsx';
-import NotificationPanel from './NotificationPanel.tsx';
+import TANavBar from '../components/NavBars/TANavBar.tsx';
+import NotificationPanel from '../Benim/NotificationPanel.tsx';
 import { fetchNotifications, Notification, markAllNotificationsRead } from '../api.ts';
 
 const Layout: React.FC = () => {
@@ -21,14 +21,7 @@ const Layout: React.FC = () => {
 
   return (
     <>
-      <TANavBar onNotificationsClick={toggle} />
-      {show && (
-        <NotificationPanel
-          notifications={notes}
-          onClose={toggle}
-          onMarkAllRead={handleMarkAll}
-        />
-      )}
+      <TANavBar/>
       <Outlet />
     </>
   );

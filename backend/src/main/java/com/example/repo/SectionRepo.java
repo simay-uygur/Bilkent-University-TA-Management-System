@@ -47,9 +47,6 @@ public interface SectionRepo extends JpaRepository<Section, Integer>{
 
 
 
-
-
-
     Optional<Section> findSectionByOffering_IdAndSectionCodeIgnoreCase(int offeringId, String sectionCode);
 //  @Query("""
 //    SELECT new com.example.dto.TaDto(
@@ -91,8 +88,7 @@ public interface SectionRepo extends JpaRepository<Section, Integer>{
            
            WHERE   sec.sectionCode = :sectionCode
            """)
-    Optional<Section>findBySectionCodeIgnoreCase(String secCode);
-
+    Optional<Section> findBySectionCodeIgnoreCase(@Param("sectionCode") String sectionCode);
 //    @Query("""
 //           SELECT  t
 //           FROM    Section  sec

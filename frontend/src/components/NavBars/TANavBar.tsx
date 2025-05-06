@@ -38,13 +38,13 @@ const TANavBar: React.FC = () => {
       onClick: () => navigate('/set'),
     },
     {
-      label: 'Logout',
-      icon: <LogOut size={18} />,
-      onClick: () => {
-        // your logout logic here
-        navigate('/login');
-      },
-    },
+          label: 'Logout',
+          icon: <LogOut size={18} />,
+          onClick: () => {
+            localStorage.removeItem('jwt');
+            navigate('/login', { replace: true });
+          }
+        },
   ];
 
   return (

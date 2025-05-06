@@ -1,6 +1,7 @@
 package com.example.entity.Courses;
 
 import com.example.entity.General.ClassRoom;
+import com.example.entity.General.DayOfWeek;
 import com.example.entity.General.Event;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -40,5 +41,10 @@ public class Lesson {
         LESSON,
         SPARE_HOUR
     }
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "day_of_week", nullable = false)
+    private DayOfWeek day;
+
 }
 

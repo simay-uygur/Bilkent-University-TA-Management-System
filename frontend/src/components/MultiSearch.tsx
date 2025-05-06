@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import SearchSelect from './SearchSelect';
+import SearchSelect from '../Benim/SearchSelect';
 import styles from './MultiSearch.module.css';
 // Remove the API imports and use direct fetch calls
 

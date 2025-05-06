@@ -267,7 +267,7 @@ const TAMonSchPage: React.FC = () => {
 
   return (
     <div className={styles.pageWrapper}>
-      <TANavBar />
+      
       <BackBut to = '/ta'/>
       {/* Main content */}
       <div className={styles.mainContainer}>

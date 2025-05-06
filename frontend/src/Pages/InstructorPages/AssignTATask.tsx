@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import DepOfNavBar from '../../components/NavBars/DepOfNavBar';
 import BackBut from '../../components/Buttons/BackBut';
-import SearchSelect from '../../components/SearchSelect';
+import SearchSelect from '../../Benim/SearchSelect';
 import ErrPopUp from '../../components/PopUp/ErrPopUp';
 import ConPop from '../../components/PopUp/ConPop';
 import styles from './AssignTATask.module.css';

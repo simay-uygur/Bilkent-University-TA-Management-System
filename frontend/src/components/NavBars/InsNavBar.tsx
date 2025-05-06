@@ -19,7 +19,7 @@ const InsNavBar: React.FC = () => {
     {
       label: 'Home',
       icon: <Home size={18} />,
-      onClick: () => navigate('/ins'),
+      onClick: () => navigate('/instructor'),
       active: true,
     },
     {
@@ -33,13 +33,13 @@ const InsNavBar: React.FC = () => {
       onClick: () => navigate('/set'),
     },
     {
-      label: 'Logout',
-      icon: <LogOut size={18} />,
-      onClick: () => {
-        // Add your logout logic here, then:
-        navigate('/login');
-      },
-    },
+          label: 'Logout',
+          icon: <LogOut size={18} />,
+          onClick: () => {
+            localStorage.removeItem('jwt');
+            navigate('/login', { replace: true });
+          }
+        },
   ];
 
   return (

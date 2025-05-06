@@ -60,7 +60,7 @@ const InsMainPage: React.FC = () => {
 
   return (
     <div className={styles.pageWrapper}>
-      <InsNavBar />
+      
 
       <main className={styles.content}>
         <h1 className={styles.heading}>My Courses</h1>

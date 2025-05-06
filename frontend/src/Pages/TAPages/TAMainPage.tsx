@@ -71,7 +71,7 @@ function TAMainPage() {
 
   return (
     <div className={styles.pageWrapper}>
-      <TANavBar />
+      
       <div className={styles.contentWrapper}>
         <table className={styles.table}>
           <thead>

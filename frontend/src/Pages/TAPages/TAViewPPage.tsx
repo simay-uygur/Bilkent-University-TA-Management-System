@@ -35,7 +35,7 @@ const TAViewPPage: React.FC = () => {
 
   return (
     <div className={styles.pageWrapper}>
-      <TANavBar />
+     
       <BackBut to="/ta" />
       <div className={styles.mainContainer}>
         <h2>Proctoring Schedule</h2>

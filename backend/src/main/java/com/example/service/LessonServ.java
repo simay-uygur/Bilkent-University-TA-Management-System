@@ -10,13 +10,13 @@ import java.util.Map;
 public interface LessonServ {
     Map<String, Object> importLessonsFromExcel(MultipartFile file) throws IOException;
 
-    LessonDto createLesson(LessonDto dto);
-
     List<LessonDto> getAllLessons();
 
     LessonDto getLessonById(Long id);
 
     LessonDto updateLesson(Long id, LessonDto dto);
+
+    List<LessonDto> createLessonDtoList(LessonDto dto);
 
     void deleteLesson(Long id);
 }

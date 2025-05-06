@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import NavBarDeans from '../components/NavBarDeans'
+
 import styles from './DeansDepartmentDetailPage.module.css'
 
 interface InstructorDto {

@@ -65,7 +65,7 @@ const ExamProctorPage: React.FC = () => {
 
   return (
     <div className={styles.container}>
-      <InsNavBar />
+      
 
       <div className={styles.headerRow}>
         <BackBut to="/ins" />
