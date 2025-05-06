@@ -101,8 +101,7 @@ private void checkForTimeConflict(Event newEvent, ClassRoom room) {
 
         Section section = sectionRepo.findBySectionCodeIgnoreCase(dto.getSectionId())
                 .orElseThrow(() -> new IllegalArgumentException("Section not found"));
-        ClassRoom room = classRoomRepo.findClassRoomByClassroomIdEqualsIgnoreCase(dto.getClassroomId())
-                .orElse(null);
+        ClassRoom room = classRoomRepo.findClassRoomByClassroomIdEqualsIgnoreCase(dto.getClassroomId()).orElseThrow(() -> new IllegalArgumentException("Classroom not found"));
         Lesson.LessonType type = Lesson.LessonType.valueOf(dto.getLessonType());
         DayOfWeek day = DayOfWeek.valueOf(dto.getDay().toUpperCase());
 
@@ -152,7 +151,7 @@ private void checkForTimeConflict(Event newEvent, ClassRoom room) {
 
                     Section section = sectionRepo.findBySectionCodeIgnoreCase(sectionCode)
                             .orElseThrow(() -> new IllegalArgumentException("Section not found: " + sectionCode));
-                    ClassRoom room = classRoomRepo.findClassRoomByClassroomIdEqualsIgnoreCase(roomCode).orElse(null);
+                    ClassRoom room = classRoomRepo.findClassRoomByClassroomIdEqualsIgnoreCase(roomCode).orElseThrow(() -> new IllegalArgumentException("Classroom not found: " + roomCode));
                     DayOfWeek day = DayOfWeek.valueOf(dayStr);
                     Lesson.LessonType type = Lesson.LessonType.valueOf(typeStr);
 

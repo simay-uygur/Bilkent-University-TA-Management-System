@@ -91,8 +91,7 @@ public interface SectionRepo extends JpaRepository<Section, Integer>{
            
            WHERE   sec.sectionCode = :sectionCode
            """)
-    Optional<Section>findBySectionCodeIgnoreCase(String secCode);
-
+    Optional<Section> findBySectionCodeIgnoreCase(@Param("sectionCode") String sectionCode);
 //    @Query("""
 //           SELECT  t
 //           FROM    Section  sec
