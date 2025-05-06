@@ -13,19 +13,20 @@ import lombok.Setter;
 @Embeddable
 public class Date {
 
-    @Column(nullable = false)
-    private int day;
-    @Column(nullable = false)
-    private int month;
-    @Column(nullable = false)
-    private int year;
-    
-    
-    @Column(nullable = false)
-    private int hour;
+    @Column(nullable = true, updatable = true)
+    private Integer day;
 
-    @Column(nullable = false)
-    private int minute;
+    @Column(nullable = true, updatable = true)
+    private Integer month;
+
+    @Column(nullable = true, updatable = true)
+    private Integer year;
+
+    @Column(nullable = true, updatable = true)
+    private Integer hour;
+
+    @Column(nullable = true, updatable = true)
+    private Integer minute;
 
     @Override
     public String toString() {
@@ -54,13 +55,21 @@ public class Date {
 
     public Date(){}
 
-    public Date(int day, int month, int year, int hour, int minute) {
+    public Date(Integer day, Integer month, Integer year, Integer hour, Integer minute) {
         this.day = day;
         this.month = month;
         this.year = year;
         this.hour = hour;
         this.minute = minute;
     }
+
+//    public Date(int day, int month, int year, int hour, int minute) {
+//        this.day = day;
+//        this.month = month;
+//        this.year = year;
+//        this.hour = hour;
+//        this.minute = minute;
+//    }
 
     public Date currenDate() {
         //java.time.ZonedDateTime now = java.time.ZonedDateTime.now(java.time.ZoneId.of("UTC"));

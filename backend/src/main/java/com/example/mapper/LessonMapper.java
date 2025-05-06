@@ -1,5 +1,7 @@
 package com.example.mapper;
 
+import com.example.dto.DateDto;
+import com.example.dto.EventDto;
 import com.example.dto.LessonDto;
 import com.example.entity.Courses.Lesson;
 import com.example.entity.General.ClassRoom;
@@ -21,7 +23,7 @@ public class LessonMapper {
         ClassRoom room = lesson.getLessonRoom();
         if (room != null) {
             dto.setClassroomId(room.getClassroomId());
-            dto.setExamCapacity(room.getExamCapacity());
+            //dto.setExamCapacity(room.getExamCapacity());
         }
 
         dto.setLessonType(lesson.getLessonType().name());
@@ -64,22 +66,21 @@ public class LessonMapper {
         );
     }
 
-    private com.example.dto.EventDto toEventDto(Event event) {
-        if (event == null) return null;
-        return new com.example.dto.EventDto(
-                new com.example.dto.DateDto(
-                        event.getStart().getDay(),
-                        event.getStart().getMonth(),
-                        event.getStart().getYear(),
-                        event.getStart().getHour(),
-                        event.getStart().getMinute()
+    private EventDto toEventDto(Event event) {
+        return new EventDto(
+                new DateDto(
+                        event.getStart().getDay() != null ? event.getStart().getDay() : 0,
+                        event.getStart().getMonth() != null ? event.getStart().getMonth() : 0,
+                        event.getStart().getYear() != null ? event.getStart().getYear() : 0,
+                        event.getStart().getHour() != null ? event.getStart().getHour() : 0,
+                        event.getStart().getMinute() != null ? event.getStart().getMinute() : 0
                 ),
-                new com.example.dto.DateDto(
-                        event.getFinish().getDay(),
-                        event.getFinish().getMonth(),
-                        event.getFinish().getYear(),
-                        event.getFinish().getHour(),
-                        event.getFinish().getMinute()
+                new DateDto(
+                        event.getFinish().getDay() != null ? event.getFinish().getDay() : 0,
+                        event.getFinish().getMonth() != null ? event.getFinish().getMonth() : 0,
+                        event.getFinish().getYear() != null ? event.getFinish().getYear() : 0,
+                        event.getFinish().getHour() != null ? event.getFinish().getHour() : 0,
+                        event.getFinish().getMinute() != null ? event.getFinish().getMinute() : 0
                 )
         );
     }
