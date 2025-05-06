@@ -37,7 +37,12 @@ public interface SectionRepo extends JpaRepository<Section, Integer>{
     List<StudentDto> findStudentDTOsBySectionId(@Param("sectionId") Long sectionId);
 
     //boolean existsBySectionId(int sectionId);
-
+    @Query
+    ("""
+    SELECT s
+    FROM Section s
+    WHERE s.sectionCode = :sectionCode
+    """)
     boolean existsBySectionCodeEqualsIgnoreCase(String sectionCode);
 
 
@@ -80,7 +85,12 @@ public interface SectionRepo extends JpaRepository<Section, Integer>{
            WHERE   sec.sectionId = :sectionId
            """)
     List<TA> findTasBySectionId(@Param("sectionId") int sectionId);
-
+    @Query("""
+           SELECT  sec
+           FROM    Section  sec
+           
+           WHERE   sec.sectionCode = :sectionCode
+           """)
     Optional<Section>findBySectionCodeIgnoreCase(String secCode);
 
 //    @Query("""
