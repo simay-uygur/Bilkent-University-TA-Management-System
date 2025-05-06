@@ -1,6 +1,7 @@
 package com.example.controller;
 
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
 import org.springframework.http.HttpStatus;
@@ -17,7 +18,6 @@ import org.springframework.web.bind.annotation.RestController;
 import com.example.dto.CourseOfferingDto;
 import com.example.dto.ExamDto;
 import com.example.entity.Courses.CourseOffering;
-import com.example.exception.GeneralExc;
 import com.example.mapper.CourseOfferingMapper;
 import com.example.repo.CourseOfferingRepo;
 import com.example.repo.CourseRepo;
@@ -70,15 +70,29 @@ public class CourseOfferingController {
     }
 
     @PostMapping("/course/{course_code}/exam")
-    public ResponseEntity<Boolean> createExam(@RequestBody ExamDto exam, @PathVariable String course_code) {
-        CourseOffering offering = courseOfferingRepo.findByCourse_CourseCode(course_code).
-        orElseThrow(() -> new GeneralExc("No current offering found for course: " + course_code));
-        int size = offering.getExams().size();
-        service.createExam(exam, course_code);
-        if (offering.getExams().size() == size) {
-            throw new GeneralExc("Exam not created successfully for course: " + course_code);
-        }
-        return new ResponseEntity<>((offering.getExams().size() == size) ? HttpStatus.CREATED : HttpStatus.BAD_REQUEST);
+    public CompletableFuture<ResponseEntity<Boolean>> createExam(@RequestBody ExamDto exam, @PathVariable String course_code) {
+        return service.createExam(exam, course_code).thenApply(success -> {
+            if (success) {
+              return ResponseEntity.status(HttpStatus.CREATED).body(true);
+            } else {
+              return ResponseEntity
+                    .status(HttpStatus.BAD_REQUEST)
+                    .body(false);
+            }
+        });
+    }
+
+    @PostMapping("/course/{course_code}/exam/{exam_id}/tas")
+    public CompletableFuture<ResponseEntity<Boolean>> addTAs(@PathVariable String course_code, @PathVariable Integer exam_id, @RequestBody List<Long> tas) {
+        return service.addTAs(course_code, exam_id, tas).thenApply(success -> {
+            if (success) {
+              return ResponseEntity.status(HttpStatus.CREATED).body(true);
+            } else {
+              return ResponseEntity
+                    .status(HttpStatus.BAD_REQUEST)
+                    .body(false);
+            }
+        });
     }
 }
 

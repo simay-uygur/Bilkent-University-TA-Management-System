@@ -9,7 +9,6 @@ import lombok.EqualsAndHashCode;
 @EqualsAndHashCode(callSuper = true)
 @Data
 public class SwapDto extends RequestDto {
-    private Event duration;
     private String examName;
     private int examId;
 }

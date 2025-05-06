@@ -8,6 +8,8 @@ import org.hibernate.annotations.DynamicUpdate;
 
 import com.example.entity.Courses.CourseOffering;
 import com.example.entity.Courses.Section;
+import com.example.entity.Exams.Exam;
+import com.example.entity.Exams.ExamRoom;
 import com.example.entity.General.AcademicLevelType;
 import com.example.entity.General.ProctorType;
 import com.example.entity.Tasks.TaTask;
@@ -19,6 +21,7 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
 import static jakarta.persistence.FetchType.LAZY;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.OneToMany;
@@ -67,6 +70,12 @@ public class TA extends User {
     @Column(name = "is_graduated", nullable = false)
     private Boolean isGraduated = false;
 
+    @ManyToMany(
+      mappedBy = "assignedTas",
+      fetch    = FetchType.LAZY
+    )
+    private List<Exam> exams = new ArrayList<>();
+
     @ManyToMany(mappedBy = "registeredTas", fetch = LAZY)
     private List<CourseOffering> offeringsAsStudent = new ArrayList<>();
 
@@ -83,6 +92,9 @@ public class TA extends User {
     @OneToMany(mappedBy = "taOwner", cascade = CascadeType.ALL)
     private List<TaTask> taTasks = new ArrayList<>();
 
+    @ManyToMany(mappedBy = "tasAsStudentsList", fetch = LAZY)
+    private List<ExamRoom> examRoomsAsStudent = new ArrayList<>();
+
     public void increaseWorkload(int load) {
         totalWorkload += load;
     }
@@ -93,7 +105,6 @@ public class TA extends User {
         }
         totalWorkload -= load;
     }
-
 
     @Override
     public boolean equals(Object o) {

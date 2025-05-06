@@ -1,5 +1,7 @@
 package com.example.entity.General;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 
@@ -72,5 +74,13 @@ public class Date {
         currentDate.setHour(now.getHour());
         currentDate.setMinute(now.getMinute());
         return currentDate;
+    }
+
+    public LocalDate toLocalDate() {
+        return LocalDate.of(year, month, day);
+    }
+    
+    public LocalDateTime toLocalDateTime() {
+        return LocalDateTime.of(year, month, day, hour, minute);
     }
 }

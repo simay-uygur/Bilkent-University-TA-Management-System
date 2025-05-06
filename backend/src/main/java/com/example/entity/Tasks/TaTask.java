@@ -35,7 +35,6 @@ public class TaTask {
         this.task = task;
         this.type = type;
     }
-
 }
 
 /*

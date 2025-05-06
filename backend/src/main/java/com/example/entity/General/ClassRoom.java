@@ -44,5 +44,4 @@ public class ClassRoom {
             cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REFRESH}
     )
     private List<Lesson> lessons = new ArrayList<>();
-
 }

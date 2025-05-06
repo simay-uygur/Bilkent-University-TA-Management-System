@@ -1,12 +1,25 @@
 package com.example.entity.Exams;
 
+import java.util.List;
+
+import com.example.entity.Actors.TA;
 import com.example.entity.General.ClassRoom;
 import com.example.entity.General.Student;
-import jakarta.persistence.*;
+
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
+import jakarta.persistence.ManyToMany;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
-
-import java.util.List;
 
 /**
  * An individual room assignment for a single exam.
@@ -30,9 +43,6 @@ public class ExamRoom {
     @Column(name = "isApproved", nullable = false)
     private boolean approved = false;
 
-    @Column(name = "workload", nullable = false)
-    private int workload;
-
     @ManyToMany(fetch = FetchType.LAZY,
             cascade = { CascadeType.PERSIST, CascadeType.MERGE })
     @JoinTable(
@@ -41,6 +51,15 @@ public class ExamRoom {
             inverseJoinColumns = @JoinColumn(name = "student_id")
     )
     private List<Student> studentsList;
+
+    @ManyToMany(fetch = FetchType.LAZY,
+            cascade = { CascadeType.PERSIST, CascadeType.MERGE })
+    @JoinTable(
+            name               = "examroom_ta_list",
+            joinColumns        = @JoinColumn(name = "examroom_id"),
+            inverseJoinColumns = @JoinColumn(name = "ta_id")
+    )
+    private List<TA> tasAsStudentsList; // TODO: change to TA entity
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "exam_id", nullable = false)

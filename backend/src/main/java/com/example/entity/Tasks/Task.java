@@ -79,15 +79,6 @@ public class Task {
     @JoinColumn(name = "section_id", nullable = false)
     private Section section;
 
-    @JsonIgnore
-    @OneToOne(
-            cascade        = { CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE },
-            optional       = true,
-            fetch          = FetchType.LAZY
-    )
-    @JoinColumn(name = "exam_id")
-    private Exam exam;
-
     @OneToMany(mappedBy = "task", cascade = CascadeType.ALL)
     private List<WorkLoad> workloadList = new ArrayList<>();
     /* ─── helper methods ─────────────────────────── */

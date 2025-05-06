@@ -74,13 +74,13 @@ public class Request {
     @Column(name = "sent_time", unique = false)
     private Date sentTime;
 
-    @ManyToOne(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "sender_id")
     //@JsonBackReference
       @JsonIgnoreProperties("sended_requests") // Break recursion
     private User sender;
 
-    @ManyToOne(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "receiver_id")
     @JsonIgnoreProperties("received_requests") // Break recursion
     //@JsonBackReference

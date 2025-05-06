@@ -46,7 +46,7 @@ public class Event {
     }
 
     //not checked
-    public boolean has(Event dur){
+    /*public boolean has(Event dur){
         return ((dur.getStart().equals(start) && dur.getFinish().equals(finish)) || 
                 ((dur.getStart().getHour() >= start.getHour() && 
                   dur.getStart().getMinute() >= start.getMinute()) && 
@@ -56,10 +56,20 @@ public class Event {
                   dur.getFinish().getMinute() >= start.getMinute()) && 
                   (dur.getFinish().getHour() <= finish.getHour() &&
                    dur.getFinish().getMinute() <= finish.getMinute())));
+    }*/
+
+    public boolean has(Event other){
+        if ( this.finish.isBefore(other.getStart())
+        || this.start .isAfter(other.getFinish()) ) {
+            return false;
+        }
+        // otherwise we must overlap (start inside, end inside, fully containing, etc.)
+        return true;
     }
 
     @Override
     public String toString(){
         return "Start at: " + start.toString() + "\nFinish at: " + finish.toString();
     }
+
 }

@@ -27,7 +27,7 @@ public class ExamServImpl implements ExamServ{
     public ExamDto getExam(Exam exam) {
         ExamDto dto = new ExamDto();
         List<ExamRoomDto> rooms = new ArrayList<>();
-        for (ExamRoom room : exam.getExam_rooms()){
+        for (ExamRoom room : exam.getExamRooms()){
             List<StudentDto> studDtos = new ArrayList<>();
             for (Student stud : room.getStudentsList()) { // some other fields may be added here if needed.
                 StudentDto s = new StudentDto();
@@ -41,9 +41,8 @@ public class ExamServImpl implements ExamServ{
             ExamRoomDto room_DTO = new ExamRoomDto(room.getExamRoom().getClassroomId(), studDtos); // hope it works
             rooms.add(room_DTO);
         }
-        dto.setCourseCode(exam.getTask().getSection().getOffering().getCourse().getCourseCode()); //this can be changed
-        dto.setDuration(exam.getTask().getDuration());
-        dto.setExamRooms(rooms);
+        dto.setDuration(exam.getDuration());
+        //dto.setExamRooms(rooms);
         return dto;
     }
 
