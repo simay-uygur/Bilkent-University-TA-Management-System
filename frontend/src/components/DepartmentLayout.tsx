@@ -2,8 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { Outlet } from 'react-router-dom';
 import NavBarDepartment from './NavBarDepartment';
-import NotificationPanel from './NotificationPanel';
-import SearchSelect from './SearchSelect';
+import NotificationPanel from '../Benim/NotificationPanel';
 import { fetchNotifications, markAllRead, Notification } from '../api'; 
 import styles from './DepartmentLayout.module.css';
 import MultiSearch from './MultiSearch';

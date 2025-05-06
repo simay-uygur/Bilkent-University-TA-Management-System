@@ -1,0 +1,15 @@
+/* GreenButton.module.css */
+.greenButton {
+    background-color: #1aa229;
+    color: #ffffff;
+    border: none;
+    border-radius: 4px;
+    padding: 0.5rem 1rem;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background-color 0.2s ease-in-out;
+  }
+  
+  .greenButton:hover {
+    background-color: #179b20;
+  }
