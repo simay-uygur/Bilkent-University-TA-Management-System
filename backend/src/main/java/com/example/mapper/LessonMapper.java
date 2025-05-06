@@ -5,6 +5,7 @@ import com.example.dto.EventDto;
 import com.example.dto.LessonDto;
 import com.example.entity.Courses.Lesson;
 import com.example.entity.General.ClassRoom;
+import com.example.entity.General.Date;
 import com.example.entity.General.Event;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -46,17 +47,17 @@ public class LessonMapper {
         return lesson;
     }
 
-    private Event toEvent(com.example.dto.EventDto dto) {
+    private Event toEvent(EventDto dto) {
         if (dto == null) return null;
         return new Event(
-                new com.example.entity.General.Date(
+                new Date(
                         dto.getStart().getDay(),
                         dto.getStart().getMonth(),
                         dto.getStart().getYear(),
                         dto.getStart().getHour(),
                         dto.getStart().getMinute()
                 ),
-                new com.example.entity.General.Date(
+                new Date(
                         dto.getFinish().getDay(),
                         dto.getFinish().getMonth(),
                         dto.getFinish().getYear(),

@@ -247,7 +247,7 @@ public class CourseOfferingServImpl implements CourseOfferingServ {
         for (String code : examRoomsDto){
             ExamRoom examRoom = new ExamRoom();
             examRoom.setExam(exam);
-            ClassRoom classRoom = classRoomRepo.findByClassroomId(code)
+            ClassRoom classRoom = classRoomRepo.findClassRoomByClassroomId(code)
                     .orElseThrow(() -> new GeneralExc("Classroom not found: " + code));
             for (ExamRoom examroom : classRoom.getExamRooms()) {
                 if (examroom.getExam().getDuration().has(exam.getDuration())) {
