@@ -43,27 +43,31 @@ public class AuthController {
     private final UserDetailsServiceImpl userDetailsService;
     private final PasswordEncoder passwordEncoder; 
 
-    @PostMapping("/api/signUp")
-    public ResponseEntity<User> createUser(@RequestBody User u) 
-    {
-        //System.out.println("role: " + u.getRole() + "id: " + u.getId());
-        User user_to_check = serv.getUserById(u.getId());
-        if (serv.getUserById(u.getId()) != null)
-            throw new UserExistsExc(u.getId()) ;
-        String[] name = u.getName().split(" ");
-        String name_to_check = name[name.length-1];
-
-        String[] surname = u.getSurname().split(" ");
-        String surname_to_check = surname[surname.length-1];
-        String check_mail = name_to_check.toLowerCase() + 
-                            "." + 
-                            surname_to_check.toLowerCase() + 
-                            "@ug.bilkent.edu.tr";
-        if (!check_mail.matches(u.getWebmail().toLowerCase()) && !Objects.equals(user_to_check.getId(), u.getId()))
-            throw new IncorrectWebMailException() ;
-        return new ResponseEntity<>(serv.createUser(u), HttpStatus.CREATED) ;
-        //return ResponseEntity.created(URI.create("/signIn/{id}")).body(serv.createUser(u)) ;
+@PostMapping("/api/signUp")
+public ResponseEntity<User> createUser(@RequestBody User u) 
+{
+    User user_to_check = serv.getUserById(u.getId());
+    if (user_to_check != null) {
+        logService.warn("AuthController", "Kayıt olmaya çalışan kullanıcı zaten mevcut: ID = " + u.getId());
+        throw new UserExistsExc(u.getId());
     }
+
+    String[] name = u.getName().split(" ");
+    String name_to_check = name[name.length - 1];
+
+    String[] surname = u.getSurname().split(" ");
+    String surname_to_check = surname[surname.length - 1];
+    String check_mail = name_to_check.toLowerCase() + "." + surname_to_check.toLowerCase() + "@ug.bilkent.edu.tr";
+
+    if (!check_mail.matches(u.getWebmail().toLowerCase())) {
+        logService.warn("AuthController", "Geçersiz webmail ile kayıt denemesi: ID = " + u.getId() + ", Webmail = " + u.getWebmail());
+        throw new IncorrectWebMailException();
+    }
+
+    User created = serv.createUser(u);
+    logService.info("AuthController", "Yeni kullanıcı oluşturuldu: ID = " + created.getId());
+    return new ResponseEntity<>(created, HttpStatus.CREATED);
+}
 
     @PostMapping("/api/signIn")
     public ResponseEntity<?> signIn(@Valid @RequestBody SignInRequest request) {
