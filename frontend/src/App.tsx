@@ -47,6 +47,8 @@ import DeansProctoringPage from './components/DeansProctoringPage';
 import ProctorLeftTA from './Pages/DeanOfficePages/ProctorLeftTA';
 import DepartmentCourseDetails from './components/DepartmentCourseDetails';
 import DepartmentInsturctorDetails from './components/DepartmentInsturctorDetails';
+import AssignProctor from './Pages/DepOfficePages/AssignProctor';
+import AssignTA from './Pages/DepOfficePages/AssignTA';
 
 const App: React.FC = () => (
   <BrowserRouter>
@@ -108,13 +110,18 @@ const App: React.FC = () => (
       <Route element={<ProtectedRoute requiredRole="ROLE_DEPARTMENT_STAFF" />}>
         <Route path="/dept-office" element={<DepartmentLayout />}>
           <Route index                          element={<DepartmentOffice />} />
-          <Route path="proctor"                 element={<ProctorAssignmentsPage />} />
+          {/* <Route path="proctor"                 element={<ProctorAssignmentsPage />} /> */}
+          <Route path="proctor" element={<AssignProctor />} />
           
           <Route path="proctor/:courseId/:mode" element={<ProctorAssignmentsPage />} />
+          <Route path="proctor/assign/:examId" element={<AssignTA />} />
           <Route path="course/:courseCode"        element={<DepartmentCourseDetails />} />
           <Route path="instructor/:id"         element={<DepartmentInsturctorDetails />} />
 
           <Route path="leave"                   element={<LeaveRequestsPage />} />
+
+          
+      
 
 
          
@@ -130,13 +137,16 @@ const App: React.FC = () => (
           <Route index                          element={<DeansOffice />} />
           <Route path= "proctor"                          element={<DeansProctoringPage />} />
           <Route path="assign/:courseId/:mode"  element={<DeanAssignProctors />} />
+
+
+
           
           
         </Route>
       </Route>
 
       {/* Fallback */}
-      <Route path="*" element={<Navigate to="/login" replace />} />
+     {/*  <Route path="*" element={<Navigate to="/login" replace />} /> */}
     </Routes>
   </BrowserRouter>
 );

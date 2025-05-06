@@ -2,6 +2,7 @@
 import React, { useState, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import DepOfNavBar from '../../components/NavBars/DepOfNavBar';
+
 import BackBut from '../../components/Buttons/BackBut';
 import ErrPopUp from '../../components/PopUp/ErrPopUp';
 import ConPop from '../../components/PopUp/ConPop';
@@ -56,8 +57,8 @@ const AssignTA: React.FC = () => {
       const newPotential = [...potential, ta];
       setAssigned(newAssigned);
       setPotential(newPotential);
-      examData.assignedTAs = newAssigned;
-      examData.potentialTAs = newPotential;
+      /* examData.assignedTAs = newAssigned;
+      examData.potentialTAs = newPotential; */
     } else {
       if (assigned.length >= needed) {
         setErrorMsg(`Cannot select more than ${needed} TAs.`);
@@ -67,8 +68,8 @@ const AssignTA: React.FC = () => {
       const newPotential = potential.filter(a => a.id !== ta.id);
       setAssigned(newAssigned);
       setPotential(newPotential);
-      examData.assignedTAs = newAssigned;
-      examData.potentialTAs = newPotential;
+     /*  examData.assignedTAs = newAssigned;
+      examData.potentialTAs = newPotential; */
     }
     examData.tasLeft = needed - examData.assignedTAs.length;
   };
@@ -90,7 +91,7 @@ const AssignTA: React.FC = () => {
 
   const handleConfirm = () => {
     setShowConfirm(false);
-    navigate('/asP');
+    navigate('/proctor');
   };
 
   const handleAutoAssign = () => {
@@ -110,8 +111,8 @@ const AssignTA: React.FC = () => {
 
     setAssigned(newAssigned);
     setPotential(newPotential);
-    examData.assignedTAs = newAssigned;
-    examData.potentialTAs = newPotential;
+    /* examData.assignedTAs = newAssigned;
+    examData.potentialTAs = newPotential; */
     examData.tasLeft = needed - newAssigned.length;
 
     // Use ErrPopUp for both success & partial-info
@@ -125,10 +126,10 @@ const AssignTA: React.FC = () => {
 
   return (
     <div className={styles.pageWrapper}>
-      <DepOfNavBar />
+      
 
       <div className={styles.header}>
-        <BackBut to="/asP" />
+        <BackBut to="/dept-office/proctor" />
         <h1 className={styles.title}>
           {examData.courseName} – {examData.examType}
         </h1>
