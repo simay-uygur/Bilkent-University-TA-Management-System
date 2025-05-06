@@ -66,7 +66,7 @@ const App: React.FC = () => (
       <Route element={<ProtectedRoute requiredRole="ROLE_TA" />}>
         <Route element={<TALayout />}>
           <Route path="/ta"             element={<TAMainPage />} />
-          <Route path="/dashboard"             element={<TAMainPage />} />
+          {/* <Route path="/dashboard"             element={<TAMainPage />} /> */}
         <Route path="/make" element={<MakeLeaveReq />} />
            <Route path="/mon" element={<TAMonSchPage />} />
            <Route path="/viewP" element={<TAViewPPage />} />
