@@ -1,0 +1,57 @@
+/* src/components/AssignProctorRow.module.css */
+
+.row {
+  transition: background-color 0.2s ease;
+  /* existing padding, border, alignment, etc. */
+}
+
+
+.completed {
+  background-color: #93efad;
+}
+
+.incomplete {
+  background-color: #ffa5a5;
+}
+
+.tick {
+  margin-right: 4px;
+  vertical-align: middle;
+  color: #4cb953;
+}
+
+.actions {
+  display: flex;
+  gap: 8px;
+}
+
+.btn {
+  padding: 4px 8px;
+  font-size: 0.875rem;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+.btn:hover {
+  opacity: 0.8;
+}
+
+.autoBtn {
+  background-color: #007bff;
+  border: 1px solid#000000;
+  color: white;
+}
+
+.manualBtn {
+  background-color: #f14343;
+  border: 1px solid#000000;
+  color: white;
+}
+
+.demandBtn {
+  background-color: #007bff;  /* amber/orange accent */
+  color: white;
+  border: 1px solid#000000;
+}

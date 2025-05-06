@@ -1,0 +1,202 @@
+// src/pages/ExamProctor/CourseTAReq.tsx
+import React, { useState, FocusEvent } from 'react';
+import { useLocation } from 'react-router-dom';
+import InsNavBar from '../../components/NavBars/InsNavBar';
+import BackBut from '../../components/Buttons/BackBut';
+import SearchSelect from '../../components/SearchSelect';
+import GreenBut from '../../components/Buttons/GreenBut';
+import ErrPopUp from '../../components/PopUp/ErrPopUp';
+import ConPop from '../../components/PopUp/ConPop';
+import styles from './CourseTAReq.module.css';
+
+export interface TA {
+  id: string;
+  name: string;
+}
+
+interface RawRequest {
+  courseId: string;
+  neededTAs: number;
+  wantedTAs: string[];
+  unwantedTAs: string[];
+}
+
+const CourseTAReq: React.FC = () => {
+  const location = useLocation();
+  const courseCode = location.pathname.split('/')[2] || 'Unknown Course';
+
+  const tas: TA[] = [
+    { id: 'ta1', name: 'Ali Veli' },
+    { id: 'ta2', name: 'Ayşe Fatma' },
+    { id: 'ta3', name: 'Mehmet Can' },
+  ];
+
+  const initialState = { needed: 0, wanted: [] as string[], unwanted: [] as string[] };
+  const [state, setState] = useState(initialState);
+  const [resetKey, setResetKey] = useState({ wanted: 0, unwanted: 0 });
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const [confirmData, setConfirmData] = useState<RawRequest | null>(null);
+
+  const handleNeededFocus = (e: FocusEvent<HTMLInputElement>) => e.target.select();
+  const handleNeededChange = (v: number) => setState(prev => ({ ...prev, needed: v }));
+
+  const handleSelect = (field: 'wanted' | 'unwanted', taId: string) => {
+    setState(prev => ({
+      needed: prev.needed,
+      wanted:
+        field === 'wanted'
+          ? Array.from(new Set([...prev.wanted, taId]))
+          : prev.wanted.filter(id => id !== taId),
+      unwanted:
+        field === 'unwanted'
+          ? Array.from(new Set([...prev.unwanted, taId]))
+          : prev.unwanted.filter(id => id !== taId),
+    }));
+    setResetKey(prev => ({ ...prev, [field]: prev[field] + 1 }));
+  };
+
+  const handleDeselect = (field: 'wanted' | 'unwanted', taId: string) =>
+    setState(prev => ({
+      needed: prev.needed,
+      wanted:
+        field === 'wanted'
+          ? prev.wanted.filter(id => id !== taId)
+          : prev.wanted,
+      unwanted:
+        field === 'unwanted'
+          ? prev.unwanted.filter(id => id !== taId)
+          : prev.unwanted,
+    }));
+
+  const handleSubmit = () => {
+    if (state.needed === 0) {
+      setErrorMsg("You can't request 0 TAs.");
+    } else {
+      setConfirmData({
+        courseId: courseCode,
+        neededTAs: state.needed,
+        wantedTAs: state.wanted,
+        unwantedTAs: state.unwanted,
+      });
+    }
+  };
+
+  const handleConfirm = () => {
+    if (!confirmData) return;
+    console.log('Payload:', confirmData);
+    // TODO: POST payload to backend
+
+    // reset all inputs on approval
+    setConfirmData(null);
+    setState(initialState);
+    setResetKey({ wanted: 0, unwanted: 0 });
+  };
+
+  const selectedSet = new Set([...state.wanted, ...state.unwanted]);
+
+  return (
+    <div className={styles.container}>
+      <InsNavBar />
+      <div className={styles.headerRow}>
+        <BackBut to="/ins" />
+        <h1 className={styles.title}>Course TA Request</h1>
+      </div>
+
+      <div className={styles.card}>
+        <div className={styles.cardHeader}>{courseCode}</div>
+
+        <label className={styles.label}>
+          TA Needed:
+          <input
+            type="number"
+            min={0}
+            value={state.needed}
+            onFocus={handleNeededFocus}
+            onChange={e => handleNeededChange(+e.target.value)}
+            className={styles.inputNumber}
+          />
+        </label>
+
+        <div className={styles.controlsRow}>
+          <div className={styles.selectorRow}>
+            <div className={styles.selectorBlock}>
+              <span className={styles.selectorTitle}>Wanted TAs:</span>
+              <SearchSelect<TA>
+                key={`wanted-${resetKey.wanted}`}
+                options={tas.filter(t => !selectedSet.has(t.id))}
+                filterOption={t => t.name}
+                renderOption={t => <>{t.name}</>}
+                placeholder="Pick a TA…"
+                onSelect={t => handleSelect('wanted', t.id)}
+                className={styles.searchSelect}
+              />
+              <div className={styles.selectedList}>
+                {state.wanted.map(id => {
+                  const ta = tas.find(t => t.id === id)!;
+                  return (
+                    <span key={id} className={styles.tag}>
+                      {ta.name}
+                      <button
+                        type="button"
+                        className={styles.tagRemove}
+                        onClick={() => handleDeselect('wanted', id)}
+                      >
+                        ×
+                      </button>
+                    </span>
+                  );
+                })}
+              </div>
+            </div>
+
+            <div className={styles.selectorBlock}>
+              <span className={styles.selectorTitle}>Unwanted TAs:</span>
+              <SearchSelect<TA>
+                key={`unwanted-${resetKey.unwanted}`}
+                options={tas.filter(t => !selectedSet.has(t.id))}
+                filterOption={t => t.name}
+                renderOption={t => <>{t.name}</>}
+                placeholder="Pick a TA…"
+                onSelect={t => handleSelect('unwanted', t.id)}
+                className={styles.searchSelect}
+              />
+              <div className={styles.selectedList}>
+                {state.unwanted.map(id => {
+                  const ta = tas.find(t => t.id === id)!;
+                  return (
+                    <span key={id} className={styles.tag}>
+                      {ta.name}
+                      <button
+                        type="button"
+                        className={styles.tagRemove}
+                        onClick={() => handleDeselect('unwanted', id)}
+                      >
+                        ×
+                      </button>
+                    </span>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+
+          <div className={styles.cardSubmitWrapper}>
+            <GreenBut text="Submit Request" onClick={handleSubmit} />
+          </div>
+        </div>
+      </div>
+
+      {errorMsg && <ErrPopUp message={errorMsg} onConfirm={() => setErrorMsg(null)} />}
+
+      {confirmData && (
+        <ConPop
+          message="Are you sure you want to submit this request?"
+          onConfirm={handleConfirm}
+          onCancel={() => setConfirmData(null)}
+        />
+      )}
+    </div>
+  );
+};
+
+export default CourseTAReq;

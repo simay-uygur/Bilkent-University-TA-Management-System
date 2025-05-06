@@ -1,0 +1,49 @@
+.pageWrapper {
+    background: #f7f7f7;
+    min-height: 100vh;
+    padding: 1rem;
+  }
+  
+  .back {
+    background: none;
+    border: none;
+    color: #2563EB;
+    cursor: pointer;
+    margin-bottom: 0.5rem;
+  }
+  
+  .heading {
+    margin: 0.5rem 0;
+    font-size: 1.25rem;
+  }
+  
+  .note {
+    margin-bottom: 1rem;
+  }
+  
+  .table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 1rem;
+  }
+  
+  .table th,
+  .table td {
+    border: 1px solid #E5E7EB;
+    padding: 0.5rem;
+  }
+  
+  .confirm {
+    background: #10B981;
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+  
+  .confirm:disabled {
+    background: #9CA3AF;
+    cursor: not-allowed;
+  }
+  

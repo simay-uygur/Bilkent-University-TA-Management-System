@@ -1,0 +1,104 @@
+/* TAMainPage.module.css */
+
+/* Page wrapper styling */
+.pageWrapper {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background-color: #d2e9ff;
+}
+
+/* Content wrapper */
+.contentWrapper {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 20px;
+  overflow-y: auto;
+}
+
+/* Table styling */
+.table {
+  width: 80%;
+  border-collapse: collapse;
+  text-align: center;
+  margin: 0 auto;
+  background-color: #efdef8;
+}
+
+.table th,
+.table td {
+  border: 1px solid #b0a1ac;
+  padding: 10px;
+}
+
+.table th {
+  background-color: #f5e1e1;
+}
+
+.timeColumn {
+  width: 150px;
+}
+
+.dayColumn {
+  width: 150px;
+}
+
+/* ==== ITEM TYPE STYLES ==== */
+.course {
+  /* green for courses */
+  background-color: #d3f8e2;
+  padding: 4px;
+  border-radius: 4px;
+}
+
+.lab {
+  /* orange for labs */
+  background-color: #f9e0a3;
+  padding: 4px;
+  border-radius: 4px;
+}
+
+.recitation {
+  /* purple for recitations */
+  background-color: #c8d0f2;
+  padding: 4px;
+  border-radius: 4px;
+}
+
+/* Buttons */
+.buttonContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  margin: 40px 0;
+  align-items: center;
+}
+
+.button {
+  min-width: 200px;
+  padding: 12px 25px;
+  font-size: 1.1rem;
+  color: #fff;
+  background-color: #4caf50;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.3s, transform 0.2s;
+}
+
+.button:hover {
+  background-color: #45a049;
+  transform: translateY(-2px);
+}
+
+.button:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(72, 163, 244, 0.5);
+}
+
+.button:active {
+  background-color: #388e3c;
+  transform: none;
+}

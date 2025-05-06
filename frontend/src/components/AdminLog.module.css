@@ -1,0 +1,61 @@
+.card {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem;
+    background: linear-gradient(135deg, #ffffff, #f3f4f6);
+    border-left: 4px solid #3b82f6;
+    border-radius: 8px;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05);
+    transition: transform 0.2s, box-shadow 0.2s, border 0.2s;
+    cursor: pointer;
+  }
+  
+  .card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.1);
+  }
+  
+  .noShadow {
+    box-shadow: none;
+    border: 1px solid #e5e7eb;
+  }
+  
+  .icon {
+    color: #3b82f6;
+    flex-shrink: 0;
+  }
+  
+  .content {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    gap: 0.25rem;
+  }
+  
+  .message {
+    margin: 0;
+    font-size: 1rem;
+    color: #1f2937;
+    cursor: pointer;
+  }
+  
+  .datetime {
+    font-size: 0.75rem;
+    color: #6b7280;
+    align-self: flex-end;
+  }
+  
+  .trashButton {
+    background: transparent;
+    border: none;
+    color: #e11d48;
+    cursor: pointer;
+    padding: 0.25rem;
+    transition: color 0.2s;
+  }
+  
+  .trashButton:hover {
+    color: #be123c;
+  }
+  
