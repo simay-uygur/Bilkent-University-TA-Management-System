@@ -38,7 +38,7 @@ public class ExamServImpl implements ExamServ{
                 s.setDepartment(stud.getDepartment());
                 studDtos.add(s);
             }
-            ExamRoomDto room_DTO = new ExamRoomDto(room.getClassRoom().getClassroomId(), studDtos); // hope it works
+            ExamRoomDto room_DTO = new ExamRoomDto(room.getExamRoom().getClassroomId(), studDtos); // hope it works
             rooms.add(room_DTO);
         }
         dto.setDuration(exam.getDuration());
