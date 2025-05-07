@@ -1,14 +1,15 @@
 // src/pages/ExamProctor/CourseTAReq.tsx
 import React, { useState, useEffect, FocusEvent } from 'react';
 import { useLocation } from 'react-router-dom';
-import InsNavBar from '../../components/NavBars/InsNavBar';
+
 import BackBut from '../../components/Buttons/BackBut';
-import SearchSelect from '../../Benim/SearchSelect';
+
 import GreenBut from '../../components/Buttons/GreenBut';
 import ErrPopUp from '../../components/PopUp/ErrPopUp';
 import ConPop from '../../components/PopUp/ConPop';
-import styles from './CourseTAReq.module.css';
+import styles from './CourseTARequest.module.css';
 import axios from 'axios';
+import SearchSelect from '../../components/SearchSelect';
 
 // Updated TA interface to match API response
 export interface TA {

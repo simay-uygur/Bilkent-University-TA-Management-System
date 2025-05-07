@@ -37,6 +37,7 @@ import AdminLayout from './components/Layouts/AdminLayout';
 import ViewLogs from './Pages/AdminPages/ViewLogs';
 import ProctorTASelection from './Pages/DeanOfficePages/ProctorTASelection';
 import ProctorCourseSelection from './Pages/DeanOfficePages/ProctorCourseSelection';
+import ProtectedRoute from './Pages/ProtectedRoute';
 
 const App: React.FC = () => (
   <BrowserRouter>
@@ -45,7 +46,7 @@ const App: React.FC = () => (
       {/* Public */}
       <Route path="/login" element={<Login />} />
       {/* TA Area (requires ROLE_TA) */}
-      {/*<Route element={<ProtectedRoute requiredRole="ROLE_TA" />}>*/}
+      <Route element={<ProtectedRoute requiredRole="ROLE_TA" />}>
         <Route path="/ta" element={<TALayout />}>
           <Route index element={<TAMainPage />} />
           <Route path="/ta/leave-request" element={<MakeLeaveRequest />} />
@@ -54,10 +55,10 @@ const App: React.FC = () => (
           <Route path="/ta/settings" element={<Settings />} />
           <Route path="/ta/notification" element={<Notification />} />
         </Route>
-      {/*</Route>*/}
+      </Route>
 
       {/* Instructor Area (requires ROLE_INSTRUCTOR) */}
-      {/*<Route element={<ProtectedRoute requiredRole="ROLE_INSTRUCTOR" />}>*/}
+      <Route element={<ProtectedRoute requiredRole="ROLE_INSTRUCTOR" />}>
         <Route path="/instructor" element={<InstructorLayout />}>
           <Route index element={<InstructorMainPage />} />
           <Route path="/instructor/exam-proctor-request/:courseID" element={<ExamProctorPage />} />
@@ -68,25 +69,25 @@ const App: React.FC = () => (
           <Route path="/instructor/settings" element={<Settings />} />
           <Route path="/instructor/notification" element={<Notification />} />
         </Route>
-      {/*</Route>*/}
+      </Route>
 
       {/* Department Office Area (requires ROLE_DEPARTMENT) */}
-      {/*<Route element={<ProtectedRoute requiredRole="ROLE_DEPARTMENT_STAFF" />}>*/}
+      <Route element={<ProtectedRoute requiredRole="ROLE_DEPARTMENT_STAFF" />}>
         <Route path="/department-office" element={<DepartmentLayout />}>
           <Route index element={<DepartmentOffice />} />
-          <Route path="/department-office/:courseCode" element={<CourseDetails />} />
+          <Route path="/department-office/course/:courseCode" element={<CourseDetails />} />
           <Route path="/department-office/instructor/:id" element={<InstructorDetails />} />
-          <Route path="/department-office/assign-course/:courseID/:courseSec" element={<SelectTACourse/>} />
+          <Route path="/department-office/assign-course/:sectionCode" element={<SelectTACourse/>} />
           <Route path="/department-office/assign-course" element={<AssignTACourse />} />
           <Route path="/department-office/assign-proctor/:examID" element={<AssignTAProctor />} />
           <Route path="/department-office/assign-proctor" element={<AssignProctor />} />
           <Route path="/department-office/settings" element={<Settings />} />
           <Route path="/department-office/notification" element={<Notification />} />
         </Route>
-      {/*</Route>*/}
+      </Route>
 
       {/* Dean’s Office Area (requires ROLE_DEAN) */}
-      {/*<Route element={<ProtectedRoute requiredRole="ROLE_DEANS_OFFICE" />}>*/}
+      <Route element={<ProtectedRoute requiredRole="ROLE_DEANS_OFFICE" />}>
         <Route path="/deans-office" element={<DeansLayout />}>
           {/*<Route index element={<DeansOffice />} />*/}
           <Route path= "/deans-office/proctor"  element={<ProctorCourseSelection />} />
@@ -96,17 +97,17 @@ const App: React.FC = () => (
           <Route path="/deans-office/proctor/:examID" element={<ProctorTASelection />} />
           <Route path="/deans-office/view-add-exams" element={<ViewAddExam />} />
         </Route>
-      {/*</Route>*/}
+      </Route>
 
       {/* Admin's Pages */}
-      {/*<Route element={<ProtectedRoute requiredRole="ROLE_ADMIN" />}>*/}
+      <Route element={<ProtectedRoute requiredRole="ROLE_ADMIN" />}>
         <Route path="/admin" element={<AdminLayout />}>
           <Route index element={<AdminMainPage />} />
           <Route path= "/admin/view-logs"  element={<ViewLogs />} />
           <Route path="/admin/settings" element={<Settings />} />
           <Route path="/admin/notification" element={<Notification />} />
         </Route>
-      {/*</Route>*/}
+      </Route>
 
       {/* Fallback */}
       <Route path="*" element={<Navigate to="/login" replace />} />

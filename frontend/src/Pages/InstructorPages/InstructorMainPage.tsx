@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import CourseInfoPanel from './CourseInfoPanel';
-import styles from './InsMainPage.module.css';
+import styles from './InstructorMainPage.module.css';
 import axios from 'axios';
 
 // Updated interfaces to match API response
@@ -129,7 +129,7 @@ const InsMainPage: React.FC = () => {
                   <div className={styles.actions}>
                     <button
                       className={styles.actionButton}
-                      onClick={() => navigate(`/examProc/${courseCode}`)}
+                      onClick={() => navigate(`/instructor/exam-printing/${courseCode}`)}
                     >
                       Exam Proctoring
                     </button>
@@ -138,13 +138,13 @@ const InsMainPage: React.FC = () => {
                     </button>
                     <button 
                       className={styles.actionButton} 
-                      onClick={() => navigate(`/man/${courseCode}`)}
+                      onClick={() => navigate(`/instructor/workload/${courseCode}/${sectionNumber}`)}
                     >
                       Manage Course Works
                     </button>
                     <button 
                       className={styles.actionButton} 
-                      onClick={() => navigate(`/courseTA/${courseCode}`)}
+                      onClick={() => navigate(`/instructor/assign-course/${courseCode}/${sectionNumber}`)}
                     >
                       Course TA
                     </button>
