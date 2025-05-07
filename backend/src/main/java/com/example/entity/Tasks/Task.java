@@ -3,12 +3,10 @@ package com.example.entity.Tasks;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.example.entity.Courses.Course;
+import com.example.entity.Actors.TA;
 import com.example.entity.Courses.Section;
-import com.example.entity.Exams.Exam;
 import com.example.entity.General.Event;
 import com.example.entity.Requests.WorkLoad;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
 import jakarta.persistence.CascadeType;
@@ -24,7 +22,6 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
-import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -48,8 +45,8 @@ public class Task {
     @Column(name = "duration", nullable = false)
     private Event duration;
 
-    @Column(name = "is_time_passed", nullable = false)
-    private boolean timePassed;
+    /*@Column(name = "is_time_passed", nullable = false)
+    private boolean timePassed;*/
 
     @Column(name = "workload", nullable = false)
     private int workload;
@@ -62,15 +59,15 @@ public class Task {
     @Column(name = "status", nullable = false)
     private TaskState status = TaskState.UNKNOWN;
 
-    @Enumerated(EnumType.STRING)
+    /*@Enumerated(EnumType.STRING)
     @Column(name = "access_type", updatable = false)
-    private TaskAccessType accessType;
+    private TaskAccessType accessType;*/
 
     @OneToMany(mappedBy = "task", cascade = CascadeType.ALL)
     private List<TaTask> tasList = new ArrayList<>();
 
-    @Column(name = "required_tas", nullable = false)
-    private int requiredTAs;
+    /*@Column(name = "required_tas", nullable = false)
+    private int requiredTAs;*/
 
     @Column(name = "size_of_tas", nullable = false)
     private int amountOfTas = 0;
@@ -88,13 +85,16 @@ public class Task {
         return duration != null && duration.isOngoing();
     }
 
-    public boolean addTA() {
-        if (tasList == null) tasList = new ArrayList<>();
-        if (amountOfTas < requiredTAs) {
-            amountOfTas++;
-            return true;
-        }
-        return false;
+    public void assignTo(TA ta) 
+    {
+        if (tasList == null) // Check if tasList is null before initializing
+            tasList = new ArrayList<>(); // Initialize the list if it's null
+        TaTask link = new TaTask(this, ta);
+        // set both sides
+        tasList.add(link);
+        //ta.getTaTasks().add(link);
+        // update counter
+        amountOfTas++;
     }
 
     public boolean removeTA() {
@@ -111,6 +111,23 @@ public class Task {
                 : null;
     }
 
+    public Task(Section section, Event duration, String type, int workload)
+    {
+        this.section = section;
+        this.duration = duration;
+        this.taskType = TaskType.valueOf(type);
+        if (workload == 0)
+        {
+            switch (taskType){
+                case Lab -> this.workload = 4;
+                case Grading -> this.workload = 3;
+                case Recitation -> this.workload = 2;
+                case Office_Hour -> this.workload = 1;
+            }
+        }
+        else 
+            this.workload = workload;
+    }
     @OneToMany(mappedBy = "task", cascade = CascadeType.ALL)
     private List<WorkLoad> workLoadRequestList = new ArrayList<>(); // List of WorkLoad objects associated with this task
 }

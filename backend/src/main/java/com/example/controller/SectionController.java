@@ -71,8 +71,8 @@ public class SectionController {
         sectionServ.delete(id);
     } 
 
-    @PostMapping("/{section_code}/task")
-    public ResponseEntity<Boolean> createTask(@RequestBody TaskDto entity, @PathVariable String section_code) {
+    @PostMapping("section/{section_code}/task")
+    public ResponseEntity<TaskDto> createTask(@RequestBody TaskDto entity, @PathVariable String section_code) {
         return new ResponseEntity<>(taskServ.createTask(entity, section_code), HttpStatus.CREATED);
     }
 }

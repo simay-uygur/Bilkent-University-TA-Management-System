@@ -21,6 +21,7 @@ import com.example.dto.ExamDto;
 import com.example.dto.StudentMiniDto;
 import com.example.entity.Actors.TA;
 import com.example.entity.Courses.CourseOffering;
+import com.example.entity.Courses.Section;
 import com.example.entity.Exams.Exam;
 import com.example.entity.Exams.ExamRoom;
 import com.example.entity.General.ClassRoom;
@@ -303,5 +304,28 @@ public class CourseOfferingServImpl implements CourseOfferingServ {
             throw new GeneralExc("TA assignment to exam failed."); // Ensure GeneralExc is correctly imported
         }
         return CompletableFuture.completedFuture(true);
+    }
+
+    @Override
+    public Section getSectionByNumber(String courseCode, int sectionNumber) {
+        // 1) fetch the “current” offering exactly the way you already do
+        CourseOffering offering = getCurrentOffering(courseCode);
+    
+        // 2) look through its sections and split the sectionCode on “-”
+        return offering.getSections().stream()
+            .filter(s -> {
+                // e.g. "CS‑319‑1‑2025‑SPRING".split("-") → ["CS","319","1","2025","SPRING"]
+                String[] parts = s.getSectionCode().split("-");
+                // parts[2] is the “1” or “2” that you want
+                return parts.length >= 3
+                    && Integer.parseInt(parts[2]) == sectionNumber;
+            })
+            .findFirst()
+            .orElseThrow(() ->
+                new GeneralExc(
+                    "No section “" + sectionNumber +
+                    "” for course “" + courseCode + "”"
+                )
+            );
     }
 }

@@ -15,14 +15,15 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.dto.TaDto;
+import com.example.dto.TaTaskDto;
 import com.example.entity.Actors.TA;
 import com.example.entity.General.Date;
 import com.example.entity.Tasks.Task;
 import com.example.exception.GeneralExc;
 import com.example.exception.UserNotFoundExc;
 import com.example.exception.taExc.TaNotFoundExc;
+import com.example.repo.TaskRepo;
 import com.example.service.TAServ;
-import com.example.service.TaskServ;
 
 import lombok.RequiredArgsConstructor;
 
@@ -32,31 +33,29 @@ import lombok.RequiredArgsConstructor;
 public class TA_controller {
     @Autowired
     private TAServ serv;
-
+    
     @Autowired
-    private TaskServ taskServ;
-
+    private TaskRepo taskRepo;
     /*@PostMapping("/api/ta/signUp")
     public ResponseEntity<TA> createTA(@RequestBody TA ta) 
     {
-        //System.out.println("role: " + u.getRole() + "id: " + u.getId());
-        TA ta_to_check = serv.getTAById(ta.getId());
-        if (ta_to_check != null)
-            throw new UserExistsExc(ta.getId()) ;
-        String check_mail = ta.getName().toLowerCase() + 
-                            "." + 
-                            ta.getSurname().toLowerCase() + 
-                            "@ug.bilkent.edu.tr";
-        if (!check_mail.matches(ta_to_check.getWebmail().toLowerCase()) && !Objects.equals(ta_to_check.getId(), ta_to_check.getId()))
-            throw new IncorrectWebMailException() ;
-        return new ResponseEntity<>((TA) userServ.createUser(ta), HttpStatus.CREATED) ;
-        //return ResponseEntity.created(URI.create("/signIn/{id}")).body(serv.createUser(u)) ;
+    //System.out.println("role: " + u.getRole() + "id: " + u.getId());
+    TA ta_to_check = serv.getTAById(ta.getId());
+    if (ta_to_check != null)
+    throw new UserExistsExc(ta.getId()) ;
+    String check_mail = ta.getName().toLowerCase() +
+    "." +
+    ta.getSurname().toLowerCase() +
+    "@ug.bilkent.edu.tr";
+    if (!check_mail.matches(ta_to_check.getWebmail().toLowerCase()) && !Objects.equals(ta_to_check.getId(), ta_to_check.getId()))
+    throw new IncorrectWebMailException() ;
+    return new ResponseEntity<>((TA) userServ.createUser(ta), HttpStatus.CREATED) ;
+    //return ResponseEntity.created(URI.create("/signIn/{id}")).body(serv.createUser(u)) ;
     } // method should be sent to Admin controller*/
     
     @GetMapping("/api/ta/all")
     public List<TaDto> getAllTAs() 
     {
-        System.out.println("ilmayyyyy");
         return serv.getAllTAs();
     } // method should be sent to Admin controller
 
@@ -82,21 +81,22 @@ public class TA_controller {
     } // method should be sent to Admin controller
 
     @GetMapping("/api/ta/{ta_id}/task/{task_id}")
-    public Task getTaskById(@PathVariable("ta_id") Long ta_id, @PathVariable("task_id") int task_id) 
+    public TaTaskDto getTaskById(@PathVariable("ta_id") Long ta_id, @PathVariable("task_id") int task_id) 
     {
         return serv.getTaskById(task_id, ta_id);
     }
 
     @GetMapping("/api/ta/{id}/tasks")
-    public Set<Task> getAllTasks(@PathVariable Long id) 
+    public Set<Task> getAllTasTasks(@PathVariable Long id) 
     {
-        return serv.getAllTasks(id);
+        return serv.getAllTasTasks(id);
     }
     
     @PostMapping("/api/ta/{id}/task/{task_id}")
     public ResponseEntity<?> createTask(@PathVariable Long id, @PathVariable int task_id) 
     {
-        Task task = taskServ.getTaskById(task_id);
+        Task task = taskRepo.findById(task_id)
+                .orElseThrow(() -> new GeneralExc("Task with ID " + task_id + " not found."));
         if (task == null) {
             throw new GeneralExc("Task with ID " + task_id + " not found.");
         }

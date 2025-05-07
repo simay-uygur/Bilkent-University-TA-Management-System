@@ -111,7 +111,11 @@ public class Section {
             orphanRemoval = true)
     private List<Lesson> lessons = new ArrayList<>();
 
-
+    @Override
+    public String toString(){
+        String[] parts = this.sectionCode.split("-");
+        return parts[0] + "-" + parts[1] + "-" + parts[2];
+    }
     
 
 }

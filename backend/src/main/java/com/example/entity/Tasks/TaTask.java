@@ -30,10 +30,9 @@ public class TaTask {
     private TaskAccessType type;
 
     // Parameterized constructor
-    public TaTask(Task task, TA ta_owner, TaskAccessType type) {
+    public TaTask(Task task, TA ta_owner) {
         this.taOwner = ta_owner;
         this.task = task;
-        this.type = type;
     }
 }
 

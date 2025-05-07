@@ -1,6 +1,7 @@
 package com.example.repo;
 
 
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 
@@ -33,16 +34,5 @@ public interface TaskRepo extends JpaRepository<Task, Integer>{
     @Query("SELECT t FROM Task t WHERE t.status = 'DELETED'")
     HashSet<Task> findDeletedTasks();
 
-    @Modifying
-    @Transactional
-    @Query("""
-        UPDATE Task t
-        SET t.state = :completedState
-        WHERE t.section.id = :sectionId
-        AND t.taskType <> com.example.entity.Tasks.TaskType.Grading
-    """)
-    int markNonGradingTasksCompleted(
-        @Param("sectionId") Long sectionId,
-        @Param("completedState") TaskState completedState
-    );
+    List<Task> findByStatusNotIn(Collection<TaskState> states);
 }

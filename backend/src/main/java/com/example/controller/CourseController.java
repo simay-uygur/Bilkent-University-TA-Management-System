@@ -125,7 +125,8 @@ public class CourseController {
                 taDtos,
                 "Task #" + task.getTaskId(),
                 task.getDuration(),
-                task.getStatus().toString()
+                task.getStatus().toString(),
+                task.getWorkload()
         );
 
         return ResponseEntity.ok(dto);

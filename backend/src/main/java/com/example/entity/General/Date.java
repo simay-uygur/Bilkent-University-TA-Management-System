@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
+import java.util.Objects;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
@@ -44,10 +45,10 @@ public class Date {
     }
     
     public boolean isBefore(Date other) { // other - 16:48, this - 16:45
-        if (this.year != other.year) return this.year < other.year; 
-        if (this.month != other.month) return this.month < other.month;
-        if (this.day != other.day) return this.day < other.day;
-        if (this.hour != other.hour) return this.hour < other.hour;
+        if (!Objects.equals(this.year, other.year)) return this.year < other.year; 
+        if (!Objects.equals(this.month, other.month)) return this.month < other.month;
+        if (!Objects.equals(this.day, other.day)) return this.day < other.day;
+        if (!Objects.equals(this.hour, other.hour)) return this.hour < other.hour;
         return this.minute <= other.minute;
     }
     

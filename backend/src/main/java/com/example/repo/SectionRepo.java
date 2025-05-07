@@ -91,4 +91,6 @@ public interface SectionRepo extends JpaRepository<Section, Integer>{
 //           WHERE   sec.sectionId = :sectionId
 //           """)
 //    Optional<List<Section>> findSectionsBySectionCodeIgnoreCase(String secCode);
+
+    List<Section> findByAssignedTas_Id(Long taId);
 }

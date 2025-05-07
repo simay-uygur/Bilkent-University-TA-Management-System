@@ -8,6 +8,7 @@ import java.util.concurrent.CompletableFuture;
 import com.example.dto.CourseOfferingDto;
 import com.example.dto.ExamDto;
 import com.example.entity.Courses.CourseOffering;
+import com.example.entity.Courses.Section;
 import com.example.exception.GeneralExc;
 
 public interface CourseOfferingServ {
@@ -26,6 +27,7 @@ public interface CourseOfferingServ {
     CourseOffering getCurrentOffering(String courseCode);
     CompletableFuture<Boolean> createExam(ExamDto exam, String courseCode); // Assuming you have an ExamDto class
     CompletableFuture<Boolean> addTAs(String courseCode, Integer examId, List<Long> tas) throws GeneralExc; // Assuming you have an ExamDto class
+    Section getSectionByNumber(String courseCode, int sectionNumber) ;
 }
 
 

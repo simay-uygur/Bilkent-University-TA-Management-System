@@ -41,7 +41,8 @@ public class Event {
         if (start == null || finish == null) return false;
 
         Date current = new Date().currenDate();
-        return (current.isAfter(start) || current.isBefore(start)) && current.isBefore(finish);
+        //return (current.isAfter(start) || current.isBefore(start)) && current.isBefore(finish);
+        return current.isAfter(start) && current.isBefore(finish);
     }
 
 //    public boolean isOngoing() {
