@@ -21,6 +21,8 @@ import com.example.dto.ExamDto;
 import com.example.dto.StudentMiniDto;
 import com.example.entity.Actors.TA;
 import com.example.entity.Courses.CourseOffering;
+import com.example.entity.Courses.Section;
+import com.example.exception.Course.CourseNotFoundExc;
 import com.example.entity.Exams.Exam;
 import com.example.entity.Exams.ExamRoom;
 import com.example.entity.General.ClassRoom;
@@ -49,9 +51,9 @@ public class CourseOfferingServImpl implements CourseOfferingServ {
     private final StudentRepo studentRepo;
     private final ExamRepo examRepo;
 
-        @Override
+    @Override
     public CourseOfferingDto getCourseByCourseCode(String code) {
-      CourseOffering off = repo.findByCourseCode(code)
+        CourseOffering off = repo.findByCourseCode(code)
                 .orElseThrow(() -> new IllegalArgumentException("Offering not found: " + code));
 
         return courseMapper.toDto(off);
@@ -69,8 +71,8 @@ public class CourseOfferingServImpl implements CourseOfferingServ {
     public List<CourseOfferingDto> getOfferingsByDepartment(String deptName){
         List<CourseOffering> offerings = repo.findByCourseDepartmentName(deptName)
                 .orElseThrow(() -> new IllegalArgumentException("No offerings found for department: " + deptName));
-        
-                return offerings.stream()
+
+        return offerings.stream()
                 .map(courseMapper::toDto)
                 .collect(Collectors.toList());
     }

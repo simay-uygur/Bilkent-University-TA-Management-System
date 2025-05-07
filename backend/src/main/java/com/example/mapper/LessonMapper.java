@@ -32,6 +32,7 @@ public class LessonMapper {
 
         dto.setLessonType(lesson.getLessonType().name());
         dto.setSectionId(lesson.getSection() != null ? lesson.getSection().getSectionCode() : null);
+        dto.setDay(lesson.getDay() != null ? lesson.getDay().name() : null);
 
         return dto;
     }
@@ -87,4 +88,5 @@ public class LessonMapper {
                 )
         );
     }
+
 }

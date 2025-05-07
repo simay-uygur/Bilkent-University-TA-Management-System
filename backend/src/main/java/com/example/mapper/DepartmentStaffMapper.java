@@ -10,6 +10,8 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class DepartmentStaffMapper {
 
+    private final DepartmentMapper departmentMapper;
+
     public DepartmentStaffDto toDto(DepartmentStaff staff) {
         DepartmentStaffDto dto = new DepartmentStaffDto();
         dto.setId(staff.getId());
@@ -20,6 +22,9 @@ public class DepartmentStaffMapper {
         if (staff.getDepartment() != null) {
             dto.setDepartmentName(staff.getDepartment().getName());
         }
+        /* if (staff.getDepartment() != null) {
+            dto.setDepartmentName((departmentMapper.toDto(staff.getDepartment())).getCode());
+        } */
 
         return dto;
     }

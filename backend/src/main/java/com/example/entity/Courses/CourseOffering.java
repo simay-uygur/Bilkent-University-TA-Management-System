@@ -4,6 +4,7 @@ package com.example.entity.Courses;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.example.entity.Actors.Instructor;
 import com.example.entity.Actors.TA;
 import com.example.entity.Exams.Exam;
 import com.example.entity.General.Semester;
@@ -97,6 +98,9 @@ public class CourseOffering {
     @OrderBy("studentSurname ASC, studentName ASC")
     private List<Student> registeredStudents = new ArrayList<>();
 
+    @ManyToOne(fetch =  FetchType.LAZY )
+    @JoinColumn(name = "coordinator_id", nullable = true, updatable = true)  // to test it now, nullable is true (database will be changed)
+    private Instructor coordinator;
 
 }
 

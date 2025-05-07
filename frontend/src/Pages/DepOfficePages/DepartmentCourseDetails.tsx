@@ -19,6 +19,7 @@ interface LessonDto {
     start: { day: number; month: number; year: number; hour: number; minute: number }
     finish: { day: number; month: number; year: number; hour: number; minute: number }
   }
+  day : string
   classroomId: string | null
   examCapacity: number | null
   lessonType: string
@@ -188,8 +189,26 @@ const CourseDetails: React.FC = () => {
                         : <span>None</span>
                       }
                     </div>
-
-                    <div>
+                   
+<div>
+  <strong>Lessons:</strong>{' '}
+  {sec.lessons && sec.lessons.length > 0
+    ? <ul className={styles.lessonList}>
+        {sec.lessons.map((l, i) => (
+          <li key={i} className={styles.lessonItem}>
+            {l.lessonType} •{' '}
+            {/* Replace the date formatting with the day field */}
+            <strong>{l.day}</strong> {' '}
+            {`${String(l.duration.start.hour).padStart(2,'0')}:${String(l.duration.start.minute).padStart(2,'0')}–`}
+            {`${String(l.duration.finish.hour).padStart(2,'0')}:${String(l.duration.finish.minute).padStart(2,'0')}`} •{' '}
+            Room: {l.classroomId ?? 'TBA'} • Cap: {l.examCapacity ?? '–'}
+          </li>
+        ))}
+      </ul>
+    : <span>No lessons scheduled.</span>
+  }
+</div>
+                    {/* <div>
                       <strong>Lessons:</strong>{' '}
                       {sec.lessons && sec.lessons.length > 0
                         ? <ul className={styles.lessonList}>
@@ -205,7 +224,7 @@ const CourseDetails: React.FC = () => {
                           </ul>
                         : <span>No lessons scheduled.</span>
                       }
-                    </div>
+                    </div> */}
                   </div>
                 )}
               </div>

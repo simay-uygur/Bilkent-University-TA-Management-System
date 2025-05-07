@@ -6,10 +6,13 @@ export interface Credentials {
 }
 
 export interface JwtResponse {
+  name: any;
+  userId: string;
   token: string;
   id: number;
   username: string;
   role: string;
+  department: string;
 }
 
 export function login(

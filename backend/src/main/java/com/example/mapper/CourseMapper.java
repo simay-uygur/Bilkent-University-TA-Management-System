@@ -17,6 +17,7 @@ import org.springframework.stereotype.Component;
 public class CourseMapper {
 
     private final DepartmentRepo departmentRepo;
+    private final DepartmentMapper departmentMapper;
 
     public CourseDto toDto(Course course) {
         if (course == null) return null;
@@ -26,6 +27,8 @@ public class CourseMapper {
         dto.setCourseCode(course.getCourseCode());
         dto.setCourseName(course.getCourseName());
         dto.setDepartment(course.getDepartment().getName());
+        //dto.setDepartment((departmentMapper.toDto(course.getDepartment())).getCode());
+
         dto.setCourseAcademicStatus(course.getCourseAcademicStatus().name());
         dto.setPrereqs(
                 Arrays.stream(course.getPrereqList().split("\\s*,\\s*"))

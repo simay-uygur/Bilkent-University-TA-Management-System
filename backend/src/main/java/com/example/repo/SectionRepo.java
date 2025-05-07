@@ -91,4 +91,10 @@ public interface SectionRepo extends JpaRepository<Section, Integer>{
 //           WHERE   sec.sectionId = :sectionId
 //           """)
 //    Optional<List<Section>> findSectionsBySectionCodeIgnoreCase(String secCode);
+  /*   @Query("""
+           SELECT  sec
+           FROM    Section  sec
+           WHERE   sec.sectionCode.instructor.department.name = :deptName
+           """)
+    List<SectionDto> findByDepartment(String deptName); */
 }
