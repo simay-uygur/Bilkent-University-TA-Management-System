@@ -54,9 +54,10 @@ const DepartmentOffice: React.FC = () => {
   const [courses, setCourses] = useState<CourseDto[]>([]);
   const [tas, setTAs] = useState<TaDto[]>([]);
 
-  useEffect(() => {
-    const fetchDepartmentData = async () => {
-      try {
+
+    useEffect(() => {
+      // Get department staff data
+      const fetchDepartmentData = () => {
         setLoading(true);
         
         // Get staff ID from localStorage
@@ -67,34 +68,52 @@ const DepartmentOffice: React.FC = () => {
           return;
         }
         
-        // Get department staff data
-        const staffResponse = await axios.get(`/api/department-staff/${staffId}`);
-        const staff = staffResponse.data;
-        setStaffData(staff);
-        
-        const departmentCode = staff.departmentName;
-        
-        // Fetch data for the specific department
-        const [instructorRes, coursesRes, tasRes] = await Promise.all([
-          axios.get(`/api/instructors/department/${departmentCode}`),
-          axios.get(`/api/course/department/${departmentCode}`),
-          axios.get(`/api/ta/department/${departmentCode}`)
-        ]);
-        
-        setInstructors(instructorRes.data);
-        setCourses(coursesRes.data);
-        setTAs(tasRes.data);
-        
-        setLoading(false);
-      } catch (err) {
-        console.error('Error fetching department data:', err);
-        setError('Failed to load department data. Please try again.');
-        setLoading(false);
-      }
-    };
+        // Get department staff data using fetch
+        fetch(`/api/department-staff/${staffId}`)
+          .then(res => res.json())
+          .then(staff => {
+            setStaffData(staff);
+            const departmentCode = staff.departmentName;
+            
+            // Load instructors
+            fetch(`/api/instructors/department/${departmentCode}`)
+              .then(res => res.json())
+              .then((data: InstructorDto[]) => setInstructors(data))
+              .catch(err => {
+                console.log('Instructor data fetch error:', err);
+                setInstructors([]);
+              });
+            
+            // Load courses
+            fetch(`/api/course/department/${departmentCode}`)
+              .then(res => res.json())
+              .then((data: CourseDto[]) => setCourses(data))
+              .catch(err => {
+                console.log('Course data fetch error:', err);
+                setCourses([]);
+              });
+            
+            // Load TAs
+            fetch(`/api/ta/department/${departmentCode}`)
+              .then(res => res.json())
+              .then((data: TaDto[]) => setTAs(data))
+              .catch(err => {
+                console.log('TA data fetch error:', err);
+                setTAs([]);
+              });
+            
+            setLoading(false);
+          })
+          .catch(err => {
+            console.error('Error fetching staff data:', err);
+            setError('Failed to load department data. Please try again.');
+            setLoading(false);
+          });
+      };
+      
+      fetchDepartmentData();
+    }, []);
     
-    fetchDepartmentData();
-  }, []);
 
   if (loading) {
     return <div className={styles.loading}>Loading department data...</div>;
