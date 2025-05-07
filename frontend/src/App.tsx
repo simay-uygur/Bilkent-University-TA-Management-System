@@ -38,6 +38,7 @@ import ViewLogs from './Pages/AdminPages/ViewLogs';
 import ProctorTASelection from './Pages/DeanOfficePages/ProctorTASelection';
 import ProctorCourseSelection from './Pages/DeanOfficePages/ProctorCourseSelection';
 import ProtectedRoute from './Pages/ProtectedRoute';
+import DeansOffice from './Pages/DeanOfficePages/DeansOffice';
 
 const App: React.FC = () => (
   <BrowserRouter>
@@ -89,7 +90,7 @@ const App: React.FC = () => (
       {/* Dean’s Office Area (requires ROLE_DEAN) */}
       <Route element={<ProtectedRoute requiredRole="ROLE_DEANS_OFFICE" />}>
         <Route path="/deans-office" element={<DeansLayout />}>
-          {/*<Route index element={<DeansOffice />} />*/}
+          <Route index element={<DeansOffice />} />
           <Route path= "/deans-office/proctor"  element={<ProctorCourseSelection />} />
           <Route path="/deans-office/department/:dept" element={<DeansDepartmentDetailPage />}/>
           <Route path="/deans-office/settings" element={<Settings />} />

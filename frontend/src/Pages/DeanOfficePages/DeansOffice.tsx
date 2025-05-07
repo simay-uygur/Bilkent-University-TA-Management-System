@@ -1,4 +1,48 @@
-// src/pages/DeansOfficePage.tsx
+import React, { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
+import styles from './DeansOffice.module.css'
+
+interface DeptStats {
+  dept: string
+  instructors: number
+  courses: number
+  tas: number
+}
+
+// Static department data with placeholder statistics
+const DEPARTMENTS: DeptStats[] = [
+  { dept: 'CS', instructors: 24, courses: 42, tas: 76 },
+  { dept: 'IE', instructors: 18, courses: 35, tas: 52 },
+  { dept: 'EEE', instructors: 29, courses: 48, tas: 87 },
+  { dept: 'ME', instructors: 22, courses: 39, tas: 65 }
+]
+
+const DeansOfficePage: React.FC = () => {
+  const navigate = useNavigate()
+
+  return (
+    <div className={styles.pageWrapper}>
+      <h1 className={styles.heading}>Engineering Faculty Overview</h1>
+      <div className={styles.grid}>
+        {DEPARTMENTS.map(dept => (
+          <div
+            key={dept.dept}
+            className={styles.card}
+            onClick={() => navigate(`/deans-office/department/${dept.dept}`)}
+          >
+            <h2 className={styles.deptName}>{dept.dept}</h2>
+            <p className={styles.metric}>Instructors: {dept.instructors}</p>
+            <p className={styles.metric}>Courses: {dept.courses}</p>
+            <p className={styles.metric}>TAs: {dept.tas}</p>
+          </div>
+        ))}
+      </div>
+    </div>
+  )
+}
+
+export default DeansOfficePage
+/* // src/pages/DeansOfficePage.tsx
 import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 
@@ -63,7 +107,7 @@ const DeansOfficePage: React.FC = () => {
   )
 }
 
-export default DeansOfficePage
+export default DeansOfficePage */
 
 
 
