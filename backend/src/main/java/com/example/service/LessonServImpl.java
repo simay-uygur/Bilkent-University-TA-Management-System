@@ -109,24 +109,26 @@ private void checkForTimeConflict(Event newEvent, ClassRoom room) {
         while (startTime.plusMinutes(50).isBefore(endTime) || startTime.plusMinutes(50).equals(endTime)) {
             java.time.LocalTime chunkEnd = startTime.plusMinutes(50);
 
-            Date start = new Date(null, null, null, startTime.getHour(), startTime.getMinute());
-            Date end = new Date(null, null, null, chunkEnd.getHour(), chunkEnd.getMinute());
+           // Check if a similar lesson already exists
+    if (!lessonExists(section, day, startTime, chunkEnd)) {
+        Date start = new Date(null, null, null, startTime.getHour(), startTime.getMinute());
+        Date end = new Date(null, null, null, chunkEnd.getHour(), chunkEnd.getMinute());
 
-            Lesson lesson = new Lesson();
-            lesson.setDuration(new Event(start, end));
-            lesson.setSection(section);
-            lesson.setLessonRoom(room);
-            lesson.setLessonType(type);
-            lesson.setDay(day);
+        Lesson lesson = new Lesson();
+        lesson.setDuration(new Event(start, end));
+        lesson.setSection(section);
+        lesson.setLessonRoom(room);
+        lesson.setLessonType(type);
+        lesson.setDay(day);
 
-            chunks.add(lesson);
-            startTime = chunkEnd.plusMinutes(10); // add 10-minute break
+        chunks.add(lesson);
+        
+    }
+    startTime = chunkEnd.plusMinutes(10); // add 10-minute break
+    if (chunks.isEmpty()) {
+        throw new IllegalArgumentException("No valid 50-minute lesson chunks could be created");
+    }
         }
-
-        if (chunks.isEmpty()) {
-            throw new IllegalArgumentException("No valid 50-minute lesson chunks could be created");
-        }
-
         lessonRepo.saveAll(chunks);
         return chunks.stream().map(this::convertToDto).collect(Collectors.toList());
     }
@@ -197,6 +199,33 @@ private void checkForTimeConflict(Event newEvent, ClassRoom room) {
                 "failedCount", failed.size(),
                 "failedRows", failed
         );
+    }
+    private boolean lessonExists(Section section, DayOfWeek day, LocalTime startTime, LocalTime endTime) {
+        // Find all lessons for this section
+        List<Lesson> existingLessons = lessonRepo.findBySection(section);
+        
+        // Check each lesson for day and time overlap
+        for (Lesson existingLesson : existingLessons) {
+            // First check if the day matches
+            if (existingLesson.getDay() == day) {
+                // Check if times overlap
+                LocalTime existingStart = LocalTime.of(
+                    existingLesson.getDuration().getStart().getHour(), 
+                    existingLesson.getDuration().getStart().getMinute()
+                );
+                LocalTime existingEnd = LocalTime.of(
+                    existingLesson.getDuration().getFinish().getHour(), 
+                    existingLesson.getDuration().getFinish().getMinute()
+                );
+                
+                // Check for overlap - if any part of the time periods intersect
+                if ((startTime.isBefore(existingEnd) && endTime.isAfter(existingStart)) ||
+                    startTime.equals(existingStart) || endTime.equals(existingEnd)) {
+                    return true; // Overlap found
+                }
+            }
+        }
+        return false; // No overlap
     }
 /*
     @Override
