@@ -14,7 +14,7 @@ interface DeptStats {
 
 const DEPARTMENTS = ['CS', 'IE', 'EEE', 'ME']
 
-const DeansOffice: React.FC = () => {
+const DeansOfficePage: React.FC = () => {
   const [stats, setStats] = useState<DeptStats[]>([])
   const navigate = useNavigate()
 
@@ -63,7 +63,7 @@ const DeansOffice: React.FC = () => {
   )
 }
 
-export default DeansOffice
+export default DeansOfficePage
 
 
 

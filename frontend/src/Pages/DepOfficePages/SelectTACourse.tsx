@@ -148,7 +148,7 @@ const SelectTACourse: React.FC = () => {
   return (
     <div className={styles.pageWrapper}>
       <header className={styles.header}>
-        <BackBut to="/asgnTAC" />
+        <BackBut to="/department-office/assign-course" />
         <h1 className={styles.title}>{courseData.courseName}</h1>
         <div className={styles.stats}>
           <span>Needed: {needed}</span>

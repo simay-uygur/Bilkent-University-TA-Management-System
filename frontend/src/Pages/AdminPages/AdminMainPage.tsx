@@ -2,7 +2,6 @@ import React from 'react';
 import AdminNavBar from '../../components/NavBars/AdminNavBar';
 import BulkUpload from '../../components/BulkUpload';
 import styles from './AdminMainPage.module.css';
-import { div } from 'motion/react-client';
 
 const AdminMainPage: React.FC = () => {
   const handleUploadTA = (file: File) => {

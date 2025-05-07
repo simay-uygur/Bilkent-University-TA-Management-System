@@ -1,6 +1,6 @@
 import React from 'react';
 import { X } from 'lucide-react';
-import type { Instructor } from './InsMainPage';
+import type { Instructor } from './InstructorMainPage';
 import styles from './CourseInfoPanel.module.css';
 
 interface Course {

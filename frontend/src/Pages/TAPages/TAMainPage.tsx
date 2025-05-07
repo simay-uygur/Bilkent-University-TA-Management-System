@@ -1,6 +1,5 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import TANavBar from '../../components/NavBars/TANavBar';
 import styles from './TAMainPage.module.css';
 
 // Interface for the schedule items
@@ -99,13 +98,13 @@ function TAMainPage() {
         <div className={styles.buttonContainer}>
           <button
             className={styles.button}
-            onClick={() => navigate('/mon')}
+            onClick={() => navigate('/ta/monthly-schedule')}
           >
             Go to Proctoring Schedule
           </button>
           <button
             className={styles.button}
-            onClick={() => navigate('/viewP')}
+            onClick={() => navigate('/ta/view-proctoring')}
           >
             View Proctorings
           </button>

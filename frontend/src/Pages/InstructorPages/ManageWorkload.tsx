@@ -1,7 +1,6 @@
 // src/pages/ManageWorkload/ManageWorkload.tsx
 import React, { useState, ChangeEvent } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
-import InsNavBar from '../../components/NavBars/InsNavBar';
+import { useNavigate, useParams } from 'react-router-dom';
 import BackBut from '../../components/Buttons/BackBut';
 import ConPop from '../../components/PopUp/ConPop';
 import ErrPopUp, { ErrorPopupProps } from '../../components/PopUp/ErrPopUp';
@@ -30,9 +29,11 @@ const initialTasks: Task[] = [
 type RawConfirm = { action: 'delete' | 'deleteAll' | 'save'; id?: number };
 
 const ManageWorkload: React.FC = () => {
-  const location = useLocation();
+  const { courseID } = useParams<{ courseID: string }>()
+  const { courseSec } = useParams<{ courseSec: string }>()
   const navigate = useNavigate();
-  const courseCode = location.pathname.split('/')[2] || 'Unknown Course';
+  const courseCode = courseID;
+  const courseSection = courseSec;
 
   const [tasks, setTasks] = useState<Task[]>(initialTasks);
   const [modalOpen, setModalOpen] = useState(false);
@@ -148,7 +149,8 @@ const ManageWorkload: React.FC = () => {
 
       <div className={styles.headerRow}>
         <BackBut to="/instructor"/>
-        <h1 className={styles.title}>{courseCode} Workload</h1>
+        <h1 className={styles.title}>Workload of {courseCode} <br/> Section {courseSection}
+        </h1>
       </div>
 
       <div className={styles.content} style={{ filter: modalOpen||!!confirm ? 'blur(4px)' : 'none' }}>
@@ -188,7 +190,7 @@ const ManageWorkload: React.FC = () => {
                   </button>
                   <button
                     className={styles.assignBtn}
-                    onClick={() => navigate(`/man/${courseCode}/${t.id}`)}
+                    onClick={() => navigate(`/instructor/workload/${courseCode}/${courseSec}/${t.id}`)}
                   >
                     Assign TA
                   </button>
@@ -217,13 +219,107 @@ const ManageWorkload: React.FC = () => {
         </div>
       </div>
 
-      {/* Modals & Popups */}
-      {modalOpen && (
+        {/* Modals & Popups */}
+        {modalOpen && (
         <div className={styles.modalOverlay}>
-          {/* ...modal form as before... */}
-          {/* omitted for brevity */}
+          <div className={styles.modal}>
+            <h2>{isEdit ? 'Edit Task' : 'Add Task'}</h2>
+            <form>
+              <div className={styles.fieldRow}>
+                <label htmlFor="type">Type</label>
+                <select
+                  id="type"
+                  name="type"
+                  value={current.type}
+                  onChange={handleChange}
+                >
+                  <option value="Lab">Lab</option>
+                  <option value="Grading">Grading</option>
+                  <option value="Recitation">Recitation</option>
+                </select>
+              </div>
+
+              <div className={styles.fieldRow}>
+                <label htmlFor="date">Date</label>
+                <input
+                  type="date"
+                  id="date"
+                  name="date"
+                  value={current.date}
+                  onChange={handleChange}
+                />
+              </div>
+
+              {current.type !== 'Grading' ? (
+                <>
+                  <div className={styles.fieldRow}>
+                    <label htmlFor="startTime">Start Time</label>
+                    <select
+                      id="startTime"
+                      name="startTime"
+                      value={current.startTime}
+                      onChange={handleChange}
+                    >
+                      {startTimes.map((t, i) => (
+                        <option key={t} value={i + 1}>
+                          {t}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className={styles.fieldRow}>
+                    <label htmlFor="endTime">End Time</label>
+                    <select
+                      id="endTime"
+                      name="endTime"
+                      value={current.endTime}
+                      onChange={handleChange}
+                    >
+                      {endTimes.map((t, i) => (
+                        <option key={t} value={i + 1}>
+                          {t}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                </>
+              ) : (
+                <div className={styles.fieldRow}>
+                  <label htmlFor="gradingEndTime">Grading Ends At</label>
+                  <select
+                    id="gradingEndTime"
+                    name="gradingEndTime"
+                    value={current.gradingEndTime}
+                    onChange={handleChange}
+                  >
+                    {endTimes.map((t) => (
+                      <option key={t} value={t}>
+                        {t}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              )}
+
+              <div className={styles.buttonsRow}>
+                <button
+                  type="button"
+                  onClick={() => setConfirm({ action: 'save' })}
+                >
+                  {isEdit ? 'Update' : 'Save'}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setModalOpen(false)}
+                >
+                  Cancel
+                </button>
+              </div>
+            </form>
+          </div>
         </div>
       )}
+
       {confirm?.action === 'delete' && (
         <ConPop
           message="Delete this task?"

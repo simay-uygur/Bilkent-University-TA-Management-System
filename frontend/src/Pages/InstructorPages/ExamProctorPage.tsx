@@ -1,9 +1,8 @@
 // src/pages/ExamProctor/ExamProctorPage.tsx
 import React, { useState } from 'react';
-import { useLocation } from 'react-router-dom';
-import InsNavBar from '../../components/NavBars/InsNavBar';
+import { useParams } from 'react-router-dom';
 import BackBut from '../../components/Buttons/BackBut';
-import ExamProctorReq, { Exam} from './ExamProctorReq';
+import ExamProctorReq, { Exam} from './ExamProctorRequest';
 import ErrPopUp from '../../components/PopUp/ErrPopUp';
 import ConPop from '../../components/PopUp/ConPop';
 import styles from './ExamProctorPage.module.css';
@@ -22,8 +21,8 @@ interface BackendPayload {
 }
 
 const ExamProctorPage: React.FC = () => {
-  const location = useLocation();
-  const courseCode = location.pathname.split('/')[2] || 'Unknown';
+  const { courseID } = useParams<{ courseID: string }>()
+  const courseCode = courseID;
 
   const initialExams: Exam[] = [
     { id: `${courseCode}-mid`,   name: `${courseCode} Midterm`, type: 'Midterm', studentCount: 120 },
@@ -68,7 +67,7 @@ const ExamProctorPage: React.FC = () => {
       
 
       <div className={styles.headerRow}>
-        <BackBut to="/ins" />
+        <BackBut to="/instructor" />
         <h1 className={styles.title}>Exam Proctoring for {courseCode}</h1>
       </div>
 
