@@ -31,7 +31,7 @@ public class SectionMapper {
                 .collect(Collectors.toList())); 
         dto.setInstructor(instructorMapper.toDto(section.getInstructor())); 
 
-        dto.setTas(section.getRegisteredTas().stream().map(taMapper::toDto).collect(Collectors.toList()));
+        dto.setTas(section.getAssignedTas().stream().map(taMapper::toDto).collect(Collectors.toList()));
         dto.setStudents(section.getRegisteredStudents().stream().map(studentMapper::toDto).collect(Collectors.toList()));
 
         return dto;
