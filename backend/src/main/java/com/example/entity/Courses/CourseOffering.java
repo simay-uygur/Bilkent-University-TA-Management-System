@@ -80,7 +80,6 @@ public class CourseOffering {
             inverseJoinColumns = @JoinColumn(name = "ta_id")
     )
     @OrderBy("surname ASC, name ASC")
-    @OrderBy("surname ASC, name ASC")
     private List<TA> registeredTas = new ArrayList<>();
 
     /** TAs who are *assigned* to assist/teach this offering */
@@ -91,7 +90,6 @@ public class CourseOffering {
             inverseJoinColumns = @JoinColumn(name = "ta_id")
     )
     @OrderBy("totalWorkload ASC")
-    @OrderBy("totalWorkload ASC")
     private List<TA> assignedTas = new ArrayList<>();
 
     @ManyToMany(fetch = FetchType.LAZY)
@@ -100,7 +98,6 @@ public class CourseOffering {
             joinColumns        = @JoinColumn(name = "offering_id"),
             inverseJoinColumns = @JoinColumn(name = "student_id")
     )
-    @OrderBy("studentSurname ASC, studentName ASC")
     @OrderBy("studentSurname ASC, studentName ASC")
     private List<Student> registeredStudents = new ArrayList<>();
 
