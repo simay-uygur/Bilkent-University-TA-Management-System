@@ -15,7 +15,6 @@ import lombok.AllArgsConstructor;
 public class NotificationService {
 
     private final NotificationRepos notificationRepos;
-    private final NotificationTemplateService templateService;
     private final MailService mailService;
 
     /**
