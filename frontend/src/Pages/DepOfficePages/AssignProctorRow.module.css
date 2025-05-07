@@ -1,10 +1,14 @@
 /* src/components/AssignProctorRow.module.css */
 
 .row {
-  transition: background-color 0.2s ease;
-  /* existing padding, border, alignment, etc. */
+  transition: background-color 0.2s;
+  cursor: pointer;              /* show pointer on hover */
 }
 
+/* change nothing about your completed/incomplete colors, but add: */
+.row:hover {
+  background-color: rgba(0, 0, 0, 0.05);
+}
 
 .completed {
   background-color: #93efad;
@@ -39,19 +43,19 @@
 }
 
 .autoBtn {
-  background-color: #007bff;
-  border: 1px solid#000000;
+  background-color: #1a7ee9;
+  border: 1px solid #000000;   /* added missing space */
   color: white;
 }
 
 .manualBtn {
   background-color: #f14343;
-  border: 1px solid#000000;
+  border: 1px solid #000000;   /* added missing space */
   color: white;
 }
 
 .demandBtn {
-  background-color: #007bff;  /* amber/orange accent */
+  background-color: #007bff;
+  border: 1px solid #000000;   /* added missing space */
   color: white;
-  border: 1px solid#000000;
 }

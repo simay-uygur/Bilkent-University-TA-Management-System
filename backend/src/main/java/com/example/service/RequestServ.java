@@ -15,7 +15,6 @@ public interface RequestServ {
     public List<Request> getTransferProctoringRequestsOfTheUser(User u); // Transfer Proctoring
     public List<Request> getProctorTaInFacultyRequestsOfTheUser(User u); // TA in Faculty
     public List<Request> getProctorTaFromFacultiesRequestsOfTheUser(User u); // Ta from Faculties
-    
     public boolean createRequest(Request req);
     public void checkLeaveRequests();
 }

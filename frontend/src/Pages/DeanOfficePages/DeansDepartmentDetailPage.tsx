@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import DeanOfNavBar from '../../components/NavBars/DeanOfNavBar';
+
 import styles from './DeansDepartmentDetailPage.module.css'
 
 interface InstructorDto {
@@ -22,7 +22,7 @@ interface TaDto {
   surname: string
 }
 
-const DeansDepartmentDetailPage: React.FC = () => {
+const DepartmentDetailPage: React.FC = () => {
   const { dept } = useParams<{ dept: string }>()
   const navigate = useNavigate()
 
@@ -49,9 +49,12 @@ const DeansDepartmentDetailPage: React.FC = () => {
   return (
     <>
     
+
       <div className={styles.pageWrapper}>
-      <DeanOfNavBar />
-      <h1 className={styles.heading}>Department: {dept}</h1>
+        <button className={styles.backBtn} onClick={() => navigate(-1)}>
+          ← Back
+        </button>
+        <h1 className={styles.heading}>Department: {dept}</h1>
 
         <div className={styles.grid}>
           <div className={styles.card}>
@@ -104,4 +107,4 @@ const DeansDepartmentDetailPage: React.FC = () => {
   )
 }
 
-export default DeansDepartmentDetailPage
+export default DepartmentDetailPage

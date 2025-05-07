@@ -4,7 +4,6 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -24,6 +23,7 @@ import com.example.service.ExamServ;
 import com.example.service.SectionServ;
 import com.example.service.TaskServ;
 
+
 import lombok.RequiredArgsConstructor;
 
 @RestController
@@ -42,12 +42,16 @@ public class SectionController {
         Section sec = sectionServ.getById(id);
         return sectionMapper.toDto(sec);
     }
+
     @GetMapping("/sectionCode/{sectionCode}")
     public SectionDto getBySectionCode(@PathVariable String sectionCode) {
         Section sec = sectionServ.getBySectionCode(sectionCode);
         return sectionMapper.toDto(sec);
     }
-    
+    /* @GetMapping("/department/{deptName}")
+    public List<SectionDto> getByDepartment(@PathVariable String deptName) {
+        return sectionServ.getByDepartment(deptName);
+    } */
 
     @GetMapping
     public List<SectionDto> getAll() {
@@ -75,4 +79,21 @@ public class SectionController {
     public ResponseEntity<TaskDto> createTask(@RequestBody TaskDto entity, @PathVariable String section_code) {
         return new ResponseEntity<>(taskServ.createTask(entity, section_code), HttpStatus.CREATED);
     }
+    }
+
+    //if this takes sectiondto update that  and also ta dto
+    @PostMapping("/{sectionCode}/tas/{taId}")
+    public CompletableFuture<ResponseEntity<Void>> assignTaToSection(
+            @PathVariable String sectionCode,
+            @PathVariable Long taId
+    ) {
+        return CompletableFuture.supplyAsync(() -> {
+            sectionServ.assignTA(taId, sectionCode);
+            return ResponseEntity.ok().build();
+        });
+    }
+//
+//    @PostMapping("/{sectionCode}/tasWithDtos/{taId}")
+//    public CompletableFuture<ResponseEntity<Void>> assignTaToSectionWithDtos()
+
 }

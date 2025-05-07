@@ -19,7 +19,7 @@ const DeanOfNavBar: React.FC = () => {
     {
       label: 'Home',
       icon: <Home size={18} />,
-      onClick: () => navigate('/adm'),
+      onClick: () => navigate('/admin'),
       active: true,
     },
     {
@@ -30,12 +30,12 @@ const DeanOfNavBar: React.FC = () => {
     {
       label: 'Logs',
       icon: <Bell size={18} />,
-      onClick: () => navigate('/viewL'),
+      onClick: () => navigate('/admin/view-logs'),
     },
     {
       label: 'Settings',
       icon: <Settings size={18} />,
-      onClick: () => navigate('/set'),
+      onClick: () => navigate('/admin/settings'),
     },
     {
       label: 'Logout',

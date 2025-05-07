@@ -7,8 +7,8 @@ import com.example.entity.Courses.Lesson;
 import com.example.entity.General.ClassRoom;
 import com.example.entity.General.Date;
 import com.example.entity.General.Event;
+
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Component;
 
 @Component
 @RequiredArgsConstructor
@@ -21,6 +21,7 @@ public class LessonMapper {
 
         dto.setDuration(toEventDto(lesson.getDuration()));
 
+        // classRoom → use classroomId and examCapacity
         ClassRoom room = lesson.getLessonRoom();
         if (room != null) {
             dto.setClassroomId(room.getClassroomId());
@@ -29,6 +30,7 @@ public class LessonMapper {
 
         dto.setLessonType(lesson.getLessonType().name());
         dto.setSectionId(lesson.getSection() != null ? lesson.getSection().getSectionCode() : null);
+        dto.setDay(lesson.getDay() != null ? lesson.getDay().name() : null);
 
         return dto;
     }

@@ -92,10 +92,10 @@ public class CourseController {
     }
     
     
-    @PostMapping("api/course/{course_code}/ta/{ta_id}")
-    public ResponseEntity<Boolean> assignTA(@PathVariable String course_code, @PathVariable Long ta_id) {
-        return new ResponseEntity<>(courseOfferingServ.assignTA(ta_id, course_code), HttpStatus.OK);  // newly added
-    }
+//    @PostMapping("api/course/{course_code}/ta/{ta_id}")
+//    public ResponseEntity<Boolean> assignTA(@PathVariable String course_code, @PathVariable Long ta_id) {
+//        return new ResponseEntity<>(courseOfferingServ.assignTA(ta_id, course_code), HttpStatus.OK);  // newly added
+//    }
 //
 //    @PostMapping("api/course/{course_code}/task")
 //    public ResponseEntity<Boolean> createTask(@PathVariable String course_code, @RequestBody Task task) {

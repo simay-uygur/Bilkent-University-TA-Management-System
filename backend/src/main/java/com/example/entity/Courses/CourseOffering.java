@@ -4,6 +4,7 @@ package com.example.entity.Courses;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.example.entity.Actors.Instructor;
 import com.example.entity.Actors.TA;
 import com.example.entity.Exams.Exam;
 import com.example.entity.General.Event;
@@ -22,6 +23,7 @@ import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.OrderBy;
 import jakarta.persistence.OrderBy;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
@@ -78,6 +80,7 @@ public class CourseOffering {
             inverseJoinColumns = @JoinColumn(name = "ta_id")
     )
     @OrderBy("surname ASC, name ASC")
+    @OrderBy("surname ASC, name ASC")
     private List<TA> registeredTas = new ArrayList<>();
 
     /** TAs who are *assigned* to assist/teach this offering */
@@ -88,6 +91,7 @@ public class CourseOffering {
             inverseJoinColumns = @JoinColumn(name = "ta_id")
     )
     @OrderBy("totalWorkload ASC")
+    @OrderBy("totalWorkload ASC")
     private List<TA> assignedTas = new ArrayList<>();
 
     @ManyToMany(fetch = FetchType.LAZY)
@@ -97,7 +101,12 @@ public class CourseOffering {
             inverseJoinColumns = @JoinColumn(name = "student_id")
     )
     @OrderBy("studentSurname ASC, studentName ASC")
+    @OrderBy("studentSurname ASC, studentName ASC")
     private List<Student> registeredStudents = new ArrayList<>();
+
+    @ManyToOne(fetch =  FetchType.LAZY )
+    @JoinColumn(name = "coordinator_id", nullable = true, updatable = true)  // to test it now, nullable is true (database will be changed)
+    private Instructor coordinator;
 
     @Column(name = "semester_duration", nullable = false, updatable = true)
     private Event semesterDuration; // the duration of the semester in which this offering is held

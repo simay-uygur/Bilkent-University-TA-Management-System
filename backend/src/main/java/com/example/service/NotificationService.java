@@ -15,8 +15,8 @@ import lombok.AllArgsConstructor;
 public class NotificationService {
 
     private final NotificationRepos notificationRepos;
-    private final NotificationTemplateService templateService;
     private final MailService mailService;
+    private final LogService log; 
 
     /**
      * Creates and saves a new notification for the given receiver.
@@ -36,6 +36,7 @@ public class NotificationService {
     public Notification createNotification(String receiverName, String title, String text) {
         Notification notification = new Notification(title, text, receiverName, false, false, LocalDateTime.now()
         );
+        log.info("NotificationService", "Notification created for: " + receiverName); 
         notificationRepos.save(notification);
         //mailService.sendMail(receiverName, title, text);
         return notification;

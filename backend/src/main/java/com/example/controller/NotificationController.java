@@ -82,7 +82,11 @@ public class NotificationController {
         return new ResponseEntity<>(notificationService.getUnreadNotifications(receiverName),
                 HttpStatus.ACCEPTED);
     }
-
+    @GetMapping("/unread-count")
+    public ResponseEntity<?> getUnreadNotificationCount(@RequestParam String receiverName) {
+        int count = notificationService.getUnreadNotifications(receiverName).size();
+        return new ResponseEntity<>(count, HttpStatus.OK);
+    }
 
     /**
      * Retrieves all notifications for a specific user.
