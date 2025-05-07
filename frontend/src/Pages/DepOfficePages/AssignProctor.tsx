@@ -1,12 +1,12 @@
 // src/pages/AssignProctor/AssignProctor.tsx
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import DepOfNavBar from '../../components/NavBars/DepOfNavBar';
 import AssignProctorRow, { Exam } from './AssignProctorRow';
 import ConPop from '../../components/PopUp/ConPop';
 import ErrPopUp from '../../components/PopUp/ErrPopUp';
 import { sampleExams } from './data';
 import styles from './AssignProctor.module.css';
+import BackBut from '../../components/Buttons/BackBut';
 
 const AssignProctor: React.FC = () => {
   const navigate = useNavigate();
@@ -22,7 +22,7 @@ const AssignProctor: React.FC = () => {
   const [demandConfirmMsg, setDemandConfirmMsg] = useState<string | null>(null);
 
   const handleAuto = (id: string) => {
-    navigate(`/assign/${id}`);
+    navigate(`/department-office/assign-proctor/${id}`);
   };
 
   const handleFinish = (id: string) => {
@@ -73,10 +73,11 @@ const AssignProctor: React.FC = () => {
 
   return (
     <div className={styles.pageWrapper}>
-      <DepOfNavBar />
-
+      <div className={styles.headerRow}>
+        <BackBut to="/department-office" />
+        <h1 className={styles.title}>Course of Exams</h1>
+      </div>
       <div className={styles.container}>
-        <h1 className={styles.title}>Exams of Courses</h1>
         <table className={styles.table}>
           <thead className={styles.headings}>
             <tr>

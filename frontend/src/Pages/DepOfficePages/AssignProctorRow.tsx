@@ -69,13 +69,13 @@ const AssignProctorRow: React.FC<AssignProctorRowProps> = ({
           Assign TAs
         </button>
         <button
-          className={`${styles.btn} ${styles.demandBtn}`}    // new button style
+          className={`${styles.btn} ${styles.autoBtn}`}    // new button style
           onClick={() => onDemand(exam.id)}
         >
           Demand TA
         </button>
         <button
-          className={`${styles.btn} ${styles.manualBtn}`}
+          className={`${styles.btn} ${styles.autoBtn}`}
           onClick={() => onFinish(exam.id)}
         >
           Finish Assignment

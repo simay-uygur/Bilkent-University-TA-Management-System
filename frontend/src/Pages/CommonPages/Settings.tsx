@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import InsNavBar from '../../components/NavBars/InsNavBar';
 import styles from './Settings.module.css';
 
 const Settings: React.FC = () => {
@@ -39,7 +38,6 @@ const Settings: React.FC = () => {
 
   return (
     <div className={styles.pageWrapper}>
-      <InsNavBar />
       <main className={styles.content}>
         <h1 className={styles.heading}>Profile Settings</h1>
         <div className={styles.profileContainer}>

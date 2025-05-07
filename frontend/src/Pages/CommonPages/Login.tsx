@@ -1,25 +1,30 @@
+// src/pages/Login.tsx
 import React, { useState, FormEvent, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import axios from 'axios';
-import { toast, ToastContainer } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
 import NavBar from '../../components/NavBars/NavBar';
+import { login } from '../../api';
 import styles from './Login.module.css';
 
-interface LoginErrors {
-  username?: string;
-  password?: string;
+interface Credentials {
+  id: string;
+  password: string;
+}
+
+interface JwtResponse {
+  token: string;
+  role: string;
+  // other fields as returned
 }
 
 const Login: React.FC = () => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
-  const [errors, setErrors]     = useState<LoginErrors>({});
+  const [errors, setErrors]   = useState<{ username?: string; password?: string }>({});
+  const navigate = useNavigate();
+  const location = useLocation();
   const [referrer, setReferrer] = useState<string | null>(null);
-  const navigate                = useNavigate();
-  const location                = useLocation();
 
-  // Parse optional ?ref=/some/path
+  // capture optional ?ref= redirect target
   useEffect(() => {
     const params = new URLSearchParams(location.search);
     const r = params.get('ref');
@@ -28,77 +33,62 @@ const Login: React.FC = () => {
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
+    const newErrors: { username?: string; password?: string } = {};
 
-    // Client-side validation
-    const newErrors: LoginErrors = {};
     if (!username.trim()) newErrors.username = 'Username is required.';
-    if (!password.trim()) newErrors.password = 'Password is required.';
+    if (!password)      newErrors.password = 'Password is required.';
+
     if (Object.keys(newErrors).length) {
       setErrors(newErrors);
       return;
     }
-    setErrors({});
 
     try {
-      axios.defaults.baseURL = 'http://localhost:5173';
-      const resp = await axios.post('/api/auth/login', { username, password });
+      setErrors({});
+      const res = await login({ id: username, password });
+      const jwt  = res.data?.token;
+      const role = res.data?.role;
 
-      if (resp.status === 200 && resp.data.token) {
-        const token = resp.data.token;
-        // Fetch user role
-        const roleResp = await axios.post<string>('/api/auth/user-role', { username, password });
-        const role     = roleResp.data;
-
-        // Persist in localStorage
-        localStorage.setItem('userToken', token);
-        localStorage.setItem('username', username);
-        localStorage.setItem('role', role);
-
-        toast.success('Login successful! Redirecting…');
-
-        setTimeout(() => {
-          if (referrer) {
-            navigate(referrer, { replace: true });
-          } else {
-            switch (role) {
-              case 'TA':
-                navigate('/coordinator-homepage');
-                break;
-              case 'DepartmentOffice':
-                navigate('/counselor-homepage');
-                break;
-              case 'DeanOffice':
-                navigate('/tourguide-homepage');
-                break;
-              case 'Instructor':
-                navigate('/advisor-homepage');
-                break;
-              case 'Admin':
-                navigate('/admin-dashboard');
-                break;
-              default:
-                toast.error('Unknown role. Please contact support.');
-                navigate('/login', { replace: true });
-            }
-          }
-        }, 800);
-      } else {
-        toast.error('Login failed. Please check your credentials.');
+      if (!jwt) {
+        setErrors({ password: 'Invalid username or password.' });
+        return;
       }
-    } catch (err: any) {
-      console.error(err);
-      if (err.response?.status === 401) {
-        toast.error('Invalid username or password.');
-      } else {
-        toast.error('Server error. Please try again later.');
+
+      // store token
+      localStorage.setItem('jwt', jwt);
+      // set axios default header if used elsewhere
+      // axios.defaults.headers.common['Authorization'] = `Bearer ${jwt}`;
+
+      // choose landing page by role
+      let home = '/login';
+      switch (role) {
+        case 'ROLE_TA':
+          home = '/ta';
+          break;
+        case 'ROLE_INSTRUCTOR':
+          home = '/instructor';
+          break;
+        case 'ROLE_DEPARTMENT_STAFF':
+          home = '/department-office';
+          break;
+        case 'ROLE_DEANS_OFFICE':
+          home = '/deans-office';
+          break;
+          case 'ROLE_ADMIN':
+          home = '/admin';
+          break;
       }
+
+      navigate(referrer || home, { replace: true });
+    } catch (err) {
+      console.error('Login failed', err);
+      setErrors({ password: 'Invalid username or password.' });
     }
   };
 
   return (
     <div className={styles.loginPageWrapper}>
       <NavBar />
-      <ToastContainer position="top-right" autoClose={3000} />
 
       <div className={styles.container}>
         <div className={styles.card}>
@@ -112,7 +102,6 @@ const Login: React.FC = () => {
                 value={username}
                 onChange={e => setUsername(e.target.value)}
                 className={styles.input}
-                placeholder="Enter your username"
               />
               {errors.username && <div className={styles.errorText}>{errors.username}</div>}
             </div>
@@ -125,7 +114,6 @@ const Login: React.FC = () => {
                 value={password}
                 onChange={e => setPassword(e.target.value)}
                 className={styles.input}
-                placeholder="Enter your password"
               />
               {errors.password && <div className={styles.errorText}>{errors.password}</div>}
             </div>

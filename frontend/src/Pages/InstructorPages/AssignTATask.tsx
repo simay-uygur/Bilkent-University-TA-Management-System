@@ -1,9 +1,7 @@
-// src/pages/AssignTATask/AssignTATask.tsx
 import React, { useState } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
-import DepOfNavBar from '../../components/NavBars/DepOfNavBar';
+import { useNavigate, useParams } from 'react-router-dom';
 import BackBut from '../../components/Buttons/BackBut';
-import SearchSelect from '../../Benim/SearchSelect';
+import SearchSelect from '../../components/SearchSelect';
 import ErrPopUp from '../../components/PopUp/ErrPopUp';
 import ConPop from '../../components/PopUp/ConPop';
 import styles from './AssignTATask.module.css';
@@ -21,9 +19,9 @@ const sampleTAs: TA[] = [
 ];
 
 const AssignTATask: React.FC = () => {
-  const location = useLocation();
+  const { courseID } = useParams<{ courseID: string }>()
+  const { courseSec } = useParams<{ courseSec: string }>()
   const navigate = useNavigate();
-  const courseId = location.pathname.split('/')[2] || '';
 
   // pre-existing assigned
   const [alreadyAssigned, setAlreadyAssigned] = useState<TA[]>([
@@ -65,18 +63,16 @@ const AssignTATask: React.FC = () => {
   const handleConfirm = () => {
     // merge new into existing
     const merged = [...alreadyAssigned, ...selected];
-    console.log('Final assigned:', merged, 'for course', courseId);
+    console.log('Final assigned:', merged, 'for course', courseID);
     // TODO: send merged to backend
     setConfirmOpen(false);
-    navigate(`/man/${courseId}`);
+    navigate(`/instructor/workload/${courseID}/${courseSec}`);
   };
 
   return (
     <div className={styles.pageWrapper}>
-      <DepOfNavBar />
-
       <div className={styles.headerRow}>
-        <BackBut to={`/man/${courseId}`} />
+        <BackBut to={`/instructor/workload/${courseID}/${courseSec}`} />
         <h1 className={styles.title}>Assign Task To TAs</h1>
       </div>
 

@@ -1,7 +1,6 @@
 // src/pages/ViewAddExam/ViewAddExam.tsx
 import React, { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import DepOfNavBar from '../../components/NavBars/DepOfNavBar';
 import BackBut from '../../components/Buttons/BackBut';
 import ConPop from '../../components/PopUp/ConPop';
 import ErrPopUp from '../../components/PopUp/ErrPopUp';
@@ -83,10 +82,9 @@ const ViewAddExam: React.FC = () => {
 
   return (
     <div className={styles.pageWrapper}>
-      <DepOfNavBar />
 
       <div className={styles.headerRow}>
-        <BackBut to="/dep" />
+        <BackBut to="/department-office" />
         <h1 className={styles.title}>Exams</h1>
       </div>
 

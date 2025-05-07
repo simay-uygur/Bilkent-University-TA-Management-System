@@ -1,7 +1,6 @@
 // src/pages/AssignTACourse/AssignTACourse.tsx
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import DepOfNavBar from '../../components/NavBars/DepOfNavBar';
 import BackBut from '../../components/Buttons/BackBut';
 import ConPop from '../../components/PopUp/ConPop';
 import styles from './AssignTACourse.module.css';
@@ -9,6 +8,7 @@ import styles from './AssignTACourse.module.css';
 interface Course {
   id: string;
   name: string;
+  section: string;
   neededTAs: number;
   preferredCount: number;
   tasLeft: number;
@@ -18,16 +18,16 @@ const AssignTACourse: React.FC = () => {
   const navigate = useNavigate();
 
   const initialCourses: Course[] = [
-    { id: 'CS-101', name: 'Intro to CS', neededTAs: 3, preferredCount: 2, tasLeft: 1 },
-    { id: 'MATH-201', name: 'Calculus II', neededTAs: 2, preferredCount: 1, tasLeft: 2 },
-    { id: 'PHY-301', name: 'Physics III', neededTAs: 1, preferredCount: 0, tasLeft: 0 },
+    { id: 'CS-101', name: 'Intro to CS', section: '1', neededTAs: 3, preferredCount: 2, tasLeft: 1 },
+    { id: 'MATH-201', name: 'Calculus II', section: '2', neededTAs: 2, preferredCount: 1, tasLeft: 2 },
+    { id: 'PHY-301', name: 'Physics III', section: '1', neededTAs: 1, preferredCount: 0, tasLeft: 0 },
   ];
 
   const [courses, setCourses] = useState<Course[]>(initialCourses);
   const [confirmId, setConfirmId] = useState<string | null>(null);
   const [confirmMsg, setConfirmMsg] = useState<string | null>(null);
 
-  const handleAssign = (id: string) => navigate(`/asgnTA/${id}`);
+  const handleAssign = (id: string, section: string) => navigate(`/department-office/assign-course/${id}/${section}`);
 
   const handleFinish = (id: string) => {
     const c = courses.find(c => c.id === id);
@@ -48,10 +48,8 @@ const AssignTACourse: React.FC = () => {
 
   return (
     <div className={styles.pageWrapper}>
-      <DepOfNavBar />
-
       <div className={styles.headerRow}>
-        <BackBut to="/man" />
+        <BackBut to="/department-office" />
         <h1 className={styles.title}>Assign TAs to Course</h1>
       </div>
 
@@ -60,6 +58,7 @@ const AssignTACourse: React.FC = () => {
           <thead className={styles.headings}>
             <tr>
               <th>Course Name</th>
+              <th>Section</th>
               <th>Course ID</th>
               <th>Needed TAs</th>
               <th>Preferred TAs</th>
@@ -78,6 +77,7 @@ const AssignTACourse: React.FC = () => {
                 }`}
               >
                 <td>{course.name}</td>
+                <td>{course.section}</td>
                 <td>{course.id}</td>
                 <td>{course.neededTAs}</td>
                 <td>{course.preferredCount}</td>
@@ -85,12 +85,12 @@ const AssignTACourse: React.FC = () => {
                 <td className={styles.actionsCell}>
                   <button
                     className={styles.assignBtn}
-                    onClick={() => handleAssign(course.id)}
+                    onClick={() => handleAssign(course.id, course.section)}
                   >
                     Assign TA
                   </button>
                   <button
-                    className={styles.finishBtn}
+                    className={styles.assignBtn}
                     onClick={() => handleFinish(course.id)}
                   >
                     Finish Assignment
