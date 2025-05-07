@@ -512,6 +512,8 @@ public class SectionServImpl implements SectionServ {
                     sec.setOffering(off);
                     sec.setInstructor(instr);
                     sec.setCourseName(courseName);
+                    sec.setPreffered_TAS(null);
+                    sec.setUnpreffered_TAS(null);
 
                     // 8) if isCoordinator == 1, set the offering’s coordinator
                     if (isCoord == 1) {
