@@ -12,6 +12,7 @@ import com.example.entity.Requests.ProctorTaInFaculty;
 import com.example.entity.Requests.Swap;
 import com.example.entity.Requests.SwapEnable;
 import com.example.entity.Requests.TransferProctoring;
+import com.example.entity.Tasks.Task;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
 import jakarta.persistence.CascadeType;
@@ -151,4 +152,8 @@ public class Exam {
 
     @Column(name = "amount_of_assigned_tas", unique = false, updatable = true)
     private Integer amountOfAssignedTAs = 0; // this is used to get the assigned tas for this exam
+
+    public Task getTask() {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
 }

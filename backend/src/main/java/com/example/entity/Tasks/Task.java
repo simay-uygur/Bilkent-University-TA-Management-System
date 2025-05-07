@@ -3,12 +3,9 @@ package com.example.entity.Tasks;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.example.entity.Courses.Course;
 import com.example.entity.Courses.Section;
-import com.example.entity.Exams.Exam;
 import com.example.entity.General.Event;
 import com.example.entity.Requests.WorkLoad;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
 import jakarta.persistence.CascadeType;
@@ -24,7 +21,6 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
-import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -113,6 +109,10 @@ public class Task {
 
     @OneToMany(mappedBy = "task", cascade = CascadeType.ALL)
     private List<WorkLoad> workLoadRequestList = new ArrayList<>(); // List of WorkLoad objects associated with this task
+
+    public Object getExam() {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
 }
 
 /*
