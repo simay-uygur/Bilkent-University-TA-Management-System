@@ -13,6 +13,7 @@ interface Credentials {
 interface JwtResponse {
   token: string;
   role: string;
+  
   // other fields as returned
 }
 
@@ -46,9 +47,11 @@ const Login: React.FC = () => {
     try {
       setErrors({});
       const res = await login({ id: username, password });
-      const jwt  = res.data?.token;
+      const jwt = res.data?.token;
       const role = res.data?.role;
-
+      const userId = res.data?.userId || username; // Get user ID from response or use username
+      const name = res.data?.name;
+      
       if (!jwt) {
         setErrors({ password: 'Invalid username or password.' });
         return;
@@ -56,6 +59,9 @@ const Login: React.FC = () => {
 
       // store token
       localStorage.setItem('jwt', jwt);
+      localStorage.setItem('userId', userId);
+      localStorage.setItem('userRole', role);
+      if (name) localStorage.setItem('userName', name);
       // set axios default header if used elsewhere
       // axios.defaults.headers.common['Authorization'] = `Bearer ${jwt}`;
 
@@ -63,7 +69,7 @@ const Login: React.FC = () => {
       let home = '/login';
       switch (role) {
         case 'ROLE_TA':
-          home = '/dashboard';
+          home = '/ta';
           break;
         case 'ROLE_INSTRUCTOR':
           home = '/instructor';

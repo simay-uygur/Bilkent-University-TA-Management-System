@@ -484,7 +484,8 @@ public class SectionServImpl implements SectionServ {
                     Course course = courseRepo
                             .findByCourseCodeIgnoreCase(fullCode)
                             .orElseThrow(() -> new IllegalArgumentException("Course not found: " + fullCode));
-
+                    // 5) course lookup
+                    String courseName = course.getCourseName();
                     // 5) offering lookup (or create)
                     CourseOffering off = offeringService
                             .getByCourseAndSemester((long) course.getCourseId(), sem.getId())
@@ -510,6 +511,7 @@ public class SectionServImpl implements SectionServ {
                     sec.setSectionCode(sectionCode);
                     sec.setOffering(off);
                     sec.setInstructor(instr);
+                    sec.setCourseName(courseName);
 
                     // 8) if isCoordinator == 1, set the offering’s coordinator
                     if (isCoord == 1) {

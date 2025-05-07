@@ -1,4 +1,215 @@
-// src/pages/DepartmentOffice.tsx
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import styles from './DepartmentOffice.module.css';
+import axios from 'axios';
+
+interface StaffDto {
+  id: number;
+  name: string;
+  surname: string;
+  isActive: boolean;
+  departmentName: string;
+}
+
+interface InstructorDto {
+  id: number;
+  name: string;
+  surname: string;
+  academicLevel: string;
+  totalWorkload: number;
+  isActive: boolean;
+  isGraduated: boolean;
+  department: string;
+  courses: string[];
+  lessons: string[];
+}
+
+interface CourseDto {
+  courseId: number;
+  courseCode: string;
+  courseName: string;
+  courseAcademicStatus: string;
+  department: string;
+}
+
+interface TaDto {
+  id: number;
+  name: string;
+  surname: string;
+  academicLevel: string;
+  totalWorkload: number;
+  isActive: boolean;
+  isGraduated: boolean;
+  department: string;
+  courses: string[];
+  lessons: string[];
+}
+
+const DepartmentOffice: React.FC = () => {
+  const navigate = useNavigate();
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [staffData, setStaffData] = useState<StaffDto | null>(null);
+  const [instructors, setInstructors] = useState<InstructorDto[]>([]);
+  const [courses, setCourses] = useState<CourseDto[]>([]);
+  const [tas, setTAs] = useState<TaDto[]>([]);
+
+  useEffect(() => {
+    const fetchDepartmentData = async () => {
+      try {
+        setLoading(true);
+        
+        // Get staff ID from localStorage
+        const staffId = localStorage.getItem('userId');
+        if (!staffId) {
+          setError('Not logged in or missing user ID');
+          setLoading(false);
+          return;
+        }
+        
+        // Get department staff data
+        const staffResponse = await axios.get(`/api/department-staff/${staffId}`);
+        const staff = staffResponse.data;
+        setStaffData(staff);
+        
+        const departmentCode = staff.departmentName;
+        
+        // Fetch data for the specific department
+        const [instructorRes, coursesRes, tasRes] = await Promise.all([
+          axios.get(`/api/instructors/department/${departmentCode}`),
+          axios.get(`/api/course/department/${departmentCode}`),
+          axios.get(`/api/ta/department/${departmentCode}`)
+        ]);
+        
+        setInstructors(instructorRes.data);
+        setCourses(coursesRes.data);
+        setTAs(tasRes.data);
+        
+        setLoading(false);
+      } catch (err) {
+        console.error('Error fetching department data:', err);
+        setError('Failed to load department data. Please try again.');
+        setLoading(false);
+      }
+    };
+    
+    fetchDepartmentData();
+  }, []);
+
+  if (loading) {
+    return <div className={styles.loading}>Loading department data...</div>;
+  }
+
+  if (error) {
+    return <div className={styles.error}>{error}</div>;
+  }
+
+  const departmentName = staffData?.departmentName || 'Department';
+
+  return (
+    <div className={styles.pageWrapper}>
+      <h1 className={styles.heading}>Department Overview ({departmentName})</h1>
+      <div className={styles.grid}>
+
+        {/* Instructors */}
+        <div className={styles.card}>
+          <h2 className={styles.tableHeading}>Instructors</h2>
+          <table className={styles.table}>
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Level</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              {instructors.length > 0 ? (
+                instructors.map(i => (
+                  <tr key={i.id}>
+                    <td>{i.name} {i.surname}</td>
+                    <td>{i.academicLevel}</td>
+                    <td>
+                      <button
+                        type="button"
+                        onClick={() => navigate(`instructor/${i.id}`)}
+                      >
+                        Details
+                      </button>
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan={3}>No instructors found</td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+
+        {/* Courses */}
+        <div className={styles.card}>
+          <h2 className={styles.tableHeading}>Courses</h2>
+          <table className={styles.table}>
+            <thead>
+              <tr><th>Code</th><th>Name</th><th>Action</th></tr>
+            </thead>
+            <tbody>
+              {courses.length > 0 ? (
+                courses.map(c => (
+                  <tr key={c.courseId}>
+                    <td>{c.courseCode}</td>
+                    <td>{c.courseName}</td>
+                    <td>
+                      <button
+                        type="button"
+                        onClick={() => navigate(`course/${c.courseCode}`)}
+                      >
+                        Details
+                      </button>
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan={3}>No courses found</td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+
+        {/* TAs */}
+        <div className={styles.card}>
+          <h2 className={styles.tableHeading}>TAs</h2>
+          <table className={styles.table}>
+            <thead>
+              <tr><th>Name</th><th>Workload</th></tr>
+            </thead>
+            <tbody>
+              {tas.length > 0 ? (
+                tas.map(t => (
+                  <tr key={t.id}>
+                    <td>{t.name} {t.surname}</td>
+                    <td>{t.totalWorkload}</td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan={2}>No TAs found</td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+
+      </div>
+    </div>
+  );
+};
+
+export default DepartmentOffice;
+/* // src/pages/DepartmentOffice.tsx
 import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import styles from './DepartmentOffice.module.css'
@@ -65,7 +276,7 @@ const DepartmentOffice: React.FC = () => {
       <h1 className={styles.heading}>Department Overview (CS)</h1>
       <div className={styles.grid}>
 
-        {/* Instructors */}
+        
         <div className={styles.card}>
           <h2 className={styles.tableHeading}>Instructors</h2>
           <table className={styles.table}>
@@ -95,7 +306,7 @@ const DepartmentOffice: React.FC = () => {
           </table>
         </div>
 
-        {/* Courses */}
+        //{ Courses }
         <div className={styles.card}>
           <h2 className={styles.tableHeading}>Courses</h2>
           <table className={styles.table}>
@@ -121,7 +332,8 @@ const DepartmentOffice: React.FC = () => {
           </table>
         </div>
 
-        {/* TAs */}
+        //
+        // {TaS}
         <div className={styles.card}>
           <h2 className={styles.tableHeading}>TAs</h2>
           <table className={styles.table}>
@@ -144,7 +356,7 @@ const DepartmentOffice: React.FC = () => {
   )
 }
 
-export default DepartmentOffice
+export default DepartmentOffice */
 
 /*
 // src/pages/DepartmentOffice.tsx

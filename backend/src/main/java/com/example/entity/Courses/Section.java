@@ -37,6 +37,9 @@ public class Section {
     @Column(name = "section_code", nullable = false, unique = true) // CS-319-1
     private String sectionCode;
 
+    @Column(name = "course_name", nullable = true) // CS-319
+    private String courseName;
+
     @OneToMany(
             mappedBy      = "section",
             fetch         = FetchType.LAZY,

@@ -37,6 +37,9 @@ const InsNavBar: React.FC = () => {
           icon: <LogOut size={18} />,
           onClick: () => {
             localStorage.removeItem('jwt');
+            localStorage.removeItem('userRole');
+            localStorage.removeItem('userId');
+            localStorage.removeItem('userName');
             navigate('/login', { replace: true });
           }
         },
