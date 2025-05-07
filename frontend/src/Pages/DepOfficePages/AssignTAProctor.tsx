@@ -2,8 +2,6 @@
 // src/pages/AssignTA/AssignTA.tsx
 import React, { useState, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import DepOfNavBar from '../../components/NavBars/DepOfNavBar';
-
 import BackBut from '../../components/Buttons/BackBut';
 import ErrPopUp from '../../components/PopUp/ErrPopUp';
 import ConPop from '../../components/PopUp/ConPop';
@@ -53,23 +51,15 @@ const AssignTAProctor: React.FC = () => {
   const toggleSelect = (ta: TA) => {
     const inAssigned = assigned.some(a => a.id === ta.id);
     if (inAssigned) {
-      const newAssigned = assigned.filter(a => a.id !== ta.id);
-      const newPotential = [...potential, ta];
-      setAssigned(newAssigned);
-      setPotential(newPotential);
-      /* examData.assignedTAs = newAssigned;
-      examData.potentialTAs = newPotential; */
+      setAssigned(a => a.filter(x => x.id !== ta.id));
+      setPotential(p => [...p, ta]);
     } else {
       if (assigned.length >= needed) {
         setErrorMsg(`Cannot select more than ${needed} TAs.`);
         return;
       }
-      const newAssigned = [...assigned, ta];
-      const newPotential = potential.filter(a => a.id !== ta.id);
-      setAssigned(newAssigned);
-      setPotential(newPotential);
-     /*  examData.assignedTAs = newAssigned;
-      examData.potentialTAs = newPotential; */
+      setAssigned(a => [...a, ta]);
+      setPotential(p => p.filter(x => x.id !== ta.id));
     }
     examData.tasLeft = needed - assigned.length;
   };
@@ -109,18 +99,11 @@ const AssignTAProctor: React.FC = () => {
     setPotential(p => p.filter(t => !toAdd.some(x => x.id === t.id)));
     examData.tasLeft = needed - assigned.length - toAdd.length;
 
-    setAssigned(newAssigned);
-    setPotential(newPotential);
-    /* examData.assignedTAs = newAssigned;
-    examData.potentialTAs = newPotential; */
-    examData.tasLeft = needed - newAssigned.length;
-
-    // Use ErrPopUp for both success & partial-info
-    if (numToAssign < leftCount) {
-      setAutoMsg(`Assigned ${numToAssign}, but ${needed - newAssigned.length} still left.`);
-    } else {
-      setAutoMsg(`Successfully assigned all ${numToAssign} TAs.`);
-    }
+    setAutoMsg(
+      count < leftCount
+        ? `Assigned ${count}, but ${needed - (assigned.length + count)} still left.`
+        : `Successfully assigned all ${count} TAs.`
+    );
     setShowAutoErr(true);
   };
 
