@@ -22,13 +22,11 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.example.dto.CourseDto;
-import com.example.dto.TaDto;
-import com.example.dto.TaskDto;
 import com.example.entity.Courses.Course;
 import com.example.entity.Courses.Section;
 import com.example.entity.Tasks.TaTask;
 import com.example.entity.Tasks.Task;
+
 import com.example.repo.CourseRepo;
 import com.example.service.CourseServ;
 
@@ -112,17 +110,42 @@ public class CourseController {
     public ResponseEntity<Boolean> updateTask(@PathVariable String course_code, @RequestBody int task_id, @RequestBody Task task) {
         return new ResponseEntity<>(courseServ.updateTask(course_code,task_id,task), HttpStatus.ACCEPTED);
     }
-//
+
+    @GetMapping("api/course/{course_code}/task/{id}")
+    public ResponseEntity<TaskDto> getTask(
+            @PathVariable String course_code,
+            @PathVariable int id
+    ) {
+        Task task = courseServ.getTaskByID(course_code, id);
+
+        // map each TaTask → TaDto
+        List<TaDto> taDtos = task.getTasList().stream()
+                .map(TaTask::getTaOwner)
+                .map(taMapper::toDto)
+                .collect(Collectors.toList());
+
+        String durationStr = task.getDuration() != null
+                ? task.getDuration().toString()
+                : null;
+
+        TaskDto dto = new TaskDto(
+                task.getTaskType().toString(),
+                taDtos,
+                "Task #" + task.getTaskId(),
+                durationStr,
+                task.getStatus().toString()
+        );
+
+        return ResponseEntity.ok(dto);
+    }
+
 //    @GetMapping("api/course/{course_code}/task/{id}")
-//    public ResponseEntity<TaskDto> getTask(
-//            @PathVariable String course_code,
-//            @PathVariable int id
-//    ) {
+//    public TaskDto getTask(@PathVariable String course_code, @PathVariable int id) {
 //        Task task = courseServ.getTaskByID(course_code, id);
 //        List<TaDto> taDtos = new ArrayList<>();
 //        for (TaTask taTask : task.getTasList()){
 //            /*
-//    private Long id;
+//               private Long id;
 //    private String name;
 //    private String surname;
 //    private String academicLevel;
@@ -142,10 +165,10 @@ public class CourseController {
 //                    taTask.getTaOwner().getIsActive(),                 // isActive
 //                    taTask.getTaOwner().getIsGraduated(),              // isGraduated
 //                    taTask.getTaOwner().getDepartment(),               // department
-//                    taTask.getTaOwner().getOfferingsAsStudent().stream()          // courses → List<String>
-//                            .map(Course::getCourseCode)
+//                    taTask.getTaOwner().getOfferingsAsHelper().stream()          // courses → List<String>
+//                            .map(CourseOffering::getCourse)
 //                            .collect(Collectors.toList()),
-//                    taTask.getTaOwner().getTasOwnLessons().stream()    // lessons → List<String>
+//                    taTask.getTaOwner().getOfferingsAsStudent().stream()    // lessons → List<String>
 //                            .map(Section::getSectionCode)
 //                            .collect(Collectors.toList())
 //            );
@@ -162,6 +185,10 @@ public class CourseController {
 //            task.getStatus().toString() // Convert enum to String
 //        );
 //    }
+
+
+
+
     /*@PostMapping("/course/{course_code}/exam")
     public ResponseEntity<Boolean> createExam(@RequestBody Exam exam, @PathVariable String course_code) {
         return new ResponseEntity<>()

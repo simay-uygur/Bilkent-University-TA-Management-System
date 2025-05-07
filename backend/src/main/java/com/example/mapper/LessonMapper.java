@@ -2,9 +2,12 @@ package com.example.mapper;
 
 import org.springframework.stereotype.Component;
 
+import com.example.dto.DateDto;
+import com.example.dto.EventDto;
 import com.example.dto.LessonDto;
 import com.example.entity.Courses.Lesson;
 import com.example.entity.General.ClassRoom;
+import com.example.entity.General.Event;
 
 import lombok.RequiredArgsConstructor;
 
@@ -12,9 +15,6 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class LessonMapper {
 
-    /**
-     * Entity → DTO
-     */
     public LessonDto toDto(Lesson lesson) {
         if (lesson == null) return null;
 
@@ -26,29 +26,27 @@ public class LessonMapper {
         // classRoom → use classroomId and examCapacity
         ClassRoom room = lesson.getLessonRoom();
         if (room != null) {
-            dto.setRoom(room.getClassroomId());
-            dto.setExamCapacity(room.getExamCapacity());
+            dto.setClassroomId(room.getClassroomId());
+            //dto.setExamCapacity(room.getExamCapacity());
         }
+
+        dto.setLessonType(lesson.getLessonType().name());
+        dto.setSectionId(lesson.getSection() != null ? lesson.getSection().getSectionCode() : null);
 
         return dto;
     }
 
-    /**
-     * DTO → Entity
-     *
-     * Note: we only parse the duration here.
-     *       Assigning the real ClassRoom entity is done in the service.
-     */
     public Lesson toEntity(LessonDto dto) {
         if (dto == null) return null;
 
         Lesson lesson = new Lesson();
 
-//        if (dto.getDuration() != null && !dto.getDuration().isEmpty()) {
-//            lesson.setDuration(Duration.parse(dto.getDuration()));
-//        }
+        lesson.setDuration(toEvent(dto.getDuration())); // this line now works
 
-        // lesson.setLessonRoom(...) must be assigned in the service
+        if (dto.getLessonType() != null) {
+            lesson.setLessonType(Lesson.LessonType.valueOf(dto.getLessonType()));
+        }
+
         return lesson;
     }
 }

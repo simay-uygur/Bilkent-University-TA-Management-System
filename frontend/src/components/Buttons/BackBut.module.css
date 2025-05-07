@@ -1,0 +1,34 @@
+.backButton {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 60px;
+    height: 60px;
+    /* translucent background with slight blur */
+    background: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(4px);
+    
+    /* gentle border and soft shadow */
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    margin: 8px;
+    border-radius: 50%;
+    color: #150063;    /* deep accent color */
+    cursor: pointer;
+
+  }
+  
+  .backButton:hover {
+    background-color: rgba(255, 255, 255, 0.9);
+    transform: scale(1.1);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+  }
+  
+  .backButton:active {
+    transform: scale(0.95);
+  }
+  
+  .backButton:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.5);
+  }

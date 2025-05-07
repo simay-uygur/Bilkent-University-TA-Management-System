@@ -25,8 +25,6 @@ import com.example.dto.FailedRowInfo;
 import com.example.dto.TaDto;
 import com.example.entity.Actors.Role;
 import com.example.entity.Actors.TA;
-import com.example.entity.Courses.Course;
-import com.example.entity.Courses.Section;
 import com.example.entity.General.AcademicLevelType;
 import com.example.entity.General.Date;
 import com.example.entity.Schedule.Schedule;
@@ -69,17 +67,27 @@ public class TAServImpl implements TAServ {
 
 
     @Override
-    public TaDto getTAById(Long id){
+    public TaDto getTAByIdDto(Long id){
         TA ta = repo.findById(id)
                 .orElseThrow(() -> new UserNotFoundExc(id));
         return taMapper.toDto(ta);
-        
     }
+
+    @Override
+    public TA getTAByIdTa(Long id){
+        TA ta = repo.findById(id)
+                .orElseThrow(() -> new UserNotFoundExc(id));
+        return ta;
+
+    }
+
+    @Override
     public TA getTAByIdEntity(Long id){
         return repo.findById(id)
                 .orElseThrow(() -> new UserNotFoundExc(id));
         
     }
+
     @Override
         public List<TaDto> getTAsByDepartment(String deptName){
             List<TA> tas = repo.findByDepartment(deptName);

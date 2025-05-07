@@ -58,8 +58,7 @@ public class InstructorMapper {
 
         // derive all courseCodes via the sections→offering→course link
         List<String> codes = inst.getSections().stream()
-                .map(Section::getOffering)
-                .map(o -> o.getCourse().getCourseCode())
+                .map(Section::getSectionCode)
                 .distinct()
                 .collect(Collectors.toList());
         dto.setSections(codes);

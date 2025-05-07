@@ -49,6 +49,22 @@ public class CourseOfferingServImpl implements CourseOfferingServ {
     private final StudentRepo studentRepo;
     private final ExamRepo examRepo;
 
+        @Override
+    public CourseOfferingDto getCourseByCourseCode(String code) {
+      CourseOffering off = repo.findByCourseCode(code)
+                .orElseThrow(() -> new IllegalArgumentException("Offering not found: " + code));
+
+        return courseMapper.toDto(off);
+    }
+    @Override
+    public List<CourseOfferingDto> getCoursesByCourseCode(String code) {
+        List<CourseOffering> off = repo.findByCoursesCode(code)
+                .orElseThrow(() -> new IllegalArgumentException("Offering not found: " + code));
+
+        return off.stream()
+                .map(courseMapper::toDto)
+                .collect(Collectors.toList());
+    }
     @Override
     public List<CourseOfferingDto> getOfferingsByDepartment(String deptName){
         List<CourseOffering> offerings = repo.findByCourseDepartmentName(deptName)
@@ -91,15 +107,14 @@ public class CourseOfferingServImpl implements CourseOfferingServ {
 
         return courseMapper.toDto(off);
     }
-    public CourseOfferingDto getByCourseCode(String code) {
+    /* public List<CourseOfferingDto> getByCourseCode(String code) {
         List<CourseOffering> off = repo.findByCourseCode(code)
                 .orElseThrow(() -> new IllegalArgumentException("Offering not found: " + code));
 
         return off.stream()
                 .map(courseMapper::toDto)
-                .findFirst()
-                .orElseThrow(() -> new IllegalArgumentException("Offering not found: " + code));
-    }
+                .collect(Collectors.toList());
+    } */
 
     @Override
     public List<CourseOffering> getAll() {

@@ -1,0 +1,16 @@
+.crossButton {
+    width: 2rem;
+    height: 2rem;
+    border-radius: 0.375rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    background-color: transparent;
+    transition: background-color 0.2s, border-color 0.2s;
+  }
+  
+  .reject {
+    color: #ef4444;
+  }
+  

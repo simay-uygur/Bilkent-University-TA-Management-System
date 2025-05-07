@@ -1,0 +1,16 @@
+.button {
+    width: 2.25rem;
+    height: 2.25rem;
+    border-radius: 0.375rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    background-color: transparent;
+    transition: background-color 0.2s;
+  }
+  
+  .approve {
+    color: #10b981;
+  }
+  

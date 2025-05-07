@@ -1,0 +1,32 @@
+/* src/components/ApproveWorkMes.module.css */
+.container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background-color: #fff;
+    padding: 0.75rem 1rem;
+    border-radius: 0.5rem;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    margin-bottom: 1rem;
+  }
+  
+  .message {
+    flex: 1;
+    margin-right: 1rem;
+    color: var(--text-default);
+  }
+  
+  .buttons {
+    display: flex;
+    gap: 0.5rem;
+  }
+  
+  /* Example variants: */
+  .variant-green {
+    border-left: 4px solid #10b981;
+  }
+  
+  .variant-red {
+    border-left: 4px solid #ef4444;
+  }
+  

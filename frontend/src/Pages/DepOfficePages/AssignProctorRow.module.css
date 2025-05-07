@@ -1,0 +1,61 @@
+/* src/components/AssignProctorRow.module.css */
+
+.row {
+  transition: background-color 0.2s;
+  cursor: pointer;              /* show pointer on hover */
+}
+
+/* change nothing about your completed/incomplete colors, but add: */
+.row:hover {
+  background-color: rgba(0, 0, 0, 0.05);
+}
+
+.completed {
+  background-color: #93efad;
+}
+
+.incomplete {
+  background-color: #ffa5a5;
+}
+
+.tick {
+  margin-right: 4px;
+  vertical-align: middle;
+  color: #4cb953;
+}
+
+.actions {
+  display: flex;
+  gap: 8px;
+}
+
+.btn {
+  padding: 4px 8px;
+  font-size: 0.875rem;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+.btn:hover {
+  opacity: 0.8;
+}
+
+.autoBtn {
+  background-color: #1a7ee9;
+  border: 1px solid #000000;   /* added missing space */
+  color: white;
+}
+
+.manualBtn {
+  background-color: #f14343;
+  border: 1px solid #000000;   /* added missing space */
+  color: white;
+}
+
+.demandBtn {
+  background-color: #007bff;
+  border: 1px solid #000000;   /* added missing space */
+  color: white;
+}

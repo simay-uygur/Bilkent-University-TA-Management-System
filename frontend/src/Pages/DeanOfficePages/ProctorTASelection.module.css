@@ -1,0 +1,162 @@
+/* src/pages/ProctorLeftTA/ProctorLeftTA.module.css */
+
+.pageWrapper {
+    background: #d2e9ff;
+    min-height: 100vh;
+  }
+  
+  .headerRow {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: #d2e9ff;
+    padding-bottom: 1rem;
+  }
+  
+  .title {
+    font-size: 1.5rem;
+    color: #150063;
+  }
+  
+  .stats span {
+    margin-left: 1rem;
+    font-weight: 500;
+    font-size: 1.2rem;
+  }
+  
+  /* wrapper for tables and piles */
+  .bodyWrapper {
+    position: relative;
+    padding-bottom: 2rem; /* space for finish button */
+  }
+  
+  /* single vertical line across tables & piles */
+  .bodyWrapper::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    bottom: 2rem; /* stops above finish button */
+    left: 50%;
+    width: 1px;
+    background: #ccc;
+  }
+  
+  /* two side-by-side tables */
+  .splitContainer {
+    display: flex;
+    padding-top: 1rem;
+  }
+  
+  .column {
+    flex: 1;
+    padding: 0 1rem;
+  }
+  
+  .column h2 {
+    text-align: center;
+    color: #150063;
+    margin-bottom: 0.5rem;
+  }
+  
+  .searchBar {
+    display: block;
+    width: 80%;
+    max-width: 300px;
+    margin: 0 auto 1rem;
+    padding: 0.5rem;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+  }
+  
+  .table {
+    width: 100%;
+    border-collapse: collapse;
+    background: #f9fafb;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    border-radius: 6px;
+    overflow: hidden;
+  }
+  
+  .table th,
+  .table td {
+    padding: 0.5rem;
+    text-align: center;
+    border-bottom: 1px solid #ddd;
+  }
+  
+  .table th {
+    background: #150063;
+    color: #ffffff;
+  }
+  
+  .row {
+    background-color: #59e9e2;
+    cursor: pointer;
+    transition: background-color 0.2s;
+  }
+  
+  .row:hover td {
+    background: #bedaff;
+  }
+  
+  /* side-by-side assigned lists */
+  .assignedContainer {
+    display: flex;
+    margin-top: 2rem;
+    gap: 1.5rem;
+  }
+  
+  .assignedSection {
+    flex: 1;
+    padding: 1rem;
+    background: #c1ffd1;
+    border-radius: 6px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  }
+  
+  .assignedSection h3 {
+    margin-top: 0;
+    color: hsl(253,100%,19%);
+  }
+  
+  .assignedSection ul {
+    list-style: none;
+    padding: 0;
+  }
+  
+  .assignedSection li {
+    padding: 0.5rem;
+    margin-bottom: 0.25rem;
+    border-radius: 4px;
+    cursor: pointer;
+    background: #59e9e2;
+    transition: background-color 0.2s;
+  }
+  
+  .assignedSection li:hover {
+    background: #bedaff;
+  }
+  
+  /* finish button centered */
+  .finishContainer {
+    display: flex;
+    justify-content: center;
+    margin-top: 1rem;
+  }
+  
+  .finishBtn {
+    background-color: #3b82f6;
+    color: white;
+    border: none;
+    padding: 0.75rem 1.5rem;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 1rem;
+    transition: background-color 0.2s, box-shadow 0.2s;
+  }
+  
+  .finishBtn:hover {
+    background-color: #2563eb;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+  }
+  

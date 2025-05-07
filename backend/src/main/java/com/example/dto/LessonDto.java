@@ -4,10 +4,7 @@ import com.example.entity.General.Event;
 
 import lombok.*;
 
-
 @Data
-@Getter
-@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 public class LessonDto {

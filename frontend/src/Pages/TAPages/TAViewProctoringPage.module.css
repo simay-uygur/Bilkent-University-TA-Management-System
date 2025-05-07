@@ -1,0 +1,72 @@
+.pageWrapper {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    background: #d2e9ff;
+  }
+
+  .backButton {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 50px;
+    height: 50px;
+    /* translucent background with slight blur */
+    background: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(4px);
+    
+    /* gentle border and soft shadow */
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    margin: 8px;
+    cursor: pointer;
+  
+  }
+  
+  .backButton:hover {
+    background-color: rgba(255, 255, 255, 0.9);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+  }
+  
+  .backButton:active {
+    transform: scale(0.95);
+  }
+  
+  .backButton:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.5);
+  }
+
+  .mainContainer {
+    /* no padding as requested */
+    padding: 0;
+    flex: 1;
+    margin-top: 16px;
+  }
+  
+  h2 {
+    margin: 0 0 12px 16px;
+    color: #1e3a8a;
+  }
+  
+  .scheduleTable {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  
+  .scheduleTable th,
+  .scheduleTable td {
+    padding: 12px;
+    border: 1px solid #e2e8f0;
+    text-align: left;
+  }
+  
+  .scheduleTable th {
+    background: #1e3a8a;
+    color: #fff;
+    font-weight: 600;
+  }
+  
+  .scheduleTable tbody tr:nth-child(even) {
+    background: #e0f2fe;
+  }
+  

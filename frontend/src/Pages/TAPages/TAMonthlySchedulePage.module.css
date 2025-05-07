@@ -1,0 +1,230 @@
+/* src/pages/TAMonSchPage/TAMonSchPage.module.css */
+
+/* Parent relative for absolute child */
+.pageWrapper {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background-color: #d2e9ff;
+}
+
+/* Main layout */
+.mainContainer {
+  display: flex;
+  justify-content: space-between;
+  gap: 30px;
+}
+
+/* Calendar Section */
+.calendarContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 40%;
+}
+
+.monthNav {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+}
+
+.navButton {
+  background-color: #3498db;
+  color: white;
+  border: none;
+  border-radius: 50%;
+  font-size: 1.5rem;
+  padding: 10px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+  margin: 0 20px;
+}
+
+.navButton:hover {
+  background-color: #2980b9;
+}
+
+.monthYear {
+  font-size: 1.5rem;
+  font-weight: bold;
+}
+
+/* Calendar Grid */
+.calendar {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 1px;
+  justify-items: center;
+  margin-top: 20px;
+  border: 1px solid #000;
+  background-color: #fff;
+}
+
+.dayHeader {
+  font-weight: bold;
+  font-size: 1.2rem;
+  background-color: #fff;
+  padding: 8px;
+  border-bottom: 1px solid #000;
+}
+
+.dayCell {
+  width: 40px;
+  height: 40px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-radius: 50%;
+  transition: background-color 0.3s;
+}
+
+.dayCell:hover {
+  background-color: #e0e0e0;
+}
+
+.emptyCell {
+  width: 40px;
+  height: 40px;
+  background-color: transparent;
+}
+
+/* Task Display Section */
+.scheduleContainer {
+  display: flex;
+  flex-direction: column;
+  background-color: #fff;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  width: 60%;
+}
+
+.scheduleContainer h3 {
+  font-size: 1.5rem;
+  margin-bottom: 20px;
+}
+
+/* Task Table Styling */
+.taskTable {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 24px;
+  font-size: 1rem;
+}
+
+.taskTable th {
+  background-color: #1e3a8a;
+  color: #fff;
+  padding: 12px;
+  font-size: 1.125rem;
+}
+
+.taskTable td {
+  padding: 12px;
+  border: 1px solid #e2e8f0;
+  font-size: 1rem;
+}
+
+.taskTable tbody tr:nth-child(even) {
+  background-color: #e0f2fe;
+}
+
+/* Action Buttons */
+.actionsCell {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  align-items: center;
+}
+
+.deleteBtn {
+  background: #ef4444;
+  color: #fff;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.greenBtn {
+  background-color: #22c55e;
+  color: white;
+  border: none;
+  padding: 6px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.greenBtn:hover {
+  background-color: #16a34a;
+}
+
+/* Popup Styles */
+.popupOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.popup {
+  background-color: #fff;
+  padding: 20px;
+  border-radius: 10px;
+  width: 300px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.formGroup {
+  margin-bottom: 15px;
+}
+
+.formGroup label {
+  display: block;
+  margin-bottom: 6px;
+  font-weight: 500;
+}
+
+.popup textarea {
+  width: 100%;
+  height: 80px;
+  resize: none;
+}
+
+.errorMessage {
+  color: #dc2626;
+  font-size: 0.875rem;
+  margin-bottom: 10px;
+}
+
+.buttonContainer {
+  display: flex;
+  justify-content: space-between;
+}
+
+.approveBtn, .cancelBtn {
+  padding: 10px 20px;
+  border: none;
+  cursor: pointer;
+  border-radius: 5px;
+}
+
+.approveBtn {
+  background-color: #4caf50;
+  color: #fff;
+}
+
+.cancelBtn {
+  background-color: #f44336;
+  color: #fff;
+}
