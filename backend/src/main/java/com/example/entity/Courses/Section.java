@@ -40,11 +40,11 @@ public class Section {
     @Column(name = "course_name", nullable = true) // Object-orianted-software engineering
     private String courseName;
 
-    @Column(name = "preffered_TAs", nullable = true) 
+    @Column(name = "preffered_TAs", nullable = true, updatable = true) 
     private List<TA> preffered_TAS = new ArrayList<>(); // ta's which are taking this course (registered)
 
 
-    @Column(name = "unpreffered_TAs", nullable = true) 
+    @Column(name = "unpreffered_TAs", nullable = true, updatable = true) 
     private List<TA> unpreffered_TAS = new ArrayList<>(); // ta's which are taking this course (registered)
 
     @OneToMany(
