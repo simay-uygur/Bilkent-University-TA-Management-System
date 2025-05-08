@@ -40,6 +40,7 @@ public class TaskMapper {
         dto.setDescription(task.getSection().getSectionCode()); // example
         dto.setDuration(task.getDuration());
         dto.setStatus(task.getStatus().name());
+    
         return dto;
     }
 
@@ -55,7 +56,7 @@ public class TaskMapper {
         Task task = new Task();
         task.setTaskType(TaskType.valueOf(dto.getType()));
         task.setDuration(dto.getDuration());
-        task.setStatus(TaskState.valueOf(dto.getStatus()));
+        task.setStatus(TaskState.valueOf(dto.getStatus() != null ? dto.getStatus() : "UNKNOWN"));
         // workload, amountOfTas, section, tasList, etc. should be set elsewhere
         return task;
     }

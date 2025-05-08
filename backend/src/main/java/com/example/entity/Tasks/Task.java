@@ -56,7 +56,7 @@ public class Task {
     private TaskType taskType;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "status", nullable = false)
+    @Column(name = "status", nullable = true)
     private TaskState status = TaskState.UNKNOWN;
 
     /*@Enumerated(EnumType.STRING)

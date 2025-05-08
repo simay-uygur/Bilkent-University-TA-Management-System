@@ -49,6 +49,16 @@ public class SectionServImpl implements SectionServ {
     private final TARepo taRepo;
     private final TaskMapper taskMapper;
     private final SectionRepo sectionRepo;
+
+    @Override
+    public List<TaskDto> getTasks(String courseCode) {
+        Section section = repo.findBySectionCodeIgnoreCase(courseCode)
+                .orElseThrow(() -> new IllegalArgumentException("Section not found: " + courseCode));
+        List<Task> tasks = section.getTasks();
+        return tasks.stream()
+                .map(taskMapper::toDto)
+                .toList();
+    }
     @Override
     public Section create(Section section) {
         // 1) sectionCode must be supplied in the right format
@@ -593,6 +603,15 @@ public class SectionServImpl implements SectionServ {
 
         section.getAssignedTas().add(ta); // hope it makes that
         sectionRepo.save(section);
+
+        CourseOffering offering = section.getOffering();
+        if ( !offering.getAssignedTas().contains(ta) ) {
+
+            offering.getAssignedTas().add(ta);
+            System.out.println("offering.getAssignedTas() = " + offering.getAssignedTas());
+        }
+        
+        //offering.setAssignedTas(offering.getAssignedTas());
         return true;
     }
     

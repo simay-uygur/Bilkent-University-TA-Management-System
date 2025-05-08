@@ -55,7 +55,7 @@ const CourseTAReq: React.FC = () => {
     const fetchTAs = async () => {
       try {
         setLoading(true);
-        const response = await axios.get('/api/ta/department/CS');
+        const response = await axios.get('/api/ta/department/{courseCode}');
         setTAs(response.data);
         setLoading(false);
       } catch (err) {

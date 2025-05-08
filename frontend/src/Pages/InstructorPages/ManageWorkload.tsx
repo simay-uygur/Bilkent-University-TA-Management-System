@@ -1,4 +1,191 @@
-// src/pages/ManageWorkload/ManageWorkload.tsx
+import React, { useState, useEffect, ChangeEvent } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
+import BackBut from '../../components/Buttons/BackBut';
+import ConPop from '../../components/PopUp/ConPop';
+import ErrPopUp, { ErrorPopupProps } from '../../components/PopUp/ErrPopUp';
+import styles from './ManageWorkload.module.css';
+
+interface TimePart {
+  year: number;
+  month: number;
+  day: number;
+  hour: number;
+  minute: number;
+}
+
+interface Duration {
+  start: TimePart;
+  finish: TimePart;
+}
+
+interface TaskDto {
+  id: number;
+  type: 'Lab' | 'Recitation' | 'Grading';
+  duration: Duration;
+  description: string;
+}
+
+const ManageWorkload: React.FC = () => {
+  const { sectionCode } = useParams<{ sectionCode: string }>();
+  const navigate = useNavigate();
+
+  const [tasks, setTasks] = useState<TaskDto[]>([]);
+  const [modalOpen, setModalOpen] = useState(false);
+  const [currentType, setCurrentType] = useState<'Lab' | 'Recitation' | 'Grading'>('Lab');
+  const [currentDescription, setCurrentDescription] = useState('');
+  const [startHour, setStartHour] = useState(8);
+  const [startMinute, setStartMinute] = useState(30);
+  const [finishHour, setFinishHour] = useState(9);
+  const [finishMinute, setFinishMinute] = useState(20);
+  const [confirm, setConfirm] = useState<{ action: 'save' } | null>(null);
+  const [errorPopup, setErrorPopup] = useState<ErrorPopupProps | null>(null);
+
+  const showError = (msg: string) => setErrorPopup({ message: msg, onConfirm: () => setErrorPopup(null) });
+
+  const loadTasks = async () => {
+    const res = await fetch(`/api/sections/section/${sectionCode}/task`);
+    if (!res.ok) return;
+    const data = await res.json();
+    setTasks(data);
+  };
+
+  useEffect(() => {
+    loadTasks();
+  }, [sectionCode]);
+
+  const saveTask = async () => {
+    if (!currentDescription) {
+      showError("Description required.");
+      return;
+    }
+
+    const today = new Date();
+    const payload = {
+      type: currentType,
+      duration: {
+        start: {
+          year: today.getFullYear(),
+          month: today.getMonth() + 1,
+          day: today.getDate(),
+          hour: startHour,
+          minute: startMinute,
+        },
+        finish: {
+          year: today.getFullYear(),
+          month: today.getMonth() + 1,
+          day: today.getDate(),
+          hour: finishHour,
+          minute: finishMinute,
+        },
+      },
+      description: currentDescription,
+    };
+
+    const res = await fetch(`/api/sections/section/${sectionCode}/task`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+
+    if (res.status != 201) {
+      showError("Failed to save task.");
+      return;
+    }
+
+    await loadTasks();
+    setModalOpen(false);
+  };
+
+  const formatTime = (time: TimePart) => `${time.hour}:${time.minute.toString().padStart(2, '0')}`;
+
+  return (
+    <div className={styles.pageWrapper}>
+      <div className={styles.headerRow}>
+        <BackBut to="/instructor" />
+        <h1 className={styles.title}>Manage Workload - Section {sectionCode}</h1>
+      </div>
+
+      <table className={styles.taskTable}>
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Type</th>
+            <th>Description</th>
+            <th>Start</th>
+            <th>Finish</th>
+          </tr>
+        </thead>
+        <tbody>
+          {tasks.map(t => (
+            <tr key={t.id}>
+              <td>{t.id}</td>
+              <td>{t.type}</td>
+              <td>{t.description}</td>
+              <td>{formatTime(t.duration.start)}</td>
+              <td>{formatTime(t.duration.finish)}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+
+      <div className={styles.headerRow2}>
+        <button className={styles.addBtn} onClick={() => setModalOpen(true)}>Add Task</button>
+      </div>
+
+      {modalOpen && (
+        <div className={styles.modalOverlay}>
+          <div className={styles.modal}>
+            <h2>Add Task</h2>
+
+            <div className={styles.fieldRow}>
+              <label>Type</label>
+              <select value={currentType} onChange={e => setCurrentType(e.target.value as any)}>
+                <option value="Lab">Lab</option>
+                <option value="Recitation">Recitation</option>
+                <option value="Grading">Grading</option>
+              </select>
+            </div>
+
+            <div className={styles.fieldRow}>
+              <label>Description</label>
+              <input type="text" value={currentDescription} onChange={e => setCurrentDescription(e.target.value)} />
+            </div>
+
+            <div className={styles.fieldRow}>
+              <label>Start Time</label>
+              <input type="number" value={startHour} onChange={e => setStartHour(+e.target.value)} />
+              <input type="number" value={startMinute} onChange={e => setStartMinute(+e.target.value)} />
+            </div>
+
+            <div className={styles.fieldRow}>
+              <label>Finish Time</label>
+              <input type="number" value={finishHour} onChange={e => setFinishHour(+e.target.value)} />
+              <input type="number" value={finishMinute} onChange={e => setFinishMinute(+e.target.value)} />
+            </div>
+
+            <div className={styles.buttonsRow}>
+              <button onClick={() => setConfirm({ action: 'save' })}>Save</button>
+              <button onClick={() => setModalOpen(false)}>Cancel</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {confirm?.action === 'save' && (
+        <ConPop
+          message="Confirm save?"
+          onConfirm={() => { saveTask(); setConfirm(null); }}
+          onCancel={() => setConfirm(null)}
+        />
+      )}
+      {errorPopup && <ErrPopUp {...errorPopup} />}
+    </div>
+  );
+};
+
+export default ManageWorkload;
+
+/* // src/pages/ManageWorkload/ManageWorkload.tsx
 import React, { useState, ChangeEvent } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import BackBut from '../../components/Buttons/BackBut';
@@ -13,7 +200,7 @@ interface Task {
   startTime?: number;
   endTime?: number;
   gradingEndTime?: string;
-  /** list of already assigned TA names */
+  
   alreadySelectedTAs: string[];
 }
 
@@ -36,7 +223,7 @@ const navigate = useNavigate();
 // Parse the section code format CS-319-1-2025-SPRING
 const parts = sectionCode?.split('-') || [];
 const courseCode = parts.length >= 2 ? `${parts[0]}-${parts[1]}` : sectionCode || '';
-const courseSection = parts.length >= 3 ? parts[2] : '1';
+const courseSection = parts.length >= 3 ? parts[2] : '1'; */
   
  /*  // If courseSec is undefined, we might have the full section code in courseID
   if (!courseSec && courseID && courseID.split('-').length >= 3) {
@@ -45,7 +232,7 @@ const courseSection = parts.length >= 3 ? parts[2] : '1';
     courseSection = parts[2];                // e.g., "1"
   } */
   
-  const [tasks, setTasks] = useState<Task[]>(initialTasks);
+  /* const [tasks, setTasks] = useState<Task[]>(initialTasks);
   const [modalOpen, setModalOpen] = useState(false);
   const [isEdit, setIsEdit] = useState(false);
   const [current, setCurrent] = useState<Partial<Task>>({
@@ -229,7 +416,8 @@ const courseSection = parts.length >= 3 ? parts[2] : '1';
         </div>
       </div>
 
-        {/* Modals & Popups */}
+        
+
         {modalOpen && (
         <div className={styles.modalOverlay}>
           <div className={styles.modal}>
@@ -356,4 +544,4 @@ const courseSection = parts.length >= 3 ? parts[2] : '1';
   );
 };
 
-export default ManageWorkload;
+export default ManageWorkload; */

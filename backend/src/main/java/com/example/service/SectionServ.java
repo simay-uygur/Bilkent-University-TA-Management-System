@@ -6,6 +6,7 @@ import java.util.Map;
 
 import org.springframework.web.multipart.MultipartFile;
 
+import com.example.dto.TaDto;
 import com.example.dto.TaskDto;
 import com.example.entity.Courses.Section;
 
@@ -31,4 +32,5 @@ public interface SectionServ {
 
     boolean assignTA(Long taId, String sectionCode);
     //List<SectionDto> getByDepartment(String deptName);
+    List<TaskDto> getTasks(String sectionCode);
 }

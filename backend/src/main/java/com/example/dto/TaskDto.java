@@ -4,6 +4,7 @@ package com.example.dto;
 import java.util.List;
 
 import com.example.entity.General.Event;
+import com.example.entity.Tasks.TaskType;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

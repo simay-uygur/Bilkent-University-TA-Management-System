@@ -91,6 +91,10 @@ public class SectionController {
     public ResponseEntity<TaskDto> createTask(@RequestBody TaskDto entity, @PathVariable String section_code) {
         return new ResponseEntity<>(taskServ.createTask(entity, section_code), HttpStatus.CREATED);
     }
+    @GetMapping("section/{section_code}/task")
+    public ResponseEntity<List<TaskDto>> getTasks(@PathVariable String section_code) {
+        return new ResponseEntity<>(sectionServ.getTasks(section_code), HttpStatus.OK);
+    }
     
 
     //if this takes sectiondto update that  and also ta dto

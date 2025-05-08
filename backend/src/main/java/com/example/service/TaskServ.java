@@ -29,4 +29,5 @@ public interface TaskServ {
     public HashSet<Task> getDeletedTasks() ;
     public boolean assignProctoring(int task_id, List<Long> ta_id);
     public CompletableFuture<List<TaDto>> getTasToAssignToTask(String courseCode, String sectionCode, int task_id, Long instrId);
+   
 }

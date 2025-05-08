@@ -27,7 +27,10 @@ public class CourseOfferingMapper {
                 .map(sectionMapper::toDto)
                 .toList()
             );
-
+        dto.setTas(offering.getAssignedTas().stream()
+                .map(taMapper::toDto)
+                .toList()
+            );
 
         // dto.setStudents(offering.getStudents().stream()
         //         .map(studentMapper::toDto)
