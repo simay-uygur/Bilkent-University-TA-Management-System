@@ -10,8 +10,11 @@ import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -41,21 +44,34 @@ import lombok.Setter;
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "type")
 @JsonSubTypes({
     @JsonSubTypes.Type(value = Leave.class, name = "Leave"),
+    @JsonSubTypes.Type(value = ProctorTaInFaculty.class, name = "ProctorTaInFaculty"),
+    @JsonSubTypes.Type(value = ProctorTaFromFaculties.class, name = "ProctorTaFromFaculties"),
+    @JsonSubTypes.Type(value = Swap.class, name = "Swap"),
+    @JsonSubTypes.Type(value = SwapEnable.class, name = "SwapEnable"),
+    @JsonSubTypes.Type(value = WorkLoad.class, name = "Workload"),
+    @JsonSubTypes.Type(value = TransferProctoring.class, name = "TransferProctoring")
 })
 
 public class Request {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    @Column(name = "requestId", unique = true)
+    @Column(name = "request_id", unique = true)
     private Long requestId ;
 
-    @Column(name = "requestType", unique = false)
+    @Column(name = "request_type", unique = false)
+    @Enumerated(EnumType.STRING)
     private RequestType requestType;
 
-    @Column(name = "isApproved", unique = false)
+    @Column(name = "is_approved", unique = false)
     private boolean isApproved = false;
 
-    @Column(name = "sentTime", unique = false)
+    @Column(name = "is_rejected", unique = false)
+    private boolean isRejected = false;
+
+    @Column(name = "is_pending", unique = false)
+    private boolean isPending = true;
+
+    @Column(name = "sent_time", unique = false)
     private Date sentTime;
 
     @ManyToOne(fetch = FetchType.LAZY)

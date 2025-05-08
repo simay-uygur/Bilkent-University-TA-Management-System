@@ -1,17 +1,30 @@
 package com.example.controller;
 
-import com.example.dto.CourseOfferingDto;
-import com.example.entity.Courses.CourseOffering;
-import com.example.mapper.CourseOfferingMapper;
-import com.example.service.CourseOfferingServ;
-import lombok.RequiredArgsConstructor;
+import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.stream.Collectors;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
-import java.util.List;
-import java.util.stream.Collectors;
+import com.example.dto.CourseOfferingDto;
+import com.example.dto.ExamDto;
+import com.example.entity.Courses.CourseOffering;
+import com.example.mapper.CourseOfferingMapper;
+import com.example.repo.CourseOfferingRepo;
+import com.example.repo.CourseRepo;
+import com.example.service.CourseOfferingServ;
+import com.example.service.ExamServ;
+
+import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequestMapping("/api/v1/offerings")
@@ -20,6 +33,9 @@ public class CourseOfferingController {
 
     private final CourseOfferingServ service;
     private final CourseOfferingMapper mapper;
+    private final CourseRepo courseRepo;
+    private final CourseOfferingRepo courseOfferingRepo;
+    private final ExamServ examServ;
 
     @PostMapping
     public CourseOfferingDto create(@RequestBody CourseOfferingDto dto) {
@@ -35,13 +51,7 @@ public class CourseOfferingController {
                 .map(mapper::toDto)
                 .collect(Collectors.toList());
     }
-   
-    @GetMapping("/department/{deptId}")
-    public ResponseEntity<List<CourseOfferingDto>> getOfferingsByDepartment(@PathVariable String deptId) {
-        
-        return new ResponseEntity<>(service.getOfferingsByDepartment(deptId), HttpStatus.FOUND);
 
-    }
     @GetMapping("/{id}")
     public ResponseEntity<CourseOfferingDto> get(@PathVariable Long id) {
         //return mapper.toDto(service.getById(id));
@@ -79,6 +89,32 @@ public class CourseOfferingController {
     @DeleteMapping("/{id}")
     public void delete(@PathVariable Long id) {
         service.delete(id);
+    }
+
+    @PostMapping("/course/{course_code}/exam")
+    public CompletableFuture<ResponseEntity<Boolean>> createExam(@RequestBody ExamDto exam, @PathVariable String course_code) {
+        return service.createExam(exam, course_code).thenApply(success -> {
+            if (success) {
+              return ResponseEntity.status(HttpStatus.CREATED).body(true);
+            } else {
+              return ResponseEntity
+                    .status(HttpStatus.BAD_REQUEST)
+                    .body(false);
+            }
+        });
+    }
+
+    @PostMapping("/course/{course_code}/exam/{exam_id}/tas")
+    public CompletableFuture<ResponseEntity<Boolean>> addTAs(@PathVariable String course_code, @PathVariable Integer exam_id, @RequestBody List<Long> tas) {
+        return service.addTAs(course_code, exam_id, tas).thenApply(success -> {
+            if (success) {
+              return ResponseEntity.status(HttpStatus.CREATED).body(true);
+            } else {
+              return ResponseEntity
+                    .status(HttpStatus.BAD_REQUEST)
+                    .body(false);
+            }
+        });
     }
 }
 

@@ -4,12 +4,14 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import com.example.entity.General.Date;
 import com.example.entity.Tasks.TaTask;
+import com.example.entity.Tasks.Task;
 
 @Repository
 public interface TaTaskRepo extends JpaRepository<TaTask, Integer> {
@@ -84,7 +86,7 @@ public interface TaTaskRepo extends JpaRepository<TaTask, Integer> {
           @Param("toDay")    int toDay
       );
 
-      @Query("""
+      /*@Query("""
         SELECT CASE WHEN COUNT(tt)>0 THEN TRUE ELSE FALSE END
           FROM TaTask tt
         WHERE tt.taOwner.id     = :taId
@@ -96,5 +98,24 @@ public interface TaTaskRepo extends JpaRepository<TaTask, Integer> {
         @Param("taId") Long taId,
         @Param("from") Date  from,
         @Param("to")   Date  to
+      );*/
+
+      @Query("""
+        SELECT t
+          FROM TaTask tt
+          JOIN tt.task t
+         WHERE tt.taOwner.id       = :taId
+           AND t.duration.start    <= :to
+           AND t.duration.finish   >= :from
+      """)
+      List<Task> findTasksForTaInInterval(
+          @Param("taId") Long taId,
+          @Param("from") Date   from,
+          @Param("to")   Date   to
       );
+
+      @Modifying
+      @Query("DELETE FROM TaTask t WHERE t.task.taskId = :taskId AND t.taOwner.id = :taId")
+      void deleteByTaskAndTa(@Param("taskId") int taskId,
+                            @Param("taId")   Long  taId);
 }

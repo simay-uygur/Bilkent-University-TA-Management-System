@@ -1,13 +1,15 @@
 package com.example.service;
 
-import com.example.dto.SectionDto;
-import com.example.entity.Courses.Section;
-import jakarta.transaction.Transactional;
-import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+
+import org.springframework.web.multipart.MultipartFile;
+
+import com.example.dto.TaskDto;
+import com.example.entity.Courses.Section;
+
+import jakarta.transaction.Transactional;
 
 public interface SectionServ {
     Section create(Section section);
@@ -16,7 +18,7 @@ public interface SectionServ {
     List<Section> getAll();
     void delete(Integer id);
     Map<String,Object> importFromExcel(MultipartFile file) throws IOException;
-
+    List<TaskDto> getAllTasks(int sectionNumber, String courseCode);
     //@Transactional
     //Map<String, Object> importSectionsFromExcel(MultipartFile file) throws IOException;
 
@@ -27,7 +29,6 @@ public interface SectionServ {
     @Transactional
     Map<String,Object> importSectionsAndInstructorsExcelWithCoordinators(MultipartFile file) throws IOException;
 
-    @Transactional
     boolean assignTA(Long taId, String sectionCode);
     //List<SectionDto> getByDepartment(String deptName);
 }

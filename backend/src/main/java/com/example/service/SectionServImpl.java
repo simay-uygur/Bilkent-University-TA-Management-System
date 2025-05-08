@@ -1,21 +1,11 @@
 package com.example.service;
 
-import com.example.dto.FailedRowInfo;
-import com.example.entity.Actors.Instructor;
-import com.example.entity.Actors.TA;
-import com.example.entity.Courses.Course;
-import com.example.entity.Courses.CourseOffering;
-import com.example.entity.Courses.Section;
-import com.example.entity.General.Semester;
-import com.example.entity.General.Student;
-import com.example.entity.General.Term;
-import com.example.repo.CourseRepo;
-import com.example.repo.SectionRepo;
-import com.example.repo.StudentRepo;
-import com.example.repo.TARepo;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
-import jakarta.transaction.Transactional;
-import lombok.RequiredArgsConstructor;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
@@ -24,8 +14,25 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
-import java.util.*;
+import com.example.dto.FailedRowInfo;
+import com.example.dto.TaskDto;
+import com.example.entity.Actors.Instructor;
+import com.example.entity.Actors.TA;
+import com.example.entity.Courses.Course;
+import com.example.entity.Courses.CourseOffering;
+import com.example.entity.Courses.Section;
+import com.example.entity.General.Semester;
+import com.example.entity.General.Student;
+import com.example.entity.General.Term;
+import com.example.entity.Tasks.Task;
+import com.example.mapper.TaskMapper;
+import com.example.repo.CourseRepo;
+import com.example.repo.SectionRepo;
+import com.example.repo.StudentRepo;
+import com.example.repo.TARepo;
+
+import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
@@ -40,9 +47,8 @@ public class SectionServImpl implements SectionServ {
     private final StudentRepo studentRepo;
     private final TAServ taService;
     private final TARepo taRepo;
-
+    private final TaskMapper taskMapper;
     private final SectionRepo sectionRepo;
-
     @Override
     public Section create(Section section) {
         // 1) sectionCode must be supplied in the right format
@@ -202,7 +208,7 @@ public class SectionServImpl implements SectionServ {
                     // 6) build & collect section
 
                     String sectionCode = String.format("%s-%d-%d-%s",
-                            course.getCourseCode(), sectionNo, year, termEnum);
+                            course.getCourseId(), sectionNo, year, termEnum);
 
 // Check for duplicates before adding to successful list
                     if (repo.existsBySectionCodeEqualsIgnoreCase(sectionCode)) {
@@ -570,11 +576,6 @@ public class SectionServImpl implements SectionServ {
         };
     }
 
-    private long getLongCellValue(Cell cell) {
-        return (long) getNumericCellValue(cell);
-    }
-
-
     @Transactional
     @Override
     public boolean assignTA(Long taId, String sectionCode) {
@@ -594,7 +595,7 @@ public class SectionServImpl implements SectionServ {
         sectionRepo.save(section);
         return true;
     }
-}
+    
 
 
 // old codes
@@ -814,3 +815,30 @@ public class SectionServImpl implements SectionServ {
 //                "failedRows",   failed
 //        );
 //    }
+
+    private long getLongCellValue(Cell cell) {
+        return (long) getNumericCellValue(cell);
+    }
+
+    public List<TaskDto> getAllTasks(int sectionNumber, String courseCode){
+        Section section = offeringService.getSectionByNumber(courseCode, sectionNumber);
+        List<TaskDto> sectionTasks = new ArrayList<>();
+        for(Task task : section.getTasks()){
+            sectionTasks.add(taskMapper.toDto(task));
+        }
+        return sectionTasks;
+    }
+}
+
+/*
+ @Override
+    public boolean addTask(String courseCode, Task task) {
+        Course course = courseRepo.findCourseByCourseCode(courseCode)
+                .orElseThrow(() -> new CourseNotFoundExc(courseCode));
+        task.setCourse(course);
+        Task created = taskServ.createTask(task);
+        course.getTasks().add(created);
+        courseRepo.save(course);
+        return true;
+    }
+ */

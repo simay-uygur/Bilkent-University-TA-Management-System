@@ -4,18 +4,15 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.usermodel.WorkbookFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -23,6 +20,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.example.dto.FailedRowInfo;
 import com.example.dto.TaDto;
+import com.example.dto.TaTaskDto;
 import com.example.entity.Actors.Role;
 import com.example.entity.Actors.TA;
 import com.example.entity.General.AcademicLevelType;
@@ -39,9 +37,9 @@ import com.example.exception.taskExc.TaskIsNotActiveExc;
 import com.example.exception.taskExc.TaskNotFoundExc;
 import com.example.mapper.TaMapper;
 import com.example.repo.SectionRepo;
+import com.example.mapper.TaTaskMapper;
 import com.example.repo.TARepo;
 import com.example.repo.TaTaskRepo;
-
 
 import lombok.RequiredArgsConstructor;
 
@@ -50,23 +48,14 @@ import lombok.RequiredArgsConstructor;
 @Transactional(rollbackFor = Exception.class)
 public class TAServImpl implements TAServ {
     
-    @Autowired
-    private TARepo repo;
+    private final TARepo repo;
     private final TaMapper taMapper;
-
-
-    @Autowired
-    private TaskServ taskServ;
-    @Autowired
-    private TaTaskRepo taTaskRepo;
-
+    private final TaskServ taskServ;
+    private final TaTaskRepo taTaskRepo;
+    private final ScheduleServ scheduleServ;
+    private final PasswordEncoder encoder;
+    private final TaTaskMapper taTaskMapper;
     private final SectionRepo sectionRepo;
-    
-    @Autowired
-    private ScheduleServ scheduleServ;
-
-    @Autowired
-    private PasswordEncoder encoder;
 
     @Override
     public List<TaDto> getTAsBySectionCode(String sectionCode){
@@ -213,10 +202,10 @@ public class TAServImpl implements TAServ {
     }
     
     @Override
-    public Task getTaskById(int task_id, Long ta_id) {
+    public TaTaskDto getTaskById(int task_id, Long ta_id) {
         Optional<TaTask> optTaTask = taTaskRepo.findByTaskIdAndTaId(task_id, ta_id);
         TaTask taTask = optTaTask.orElseThrow(() -> new TaskNotFoundExc(task_id));
-        return taTask.getTask();
+        return taTaskMapper.toDto(taTask);
     }
 
     @Override
@@ -228,7 +217,7 @@ public class TAServImpl implements TAServ {
         if (!taskServ.checkAndUpdateStatusTask(task)) {
             throw new TaskIsNotActiveExc();
         }
-        taskServ.assignTA(task.getTaskId(), existingTA) ;
+        //taskServ.assignTA(task.getTaskId(), existingTA) ;
         return true ;
     }
     
@@ -239,23 +228,19 @@ public class TAServImpl implements TAServ {
             throw new TaNotFoundExc(ta_id);
         }
         TA ta = taOptional.get();
-        taskServ.unassignTA(task_id, ta) ; 
+        //taskServ.unassignTA(task_id, ta) ; 
         return true ;
     }
 
     @Override
-    public Set<Task> getAllTasks(Long id) {
+    public List<TaTaskDto> getAllTasTasks(Long id) {
         TA existingTA = repo.findById(id)
             .orElseThrow(() -> new TaNotFoundExc(id));
-        List<TaTask> ta_tasks = taTaskRepo.findAllByTaId(id);
-        Set<Task> tasks_list = new HashSet<>();
-        for (TaTask ta_task : ta_tasks) {
-            Task task = ta_task.getTask();
-            if (task != null) {
-                tasks_list.add(task);
-            }
+        List<TaTaskDto> tasks = new ArrayList<>();
+        for (TaTask ta_task : existingTA.getTaTasks()) {
+            tasks.add(taTaskMapper.toDto(ta_task));
         }
-        return tasks_list;
+        return tasks;
     }
 
     private void markDeleted(TA ta) {
@@ -267,7 +252,7 @@ public class TAServImpl implements TAServ {
         for (TaTask ta_task : ta_tasks) {
             Task task = ta_task.getTask();
             if (task != null) {
-                taskServ.unassignTA(task.getTaskId(), ta);
+                //taskServ.unassignTA(task.getTaskId(), ta);
             }
         }
         taTaskRepo.deleteAll(ta_tasks);
@@ -326,7 +311,7 @@ public class TAServImpl implements TAServ {
                     TA ta = optionalTA.map(existing -> { existing.setName(name);
                         existing.setSurname(surname);
                         existing.setAcademicLevel(level);
-                        existing.setIsActive(isActive);
+                        existing.setActive(isActive);
                         existing.setDeleted(false); // Just in case
                         return existing;
                     }).orElseGet(() -> {
@@ -336,7 +321,7 @@ public class TAServImpl implements TAServ {
                         newTa.setSurname(surname);
                         newTa.setWebmail(webmail);
                         newTa.setAcademicLevel(level);
-                        newTa.setIsActive(isActive);
+                        newTa.setActive(isActive);
                         newTa.setRole(Role.TA);
                         newTa.setPassword(encoder.encode("default123"));
                         newTa.setTotalWorkload(0);

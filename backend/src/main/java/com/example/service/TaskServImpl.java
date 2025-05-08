@@ -5,16 +5,19 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
+import com.example.dto.TaDto;
 import com.example.dto.TaskDto;
 import com.example.entity.Actors.TA;
 import com.example.entity.Courses.Lesson;
 import com.example.entity.Courses.Section;
+import com.example.entity.Exams.Exam;
+import com.example.entity.General.Date;
 import com.example.entity.Requests.RequestType;
 import com.example.entity.Requests.WorkLoadDto;
 import com.example.entity.Tasks.TaTask;
@@ -23,8 +26,6 @@ import com.example.entity.Tasks.TaskState;
 import com.example.exception.GeneralExc;
 import com.example.exception.NoPersistExc;
 import com.example.exception.taExc.TaNotFoundExc;
-import com.example.exception.taskExc.TaskLimitExc;
-import com.example.exception.taskExc.TaskNoTasExc;
 import com.example.exception.taskExc.TaskNotFoundExc;
 import com.example.mapper.TaskMapper;
 import com.example.repo.SectionRepo;
@@ -33,27 +34,26 @@ import com.example.repo.TaTaskRepo;
 import com.example.repo.TaskRepo;
 import com.example.dto.TaskDto;
 import com.example.entity.General.Date;
+import com.example.service.RequestServices.WorkLoadServ;
 
 import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 @Service
 @Slf4j
 @Transactional(rollbackOn = Exception.class)
+@RequiredArgsConstructor
 public class TaskServImpl implements TaskServ {
 
-    @Autowired
-    private TaskRepo taskRepo;
-
-    @Autowired
-    private TARepo taRepo;
-
-    @Autowired
-    private TaTaskRepo taTaskRepo;
-    @Autowired
-    private  SectionRepo sectionRepo;
-    @Autowired
-    private TaskMapper taskMapper;
+    private final TaskRepo taskRepo;
+    private final TARepo taRepo;
+    private final TaTaskRepo taTaskRepo;
+    private final TaskMapper taskMapper;
+    private final SectionRepo sectionRepo;
+    private final WorkLoadServ workLoadServ;
+    private final CourseOfferingServ courseOfferingServ;
+    private final RequestServ reqServ;
 
     @Override
     public TaskDto createTask(TaskDto taskDto, String sectionCode) {
@@ -93,9 +93,7 @@ public class TaskServImpl implements TaskServ {
         if (taskOptional.isEmpty()) {
             throw new TaskNotFoundExc(id);
         }
-
-        Task task = taskOptional.get();
-        taskRepo.delete(task);
+        taskRepo.deleteById(id);
         return true;
     }
 
@@ -118,9 +116,10 @@ public class TaskServImpl implements TaskServ {
     }
 
     @Override
-    public Task getTaskById(int id) {
-        return taskRepo.findById(id)
+    public TaskDto getTaskById(int id) {
+        Task task = taskRepo.findById(id)
                 .orElseThrow(() -> new TaskNotFoundExc(id));
+        return taskMapper.toDto(task);
     }
 
     @Override
@@ -134,13 +133,10 @@ public class TaskServImpl implements TaskServ {
             .orElseThrow(() -> new TaskNotFoundExc(task_id));
         
         existing.setDuration(incoming.getDuration());
-        existing.setTimePassed(incoming.isTimePassed());
         existing.setWorkload(incoming.getWorkload());
         existing.setTaskType(incoming.getTaskType());
         existing.setStatus(incoming.getStatus());
-        existing.setRequiredTAs(incoming.getRequiredTAs());
         existing.setSection(incoming.getSection());
-        existing.setExam(incoming.getExam());
         
         taskRepo.save(existing);
         return taskRepo.existsById(task_id);
@@ -167,11 +163,8 @@ public class TaskServImpl implements TaskServ {
             if (taTaskRepo.exists(task_id, ta.getId())) {
                 throw new GeneralExc("TA is already assigned to this task");
             }
-            if (task.getAmountOfTas() == task.getRequiredTAs()) {
-                throw new TaskLimitExc();
-            }
             // Create new TaTask relationship
-            TaTask taTask = new TaTask(task, ta, task.getAccessType());
+            TaTask taTask = new TaTask(task, ta);
             // Update task side
             task.setAmountOfTas(task.getAmountOfTas() + 1);
             if (task.getTasList() == null) {
@@ -187,95 +180,69 @@ public class TaskServImpl implements TaskServ {
     }
 
     @Override
-    public boolean assignTA(int task_id, TA ta) {
-        // Find existing entities
-        Task task = taskRepo.findById(task_id)
-                    .orElseThrow(() -> new TaskNotFoundExc(task_id));
+    public List<TaDto> assignTasToTask(List<TaDto> tas, int taskId, int sectionNum, String courseCode, Long instrId){
+        Task task = taskRepo.findById(taskId).orElseThrow(() -> new TaskNotFoundExc(taskId));
+        unassignTas(task, instrId);
+        for(TaDto taDto : tas){
+            TA ta = taRepo.findById(taDto.getId()).orElseThrow(() -> new TaNotFoundExc(taDto.getId()));
+            assignTA(task, ta, instrId);
+        }
+        return getTAsByTaskId(taskId);
+    }
+
+    @Override
+    @Transactional
+    public boolean assignTA(Task task, TA ta, Long instr_id) {
         // Check if assignment already exists
-        if (taTaskRepo.exists(task_id, ta.getId())) {
+        if (taTaskRepo.exists(task.getTaskId(), ta.getId())) {
             throw new GeneralExc("TA is already assigned to this task");
         }
-        //check if ta has the task on the same duration
-        for (TaTask taTask : ta.getTaTasks()) {
-            if (taTask.getTask().getDuration().equals(task.getDuration())) {
-                throw new GeneralExc("TA already has task on the same duration");
-            }
-        }
-        for(Section sec : ta.getSectionsAsStudent()){
-            for (Lesson lesson : sec.getLessons()){
-                if(task.getDuration().has(lesson.getDuration()))
-                    throw new GeneralExc("TA has lesson during that duration");
-            }
-        }
-        // Check task limits
-        if (task.getAmountOfTas() == task.getRequiredTAs()) {
-            throw new TaskLimitExc();
-        }
         
-        TaTask taTask = new TaTask( task, ta, task.getAccessType());
-        // Update task side
-        task.setAmountOfTas(task.getAmountOfTas() + 1);
-        if (task.getTasList() == null) {
-            task.setTasList(new ArrayList<>());
-        }
-        // Update TA side
-        if (ta.getTaTasks() == null) {
-            ta.setTaTasks(new ArrayList<>());
-        }
-        taTaskRepo.saveAndFlush(taTask);
+        if (hasDutyOrLessonOrExam(ta, task))
+            throw new GeneralExc("TA has a duty or lesson or exam on the same duration as the task");
+        
+        task.assignTo(ta);
+        taskRepo.save(task);
+        reqServ.deleteAllReceivedAndSendedSwapAndTransferRequestsBySomeTime(ta, task.getDuration());
         return true;
     }
 
+
+    public void unassignTas(Task task, Long instr_id){
+        for(TaTask taTask : task.getTasList()){
+            unassignTA(task, taTask.getTaOwner(), instr_id);
+        }
+    }
     @Override
-    public boolean unassignTA(int task_id, TA ta) {
-        Optional<Task> taskOptional = taskRepo.findById(task_id);
-        if (taskOptional.isEmpty()) {
-            throw new TaskNotFoundExc(task_id);
-        }
+    @Transactional
+    public boolean unassignTA(Task task, TA ta, Long instr_id) {
 
-        Task task = (Task) taskOptional.get();
-        if (task.getAmountOfTas() == 0) {
-            throw new TaskNoTasExc();
-        }
-
-        //TaTaskId id = new TaTaskId(task_id,ta.getId()) ;
-        Optional<TaTask> tas_taskOptional = taTaskRepo.findByTaskIdAndTaId(task_id, ta.getId());
-        if (tas_taskOptional.isEmpty()) {
-            throw new GeneralExc("TA not assigned to task");
-        }
-        TaTask taTask = tas_taskOptional.get();
-        taTaskRepo.delete(taTask);
-        task.getTasList().remove(taTask);
-        ta.getTaTasks().remove(taTask);
+        /*TaTask link = taTaskRepo.findByTaskIdAndTaId(task_id, ta.getId()).
+        orElseThrow(() -> new GeneralExc("TA with id " + ta.getId() + " is not assigned to the task with id " + task.getTaskId()));
+        
+        task.getTasList().remove(link);   
+        ta.getTaTasks().remove(link);   
+        task.removeTA();                 
+        taTaskRepo.delete(link);  */
+        /*link.setTask(null);
+        taskRepo.saveAndFlush(task); 
+        link.setTaOwner(null);*/
         task.removeTA();
-        taskRepo.saveAndFlush(task);
-        taRepo.saveAndFlush(ta);
-        taTaskRepo.saveAndFlush(taTask);
+        taTaskRepo.deleteByTaskAndTa(task.getTaskId(), ta.getId());
 
-        tas_taskOptional = taTaskRepo.findByTaskIdAndTaId(task_id, ta.getId());
-        if (tas_taskOptional.isEmpty()) {
-            throw new NoPersistExc("Unassignment");
-        }
         return true;
     }
 
     @Override
-    public List<TA> getTAsByTaskId(int task_id) {
+    public List<TaDto> getTAsByTaskId(int task_id) {
         Optional<Task> taskOptional = taskRepo.findById(task_id);
         if (taskOptional.isEmpty()) {
             throw new TaskNotFoundExc(task_id);
         }
 
         Task task = (Task) taskOptional.get();
-        if (task.getAmountOfTas() == 0) {
-            throw new TaskNoTasExc();
-        }
-
-        if (task.getTasList() == null) {
-            throw new TaskNoTasExc();
-        }
         
-        List<TA> tas_list = new ArrayList<>();
+        List<TaDto> tas_list = new ArrayList<>();
         for (TaTask t : task.getTasList()) {
             if (t.getTaOwner() == null) {
                 throw new GeneralExc("TA owner not found for task with ID " + task_id);
@@ -283,12 +250,18 @@ public class TaskServImpl implements TaskServ {
             if (t.getTaOwner().getId() == null) {
                 throw new GeneralExc("TA with ID " + t.getTaOwner().getId() + " not found for task with ID " + task_id);
             }
-            tas_list.add(t.getTaOwner()) ;
+            TA ta = t.getTaOwner();
+            TaDto taDto = new TaDto() ;
+            taDto.setId(ta.getId());
+            taDto.setName(ta.getName());
+            taDto.setSurname(ta.getSurname());
+            tas_list.add(taDto);
+            //taDto.se
         }
         return tas_list;
     }
 
-    @Override
+    /*@Override
     public boolean approveTask(int task_id) {
         Optional<Task> taskOptional = taskRepo.findById(task_id);
         if (taskOptional.isEmpty()) {
@@ -305,9 +278,9 @@ public class TaskServImpl implements TaskServ {
         }
     
         return true;
-    }
+    }*/
 
-    @Override
+    /*@Override
     public boolean rejectTask(int task_id) {
         Optional<Task> taskOptional = taskRepo.findById(task_id);
         if (taskOptional.isEmpty()) {
@@ -324,7 +297,7 @@ public class TaskServImpl implements TaskServ {
         }
     
         return true;
-    }
+    }*/
 
     /* @Override
     public boolean checkAndUpdateStatusTask(Task task) {
@@ -344,8 +317,9 @@ public class TaskServImpl implements TaskServ {
             return true;
         }
         return false;
-    } */
-   public boolean checkAndUpdateStatusTask(Task task) {
+    }*/
+
+    public boolean checkAndUpdateStatusTask(Task task) {
         if (task == null) {
             throw new GeneralExc("Task not found!");
         }
@@ -360,7 +334,7 @@ public class TaskServImpl implements TaskServ {
             {mark_active(task);}
         else{
             mark_completed(task); 
-            /* for (TaTask ta : task.getTasList()){
+            for (TaTask ta : task.getTasList()){
                 TA t = ta.getTaOwner(); 
                 WorkLoadDto workLoadDto = new WorkLoadDto();
                 workLoadDto.setTaskId(task.getTaskId());
@@ -378,7 +352,7 @@ public class TaskServImpl implements TaskServ {
                                             task.getTaskType().toString() + " with workload of " + 
                                             task.getWorkload() + " hours.");
                 workLoadServ.createWorkLoad(workLoadDto, t.getId());
-            } */
+            }
         }
         taskRepo.saveAndFlush(task);
         return true;
@@ -404,7 +378,7 @@ public class TaskServImpl implements TaskServ {
         return taskRepo.findDeletedTasks();
     }
 
-    private void mark_approved(Task t) {
+    /*private void mark_approved(Task t) {
         t.setStatus(TaskState.APPROVED);
         //Undone
     }
@@ -420,26 +394,7 @@ public class TaskServImpl implements TaskServ {
 
     private void reject(Task t){
         mark_rejected(t);
-    }
-
-    private void mark_not_responded(Task t) {
-        t.setStatus(TaskState.NORESPOND);
-    }
-
-    private void mark_pending(Task t) {
-        t.setStatus(TaskState.PENDING);
-    }
-
-    /* @Async("taskCheckExecutor")
-    @Scheduled(cron = "0 * * * * *")
-    public void checkTasksForTime(){
-        List<Task> tasks = taskRepo.findAll();
-        for(Task task : tasks){
-            //log.info("status I " + task.getStatus() + " " + task.getDuration().getStart().getHour()+":"+task.getDuration().getStart().getMinute() + "/" + task.getDuration().getFinish().getHour()+":"+task.getDuration().getFinish().getMinute() + " " + "-" + Thread.currentThread().getName());
-            checkAndUpdateStatusTask(task);
-            //log.info("status II " + task.getStatus() + " " + task.getDuration().getStart().getHour()+":"+task.getDuration().getStart().getMinute() + "/" + task.getDuration().getFinish().getHour()+":"+task.getDuration().getFinish().getMinute() + " " + "-" + Thread.currentThread().getName());
-        }
-    } */
+    }*/
     private void mark_not_active(Task t) {
         t.setStatus(TaskState.NOT_ACTIVE);
     }
@@ -447,6 +402,8 @@ public class TaskServImpl implements TaskServ {
     private void mark_active(Task t) {
         t.setStatus(TaskState.ACTIVE);
     }
+
+   
 
     private void mark_completed(Task t) {
         t.setStatus(TaskState.COMPLETED);
@@ -465,4 +422,44 @@ public class TaskServImpl implements TaskServ {
         }
     }
 
+    @Async("setExecutor")
+    public CompletableFuture<List<TaDto>> getTasToAssignToTask(String courseCode, String sectionCode, int task_id, Long instrId){
+        Task task = taskRepo.findById(task_id)
+                .orElseThrow(() -> new TaskNotFoundExc(task_id));
+        List<TaDto> tas = new ArrayList<>();
+        
+        Section section = courseOfferingServ.getSectionByNumber(courseCode, Integer.parseInt(sectionCode));
+        for (TA ta : section.getAssignedTas()){
+            if (ta.isActive() && !ta.isDeleted() && !hasDutyOrLessonOrExam(ta, task))
+            {
+                TaDto taDto = new TaDto();
+                taDto.setId(ta.getId());
+                taDto.setName(ta.getName());
+                taDto.setSurname(ta.getSurname());
+                tas.add(taDto);
+            }
+        }
+        return CompletableFuture.completedFuture(tas);
+    }
+
+    public boolean hasDutyOrLessonOrExam(TA ta, Task task) {
+        for (TaTask taTask : ta.getTaTasks()) {
+            if (taTask.getTask().getDuration().has(task.getDuration())) {
+                return true;
+            }
+        }
+        for (Section section : ta.getSectionsAsStudent()){
+            for (Lesson lesson : section.getLessons()) {
+                if (lesson.getDuration().has(task.getDuration())) {
+                    return true;
+                }
+            }
+        }
+        for (Exam exam : ta.getExams()){
+            if (exam.getDuration().has(task.getDuration())) {
+                return true;
+            }
+        }
+        return false;
+    }
 }

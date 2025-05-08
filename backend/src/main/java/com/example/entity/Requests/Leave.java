@@ -4,6 +4,7 @@ import com.example.entity.General.Event;
 
 import jakarta.persistence.Basic;
 import jakarta.persistence.Column;
+import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.Lob;
@@ -31,6 +32,7 @@ public class Leave extends Request{
     @Column(name = "attachment_content_type", length = 100)
     private String attachmentContentType;
 
-    @Column(name = "duration", unique = false, updatable = true)
+    @Embedded
+    @Column(name = "duration", unique = false, updatable = true,  nullable = true)
     private Event duration;
 }

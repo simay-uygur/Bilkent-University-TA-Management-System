@@ -1,5 +1,6 @@
 package com.example.repo;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -44,7 +45,7 @@ public interface TARepo extends JpaRepository<TA, Long> { // TA is the entity an
     /**
      * Check if TA as a student has any exam (Task with an Exam) conflicting with the given range.
      */
-    @Query("""
+    /*@Query("""
       SELECT CASE WHEN COUNT(tsk)>0 THEN TRUE ELSE FALSE END
       FROM Section s
       JOIN s.registeredTas ta
@@ -70,7 +71,7 @@ public interface TARepo extends JpaRepository<TA, Long> { // TA is the entity an
         @Param("endYear") int endYear,
         @Param("endMonth") int endMonth,
         @Param("endDay") int endDay
-    );
+    );*/
 
     /**
      * Check if TA as a student has any lesson conflicting with the given date range.
@@ -147,16 +148,22 @@ public interface TARepo extends JpaRepository<TA, Long> { // TA is the entity an
        WHERE  t.department = :deptName
        """)
     List<TA> findByDepartment(String deptName);
-  
-    List<TA> findBySectionsAsStudent_SectionCode(String sectionCode);
 
-    /* @Query("""
-       SELECT DISTINCT t
-       FROM   TA  t
-              JOIN     t.offeringsAsHelper o
-              LEFT JOIN FETCH t.sectionsAsStudent
-              LEFT JOIN FETCH t.sectionsAsHelper
-       WHERE  o.section.sectionCode = :sectionCode
-       """)
-    List<TA> findByOfferingsAsHelper_Section_SectionCode(String sectionCode); */
+    @Query("""
+    SELECT ta
+      FROM TA ta
+     WHERE ta.id IN :candidateIds
+       AND NOT EXISTS (
+         SELECT 1
+           FROM Exam e
+           JOIN e.assignedTas a
+          WHERE a   = ta
+            AND e.duration.start BETWEEN :windowStart AND :windowEnd
+       )
+    """)
+  List<TA> findAvailableWithinOneDayWindow(
+    @Param("candidateIds") List<Long> candidateIds,
+    @Param("windowStart")   LocalDateTime windowStart,
+    @Param("windowEnd")     LocalDateTime windowEnd
+  );
 }

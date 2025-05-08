@@ -1,12 +1,25 @@
 package com.example.entity.Exams;
 
+import java.util.List;
+
+import com.example.entity.Actors.TA;
 import com.example.entity.General.ClassRoom;
 import com.example.entity.General.Student;
-import jakarta.persistence.*;
+
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
+import jakarta.persistence.ManyToMany;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
-
-import java.util.List;
 
 /**
  * An individual room assignment for a single exam.
@@ -22,14 +35,13 @@ public class ExamRoom {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int examRoomId;          //auto generated
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    private ClassRoom classRoom;      // FK kept in the same table (no name override needed)
+    @ManyToOne(fetch = FetchType.LAZY,
+            cascade = { CascadeType.PERSIST, CascadeType.MERGE })
+    @JoinColumn(name = "classroom_id", nullable = false)
+    private ClassRoom examRoom;      // FK kept in the same table (no name override needed)
 
     @Column(name = "isApproved", nullable = false)
     private boolean approved = false;
-
-    @Column(name = "workload", nullable = false)
-    private int workload;
 
     @ManyToMany(fetch = FetchType.LAZY,
             cascade = { CascadeType.PERSIST, CascadeType.MERGE })
@@ -40,12 +52,21 @@ public class ExamRoom {
     )
     private List<Student> studentsList;
 
+    @ManyToMany(fetch = FetchType.LAZY,
+            cascade = { CascadeType.PERSIST, CascadeType.MERGE })
+    @JoinTable(
+            name               = "examroom_ta_list",
+            joinColumns        = @JoinColumn(name = "examroom_id"),
+            inverseJoinColumns = @JoinColumn(name = "ta_id")
+    )
+    private List<TA> tasAsStudentsList; // TODO: change to TA entity
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "exam_id", nullable = false)
     private Exam exam;
 
     public String getExamRoomCode() {
-        return classRoom != null ? classRoom.toString() : null; // hope it works
+        return examRoom != null ? examRoom.getClassroomId() : null;
     }
 }
 

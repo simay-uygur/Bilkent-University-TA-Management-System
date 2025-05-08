@@ -1,11 +1,14 @@
 
 package com.example.repo;
 
-import com.example.entity.Courses.CourseOffering;
+import java.util.Optional;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import com.example.entity.Courses.CourseOffering;
+import com.example.entity.General.Term;
 import java.util.List;
 import java.util.Optional;
 
@@ -57,4 +60,12 @@ Optional<CourseOffering>findByCourseCode(@Param("code") String code);
     //Optional<CourseOffering> findCourseOfferingByCourse_CourseIdAndSemester_SemesterId(Integer courseId, Long semesterId);
     //Optional<CourseOffering> findByCourse_IdAndSemester_Id(Integer courseId, Long semesterId);
     //Optional<CourseOffering> findByCourse_IdAndSemester_Id(Integer courseId, Long semesterId);
+
+    Optional<CourseOffering> findByCourse_CourseCodeAndSemester_YearAndSemester_Term(
+        String courseCode,
+        int year,
+        Term term
+    );
+
+    Optional<CourseOffering> findByCourse_CourseCode(String courseCode);
 }

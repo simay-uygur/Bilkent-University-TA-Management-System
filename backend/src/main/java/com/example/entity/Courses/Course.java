@@ -1,16 +1,13 @@
 package com.example.entity.Courses;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import org.hibernate.annotations.DynamicUpdate;
 
-import com.example.entity.Actors.TA;
+import com.example.dto.StudentDto;
 import com.example.entity.General.AcademicLevelType;
 import com.example.entity.General.Student;
-import com.example.entity.Tasks.Task;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
 import jakarta.persistence.CascadeType;
@@ -23,8 +20,6 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
-import jakarta.persistence.JoinTable;
-import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
@@ -80,5 +75,15 @@ public class Course {
         return course.getCourseId() == this.courseId;
     }
 
+    public int getCapacity(){
+        int capacity = 0;
+        for (CourseOffering courseOffering : courseOfferings) {
+            for (Section section : courseOffering.getSections()) {
+                capacity += section.getRegisteredStudents().size();
+                capacity += section.getRegisteredTas().size();
+            }
+        }
+        return capacity;
+    }
     //coordinator- deleted now only instructors
 }

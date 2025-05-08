@@ -1,17 +1,8 @@
 package com.example.controller;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import com.example.dto.CourseDto;
-import com.example.dto.InstructorDto;
-import com.example.dto.TaDto;
-import com.example.dto.TaskDto;
-import com.example.entity.Courses.CourseOffering;
-import com.example.mapper.TaMapper;
-import com.example.service.CourseOfferingServ;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -22,12 +13,16 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.example.dto.CourseDto;
+import com.example.dto.TaDto;
+import com.example.dto.TaskDto;
 import com.example.entity.Courses.Course;
 import com.example.entity.Courses.Section;
 import com.example.entity.Tasks.TaTask;
 import com.example.entity.Tasks.Task;
-
+import com.example.mapper.TaMapper;
 import com.example.repo.CourseRepo;
+import com.example.service.CourseOfferingServ;
 import com.example.service.CourseServ;
 
 import lombok.RequiredArgsConstructor;
@@ -37,14 +32,9 @@ import lombok.RequiredArgsConstructor;
 @RestController
 @RequiredArgsConstructor
 public class CourseController {
-    @Autowired
     private CourseServ courseServ; // this is used to check if the course exists in the database
-
-    @Autowired
     private CourseRepo courseRepo;
-
     private final TaMapper taMapper;
-    @Autowired
     private CourseOfferingServ courseOfferingServ;
 
     @DeleteMapping("api/course/{course_code}")
@@ -124,16 +114,13 @@ public class CourseController {
                 .map(taMapper::toDto)
                 .collect(Collectors.toList());
 
-        String durationStr = task.getDuration() != null
-                ? task.getDuration().toString()
-                : null;
-
         TaskDto dto = new TaskDto(
                 task.getTaskType().toString(),
                 taDtos,
                 "Task #" + task.getTaskId(),
-                durationStr,
-                task.getStatus().toString()
+                task.getDuration(),
+                task.getStatus().toString(),
+                task.getWorkload()
         );
 
         return ResponseEntity.ok(dto);

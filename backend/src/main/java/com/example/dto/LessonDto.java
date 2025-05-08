@@ -1,6 +1,8 @@
 package com.example.dto;
 
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
 @NoArgsConstructor
@@ -26,3 +28,6 @@ public class LessonDto {
 //}
 //// exam capacity is not necessary (it can be deleted)   and from the request both classroomid and exam capacity is received as null
 
+/*private Event duration;
+    private String classCode;  // e.g. "A101"
+    private String room;   */

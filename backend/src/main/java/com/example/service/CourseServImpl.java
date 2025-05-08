@@ -3,12 +3,10 @@ package com.example.service;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -21,13 +19,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.example.ExcelHelpers.FailedRowInfo;
 import com.example.dto.CourseDto;
-import com.example.dto.InstructorDto;
-import com.example.dto.LessonDto;
-import com.example.dto.SectionDto;
-import com.example.dto.StudentDto;
-import com.example.dto.TaDto;
-import com.example.entity.Actors.Instructor;
-import com.example.entity.Actors.TA;
 import com.example.entity.Courses.Course;
 import com.example.entity.Courses.CourseOffering;
 import com.example.entity.Courses.Department;
@@ -39,8 +30,6 @@ import com.example.exception.Course.NoPrereqCourseFound;
 import com.example.exception.GeneralExc;
 import com.example.exception.NoPersistExc;
 import com.example.mapper.CourseMapper;
-import com.example.mapper.CourseOfferingMapper;
-import com.example.mapper.LessonMapper;
 import com.example.repo.CourseRepo;
 import com.example.repo.DepartmentRepo;
 import com.example.repo.SectionRepo;
@@ -54,12 +43,9 @@ import lombok.RequiredArgsConstructor;
 public class CourseServImpl implements CourseServ {
 
     private final CourseRepo courseRepo;
-    private final TAServ taServ;
     private final TaskServ taskServ;
     private final SectionRepo secRepo;
     private final DepartmentRepo departmentRepo;
-    private final CourseOfferingMapper offeringMapper;
-    private final LessonMapper lessonMapper;
     private final CourseMapper courseMapper;
 
     @Override
@@ -73,17 +59,17 @@ public class CourseServImpl implements CourseServ {
     @Override
     public List<CourseDto> getCoursesByDepartment(String deptName) {
         List<Course> courses = courseRepo.findCourseByDepartmentName(deptName)
-                                         .orElse(Collections.emptyList());
+                                        .orElse(Collections.emptyList());
         return courses.stream()
-                      .map(courseMapper::toDto)
-                      .collect(Collectors.toList());
+                    .map(courseMapper::toDto)
+                    .collect(Collectors.toList());
     }
     @Override
     public boolean addSection(String courseCode, Section section) {
         Course course = courseRepo.findCourseByCourseCode(courseCode)
                 .orElseThrow(() -> new CourseNotFoundExc(courseCode));
 
-        if (course.getCourseOfferings() == null || course.getCourseOfferings().isEmpty()) {
+        if (course.getCourseOfferings() == null) {
             throw new GeneralExc("No offering found for course: " + courseCode);
         }
 
