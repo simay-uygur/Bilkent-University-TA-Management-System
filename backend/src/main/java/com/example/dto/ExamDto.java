@@ -8,16 +8,14 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 public class ExamDto {
-    private Event    duration;
-    private String courseCode;
-    private String       type;
-    private List<String> examRooms;
-    private int   requiredTas;
-    private Boolean swapIsEnabled;
-    private Integer workload;
+    private Event duration;            // start/finish
+    private String type;               // örn. "FINAL"
+    private List<String> examRooms;    // ["A-104","A-105","A-106"]
+    private Integer requiredTas;           // 6
+    private Boolean swapIsEnabled;     // true
+    private Integer workload;              // 4
 }

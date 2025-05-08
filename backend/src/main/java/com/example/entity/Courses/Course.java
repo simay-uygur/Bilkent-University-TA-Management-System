@@ -5,9 +5,7 @@ import java.util.List;
 
 import org.hibernate.annotations.DynamicUpdate;
 
-import com.example.dto.StudentDto;
 import com.example.entity.General.AcademicLevelType;
-import com.example.entity.General.Student;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
 import jakarta.persistence.CascadeType;

@@ -5,11 +5,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import com.example.entity.Courses.Section;
 import org.springframework.stereotype.Service;
 
 import com.example.entity.Actors.TA;
-import com.example.entity.Courses.Course;
+import com.example.entity.Courses.Section;
 import com.example.entity.Exams.Exam;
 import com.example.entity.General.AcademicLevelType;
 import com.example.entity.General.Date;
