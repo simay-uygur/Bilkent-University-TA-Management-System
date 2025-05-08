@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import BackBut from '../../components/Buttons/BackBut';
 import ConPop from '../../components/PopUp/ConPop';
-import styles from './AssignTACourse.module.css';
+import styles from './CourseTA.module.css';
 import axios from 'axios';
 
 interface Course {
@@ -15,7 +15,7 @@ interface Course {
   tasLeft: number;
 }
 
-const AssignTACourse: React.FC = () => {
+const CourseTA: React.FC = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
 
@@ -166,7 +166,8 @@ const AssignTACourse: React.FC = () => {
   );
 };
 
-export default AssignTACourse;
+export default CourseTA;
+
 /* // src/pages/AssignTACourse/AssignTACourse.tsx
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';

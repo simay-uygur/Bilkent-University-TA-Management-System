@@ -13,8 +13,9 @@ export interface Exam {
   date: string;
   startTime: string;
   endTime: string;
-  neededTAs: number;
-  filledTAs: number;
+  neededTAs?: number;
+  filledTAs?: number;
+  classroom: string;
 }
 
 const sampleExams: Exam[] = [
@@ -27,6 +28,7 @@ const sampleExams: Exam[] = [
     endTime: '12:00',
     neededTAs: 5,
     filledTAs: 2,
+    classroom: 'A-101',
   },
   {
     id: 'e2',
@@ -37,6 +39,7 @@ const sampleExams: Exam[] = [
     endTime: '16:00',
     neededTAs: 4,
     filledTAs: 4,
+    classroom: 'A-101',
   },
   {
     id: 'e3',
@@ -47,6 +50,7 @@ const sampleExams: Exam[] = [
     endTime: '11:00',
     neededTAs: 3,
     filledTAs: 1,
+    classroom: 'A-101',
   },
 ];
 
@@ -105,6 +109,7 @@ const ViewAddExam: React.FC = () => {
               <th>Date</th>
               <th>Start</th>
               <th>End</th>
+              <th>Classroom</th>
               <th>TA Needed</th>
               <th>TA Filled</th>
               <th>TA Left</th>
@@ -118,6 +123,7 @@ const ViewAddExam: React.FC = () => {
                 <td>{exam.date}</td>
                 <td>{exam.startTime}</td>
                 <td>{exam.endTime}</td>
+                <td>{exam.classroom}</td>
                 <td>{exam.neededTAs}</td>
                 <td>{exam.filledTAs}</td>
                 <td>{exam.neededTAs-exam.filledTAs}</td>

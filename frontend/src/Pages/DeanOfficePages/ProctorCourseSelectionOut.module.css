@@ -1,10 +1,11 @@
-/* src/pages/AssignProctor/AssignProctorListPage.module.css */
+/* src/pages/AssignProctor/ProctorCourseSelection.module.css */
 
 .pageWrapper {
     display: flex;
     flex-direction: column;
     min-height: 100vh;
     background: #f0faff;
+    padding: 2rem;
   }
   
   .headerRow {
@@ -13,20 +14,20 @@
     padding: 16px;
     background: #f0faff;
   }
-
-  .container {
-    flex: 1;
-    width: 100%;
-    margin: 0 auto;
-  }
   
   .title {
     flex: 1;
     text-align: center;
-    margin-bottom: 24px;
     margin: 0;
     font-size: 1.75rem;
     color: #150063;
+  }
+  
+  .container {
+    flex: 1;
+    width: 100%;
+    margin: 0 auto;
+    padding-bottom: 24px;
   }
   
   .table {
@@ -34,21 +35,30 @@
     border-collapse: collapse;
   }
   
-  .headings{
+  .headings {
     background-color: #150063;
   }
   
   .table th,
   .table td {
     padding: 12px 8px;
-    border: 1px solid #000000;
+    border: 1px solid #000;
     text-align: left;
   }
   
   .table th {
     background-color: #00067b;
     font-weight: 600;
-    color: #ffffff;
+    color: #fff;
+  }
+  
+  .table tbody tr {
+    transition: background-color 0.2s;
+    background-color: #84f1f3;
+  }
+  
+  .table tbody tr:hover {
+    background-color: rgba(0, 0, 0, 0.05);
   }
   
   .actions {
@@ -59,7 +69,19 @@
   .actions button {
     font-size: 0.875rem;
     padding: 6px 12px;
+    background: #3b82f6;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background 0.2s;
   }
+  
+  .actions button:hover {
+    background: #2563eb;
+  }
+  
+  /* Reuse ConPop modal styles if needed */
   .modalBackdrop {
     position: fixed;
     top: 0;
@@ -75,7 +97,7 @@
   }
   
   .modal {
-    background: white;
+    background: #fff;
     padding: 1.5rem;
     border-radius: 8px;
     width: 90%;
@@ -83,12 +105,10 @@
     box-shadow: 0 2px 10px rgba(0,0,0,0.1);
   }
   
-  .field {
-    margin-bottom: 1rem;
-  }
-  
-  .input {
-    width: 60px;
+  .modal h2,
+  .modal p,
+  .centeredText {
+    text-align: center;
   }
   
   .modalActions {
@@ -99,7 +119,7 @@
   
   .sendBtn {
     background-color: #3b82f6;
-    color: white;
+    color: #fff;
     border: none;
     padding: 0.5rem 1rem;
     border-radius: 4px;
@@ -108,14 +128,10 @@
   
   .cancelBtn {
     background-color: #ff3737;
-    color: #ffffff;
+    color: #fff;
     border: none;
     padding: 0.5rem 1rem;
     border-radius: 4px;
     cursor: pointer;
   }
-  .modal h2,
-.modal p,
-.centeredText {
-  text-align: center;
-}
+  

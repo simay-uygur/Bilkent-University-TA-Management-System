@@ -43,11 +43,10 @@ const InsNavBar: React.FC = () => {
               key={item.path}
               onClick={() => {
                 if (item.path === '/logout') {
-                  
                   localStorage.removeItem('jwt');
-            localStorage.removeItem('userRole');
-            localStorage.removeItem('userId');
-            localStorage.removeItem('userName');
+                  localStorage.removeItem('userRole');
+                  localStorage.removeItem('userId');
+                  localStorage.removeItem('userName');
                   navigate('/login', { replace: true });
                 } else {
                   navigate(item.path);

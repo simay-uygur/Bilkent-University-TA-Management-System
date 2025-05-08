@@ -4,6 +4,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import NavBar from '../../components/NavBars/NavBar';
 import { login } from '../../api';
 import styles from './Login.module.css';
+import LoadingPage from './LoadingPage';
 
 interface Credentials {
   id: string;
@@ -13,14 +14,17 @@ interface Credentials {
 interface JwtResponse {
   token: string;
   role: string;
-  
-  // other fields as returned
+  userId?: string;
+  name?: string;
 }
 
 const Login: React.FC = () => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [errors, setErrors]   = useState<{ username?: string; password?: string }>({});
+  const [submitError, setSubmitError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
+
   const navigate = useNavigate();
   const location = useLocation();
   const [referrer, setReferrer] = useState<string | null>(null);
@@ -34,36 +38,38 @@ const Login: React.FC = () => {
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    const newErrors: { username?: string; password?: string } = {};
+    setSubmitError(null);
 
+    const newErrors: { username?: string; password?: string } = {};
     if (!username.trim()) newErrors.username = 'Username is required.';
     if (!password)      newErrors.password = 'Password is required.';
-
     if (Object.keys(newErrors).length) {
       setErrors(newErrors);
       return;
     }
 
+    setLoading(true);
+    setErrors({});
+
     try {
-      setErrors({});
       const res = await login({ id: username, password });
-      const jwt = res.data?.token;
-      const role = res.data?.role;
-      const userId = res.data?.userId || username; // Get user ID from response or use username
-      const name = res.data?.name;
-      
+      const data: JwtResponse = res.data;
+      const jwt = data.token;
+      const role = data.role;
+      const userId = data.userId || username;
+      const name = data.name;
+
       if (!jwt) {
         setErrors({ password: 'Invalid username or password.' });
+        setLoading(false);
         return;
       }
 
-      // store token
+      // store token and user info
       localStorage.setItem('jwt', jwt);
       localStorage.setItem('userId', userId);
       localStorage.setItem('userRole', role);
       if (name) localStorage.setItem('userName', name);
-      // set axios default header if used elsewhere
-      // axios.defaults.headers.common['Authorization'] = `Bearer ${jwt}`;
 
       // choose landing page by role
       let home = '/login';
@@ -85,9 +91,13 @@ const Login: React.FC = () => {
       navigate(referrer || home, { replace: true });
     } catch (err) {
       console.error('Login failed', err);
-      setErrors({ password: 'Invalid username or password.' });
+      setSubmitError('An error occurred. Please try again.');
+    } finally {
+      setLoading(false);
     }
   };
+  
+  if (loading) return <LoadingPage />;
 
   return (
     <div className={styles.loginPageWrapper}>
@@ -96,6 +106,7 @@ const Login: React.FC = () => {
       <div className={styles.container}>
         <div className={styles.card}>
           <h1 className={styles.title}>Sign In</h1>
+          {submitError && <div className={styles.errorText}>{submitError}</div>}
           <form onSubmit={handleSubmit} className={styles.form} noValidate>
             <div className={styles.formGroup}>
               <label htmlFor="username" className={styles.label}>Username</label>

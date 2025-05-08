@@ -18,7 +18,8 @@ const DeanOfNavBar: React.FC = () => {
 
   const navItems: NavItem[] = [
     { label: 'Home',          icon: <Home size={18} />,     path: '/deans-office' },
-    { label: 'Proctoring',    icon: <BookOpen size={18} />, path: '/deans-office/proctor' },
+    { label: 'Proctoring In',    icon: <BookOpen size={18} />, path: '/deans-office/proctor-in' },
+    { label: 'Proctoring Out',    icon: <BookOpen size={18} />, path: '/deans-office/proctor-out' },
     { label: 'Manage Exams',  icon: <BookOpen size={18} />, path: '/deans-office/view-add-exams' },
     { label: 'Notifications', icon: <Bell size={18} />,     path: '/deans-office/notification' },
     { label: 'Settings',      icon: <Settings size={18} />, path: '/deans-office/settings' },
