@@ -4,7 +4,9 @@ import java.util.List;
 
 import org.springframework.stereotype.Service;
 
+import com.example.entity.Actors.Instructor;
 import com.example.entity.Actors.Role;
+import com.example.entity.Actors.TA;
 import com.example.entity.Actors.User;
 import com.example.entity.General.Date;
 import com.example.entity.Requests.WorkLoad;
@@ -12,7 +14,9 @@ import com.example.entity.Requests.WorkLoadDto;
 import com.example.entity.Tasks.TaTask;
 import com.example.exception.GeneralExc;
 import com.example.exception.UserNotFoundExc;
+import com.example.exception.taExc.TaNotFoundExc;
 import com.example.repo.RequestRepos.WorkLoadRepo;
+import com.example.repo.InstructorRepo;
 import com.example.repo.TARepo;
 import com.example.repo.TaTaskRepo;
 import com.example.repo.UserRepo;
@@ -27,18 +31,17 @@ public class WorkLoadServImpl implements WorkLoadServ {
     private final WorkLoadRepo workLoadRepo;
     private final TARepo taRepo;
     private final TaTaskRepo taTaskRepo;
+    private final InstructorRepo instrRepo;
 
     @Override
     public void createWorkLoad(WorkLoadDto dto, Long senderId) {
-        User sender = userRepo.findById(senderId)
-        .orElseThrow(() -> new UserNotFoundExc(senderId));
-        User receiver = userRepo.findById(dto.getReceiverId())
-        .orElseThrow(() -> new UserNotFoundExc(dto.getReceiverId()));
+        TA ta = taRepo.findById(senderId).orElseThrow(() -> new TaNotFoundExc(senderId));
+        Instructor instr = instrRepo.
+        findById(dto.getReceiverId()).
+        orElseThrow(() -> new GeneralExc("Instructor with id " + dto.getReceiverId() + " not found."));
         TaTask taTask = taTaskRepo.findByTaskIdAndTaId(dto.getTaskId(), senderId).
                         orElseThrow(() -> new GeneralExc("TA with id " + senderId + " does not have task with id " + dto.getTaskId()));
-        if (receiver.getRole() != Role.INSTRUCTOR) {
-            throw new GeneralExc("Receiver must be an instructor.");
-        }
+                    
         WorkLoad workloadReq = new WorkLoad();
         
         Date sent_time = new Date().currenDate();
@@ -46,10 +49,10 @@ public class WorkLoadServImpl implements WorkLoadServ {
         workloadReq.setRequestType(dto.getRequestType());
         workloadReq.setDescription(dto.getDescription());
         workloadReq.setTask(taTask.getTask());
-        workloadReq.setSender(sender);
-        workloadReq.setReceiver(receiver);
-        receiver.getReceivedRequests().add(workloadReq);
-        sender.getSendedRequests().add(workloadReq);
+        workloadReq.setSender(ta);
+        workloadReq.setReceiver(instr);
+        ta.getSendedWorkLoadRequests().add(workloadReq);
+        instr.getReceivedWorkloadRequests().add(workloadReq);
         workLoadRepo.save(workloadReq);
     }
 

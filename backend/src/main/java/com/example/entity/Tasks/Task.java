@@ -128,6 +128,7 @@ public class Task {
         else 
             this.workload = workload;
     }
+    
     @OneToMany(mappedBy = "task", cascade = CascadeType.ALL)
     private List<WorkLoad> workLoadRequestList = new ArrayList<>(); // List of WorkLoad objects associated with this task
 

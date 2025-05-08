@@ -6,6 +6,10 @@ import lombok.NoArgsConstructor;
 
 import java.util.List;
 
+import com.example.entity.Requests.SwapDto;
+import com.example.entity.Requests.TransferProctoringDto;
+import com.example.entity.Requests.WorkLoadDto;
+
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
@@ -21,8 +25,11 @@ public class TaDto {
     private List<String> courses;
     private List<String> lessons;
     private List<String> tasks;
-    private List<RequestDto> sendedRequests;
-    private List<RequestDto> receivedRequests;
+    private List<WorkLoadDto> sendedWorkLoadRequests;
+    private List<SwapDto> sendedSwapRequests;
+    private List<TransferProctoringDto> sendedTransRequests;
+    private List<SwapDto> receivedSwapRequests;
+    private List<TransferProctoringDto> receivedTransRequests;
     private List<String> tasksAsStudent;
     private List<String> tasksAsTA;
     private String proctorType;

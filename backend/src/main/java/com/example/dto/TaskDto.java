@@ -16,6 +16,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class TaskDto {
+    private int id;
     private String type;
 
     /**
@@ -43,8 +44,8 @@ public class TaskDto {
     /**
      * Convenience constructor for tasks with no assigned TAs.
      */
-    public TaskDto(String type, String description, Event duration, String status, int workload) {
-        this(type, List.of(), description, duration, status, workload);
+    public TaskDto(int id, String type, String description, Event duration, String status, int workload) {
+        this(id, type, List.of(), description, duration, status, workload);
     }
 }
 

@@ -2,13 +2,20 @@ package com.example.entity.Actors;
 
 
 
+import java.util.ArrayList;
+import java.util.List;
+
 import com.example.entity.General.Faculty;
+import com.example.entity.Requests.ProctorTaFromFaculties;
+import com.example.entity.Requests.ProctorTaFromOtherFaculty;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.Inheritance;
 import jakarta.persistence.InheritanceType;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
@@ -37,4 +44,13 @@ public class DeanOffice extends User {
                       String webmail) {
         super(id, password, name, surname, webmail, Role.DEANS_OFFICE, false);
     }*/
+
+    @OneToMany(mappedBy = "sender",fetch= FetchType.LAZY, cascade= CascadeType.ALL)
+    private List<ProctorTaFromFaculties> sendedFromFacsRequests = new ArrayList<>();
+
+    @OneToMany(mappedBy = "sender",fetch= FetchType.LAZY, cascade= CascadeType.ALL)
+    private List<ProctorTaFromOtherFaculty> sendedFromOtherFacRequests = new ArrayList<>();
+
+    @OneToMany(mappedBy = "receiver",fetch= FetchType.LAZY, cascade= CascadeType.ALL)
+    private List<ProctorTaFromOtherFaculty> receivedFromFacsRequests = new ArrayList<>();
 }

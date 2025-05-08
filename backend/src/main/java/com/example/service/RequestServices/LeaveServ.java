@@ -21,5 +21,5 @@ public interface LeaveServ {
     public void updateLeaveRequest(LeaveDTO dto, Long requestId, Long userId);
     public void deleteLeaveRequest(Long requestId, Long userId);
     public List<LeaveDTO> getRequestsBySenderId(Long senderId);
-    public List<LeaveDTO> getRequestsByReceiverId(Long receiverId);
+    public List<LeaveDTO> getRequestsByReceiverName(String receiverId);
 }
