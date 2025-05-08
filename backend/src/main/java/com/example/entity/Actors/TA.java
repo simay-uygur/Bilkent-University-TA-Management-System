@@ -12,8 +12,13 @@ import com.example.entity.Exams.Exam;
 import com.example.entity.Exams.ExamRoom;
 import com.example.entity.General.AcademicLevelType;
 import com.example.entity.General.ProctorType;
+import com.example.entity.Requests.Request;
+import com.example.entity.Requests.Swap;
+import com.example.entity.Requests.TransferProctoring;
+import com.example.entity.Requests.WorkLoad;
 import com.example.entity.Tasks.TaTask;
 import com.example.exception.NoPersistExc;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
 import jakarta.persistence.CascadeType;
@@ -117,6 +122,33 @@ public class TA extends User {
     public int hashCode() {
         return Objects.hashCode(getId());
     }
+
+    @OneToMany(mappedBy = "sender", cascade = CascadeType.ALL, fetch= FetchType.LAZY)
+    //@JsonManagedReference
+    @JsonIgnoreProperties("sender") // Only ignore the back-reference
+    private List<Swap> sendedSwapRequests = new ArrayList<>();
+    
+
+    @OneToMany(mappedBy = "receiver",fetch= FetchType.LAZY, cascade= {CascadeType.REFRESH,CascadeType.MERGE})
+    //@JsonManagedReference
+    @JsonIgnoreProperties("receiver") // Only ignore the back-reference
+    private List<Swap> receivedSwapRequests;
+
+    @OneToMany(mappedBy = "sender", cascade = CascadeType.ALL, fetch= FetchType.LAZY)
+    //@JsonManagedReference
+    @JsonIgnoreProperties("sender") // Only ignore the back-reference
+    private List<TransferProctoring> sendedTransferRequests = new ArrayList<>();
+    
+
+    @OneToMany(mappedBy = "receiver",fetch= FetchType.LAZY, cascade= {CascadeType.REFRESH,CascadeType.MERGE})
+    //@JsonManagedReference
+    @JsonIgnoreProperties("receiver") // Only ignore the back-reference
+    private List<TransferProctoring> receivedTransferRequests = new ArrayList<>();
+
+    @OneToMany(mappedBy = "sender",fetch= FetchType.LAZY, cascade= {CascadeType.REFRESH,CascadeType.MERGE})
+    //@JsonManagedReference
+    @JsonIgnoreProperties("sender") // Only ignore the back-reference
+    private List<WorkLoad> sendedWorkLoadRequests;
 }
 
 /*

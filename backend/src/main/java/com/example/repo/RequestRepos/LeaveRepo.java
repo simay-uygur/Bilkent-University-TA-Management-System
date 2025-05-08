@@ -10,10 +10,11 @@ import com.example.entity.Requests.Leave;
 
 @Repository
 public interface LeaveRepo extends JpaRepository<Leave, Long> {
-    boolean existsBySenderIdAndReceiverId(Long senderId, Long receiverId);
     Optional<List<Leave>> findBySenderId(Long senderId);
-    Optional<List<Leave>> findByReceiverId(Long receiverId);
-    Optional<List<Leave>> findBySenderIdAndReceiverId(Long senderId, Long receiverId);
-    boolean existsBySenderIdAndReceiverIdAndIsRejected(Long id, Long recId, boolean isRejected);
+    List<Leave> findAllByReceiverNameAndIsPendingTrue(String id);
+    Optional<List<Leave>> findByReceiverName(String name);
+    boolean existsBySenderIdAndReceiverNameAndIsRejected(Long senderId, String receiverName, boolean isRejected);
+
+
 }
 

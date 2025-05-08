@@ -20,27 +20,26 @@ import com.example.dto.RequestDto;
 import com.example.entity.Actors.Instructor;
 import com.example.entity.Requests.LeaveDTO;
 import com.example.entity.Requests.ProctorTaFromFacultiesDto;
-import com.example.entity.Requests.ProctorTaInFacultyDto;
+import com.example.entity.Requests.ProctorTaInDepartmentDto;
 import com.example.entity.Requests.Request;
 import com.example.entity.Requests.SwapDto;
-import com.example.entity.Requests.SwapEnableDto;
 import com.example.entity.Requests.TransferProctoringDto;
+import com.example.entity.Requests.WorkLoad;
 import com.example.entity.Requests.WorkLoadDto;
 import com.example.exception.UserNotFoundExc;
 import com.example.mapper.RequestMapper;
+import com.example.repo.DepartmentRepo;
 import com.example.repo.InstructorRepo;
 import com.example.repo.RequestRepos.LeaveRepo;
 import com.example.repo.RequestRepos.ProctorTaFromFacultiesRepo;
-import com.example.repo.RequestRepos.ProctorTaInFacultyRepo;
-import com.example.repo.RequestRepos.SwapEnableRepo;
+import com.example.repo.RequestRepos.ProctorTaInDepartmentRepo;
 import com.example.repo.RequestRepos.SwapRepo;
 import com.example.repo.RequestRepos.TransferProctoringRepo;
 import com.example.repo.RequestRepos.WorkLoadRepo;
 import com.example.service.RequestServ;
 import com.example.service.RequestServices.LeaveServ;
 import com.example.service.RequestServices.ProctorTaFromFacultiesServ;
-import com.example.service.RequestServices.ProctorTaInFacultyServ;
-import com.example.service.RequestServices.SwapEnableServ;
+import com.example.service.RequestServices.ProctorTaInDepartmentServ;
 import com.example.service.RequestServices.SwapServ;
 import com.example.service.RequestServices.TransferProctoringServ;
 import com.example.service.RequestServices.WorkLoadServ;
@@ -55,14 +54,12 @@ public class RequestController {
 
     private final SwapServ swapServ;
     private final SwapRepo swapRepo;
-    private final SwapEnableServ swapEnableServ;
-    private final SwapEnableRepo swapEnableRepo;
     private final LeaveServ leaveServ;
     private final LeaveRepo leaveRepo;
     private final ProctorTaFromFacultiesServ proctorTaFromFacultiesServ;
     private final ProctorTaFromFacultiesRepo fromFacRepo;
-    private final ProctorTaInFacultyServ proctorTaInFacultyServ;
-    private final ProctorTaInFacultyRepo inFacRepo;
+    private final ProctorTaInDepartmentServ proctorTaInDepartmentServ;
+    private final ProctorTaInDepartmentRepo inDepRepo;
     private final TransferProctoringServ transferProctoringServ;
     private final TransferProctoringRepo transferRepo;
     private final WorkLoadServ workLoadServ;
@@ -83,7 +80,7 @@ public class RequestController {
         @RequestPart(value = "file", required = false) MultipartFile file
     ) throws IOException {
         leaveServ.createLeaveRequest(dto, file, taId);
-        boolean exists = leaveRepo.existsBySenderIdAndReceiverIdAndIsRejected(taId, dto.getReceiverId(), false);
+        boolean exists = leaveRepo.existsBySenderIdAndReceiverNameAndIsRejected(taId, dto.getDepName(), false);
         return new ResponseEntity<>(exists ? HttpStatus.CREATED : HttpStatus.BAD_REQUEST);
     }
 
@@ -99,7 +96,7 @@ public class RequestController {
         Instructor instructor = insRepo.findById(insId)
                 .orElseThrow(() -> new UserNotFoundExc(insId));
         // fetch polymorphic Requests
-        List<Request> entities = instructor.getReceivedRequests();
+        List<WorkLoad> entities = instructor.getReceivedWorkloadRequests();
         // map to DTOs
         List<RequestDto> dtos = entities.stream().map(requestMapper::toDto).collect(Collectors.toList());
         return ResponseEntity.ok(dtos);
@@ -112,16 +109,6 @@ public class RequestController {
     ) {
         swapServ.createSwapRequest(dto, taId);
         boolean exists = swapRepo.existsBySenderIdAndReceiverIdAndExamExamIdAndIsRejectedFalse(taId, dto.getReceiverId(), dto.getExamId());
-        return new ResponseEntity<>(exists ? HttpStatus.CREATED : HttpStatus.BAD_REQUEST);
-    }
-
-    @PostMapping("/swap-enable")
-    public ResponseEntity<Void> sendSwapEnable(
-            @PathVariable Long taId,
-            @RequestBody SwapEnableDto dto
-    ) {
-        swapEnableServ.createSwapEnableReq(dto, taId);
-        boolean exists = swapEnableRepo.existsBySenderIdAndReceiverIdAndExamExamIdAndIsRejected(taId, dto.getReceiverId(), dto.getExamId(), false);
         return new ResponseEntity<>(exists ? HttpStatus.CREATED : HttpStatus.BAD_REQUEST);
     }
 
@@ -146,12 +133,12 @@ public class RequestController {
     }
 
     @PostMapping("/proctor-in-faculty")
-    public ResponseEntity<Void> sendProctorTaInFaculty(
-            @PathVariable Long taId,
-            @RequestBody ProctorTaInFacultyDto dto
+    public ResponseEntity<Void> sendProctorTaInDepartment(
+            @PathVariable Long instrId,
+            @RequestBody ProctorTaInDepartmentDto dto
     ) {
-        proctorTaInFacultyServ.createProctorTaInFacultyRequest(dto, taId);
-        boolean exists = inFacRepo.existsBySenderIdAndReceiverIdAndExamExamIdAndIsRejected(taId, dto.getReceiverId(), dto.getExamId(), false);
+        proctorTaInDepartmentServ.createProctorTaInDepartmentRequest(dto, instrId);
+        boolean exists = inDepRepo.existsBySender_IdAndReceiver_NameAndExam_ExamIdAndIsRejected(instrId, dto.getDepName(), dto.getExamId(), false);
         return new ResponseEntity<>(exists ? HttpStatus.CREATED : HttpStatus.BAD_REQUEST);
     }
 
@@ -166,8 +153,8 @@ public class RequestController {
     }
 
     @GetMapping("/{user_id}/receivedReqs")
-    public ResponseEntity<List<RequestDto>> getMethodName(@PathVariable Long user_id) {
-       return new ResponseEntity<>(reqServ.getRequestsOfTheUser(user_id), HttpStatus.ACCEPTED);
+    public ResponseEntity<List<RequestDto>> getReceivedRequests(@PathVariable Long user_id) {
+       return new ResponseEntity<>(reqServ.getReceivedRequestsOfTheUser(user_id), HttpStatus.ACCEPTED);
     }
     
 }

@@ -9,7 +9,9 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.example.dto.TaskDto;
 import com.example.entity.Actors.Role;
+import com.example.entity.Actors.TA;
 import com.example.entity.Actors.User;
+import com.example.entity.Courses.Department;
 import com.example.entity.General.Date;
 import com.example.entity.Requests.Leave;
 import com.example.entity.Requests.LeaveDTO;
@@ -17,6 +19,7 @@ import com.example.exception.GeneralExc;
 import com.example.exception.UserNotFoundExc;
 import com.example.exception.taExc.TaNotFoundExc;
 import com.example.repo.RequestRepos.LeaveRepo;
+import com.example.repo.DepartmentRepo;
 import com.example.repo.TARepo;
 import com.example.repo.TaTaskRepo;
 import com.example.repo.UserRepo;
@@ -31,21 +34,15 @@ public class LeaveServImpl implements LeaveServ{
     private final LeaveRepo leaveRepo;
     private final TARepo taRepo;
     private final TaTaskRepo taTaskRepo;
+    private final DepartmentRepo depRepo;
 
     @Async("setExecutor")
     @Override
     public void createLeaveRequest(LeaveDTO dto, MultipartFile file, Long senderId) throws IOException {
-        User sender = userRepo.findById(senderId)
-            .orElseThrow(() -> new UserNotFoundExc(senderId));
-        User receiver = userRepo.findById(dto.getReceiverId())
-            .orElseThrow(() -> new UserNotFoundExc(dto.getReceiverId()));
-
-        if (receiver.getId() == sender.getId()) {
-            throw new GeneralExc("Sender and receiver cannot be the same.");
-        }
-        if (receiver.getRole() != Role.DEPARTMENT_STAFF) {
-            throw new GeneralExc("Receiver must be a staff member.");
-        }
+        TA sender = taRepo.findById(dto.getSenderId()).
+        orElseThrow(() -> new TaNotFoundExc(dto.getSenderId()));
+        Department department = depRepo.findById(dto.getDepName()).
+        orElseThrow(() -> new GeneralExc("Deparment with name " + dto.getDepName() + " not found"));
 
         Leave leaveRequest = new Leave();
         Date sent_time = new Date().currenDate();
@@ -54,7 +51,7 @@ public class LeaveServImpl implements LeaveServ{
         leaveRequest.setDescription(dto.getDescription());
         leaveRequest.setDuration(dto.getDuration());
         leaveRequest.setSender(sender);
-        leaveRequest.setReceiver(receiver);
+        leaveRequest.setReceiver(department);
 
         if (file != null && !file.isEmpty()) {
             leaveRequest.setAttachment(file.getBytes());
@@ -95,7 +92,7 @@ public class LeaveServImpl implements LeaveServ{
             throw new TaNotFoundExc(userId);
         }
         List<LeaveDTO> leaveDTOs = getRequestsBySenderId(userId);
-        leaveDTOs.addAll(getRequestsByReceiverId(userId));
+        leaveDTOs.addAll(getAllLeaveRequestsByUserId(userId));
         return leaveDTOs;
     }
 
@@ -123,6 +120,7 @@ public class LeaveServImpl implements LeaveServ{
         throw new UnsupportedOperationException("Unimplemented method 'deleteLeaveRequest'");
     }
 
+    @Override
     public List<LeaveDTO> getRequestsBySenderId(Long senderId){
         if(!taRepo.existsById(senderId)){
             throw new TaNotFoundExc(senderId);
@@ -133,7 +131,7 @@ public class LeaveServImpl implements LeaveServ{
                 LeaveDTO dto = new LeaveDTO();
                 dto.setRequestId(leave.getRequestId());
                 dto.setSenderId(leave.getSender().getId());
-                dto.setReceiverId(leave.getReceiver().getId());
+                dto.setDepName(leave.getReceiver().getName());
                 dto.setDescription(leave.getDescription());
                 dto.setDuration(leave.getDuration());
                 dto.setSentTime(leave.getSentTime());
@@ -150,18 +148,19 @@ public class LeaveServImpl implements LeaveServ{
             .toList();
         return leaveDTOs;
     }
-    
-    public List<LeaveDTO> getRequestsByReceiverId(Long receiverId){
-        if(!taRepo.existsById(receiverId)){
-            throw new TaNotFoundExc(receiverId);
+
+    @Override
+    public List<LeaveDTO> getRequestsByReceiverName(String receiverId){
+        if(!depRepo.existsById(receiverId)){
+            throw new GeneralExc("Department with name " + receiverId + " not found!");
         }
-        List<Leave> leaveRequests = leaveRepo.findByReceiverId(receiverId).orElseThrow(() -> new GeneralExc("No leave requests found."));
+        List<Leave> leaveRequests = leaveRepo.findByReceiverName(receiverId).orElseThrow(() -> new GeneralExc("No leave requests found."));
         List<LeaveDTO> leaveDTOs = leaveRequests.stream()
             .map(leave -> {
                 LeaveDTO dto = new LeaveDTO();
                 dto.setRequestId(leave.getRequestId());
                 dto.setSenderId(leave.getSender().getId());
-                dto.setReceiverId(leave.getReceiver().getId());
+                dto.setDepName(leave.getReceiver().getName());
                 dto.setDescription(leave.getDescription());
                 dto.setDuration(leave.getDuration());
                 dto.setSentTime(leave.getSentTime());
