@@ -104,7 +104,8 @@ public class RequestMapper {
             dto.setReceiverId(recId);
             dto.setSenderName(pf.getSender().getName() + " " + pf.getSender().getSurname());
             dto.setReceiverName(pf.getReceiver().getName() + " " + pf.getReceiver().getSurname());
-
+            dto.setRequiredTas(pf.getRequiredTas());
+            dto.setTasLeft(pf.getTasLeft());
             // collect its child ProctorTaInFaculty by matching sentTime
             List<ProctorTaInFacultyDto> children = pf.getProctorTaInFaculties()
                 .stream()
@@ -137,6 +138,8 @@ public class RequestMapper {
             dto.setFacultyName(pi.getFaculty().getCode());
             dto.setExamName(pi.getExam().getDescription());
             dto.setExamId(pi.getExam().getExamId());
+            dto.setRequiredTas(pi.getProctorTaFromFaculties().getRequiredTas());
+            dto.setTasLeft(pi.getProctorTaFromFaculties().getTasLeft());
             return dto;
         }
         else if (req instanceof WorkLoad wl) {

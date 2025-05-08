@@ -20,8 +20,8 @@ import lombok.Data;
 @Table(name = "proctor_ta_from_faculties_requests")
 public class ProctorTaFromFaculties extends Request{
 
-    @Column(name = "required_ta")
-    private int requiredTa;
+    @Column(name = "required_tas")
+    private int requiredTas;
 
     @Column(name = "tas_left")
     private int tasLeft;
