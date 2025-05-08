@@ -1,6 +1,7 @@
 package com.example.service;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 import org.springframework.scheduling.annotation.Async;
@@ -18,6 +19,7 @@ import com.example.entity.Requests.RequestType;
 import com.example.entity.Requests.Swap;
 import com.example.entity.Requests.TransferProctoring;
 import com.example.exception.Requests.NoSuchRequestExc;
+import com.example.exception.taExc.TaNotFoundExc;
 import com.example.exception.UserNotFoundExc;
 import com.example.mapper.RequestMapper;
 import com.example.repo.RequestRepos.LeaveRepo;
@@ -27,6 +29,7 @@ import com.example.repo.RequestRepos.TransferProctoringRepo;
 
 import jakarta.transaction.Transactional;
 
+import com.example.repo.TARepo;
 import com.example.repo.UserRepo;
 
 import lombok.RequiredArgsConstructor;
@@ -41,6 +44,8 @@ public class RequestServImpl implements RequestServ{
     private final RequestMapper reqMapper;
     private final SwapRepo swapRepo;
     private final TransferProctoringRepo transRepo;
+    private final TARepo taRepo;
+    private final RequestMapper mapper;
 
     @Override
     public List<Request> getAllRequests() {
@@ -49,45 +54,39 @@ public class RequestServImpl implements RequestServ{
 
     @Override
     @Transactional
-    public List<RequestDto> getRequestsOfTheUser(Long userId) {
-        User u = userRepo.findById(userId).orElseThrow(() -> new UserNotFoundExc(userId));
-        List<RequestDto> reqs = new ArrayList<>();
-        for(Request req : u.getReceivedRequests()){
-            reqs.add(reqMapper.toDto(req));
-        }
-        return reqs;
-    }
+    public List<RequestDto> getReceivedRequestsOfTheUser(Long userId) {
+        TA ta = taRepo.findById(userId).orElseThrow(() -> new TaNotFoundExc(userId));
+        
+        List<RequestDto> all = new ArrayList<>();
 
-    @Override
-    public List<Request> getSwapRequestsOfTheUser(User u) {
-        return requestRepo.findBySenderAndRequestType(u, RequestType.Swap);
-    }
+        // swaps
+        all.addAll(
+        ta.getReceivedSwapRequests()
+                .stream()
+                .map(mapper::toDto)
+                .toList()
+        );
 
-    @Override
-    public List<Request> getLeaveRequestsOfTheUser(User u) {
-        return requestRepo.findBySenderAndRequestType(u, RequestType.Leave);
-    }
+        all.addAll(
+        ta.getReceivedTransferRequests()
+            .stream()
+            .map(mapper::toDto)
+            .toList()
+        );
 
-    @Override
-    public List<Request> getProctorTaInFacultyRequestsOfTheUser(User u) {
-        return requestRepo.findBySenderAndRequestType(u, RequestType.ProctorTaInFaculty);
-    }
+        // transfer‐proctoring
+        /*all.addAll(
+        ta.getSendedSwapRequests()
+                    .stream()
+                    .map(mapper::toDto)
+                    .toList()
+        );*/
 
-    @Override
-    public List<Request> getSwapEnableLeaveRequestsOfTheUser(User u) {
-        return requestRepo.findBySenderAndRequestType(u, RequestType.SwapEnable);
+        // sort by sentTime (oldest first)
+        all.sort(Comparator.comparing(RequestDto::getSentTime));
+        return all;
     }
-
-    @Override
-    public List<Request> getTransferProctoringRequestsOfTheUser(User u) {
-        return requestRepo.findBySenderAndRequestType(u, RequestType.TransferProctoring);
-    }
-
-    @Override
-    public List<Request> getProctorTaFromFacultiesRequestsOfTheUser(User u) {
-        return requestRepo.findBySenderAndRequestType(u, RequestType.ProctorTaFromFaculties);
-    }
-
+    
     @Override
     public boolean createRequest(Request req) {
         requestRepo.save(req);
@@ -107,7 +106,7 @@ public class RequestServImpl implements RequestServ{
         List<Leave> leaves = leaveRepo.findAll();
         for (Leave leave : leaves) {
             if (leave.getDuration().getFinish().isBefore(new Date().currenDate())) {
-                TA sender = (TA)leave.getSender();
+                TA sender = leave.getSender();
                 sender.setActive(false);
                 leaveRepo.save(leave);
             }

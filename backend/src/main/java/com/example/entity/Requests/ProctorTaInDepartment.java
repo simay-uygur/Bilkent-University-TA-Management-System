@@ -1,47 +1,39 @@
 package com.example.entity.Requests;
 
-import java.util.List;
-
-import com.example.entity.Actors.DeanOffice;
+import com.example.entity.Actors.Instructor;
 import com.example.entity.Actors.TA;
+import com.example.entity.Courses.Department;
 import com.example.entity.Exams.Exam;
 
-import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import lombok.Data;
 
 @Data
 @Entity
-@Table(name = "proctor_ta_from_faculties_requests")
-public class ProctorTaFromFaculties extends Request{
+@Table(name = "proctor_ta_in_faculty_requests")
+public class ProctorTaInDepartment extends Request{
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "name", referencedColumnName = "name")
+    private Department receiver;
+
+    @ManyToOne(fetch= FetchType.LAZY)
+    @JoinColumn(name = "instructor_id", referencedColumnName = "id")
+    private Instructor sender;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "exam_id", referencedColumnName = "exam_id")
+    private Exam exam;
 
     @Column(name = "required_tas")
     private int requiredTas;
 
     @Column(name = "tas_left")
     private int tasLeft;
-
-    @ManyToOne(fetch= FetchType.LAZY, optional = false)
-    @JoinColumn(name = "sended_fac_code", referencedColumnName = "id")
-    private DeanOffice sender;
-
-    @OneToMany(
-        mappedBy = "proctorTaFromFaculties", 
-        cascade= CascadeType.ALL, 
-        fetch= FetchType.LAZY, 
-        orphanRemoval = true
-    )
-    List<ProctorTaFromOtherFaculty> proctorTaFromOtherFacs;
-
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "exam_id", nullable = false)
-    private Exam exam;
 
     public boolean addTa(TA ta){
         if (exam.incr()){

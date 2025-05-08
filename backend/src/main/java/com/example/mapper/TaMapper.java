@@ -17,6 +17,9 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import com.example.entity.Requests.Request;
+import com.example.entity.Requests.SwapDto;
+import com.example.entity.Requests.TransferProctoringDto;
+import com.example.entity.Requests.WorkLoadDto;
 
 @Component
 @RequiredArgsConstructor
@@ -53,9 +56,32 @@ public class TaMapper {
         dto.setLessons(lessons);
         dto.setProctorType(ta.getProctorType().name());
         dto.setTaType(ta.getTaType().name());
-        dto.setSendedRequests(ta.getSendedRequests().stream()
-                                .map(re::toDto)
-                                .collect(Collectors.toList()));
+
+        dto.setReceivedSwapRequests(
+        ta.getReceivedSwapRequests().stream()
+            .map(r -> (SwapDto) re.toDto(r))
+            .collect(Collectors.toList())
+        );
+        dto.setReceivedTransRequests(
+            ta.getReceivedTransferRequests().stream()
+                .map(r -> (TransferProctoringDto) re.toDto(r))
+                .collect(Collectors.toList())
+        );
+        dto.setSendedSwapRequests(
+            ta.getReceivedSwapRequests().stream()
+                .map(r -> (SwapDto) re.toDto(r))
+                .collect(Collectors.toList())
+        );
+        dto.setSendedTransRequests(
+            ta.getSendedTransferRequests().stream()
+                .map(r -> (TransferProctoringDto) re.toDto(r))
+                .collect(Collectors.toList())
+        );
+        dto.setSendedWorkLoadRequests(
+            ta.getSendedWorkLoadRequests().stream()
+                .map(r -> (WorkLoadDto) re.toDto(r))
+                .collect(Collectors.toList())
+        );
         // “tasks” → the sectionCode of each Section this TA is registered in as a TA
       
 

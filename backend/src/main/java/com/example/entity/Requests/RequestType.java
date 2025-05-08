@@ -6,6 +6,7 @@ public enum RequestType {
     Leave,
     TransferProctoring,
     ProctorTaFromFaculties,
+    ProctorTaFromFaculty,
     ProctorTaInFaculty,
     WorkLoad
 }
