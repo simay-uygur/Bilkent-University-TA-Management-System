@@ -118,6 +118,11 @@ public class TA_controller {
         return new ResponseEntity<>(serv.getScheduleOfTheDay(ta, date), HttpStatus.OK);
     }
 
+    @GetMapping("/api/ta/sectionCode/{sectionCode}")
+    public ResponseEntity<?> getTAsBySectionCode(@PathVariable String sectionCode) {
+        return new ResponseEntity<>(serv.getTAsBySectionCode(sectionCode), HttpStatus.OK);
+    }
+
 
 
 }

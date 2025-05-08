@@ -30,4 +30,5 @@ public interface TAServ {
     public List<ScheduleItem> getScheduleOfTheDay(TA ta, String date);
     public Map<String, Object> importTAsFromExcel(MultipartFile file) throws IOException;
     public List<TaDto> getTAsByDepartment(String deptName);
+    public List<TaDto> getTAsBySectionCode(String sectionCode);
 }

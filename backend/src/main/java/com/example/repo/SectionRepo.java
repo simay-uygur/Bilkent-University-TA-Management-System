@@ -84,6 +84,14 @@ public interface SectionRepo extends JpaRepository<Section, Integer>{
            WHERE   sec.sectionId = :sectionId
            """)
     List<TA> findTasBySectionId(@Param("sectionId") int sectionId);
+
+    @Query("""
+           SELECT  t
+           FROM    Section  sec
+                   JOIN     sec.assignedTas t
+           WHERE   sec.sectionCode = :sectionCode
+           """)
+    List<TA> findTasBySectionCode(@Param("sectionCode") String sectionCode);
     @Query("""
            SELECT  sec
            FROM    Section  sec

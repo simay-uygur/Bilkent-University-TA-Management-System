@@ -38,6 +38,7 @@ import com.example.exception.taExc.TaNotFoundExc;
 import com.example.exception.taskExc.TaskIsNotActiveExc;
 import com.example.exception.taskExc.TaskNotFoundExc;
 import com.example.mapper.TaMapper;
+import com.example.repo.SectionRepo;
 import com.example.repo.TARepo;
 import com.example.repo.TaTaskRepo;
 
@@ -58,6 +59,8 @@ public class TAServImpl implements TAServ {
     private TaskServ taskServ;
     @Autowired
     private TaTaskRepo taTaskRepo;
+
+    private final SectionRepo sectionRepo;
     
     @Autowired
     private ScheduleServ scheduleServ;
@@ -67,7 +70,7 @@ public class TAServImpl implements TAServ {
 
     @Override
     public List<TaDto> getTAsBySectionCode(String sectionCode){
-        List<TA> tas = repo.findBySectionsAsStudent_SectionCode(sectionCode);
+        List<TA> tas = sectionRepo.findTasBySectionCode(sectionCode);
         if (tas.isEmpty()) {
             throw new UserNotFoundExc(sectionCode);
         }
