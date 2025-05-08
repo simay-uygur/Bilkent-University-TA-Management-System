@@ -7,5 +7,8 @@ public enum TaskState
     REJECTED,
     NORESPOND,
     UNKNOWN,
-    DELETED
+    DELETED,
+    NOT_ACTIVE,
+    ACTIVE,
+    COMPLETED,
 }

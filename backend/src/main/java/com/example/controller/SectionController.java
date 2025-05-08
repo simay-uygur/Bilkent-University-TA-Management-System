@@ -1,10 +1,15 @@
 package com.example.controller;
 
 import com.example.dto.SectionDto;
+import com.example.dto.TaskDto;
 import com.example.entity.Courses.Section;
 import com.example.mapper.SectionMapper;
 import com.example.service.SectionServ;
+import com.example.service.TaskServ;
+
 import lombok.RequiredArgsConstructor;
+
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -18,9 +23,11 @@ public class SectionController {
 
     private final SectionServ    sectionServ;
     private final SectionMapper  sectionMapper;
+    private final TaskServ      taskServ;
 
     public SectionController(SectionServ sectionServ,
-                             SectionMapper sectionMapper) {
+                             SectionMapper sectionMapper, TaskServ taskServ) {
+        this.taskServ      = taskServ;
         this.sectionServ   = sectionServ;
         this.sectionMapper = sectionMapper;
     }
@@ -29,6 +36,10 @@ public class SectionController {
     public SectionDto getById(@PathVariable int id) {
         Section sec = sectionServ.getById(id);
         return sectionMapper.toDto(sec);
+    }
+    @PostMapping("/{section_code}/task")
+    public ResponseEntity<TaskDto> createTask(@RequestBody TaskDto entity, @PathVariable String section_code) {
+        return new ResponseEntity<>(taskServ.createTask(entity, section_code), HttpStatus.CREATED);
     }
 
     @GetMapping("/sectionCode/{sectionCode}")

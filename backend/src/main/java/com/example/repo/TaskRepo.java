@@ -9,6 +9,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import com.example.entity.Tasks.Task;
+import com.example.entity.Tasks.TaskState;
 
 @Repository
 public interface TaskRepo extends JpaRepository<Task, Integer>{
@@ -27,4 +28,6 @@ public interface TaskRepo extends JpaRepository<Task, Integer>{
     // Find all DELETED tasks 
     @Query("SELECT t FROM Task t WHERE t.status = 'DELETED'")
     HashSet<Task> findDeletedTasks();
+
+    List<Task> findByStatusNotIn(List<TaskState> of);
 }

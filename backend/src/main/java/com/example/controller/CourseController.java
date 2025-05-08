@@ -111,7 +111,7 @@ public class CourseController {
         return new ResponseEntity<>(courseServ.updateTask(course_code,task_id,task), HttpStatus.ACCEPTED);
     }
 
-    @GetMapping("api/course/{course_code}/task/{id}")
+    /* @GetMapping("api/course/{course_code}/task/{id}")
     public ResponseEntity<TaskDto> getTask(
             @PathVariable String course_code,
             @PathVariable int id
@@ -137,7 +137,7 @@ public class CourseController {
         );
 
         return ResponseEntity.ok(dto);
-    }
+    } */
 
 //    @GetMapping("api/course/{course_code}/task/{id}")
 //    public TaskDto getTask(@PathVariable String course_code, @PathVariable int id) {

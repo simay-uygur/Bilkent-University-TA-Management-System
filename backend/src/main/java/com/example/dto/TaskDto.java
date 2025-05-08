@@ -7,6 +7,8 @@ import lombok.NoArgsConstructor;
 
 import java.util.List;
 
+import com.example.entity.General.Event;
+
 /**
  * Data Transfer Object for Task entity.
  */
@@ -29,7 +31,7 @@ public class TaskDto {
     /**
      * Estimated duration (e.g., "2h", "00:30").
      */
-    private String duration;
+    private Event duration;
 
     /**
      * Current status (e.g., "PENDING", "COMPLETED").
@@ -39,7 +41,7 @@ public class TaskDto {
     /**
      * Convenience constructor for tasks with no assigned TAs.
      */
-    public TaskDto(String type, String description, String duration, String status) {
+    public TaskDto(String type, String description, Event duration, String status) {
         this(type, List.of(), description, duration, status);
     }
 }

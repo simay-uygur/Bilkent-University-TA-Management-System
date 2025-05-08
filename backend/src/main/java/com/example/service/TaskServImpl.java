@@ -11,9 +11,12 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
+import com.example.dto.TaskDto;
 import com.example.entity.Actors.TA;
 import com.example.entity.Courses.Lesson;
 import com.example.entity.Courses.Section;
+import com.example.entity.Requests.RequestType;
+import com.example.entity.Requests.WorkLoadDto;
 import com.example.entity.Tasks.TaTask;
 import com.example.entity.Tasks.Task;
 import com.example.entity.Tasks.TaskState;
@@ -23,9 +26,13 @@ import com.example.exception.taExc.TaNotFoundExc;
 import com.example.exception.taskExc.TaskLimitExc;
 import com.example.exception.taskExc.TaskNoTasExc;
 import com.example.exception.taskExc.TaskNotFoundExc;
+import com.example.mapper.TaskMapper;
+import com.example.repo.SectionRepo;
 import com.example.repo.TARepo;
 import com.example.repo.TaTaskRepo;
 import com.example.repo.TaskRepo;
+import com.example.dto.TaskDto;
+import com.example.entity.General.Date;
 
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
@@ -43,14 +50,23 @@ public class TaskServImpl implements TaskServ {
 
     @Autowired
     private TaTaskRepo taTaskRepo;
+    @Autowired
+    private  SectionRepo sectionRepo;
+    @Autowired
+    private TaskMapper taskMapper;
 
     @Override
-    public Task createTask(Task task) {
-        if (task == null) {
+    public TaskDto createTask(TaskDto taskDto, String sectionCode) {
+        if (taskDto == null) {
             throw new GeneralExc("Task cannot be null!");
         }
+        Section section = sectionRepo.findBySectionCodeIgnoreCase(sectionCode)
+                .orElseThrow(() -> new GeneralExc("Section not found!"));
+        //Task task = new Task(section, taskDto.getDuration(), taskDto.getType(), 0);
+        Task task = taskMapper.toEntity(taskDto);
         checkAndUpdateStatusTask(task);
-        return taskRepo.save(task);
+        Task newTask = taskRepo.save(task);
+        return taskMapper.toDto(newTask);
     }
 
     @Override
@@ -310,7 +326,7 @@ public class TaskServImpl implements TaskServ {
         return true;
     }
 
-    @Override
+    /* @Override
     public boolean checkAndUpdateStatusTask(Task task) {
         if (task == null) {
             throw new GeneralExc("Task not found!");
@@ -328,6 +344,44 @@ public class TaskServImpl implements TaskServ {
             return true;
         }
         return false;
+    } */
+   public boolean checkAndUpdateStatusTask(Task task) {
+        if (task == null) {
+            throw new GeneralExc("Task not found!");
+        }
+        
+        if (task.getStatus() == TaskState.DELETED) {
+            return false;
+        }
+        Date current = new Date().currenDate();
+        if (current.isBefore(task.getDuration().getStart()))
+            {mark_not_active(task);}
+        else if (current.isAfter(task.getDuration().getStart()) && current.isBefore(task.getDuration().getFinish()))
+            {mark_active(task);}
+        else{
+            mark_completed(task); 
+            /* for (TaTask ta : task.getTasList()){
+                TA t = ta.getTaOwner(); 
+                WorkLoadDto workLoadDto = new WorkLoadDto();
+                workLoadDto.setTaskId(task.getTaskId());
+                workLoadDto.setWorkload(task.getWorkload());
+                workLoadDto.setTaskType(task.getTaskType().toString());
+                workLoadDto.setSenderId(t.getId());
+                workLoadDto.setSenderName(t.getName() + " " + t.getSurname());
+                workLoadDto.setRequestType(RequestType.WorkLoad);
+                workLoadDto.setSentTime(new Date().currenDate());
+                workLoadDto.setReceiverId(task.getSection().getInstructor().getId());
+                workLoadDto.setReceiverName(task.getSection().getInstructor().getName() + " " + task.getSection().getInstructor().getSurname());
+                workLoadDto.setDescription("Workload request from " + 
+                                            workLoadDto.getSenderName() + " for task " + 
+                                            task.getTaskId() + " of type " + 
+                                            task.getTaskType().toString() + " with workload of " + 
+                                            task.getWorkload() + " hours.");
+                workLoadServ.createWorkLoad(workLoadDto, t.getId());
+            } */
+        }
+        taskRepo.saveAndFlush(task);
+        return true;
     }
 
     @Override
@@ -376,10 +430,34 @@ public class TaskServImpl implements TaskServ {
         t.setStatus(TaskState.PENDING);
     }
 
-    @Async("taskCheckExecutor")
+    /* @Async("taskCheckExecutor")
     @Scheduled(cron = "0 * * * * *")
     public void checkTasksForTime(){
         List<Task> tasks = taskRepo.findAll();
+        for(Task task : tasks){
+            //log.info("status I " + task.getStatus() + " " + task.getDuration().getStart().getHour()+":"+task.getDuration().getStart().getMinute() + "/" + task.getDuration().getFinish().getHour()+":"+task.getDuration().getFinish().getMinute() + " " + "-" + Thread.currentThread().getName());
+            checkAndUpdateStatusTask(task);
+            //log.info("status II " + task.getStatus() + " " + task.getDuration().getStart().getHour()+":"+task.getDuration().getStart().getMinute() + "/" + task.getDuration().getFinish().getHour()+":"+task.getDuration().getFinish().getMinute() + " " + "-" + Thread.currentThread().getName());
+        }
+    } */
+    private void mark_not_active(Task t) {
+        t.setStatus(TaskState.NOT_ACTIVE);
+    }
+
+    private void mark_active(Task t) {
+        t.setStatus(TaskState.ACTIVE);
+    }
+
+    private void mark_completed(Task t) {
+        t.setStatus(TaskState.COMPLETED);
+    }
+
+    @Async("taskCheckExecutor")
+    @Scheduled(cron = "0 * * * * *")
+    public void checkTasksForTime(){
+        List<Task> tasks = taskRepo.findByStatusNotIn(
+            List.of(TaskState.COMPLETED, TaskState.DELETED)
+        );
         for(Task task : tasks){
             //log.info("status I " + task.getStatus() + " " + task.getDuration().getStart().getHour()+":"+task.getDuration().getStart().getMinute() + "/" + task.getDuration().getFinish().getHour()+":"+task.getDuration().getFinish().getMinute() + " " + "-" + Thread.currentThread().getName());
             checkAndUpdateStatusTask(task);

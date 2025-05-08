@@ -3,11 +3,12 @@ package com.example.service;
 import java.util.HashSet;
 import java.util.List;
 
+import com.example.dto.TaskDto;
 import com.example.entity.Actors.TA;
 import com.example.entity.Tasks.Task;
 
 public interface TaskServ {
-    public Task createTask(Task task);
+    public TaskDto createTask(TaskDto task, String section_code);
     public boolean soft_deleteTask(int task_id);
     public boolean strict_deleteTask(int task_id);
     public boolean restoreTask(int task_id);

@@ -8,5 +8,6 @@ public enum RequestType {
     VolunteerProctoring,
     ProctorTaFromFaculties,
     TaFromOtherFaculties,
-    TaInFaculty
+    TaInFaculty,
+    WorkLoad
 }
