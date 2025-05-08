@@ -1,17 +1,11 @@
 package com.example.controller;
 
 import com.example.dto.ClassRoomDto;
-import com.example.dto.FailedRowInfo;
-import com.example.entity.General.ClassRoom;
 import com.example.service.ClassRoomServ;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
-
-import java.io.IOException;
 import java.util.List;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/api/v1/classrooms")
