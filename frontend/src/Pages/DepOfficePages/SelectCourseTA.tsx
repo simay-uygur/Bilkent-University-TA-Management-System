@@ -144,7 +144,6 @@ const SelectCourseTA: React.FC = () => {
       alert('Failed to assign TAs. Please try again.');
       setConfirmAssign(false);
     }
-    navigate('/department-office/assign-course');
   };
   
   if (loading) {

@@ -127,8 +127,8 @@ const ProctorCourseSelectionOut: React.FC = () => {
                   <button onClick={() => handleAssign(exam.id)}>
                     Assign TAs
                   </button>
-                  <button onClick={() => handleDemand(exam.id)}>
-                    Demand TA
+                  <button onClick={() => handleFinish(exam.id)}>
+                    Finish Assignment
                   </button>
                 </td>
               </tr>

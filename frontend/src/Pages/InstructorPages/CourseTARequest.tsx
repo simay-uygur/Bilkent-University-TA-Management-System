@@ -20,7 +20,6 @@ export interface TA {
   taType: string;
 }
 
-
 // Raw request to backend
 interface RawRequest {
   courseId: string;
@@ -36,23 +35,6 @@ interface SentRequest {
 }
 
 const CourseTAReq: React.FC = () => {
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
-  const location = useLocation();
-  
-  // Extract course code from URL pattern: ".../assign-course/CS-464-1-2025-SPRING"
-  const pathParts = location.pathname.split('/');
-  const fullSectionCode = pathParts[pathParts.length - 1]; // Get the last part of the URL
-  
-  // Extract just the course code (CS-464) from the full section code
-  const parts = fullSectionCode.split('-');
-  const courseCode = parts.length >= 2 ? `${parts[0]}-${parts[1]}` : fullSectionCode;
-  
-  // Get section number for display
-  const sectionNumber = parts.length >= 3 ? parts[2] : '1';
-  
-  // Rest of your component remains the same...
-=======
   const { courseID } = useParams<{ courseID: string }>();
   const { courseSec } = useParams<{ courseSec: string }>();
   const courseCode = courseID!;
@@ -64,64 +46,9 @@ const CourseTAReq: React.FC = () => {
     sent: false,
   });
 
->>>>>>> Stashed changes
-  
-=======
-  const { courseID } = useParams<{ courseID: string }>();
-  const { courseSec } = useParams<{ courseSec: string }>();
-  const courseCode = courseID!;
-  const courseSection = courseSec!;
-
-  // two modes: if sentRequest.sent is true, show current form; if false, show table of TAs
-  const [sentRequest] = useState<SentRequest>({
-    payload: { courseId: courseCode, neededTAs: 0, wantedTAs: [], unwantedTAs: [] },
-    sent: false,
-  });
-
-  
->>>>>>> Stashed changes
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [tas, setTAs] = useState<TA[]>([]);
-// Replace your API-state with some mock data to visualize the table:
-/*const [tas, setTAs] = useState<TA[]>([
-  {
-    id: 1,
-    name: 'Ali',
-    surname: 'Veli',
-    academicLevel: 'BS',
-    totalWorkload: 3,
-    department: 'CS',
-    taType: 'Lab',
-  },
-  {
-    id: 2,
-    name: 'Ayşe',
-    surname: 'Fatma',
-    academicLevel: 'MS',
-    totalWorkload: 2,
-    department: 'EE',
-    taType: 'Recitation',
-  },
-  {
-    id: 3,
-    name: 'Mehmet',
-    surname: 'Can',
-    academicLevel: 'PhD',
-    totalWorkload: 5,
-    department: 'ME',
-    taType: 'Grading',
-  },
-  {
-    id: 4,
-    name: 'Elif',
-    surname: 'Yılmaz',
-    academicLevel: 'BS',
-    totalWorkload: 1,
-    department: 'CS',
-    taType: 'Lab',
-  },
-]);*/
 
   const initialState = { needed: 0, wanted: [] as number[], unwanted: [] as number[] };
   const [state, setState] = useState(initialState);
@@ -247,16 +174,7 @@ if (!sentRequest.sent) {
       <BackBut to="/instructor" />
       <h1 className={styles.title}>Course TA Request</h1>
       <div className={styles.card}>
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
-        <div className={styles.cardHeader}>{courseCode + "-" + sectionNumber}</div>
-
-=======
         <div className={styles.cardHeader}>{courseCode}-{courseSection}</div>
->>>>>>> Stashed changes
-=======
-        <div className={styles.cardHeader}>{courseCode}-{courseSection}</div>
->>>>>>> Stashed changes
         <label className={styles.label}>
           TA Needed:
           <input type="number" min={0} value={state.needed} onFocus={handleNeededFocus} onChange={e => handleNeededChange(+e.target.value)} className={styles.inputNumber} />

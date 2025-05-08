@@ -1,21 +1,14 @@
 package com.example.entity.Actors;
-
 import java.util.ArrayList;
 import java.util.List;
-
 import org.hibernate.annotations.DynamicUpdate;
-
-import com.example.entity.Courses.Course;
 import com.example.entity.Courses.Department;
 import com.example.entity.Courses.Section;
 import com.fasterxml.jackson.annotation.JsonInclude;
-
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
-import jakarta.persistence.JoinTable;
-import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;

@@ -1,10 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-
 import CourseInfoPanel from './CourseInfoPanel';
 import styles from './InstructorMainPage.module.css';
 import axios from 'axios';
-import LoadingPage from '../CommonPages/LoadingPage';
 
 // Updated interfaces to match API response
 export interface Instructor {
