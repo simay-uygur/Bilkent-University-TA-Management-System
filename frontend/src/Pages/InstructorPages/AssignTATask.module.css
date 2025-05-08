@@ -2,7 +2,7 @@
 .pageWrapper {
     display: flex;
     flex-direction: column;
-    background-color: #d2e9ff; /* page background */
+    background-color: #f0faff; /* page background */
     min-height: 100vh;
   }
   

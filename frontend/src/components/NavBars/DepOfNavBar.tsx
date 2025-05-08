@@ -3,12 +3,12 @@ import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import {
   Home,
-  BookOpen,
   UserPlus,
   UserCheck,
   Bell,
   Settings,
-  LogOut
+  LogOut,
+  Sliders
 } from 'lucide-react';
 import logo from '../../assets/BilkentÜniversitesi-logo.png';
 import styles from './DepOfNavBar.module.css';
@@ -27,6 +27,7 @@ const DepOfNavBar: React.FC = () => {
     { label: 'Home',            icon: <Home size={18} />,            path: '/department-office' },
     { label: 'CourseTA', icon: <UserPlus size={18} />,        path: '/department-office/assign-course' },
     { label: 'Proctoring',  icon: <UserCheck size={18} />,       path: '/department-office/assign-proctor' },
+    { label: 'Workload Cap', icon: <Sliders size={18} />,        path: '/department-office/set-workload' },
     { label: 'Notifications',   icon: <Bell size={18} />,            path: '/department-office/notification' },
     { label: 'Settings',        icon: <Settings size={18} />,        path: '/department-office/settings' },
     { label: 'Logout',          icon: <LogOut size={18} />,          path: '/login' },

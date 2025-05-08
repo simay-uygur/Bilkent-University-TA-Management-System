@@ -1,6 +1,6 @@
 /* src/pages/ExamProctor/CourseTAReq.module.css */
 .container {
-  background-color: #d2e9ff;
+  background-color: #f0faff;
   min-height: 700px;
 }
 
@@ -107,4 +107,68 @@
 
 .cardSubmitWrapper {
   align-self: flex-end;
+}
+/* src/pages/ExamProctor/CourseTARequest.module.css */
+
+.container {
+  padding: 1rem;
+}
+
+.title {
+  flex: 1;
+  text-align: center;
+  margin: 0 0 1.5rem;
+  font-size: 1.75rem;
+  color: #150063;
+}
+
+.subtitle {
+  text-align: center;
+  color: #6b7280;
+  margin-bottom: 1.5rem;
+}
+
+.tableWrapper {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.workloadTable {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.workloadTable th,
+.workloadTable td {
+  padding: 12px 8px;
+  border: 1px solid #000;
+  text-align: left;
+}
+
+.workloadTable th {
+  background-color: #00067b;
+  color: #fff;
+  font-weight: 600;
+}
+
+.evenRow {
+  background-color: #f0faff;
+}
+
+.oddRow {
+  background-color: #ffffff;
+}
+
+.loading,
+.error {
+  text-align: center;
+  margin-top: 2rem;
+}
+
+/* Re-use the same classes for consistency with AssignProctor */
+.container > .tableWrapper {
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  padding: 1rem;
 }

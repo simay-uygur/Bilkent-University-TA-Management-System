@@ -1,9 +1,8 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import DepOfNavBar from '../../components/NavBars/DepOfNavBar';
 import BackBut from '../../components/Buttons/BackBut';
 import ConPop from '../../components/PopUp/ConPop';
-import styles from './SelectTACourse.module.css';
+import styles from './SelectCourseTA.module.css';
 import axios from 'axios';
 
 export interface TA {
@@ -24,7 +23,7 @@ interface Course {
   tasLeft?: number;
 }
 
-const SelectTACourse: React.FC = () => {
+const SelectCourseTA: React.FC = () => {
   const navigate = useNavigate();
   // Change from courseId to sectionCode
   const { sectionCode } = useParams<{ sectionCode: string }>();
@@ -145,6 +144,7 @@ const SelectTACourse: React.FC = () => {
       alert('Failed to assign TAs. Please try again.');
       setConfirmAssign(false);
     }
+    navigate('/department-office/assign-course');
   };
   
   if (loading) {
@@ -251,7 +251,7 @@ const SelectTACourse: React.FC = () => {
   );
 };
 
-export default SelectTACourse;
+export default SelectCourseTA;
 /* // src/pages/AssignTA/SelectTACourse.tsx
 import React, { useState, useMemo, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';

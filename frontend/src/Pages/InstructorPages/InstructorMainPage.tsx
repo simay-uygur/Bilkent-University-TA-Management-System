@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import CourseInfoPanel from './CourseInfoPanel';
 import styles from './InstructorMainPage.module.css';
 import axios from 'axios';
+import LoadingPage from '../CommonPages/LoadingPage';
 
 // Updated interfaces to match API response
 export interface Instructor {
@@ -318,7 +319,7 @@ export interface Course {
   instructor: Instructor;
 }
 
-const InsMainPage: React.FC = () => {
+const InstructorMainPage: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [instructor, setInstructor] = useState<Instructor | null>(null);
@@ -382,7 +383,7 @@ const InsMainPage: React.FC = () => {
   };
 
   if (loading) {
-    return <div className={styles.loading}>Loading courses...</div>;
+    return <LoadingPage />;
   }
 
   if (error) {
@@ -457,7 +458,11 @@ const InsMainPage: React.FC = () => {
   );
 };
 
+<<<<<<< Updated upstream
 export default InsMainPage; */
+=======
+export default InstructorMainPage;
+>>>>>>> Stashed changes
 /* import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import CourseInfoPanel from './CourseInfoPanel';

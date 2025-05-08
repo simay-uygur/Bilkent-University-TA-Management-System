@@ -1,5 +1,6 @@
 import axios, { AxiosResponse } from 'axios';
-axios.defaults.baseURL = import.meta.env.VITE_API_URL || '';  // ← point to your API
+axios.defaults.baseURL = import.meta.env.VITE_API_URL || '';  // ← point to your API,
+
 export interface Credentials {
   id: string;
   password: string;
@@ -216,7 +217,7 @@ export interface RawTA {
 /** the shape your UI cares about */
 export interface TA {
   id: string;            // string so you can use it as a React key
-  displayName: string;   // e.g. "Alice Smith"
+  displayName: string;   // e.g. "Alice Smith"
   webmail: string;
   active: boolean;
 }
