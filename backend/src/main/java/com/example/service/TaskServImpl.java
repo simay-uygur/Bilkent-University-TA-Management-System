@@ -62,10 +62,10 @@ public class TaskServImpl implements TaskServ {
         }
         Section section = sectionRepo.findBySectionCodeIgnoreCase(sectionCode)
                 .orElseThrow(() -> new GeneralExc("Section not found!"));
-        //Task task = new Task(section, taskDto.getDuration(), taskDto.getType(), 0);
-        Task task = taskMapper.toEntity(taskDto);
+        Task task = new Task(section, taskDto.getDuration(), taskDto.getType(), 0);
         checkAndUpdateStatusTask(task);
         Task newTask = taskRepo.save(task);
+        
         return taskMapper.toDto(newTask);
     }
 

@@ -93,4 +93,9 @@ public class Date {
     public LocalDateTime toLocalDateTime() {
         return LocalDateTime.of(year, month, day, hour, minute);
     }
+    /* @Override
+    public int compareTo(Date o){
+        return this.compareTo(o);
+    } */
+
 }

@@ -13,4 +13,6 @@ public class WorkLoadDto extends RequestDto{
     private String taskType;
     private Event duration;
     private int workload;
+    private Long receiverId;
+    private Long senderId;
 }

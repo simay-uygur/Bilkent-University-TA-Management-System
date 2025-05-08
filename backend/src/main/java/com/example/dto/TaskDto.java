@@ -21,6 +21,7 @@ import com.example.entity.General.Event;
 @NoArgsConstructor
 @AllArgsConstructor
 public class TaskDto {
+    private int taskId;
     private String type;
 
     /**
@@ -48,8 +49,8 @@ public class TaskDto {
     /**
      * Convenience constructor for tasks with no assigned TAs.
      */
-    public TaskDto(String type, String description, Event duration, String status, int workload) {
-        this(type, List.of(), description, duration, status, workload);
+    public TaskDto(int taskId, String type, String description, Event duration, String status, int workload) {
+        this(taskId, type, List.of(), description, duration, status, workload);
     }
 }
 

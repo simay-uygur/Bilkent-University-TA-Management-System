@@ -63,7 +63,7 @@ const InsMainPage: React.FC = () => {
   const [infoCourse, setInfoCourse] = useState<Section | null>(null);
   const [courseDetails, setCourseDetails] = useState<Record<string, CourseDetails>>({});
   const navigate = useNavigate();
-
+  
   useEffect(() => {
     const fetchInstructorData = async () => {
       try {
@@ -136,7 +136,6 @@ const InsMainPage: React.FC = () => {
         setLoading(false);
       }
     };
-
     // Separate function to fetch course details
    // Separate function to fetch course details
 const fetchCourseDetails = async (courseCodes: string[]) => {

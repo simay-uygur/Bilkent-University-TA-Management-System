@@ -43,7 +43,7 @@ import DeansOffice from './Pages/DeanOfficePages/DeansOffice';
 const App: React.FC = () => (
   <BrowserRouter>
     <Routes>
-
+    
       {/* Public */}
       <Route path="/login" element={<Login />} />
       {/* TA Area (requires ROLE_TA) */}

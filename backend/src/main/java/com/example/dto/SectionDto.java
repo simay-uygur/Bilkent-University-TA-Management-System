@@ -17,5 +17,6 @@ public class SectionDto {
     private InstructorDto instructor;
     private List<TaDto> tas;
     private List<StudentDto> students;
+    private List<TaskDto> tasks;
     
 }

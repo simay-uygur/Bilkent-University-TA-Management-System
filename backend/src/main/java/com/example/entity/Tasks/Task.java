@@ -3,6 +3,8 @@ package com.example.entity.Tasks;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.springframework.security.access.method.P;
+
 import com.example.entity.Actors.TA;
 import com.example.entity.Courses.Section;
 import com.example.entity.General.Event;
@@ -55,8 +57,11 @@ public class Task {
     @Column(name = "task_type", nullable = false)
     private TaskType taskType;
 
+    @Column(name = "description", nullable = true)
+    private String description;
+
     @Enumerated(EnumType.STRING)
-    @Column(name = "status", nullable = true)
+    @Column(name = "status", nullable = false)
     private TaskState status = TaskState.UNKNOWN;
 
     /*@Enumerated(EnumType.STRING)

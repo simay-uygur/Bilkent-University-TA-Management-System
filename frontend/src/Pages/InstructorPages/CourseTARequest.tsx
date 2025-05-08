@@ -38,6 +38,7 @@ const CourseTAReq: React.FC = () => {
   
   // Extract just the course code (CS-464) from the full section code
   const parts = fullSectionCode.split('-');
+  const departmentCode = parts[0];
   const courseCode = parts.length >= 2 ? `${parts[0]}-${parts[1]}` : fullSectionCode;
   
   // Get section number for display
@@ -55,12 +56,12 @@ const CourseTAReq: React.FC = () => {
     const fetchTAs = async () => {
       try {
         setLoading(true);
-        const response = await axios.get('/api/ta/department/{courseCode}');
+        const response = await axios.get('/api/ta/department/' + departmentCode);
         setTAs(response.data);
         setLoading(false);
       } catch (err) {
         console.error('Error fetching TAs:', err);
-        setError('Failed to load TAs. Please try again.');
+        setError('Failed to load TAs. Please try again.' + departmentCode);
         setLoading(false);
       }
     };
