@@ -105,15 +105,20 @@ const AssignTATask: React.FC = () => {
   const handleConfirm = async () => {
     try {
       // merge new into existing
-      const merged = [...alreadyAssigned, ...selected];
-      console.log('Final assigned:', merged, 'for section', sectionCode, 'task', taskId);
-      
-      // TODO: send merged to backend
-      // Example API call:
-      // await axios.post(`/api/tasks/${taskId}/assign-tas`, {
-      //   sectionCode,
-      //   taIds: merged.map(ta => ta.id)
-      // });
+        // Merge newly selected TAs with already assigned TAs
+    const merged = [...alreadyAssigned, ...selected];
+    console.log('Final assigned TAs:', merged, 'for section:', sectionCode, 'task:', taskId);
+    
+    // Extract just the TA IDs as numbers (API expects List<Long>)
+    const taIds = merged.map(ta => parseInt(ta.id, 10));
+    
+    // Make the API call based on the provided endpoint
+    await axios.put(
+      `/api/task/sectionCode/${sectionCode}/task/${taskId}/assign`,
+      taIds // Send the array of IDs directly as the request body
+    );
+    
+    console.log('Successfully assigned TAs');
       
       setConfirmOpen(false);
       navigate(`/instructor/workload/${sectionCode}`);

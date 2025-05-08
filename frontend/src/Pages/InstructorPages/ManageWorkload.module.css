@@ -246,3 +246,13 @@
 .errorPopupContent .closeButton:hover {
   opacity: 0.9;
 }
+
+.noAssigned {
+  color: #d32f2f;
+  font-weight: 500;
+}
+
+.yesAssigned {
+  color: #388e3c;
+  font-weight: 500;
+}

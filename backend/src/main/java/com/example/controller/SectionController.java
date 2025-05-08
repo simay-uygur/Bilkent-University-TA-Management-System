@@ -95,7 +95,11 @@ public class SectionController {
     public ResponseEntity<List<TaskDto>> getTasks(@PathVariable String section_code) {
         return new ResponseEntity<>(sectionServ.getTasks(section_code), HttpStatus.OK);
     }
-    
+    @DeleteMapping("section/{section_code}/task/{task_id}")
+    public ResponseEntity<Boolean> deleteTask(@PathVariable String section_code, @PathVariable int task_id) {
+        
+        return new ResponseEntity<>(taskServ.deleteTask(section_code, task_id),HttpStatus.NO_CONTENT);
+    }
 
     //if this takes sectiondto update that  and also ta dto
     @PostMapping("/{sectionCode}/tas/{taId}")

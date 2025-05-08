@@ -116,7 +116,7 @@ public class Task {
                 : null;
     }
 
-    public Task(Section section, Event duration, String type, int workload)
+    public Task(Section section, Event duration,String description, String type, int workload)
     {
         this.section = section;
         this.duration = duration;

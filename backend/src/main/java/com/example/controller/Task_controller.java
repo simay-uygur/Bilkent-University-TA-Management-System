@@ -115,7 +115,27 @@ public class Task_controller {
     public ResponseEntity<List<TaDto>> assignTA(@PathVariable int task_id, @RequestBody List<TaDto> tas, @PathVariable Long instr_id, @PathVariable int section_num, @PathVariable String course_code) {
         return new ResponseEntity<>(taskServ.assignTasToTask(tas, task_id, section_num, course_code, instr_id),HttpStatus.OK);
     } 
+    @PutMapping("/api/task/sectionCode/{sectionCode}/task/{taskId}/assign")
+    @Transactional
+    public ResponseEntity<Boolean> assignTAs(@PathVariable String sectionCode, @PathVariable int taskId, @RequestBody List<Long> taIds) {
+        return new ResponseEntity<>(taskServ.assignTasToTaskByTheirId(sectionCode, taskId, taIds),HttpStatus.OK);
+    } 
 
+
+
+    /* @PutMapping("/api/sectionCode/{sectionCode}/task/{taskId}/assign/{taId}")
+    @Transactional
+    public ResponseEntity<Boolean> assignTAtoTask(@PathVariable String sectionCode,@PathVariable int taskId,@PathVariable Long taId) {
+        return new ResponseEntity<>(taskServ.assignTaToTask(sectionCode, taskId, taId),HttpStatus.OK);
+    }  -----------------Dont Use its very bad design---------------- */
+
+
+  /*   @PutMapping("/api/sectionCode/{sectionCode}/instr/{instrId}/task/{taskId}/assign/{ta_id}")
+    @Transactional
+    public ResponseEntity<List<TaDto>> assignTAtoTask(@PathVariable int task_id, @RequestBody List<TaDto> tas, @PathVariable Long instr_id, @PathVariable int section_num, @PathVariable String course_code) {
+        return new ResponseEntity<>(taskServ.assignTasToTask(tas, task_id, sectionCode instr_id),HttpStatus.OK);
+    } 
+ */
     /*@PutMapping("/api/instr/{instr_id}/task/{task_id}/unassign/{ta_id}")
     public ResponseEntity<Boolean> unassignTA(@PathVariable int task_id, @PathVariable Long ta_id, @PathVariable Long instr_id) {
         TA ta = taRepo.findById(ta_id)

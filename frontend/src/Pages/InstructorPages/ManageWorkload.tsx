@@ -204,7 +204,7 @@ const ManageWorkload: React.FC = () => {
 
     const payload = {
       type: currentType,
-      description: currentDescription || null,
+      description: currentDescription.trim() === '' ? courseCode + currentType : currentDescription.trim(),
       duration: buildDuration()
     };
 
@@ -244,6 +244,8 @@ const ManageWorkload: React.FC = () => {
               <th>Start</th>
               <th>Finish</th>
               <th>Assigned</th>
+              <th>Workload</th>
+              <th>Status</th>
               <th>Actions</th>
             </tr>
           </thead>
@@ -252,10 +254,18 @@ const ManageWorkload: React.FC = () => {
               <tr key={t.taskId}>
                 <td>{t.taskId}</td>
                 <td>{t.type}</td>
-                <td>{t.description || ''}</td>
+                <td>{t.description || 'Empty'}</td>
                 <td>{formatTime(t.duration.start)}</td>
                 <td>{formatTime(t.duration.finish)}</td>
-                <td>{t.tas.length}</td>
+                <td>
+  {t.tas.length === 0 ? (
+    <span className={styles.noAssigned}>No</span>
+  ) : (
+    <span className={styles.yesAssigned}>Yes ({t.tas.length})</span>
+  )}
+</td>
+                <td>{t.workload}</td>
+                <td>{t.status}</td>
                 <td className={styles.actionsCell}>
                   <button
                     className={styles.deleteBtn}

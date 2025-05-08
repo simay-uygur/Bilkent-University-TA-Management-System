@@ -54,7 +54,36 @@ public class TaskServImpl implements TaskServ {
     private final WorkLoadServ workLoadServ;
     private final CourseOfferingServ courseOfferingServ;
     private final RequestServ reqServ;
-   
+    @Override
+    public boolean assignTasToTaskByTheirId(String sectionCode, int taskId, List<Long> tas) {
+        Task task = taskRepo.findById(taskId)
+                .orElseThrow(() -> new TaskNotFoundExc(taskId));
+        Section section = sectionRepo.findBySectionCodeIgnoreCase(sectionCode)
+                .orElseThrow(() -> new GeneralExc("Section not found!"));
+        if (task.getSection() != null && task.getSection().getSectionCode().equals(sectionCode)) {
+            for (Long taId : tas) {
+                TA ta = taRepo.findById(taId)
+                        .orElseThrow(() -> new TaNotFoundExc(taId));
+                assignTA(task, ta, section.getInstructor().getId());
+            }
+            return true;
+        } else {
+            throw new GeneralExc("Task not found in the specified section!");
+        }
+    }
+    @Override
+    public boolean deleteTask(String section_code, int task_id) {
+        Section section = sectionRepo.findBySectionCodeIgnoreCase(section_code)
+                .orElseThrow(() -> new GeneralExc("Section not found!"));
+        Task task = taskRepo.findById(task_id)
+                .orElseThrow(() -> new TaskNotFoundExc(task_id));
+        if (task.getSection() != null && task.getSection().getSectionCode().equals(section_code)) {
+            taskRepo.delete(task);
+            return true;
+        } else {
+            throw new GeneralExc("Task not found in the specified section!");
+        }
+    }
     @Override
     public TaskDto createTask(TaskDto taskDto, String sectionCode) {
         if (taskDto == null) {
@@ -62,7 +91,7 @@ public class TaskServImpl implements TaskServ {
         }
         Section section = sectionRepo.findBySectionCodeIgnoreCase(sectionCode)
                 .orElseThrow(() -> new GeneralExc("Section not found!"));
-        Task task = new Task(section, taskDto.getDuration(), taskDto.getType(), 0);
+        Task task = new Task(section, taskDto.getDuration(),taskDto.getDescription(), taskDto.getType(), 0);
         checkAndUpdateStatusTask(task);
         Task newTask = taskRepo.save(task);
         
