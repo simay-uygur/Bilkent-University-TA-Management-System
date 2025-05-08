@@ -12,4 +12,5 @@ public class ProctorTaInFacultyDto extends RequestDto{
     private String examName;
     private int examId;
     private int requiredTas;
+    private int tasLeft;
 }

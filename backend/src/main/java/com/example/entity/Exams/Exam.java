@@ -148,4 +148,22 @@ public class Exam {
 
     @Column(name = "amount_of_assigned_tas", unique = false, updatable = true)
     private Integer amountOfAssignedTAs = 0; // this is used to get the assigned tas for this exam
+
+    public boolean incr(){
+        if (amountOfAssignedTAs != requiredTAs)
+        {
+            amountOfAssignedTAs++;
+            return true;
+        }
+        return false;
+    }
+
+    public boolean decr(){
+        if (amountOfAssignedTAs > 0)
+        {
+            amountOfAssignedTAs--;
+            return true;
+        }
+        return false;
+    }
 }
