@@ -1,7 +1,9 @@
 package com.example.service;
 
+import com.example.dto.DepartmentStaffDto;
 import com.example.entity.Actors.DepartmentStaff;
 import com.example.entity.Actors.Role;
+import com.example.mapper.DepartmentStaffMapper;
 import com.example.repo.DepartmentStaffRepo;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -15,7 +17,14 @@ public class DepartmentStaffServImpl implements DepartmentStaffServ {
 
     private final DepartmentStaffRepo repo;
     private final PasswordEncoder encoder;
+    private final DepartmentStaffMapper mapper;
 
+    @Override
+    public DepartmentStaffDto getDepartmentStaffById(Long id) {
+        DepartmentStaff staff = repo.findById(id)
+                .orElseThrow(() -> new RuntimeException("Staff with id " + id + " not found."));
+        return mapper.toDto(staff);
+    }
     @Override
     public DepartmentStaff createDepartmentStaff(DepartmentStaff staff) {
         if (repo.existsById(staff.getId())) {
@@ -52,7 +61,10 @@ public class DepartmentStaffServImpl implements DepartmentStaffServ {
     }
 
     @Override
-    public List<DepartmentStaff> getAllDepartmentStaff() {
-        return repo.findAll();
+    public List<DepartmentStaffDto> getAllDepartmentStaff() {
+        List<DepartmentStaff> staffList = repo.findAll();
+        return staffList.stream()
+                .map(mapper::toDto)
+                .toList();
     }
 }

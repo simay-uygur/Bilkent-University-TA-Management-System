@@ -1,7 +1,6 @@
 // src/pages/AssignTA/SelectTACourse.tsx
 import React, { useState, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import DepOfNavBar from '../../components/NavBars/DepOfNavBar';
 import BackBut from '../../components/Buttons/BackBut';
 import ConPop from '../../components/PopUp/ConPop';
 import styles from './SelectTACourse.module.css';
@@ -85,14 +84,13 @@ const SelectTACourse: React.FC = () => {
   );
 
   const handleConfirm = () => setConfirmAssign(true);
-  const doConfirm = () => { setConfirmAssign(false); navigate('/asgnTAC'); };
+  const doConfirm = () => { setConfirmAssign(false); navigate('/department-office/assign-course/${courseID}/${courseSec}'); };
 
   return (
     <div className={styles.pageWrapper}>
-      <DepOfNavBar />
 
       <header className={styles.header}>
-        <BackBut to="/asgnTAC" />
+        <BackBut to="/department-office/assign-course" />
         <h1 className={styles.title}>{courseData.courseName}</h1>
         <div className={styles.stats}>
           <span>Needed: {needed}</span>

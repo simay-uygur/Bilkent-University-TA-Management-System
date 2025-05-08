@@ -12,6 +12,7 @@ import java.util.List;
 public class SectionDto {
     private Long sectionId;          // was int → now Long
     private String sectionCode;
+    private String courseName;
     private List<LessonDto> lessons;
     private InstructorDto instructor;
     private List<TaDto> tas;

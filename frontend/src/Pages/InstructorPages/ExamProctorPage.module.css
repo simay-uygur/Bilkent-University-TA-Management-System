@@ -3,6 +3,7 @@
 .headerRow {
   display: flex;
   align-items: center;
+  background-color: #d2e9ff;;
 }
 
 .backBtn {
@@ -20,4 +21,5 @@
 
 .mainContainer {
   /* existing styles */
+  background-color: #d2e9ff;
 }

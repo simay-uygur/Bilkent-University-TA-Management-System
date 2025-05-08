@@ -24,7 +24,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.example.dto.FailedRowInfo;
+import com.example.ExcelHelpers.FailedRowInfo;
 import com.example.entity.Actors.Role;
 import com.example.entity.Actors.TA;
 import com.example.entity.Actors.TAType;
@@ -316,8 +316,8 @@ public class StudentServImpl implements com.example.service.StudentServ {
                         if (opt.isPresent()) {
                             TA existing = opt.get();
                             boolean changed = false;
-                            if (!existing.getIsActive()) {
-                                existing.setIsActive(true);
+                            if (!existing.isActive()) {
+                                existing.setActive(true);
                                 changed = true;
                             }
                             if (!Objects.equals(existing.getIsGraduated(), isGraduated)) {
@@ -336,7 +336,7 @@ public class StudentServImpl implements com.example.service.StudentServ {
                         newTa.setWebmail(mail);
                         newTa.setAcademicLevel(AcademicLevelType.valueOf(academicStatus));
                         newTa.setDepartment(department);
-                        newTa.setIsActive(true);
+                        newTa.setActive(true);
                         newTa.setIsGraduated(isGraduated);
                         newTa.setRole(Role.TA);
                         newTa.setTaType(TAType.valueOf(taType));

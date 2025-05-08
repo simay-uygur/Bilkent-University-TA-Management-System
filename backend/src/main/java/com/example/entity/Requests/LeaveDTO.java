@@ -1,14 +1,22 @@
 package com.example.entity.Requests;
 
+import java.util.List;
+
+import com.example.dto.RequestDto;
+import com.example.dto.TaskDto;
 import com.example.entity.General.Event;
 
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
+@EqualsAndHashCode(callSuper = true)
 @Data
-public class LeaveDTO {
-    private RequestType requestType;
-    private String description;
+public class LeaveDTO extends RequestDto {
     private Event duration;
-    private Long receiverId;    
-    //private MultipartFile file;   
+    private boolean isPending;
+    private List<TaskDto> tasks;
+
+    private String attachmentFilename;
+    private String attachmentContentType;
+    private String attachmentUrl;
 }

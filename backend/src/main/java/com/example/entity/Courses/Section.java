@@ -1,19 +1,32 @@
 package com.example.entity.Courses;
 
-import com.example.entity.Actors.Instructor;
-import com.example.entity.Actors.TA;
-import com.example.entity.Exams.ExamRoom;
-import com.example.entity.General.Student;
-import com.example.entity.Tasks.Task;
-import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.Setter;
-import org.hibernate.annotations.DynamicUpdate;
-
 import java.util.ArrayList;
 import java.util.List;
 
+import org.hibernate.annotations.DynamicUpdate;
+
+import com.example.entity.Actors.Instructor;
+import com.example.entity.Actors.TA;
+import com.example.entity.General.Student;
+import com.example.entity.Tasks.Task;
+
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import static jakarta.persistence.FetchType.LAZY;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
+import jakarta.persistence.ManyToMany;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
+import lombok.Getter;
+import lombok.Setter;
 
 /**
  * Section — a single class group of a course (e.g. CS-319-1).
@@ -36,6 +49,18 @@ public class Section {
 
     @Column(name = "section_code", nullable = false, unique = true) // CS-319-1-2025-SPRING     new format to align with course offering semester relation
     private String sectionCode;
+
+    @Column(name = "course_name", nullable = true) // Object-orianted-software engineering
+    private String courseName;
+
+
+    @ManyToMany
+    @Column(name = "preffered_TAs", nullable = true, updatable = true) 
+    private List<TA> preffered_TAS = new ArrayList<>(); // ta's which are taking this course (registered)
+
+    @ManyToMany
+    @Column(name = "unpreffered_TAs", nullable = true, updatable = true) 
+    private List<TA> unpreffered_TAS = new ArrayList<>(); // ta's which are taking this course (registered)
 
     @OneToMany(
             mappedBy      = "section",
@@ -98,7 +123,11 @@ public class Section {
             orphanRemoval = true)
     private List<Lesson> lessons = new ArrayList<>();
 
-
+    @Override
+    public String toString(){
+        String[] parts = this.sectionCode.split("-");
+        return parts[0] + "-" + parts[1] + "-" + parts[2];
+    }
     
 
 }

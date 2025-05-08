@@ -1,13 +1,16 @@
 package com.example.mapper;
 
+import org.springframework.stereotype.Component;
+
 import com.example.dto.DateDto;
 import com.example.dto.EventDto;
 import com.example.dto.LessonDto;
 import com.example.entity.Courses.Lesson;
 import com.example.entity.General.ClassRoom;
+import com.example.entity.General.Date;
 import com.example.entity.General.Event;
+
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Component;
 
 @Component
 @RequiredArgsConstructor
@@ -20,6 +23,7 @@ public class LessonMapper {
 
         dto.setDuration(toEventDto(lesson.getDuration()));
 
+        // classRoom → use classroomId and examCapacity
         ClassRoom room = lesson.getLessonRoom();
         if (room != null) {
             dto.setClassroomId(room.getClassroomId());
@@ -28,6 +32,7 @@ public class LessonMapper {
 
         dto.setLessonType(lesson.getLessonType().name());
         dto.setSectionId(lesson.getSection() != null ? lesson.getSection().getSectionCode() : null);
+        dto.setDay(lesson.getDay() != null ? lesson.getDay().name() : null);
 
         return dto;
     }
@@ -46,17 +51,17 @@ public class LessonMapper {
         return lesson;
     }
 
-    private Event toEvent(com.example.dto.EventDto dto) {
+    private Event toEvent(EventDto dto) {
         if (dto == null) return null;
         return new Event(
-                new com.example.entity.General.Date(
+                new Date(
                         dto.getStart().getDay(),
                         dto.getStart().getMonth(),
                         dto.getStart().getYear(),
                         dto.getStart().getHour(),
                         dto.getStart().getMinute()
                 ),
-                new com.example.entity.General.Date(
+                new Date(
                         dto.getFinish().getDay(),
                         dto.getFinish().getMonth(),
                         dto.getFinish().getYear(),

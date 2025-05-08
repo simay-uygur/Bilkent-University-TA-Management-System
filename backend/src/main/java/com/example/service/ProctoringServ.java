@@ -1,8 +1,11 @@
 package com.example.service;
 
-import com.example.entity.Exams.Exam;
+import java.util.List;
+import java.util.concurrent.CompletableFuture;
+
+import com.example.dto.ExamDto;
+import com.example.dto.ProctoringDto;
 
 public interface ProctoringServ {
-    public void autoAssignment(Exam exam);
-    public void manualAssignment(Exam exam, boolean[] restrictions);
+    public CompletableFuture<List<ProctoringDto>> getProctoringInfo(Integer examId, String courseCode);
 }

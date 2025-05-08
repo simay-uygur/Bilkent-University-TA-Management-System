@@ -18,7 +18,7 @@
 .title {
   flex: 1;
   text-align: center;
-  font-size: 1.8rem;
+  font-size: 1.5rem;
   font-weight: bold;
 }
 
@@ -26,18 +26,21 @@
   padding: 1rem;
   transition: filter 0.2s;
 }
+
 /* Task Table */
 .taskTable {
   width: 100%;
   border-collapse: collapse;
   margin-bottom: 24px;
 }
+
 .taskTable th {
   background: #1e3a8a;
   color: #fff;
   padding: 12px;
   font-size: 1.125rem;
 }
+
 .taskTable td {
   padding: 12px;
   border: 1px solid #483a3a;
@@ -45,12 +48,13 @@
 }
 
 /* Action Buttons */
-  .actionsCell {
-    display: flex;
-    justify-content: center;  /* or flex-start / flex-end */
-    align-items: center;
-    gap: 8px;                 /* space between buttons */
-  }
+.actionsCell {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+}
+
 .deleteBtn, .updateBtn, .assignBtn {
   border: none;
   color: #fff;
@@ -58,20 +62,27 @@
   border-radius: 4px;
   cursor: pointer;
 }
-.deleteBtn { background: #ef4444; margin-right: 8px; }
-.updateBtn { background: #22c55e; margin-right: 8px; }
+
+.deleteBtn {
+  background: #ef4444;
+}
+
+.updateBtn {
+  background: #22c55e;
+}
+
 /* Assign TA button: friendly amber */
 .assignBtn {
   background: #fbc523;
   color: #212529;
-  margin-left: 0;
   transition: background 0.2s;
 }
+
 .assignBtn:hover {
   background: #e0a800;
 }
 
-/* Header Row */
+/* Header Row 2 */
 .headerRow2 {
   display: flex;
   justify-content: space-between;
@@ -79,21 +90,22 @@
   margin-top: 16px;
   gap: 16px;
 }
-.deleteAllBtn, .button, .addBtn {
+
+.deleteAllBtn, .addBtn {
   border: none;
   color: #fff;
   padding: 12px 20px;
   border-radius: 4px;
   cursor: pointer;
 }
-.deleteAllBtn { background: #ef4444; }
-.button, .addBtn { background: #2563eb; }
-.fileUploadSection {
-  display: flex;
-  align-items: center;
-  gap: 8px;
+
+.deleteAllBtn {
+  background: #ef4444;
 }
-.fileUploadSection input { cursor: pointer; }
+
+.addBtn {
+  background: #2563eb;
+}
 
 /* Overlay for popups */
 .popupOverlay {
@@ -114,6 +126,7 @@
   box-shadow: 0 4px 12px rgba(0,0,0,0.3);
   width: 320px;
 }
+
 .popup h3 {
   margin-bottom: 16px;
   font-size: 1.1rem;
@@ -124,14 +137,23 @@
   display: flex;
   justify-content: space-between;
 }
+
 .approveBtn, .cancelBtn {
   padding: 8px 16px;
   border: none;
   border-radius: 4px;
   cursor: pointer;
 }
-.approveBtn { background: #4caf50; color: #fff; }
-.cancelBtn  { background: #f44336; color: #fff; }
+
+.approveBtn {
+  background: #4caf50;
+  color: #fff;
+}
+
+.cancelBtn {
+  background: #f44336;
+  color: #fff;
+}
 
 /* Modal (Add/Edit) */
 .modalOverlay {
@@ -143,6 +165,7 @@
   align-items: center;
   z-index: 100;
 }
+
 .modal {
   background: #fff;
   padding: 24px;
@@ -150,30 +173,39 @@
   width: 360px;
   box-shadow: 0 4px 12px rgba(0,0,0,0.2);
 }
+
 .modal h2 {
   margin-bottom: 16px;
 }
-.formGroup {
+
+/* Form rows inside modal */
+.fieldRow {
   margin-bottom: 12px;
   display: flex;
   flex-direction: column;
 }
-.formGroup label {
+
+.fieldRow label {
   margin-bottom: 4px;
   font-weight: bold;
 }
-.formGroup select {
+
+.fieldRow select,
+.fieldRow input[type="date"] {
   padding: 8px;
-  border-radius: 4px;
   border: 1px solid #cbd5e1;
+  border-radius: 4px;
 }
-.modalButtons {
+
+/* Buttons row inside modal */
+.buttonsRow {
   display: flex;
   justify-content: flex-end;
   gap: 8px;
   margin-top: 12px;
 }
-.smallBtn {
+
+.buttonsRow button {
   background: #2563eb;
   color: #fff;
   border: none;
@@ -182,7 +214,11 @@
   cursor: pointer;
 }
 
-/* Error Popup Content (file & time) */
+.buttonsRow button:hover {
+  opacity: 0.9;
+}
+
+/* Error Popup Content */
 .errorPopupContent {
   background: #fff;
   padding: 24px 32px;
@@ -191,11 +227,13 @@
   max-width: 320px;
   box-shadow: 0 4px 12px rgba(0,0,0,0.3);
 }
+
 .errorPopupContent .errorMessage {
   color: #b91c1c;
   font-size: 1rem;
   margin-bottom: 16px;
 }
+
 .errorPopupContent .closeButton {
   background: #2563eb;
   color: #fff;
@@ -204,18 +242,7 @@
   border-radius: 4px;
   cursor: pointer;
 }
-.errorPopupContent .closeButton:hover {
-  opacity: 0.9;
-}
 
-.greenButton {
-  background: #2563eb;
-  color: #fff;
-  border: none;
-  padding: 8px 16px;
-  border-radius: 4px;
-  cursor: pointer;
-}
-.greenButton:hover {
+.errorPopupContent .closeButton:hover {
   opacity: 0.9;
 }

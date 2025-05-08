@@ -6,10 +6,10 @@ import com.example.entity.Requests.Request;
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
+
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -45,7 +45,7 @@ import lombok.Setter;
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "type")
 @JsonSubTypes({
     @JsonSubTypes.Type(value = TA.class, name = "TA"),
-    //@JsonSubTypes.Type(value = Admin.class, name = "ADMIN")
+    @JsonSubTypes.Type(value = Admin.class, name = "ADMIN"), //newly added
     @JsonSubTypes.Type(value = Instructor.class, name = "INSTRUCTOR"),
     @JsonSubTypes.Type(value = DepartmentStaff.class, name = "DEPARTMENT_STAFF"),
         @JsonSubTypes.Type(value = DeanOffice.class, name = "DEAN_OFFICE")
@@ -85,11 +85,11 @@ public class User {
     @OneToMany(mappedBy = "sender", cascade = CascadeType.ALL, fetch= FetchType.LAZY)
     //@JsonManagedReference
         @JsonIgnoreProperties("sender") // Only ignore the back-reference
-    private List<Request> sended_requests;
+    private List<Request> sendedRequests;
     
 
     @OneToMany(mappedBy = "receiver",fetch= FetchType.LAZY, cascade= {CascadeType.REFRESH,CascadeType.MERGE})
     //@JsonManagedReference
     @JsonIgnoreProperties("receiver") // Only ignore the back-reference
-    private List<Request> received_requests;
+    private List<Request> receivedRequests;
 }

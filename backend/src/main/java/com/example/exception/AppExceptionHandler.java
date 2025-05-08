@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import com.example.exception.Course.CourseNotFoundExc;
 import com.example.exception.Course.NoPrereqCourseFound;
+import com.example.exception.Requests.NoSuchRequestExc;
 import com.example.exception.taskExc.TaskIsNotActiveExc;
 import com.example.exception.taskExc.TaskLimitExc;
 import com.example.exception.taskExc.TaskNoTasExc;
@@ -86,6 +87,12 @@ public class AppExceptionHandler {
 
     @ExceptionHandler(NoPrereqCourseFound.class)
     public ResponseEntity<Map<String, String>> handleCourseNotFoundException(NoPrereqCourseFound ex) {
+        return ResponseEntity.status(HttpStatus.CONFLICT)
+                .body(Map.of("error", ex.getMessage()));
+    }
+
+    @ExceptionHandler(NoSuchRequestExc.class)
+    public ResponseEntity<Map<String, String>> handleCourseNotFoundException(NoSuchRequestExc ex) {
         return ResponseEntity.status(HttpStatus.CONFLICT)
                 .body(Map.of("error", ex.getMessage()));
     }

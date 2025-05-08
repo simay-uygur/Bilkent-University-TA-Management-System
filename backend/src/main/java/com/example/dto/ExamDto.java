@@ -1,17 +1,23 @@
 package com.example.dto;
 
+import java.util.List;
+
+import com.example.entity.General.Event;
+
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-import java.util.List;
 
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 public class ExamDto {
-    private String duration;
+    private Event    duration;
     private String courseCode;
-    private List<ExamRoomDto> examRooms;
+    private String       type;
+    private List<String> examRooms;
+    private int   requiredTas;
+    private Boolean swapIsEnabled;
+    private Integer workload;
 }

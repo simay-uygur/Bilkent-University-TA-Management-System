@@ -16,7 +16,7 @@ public class DepartmentMapper {
         String facultyCode = department.getFaculty() != null
                 ? department.getFaculty().getCode()
                 : null;
-
+        
         return new DepartmentDto(
                 department.getName(),
                 facultyCode

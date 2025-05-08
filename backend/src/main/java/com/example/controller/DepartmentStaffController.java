@@ -1,5 +1,6 @@
 package com.example.controller;
 
+import com.example.dto.DepartmentStaffDto;
 import com.example.dto.InstructorDto;
 import com.example.entity.Actors.DepartmentStaff;
 import com.example.service.DepartmentStaffServ;
@@ -31,9 +32,13 @@ public class DepartmentStaffController {
         staffServ.deleteDepartmentStaff(id);
         return ResponseEntity.ok("Deleted successfully");
     }
+    @GetMapping("/{id}")
+    public ResponseEntity<DepartmentStaffDto> getById(@PathVariable Long id) {
+        return ResponseEntity.ok(staffServ.getDepartmentStaffById(id));
+    }
 
     @GetMapping
-    public ResponseEntity<List<DepartmentStaff>> getAll() {
+    public ResponseEntity<List<DepartmentStaffDto>> getAll() {
         return ResponseEntity.ok(staffServ.getAllDepartmentStaff());
     }
     /*  @GetMapping("/department/{deptName}")

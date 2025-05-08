@@ -3,15 +3,16 @@ package com.example.service;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
+
+import org.springframework.web.multipart.MultipartFile;
 
 import com.example.dto.TaDto;
+import com.example.dto.TaTaskDto;
 import com.example.entity.Actors.TA;
 import com.example.entity.General.Date;
 import com.example.entity.Schedule.Schedule;
 import com.example.entity.Schedule.ScheduleItem;
 import com.example.entity.Tasks.Task;
-import org.springframework.web.multipart.MultipartFile;
 
 public interface TAServ {
     public List<TaDto> getAllTAs();
@@ -21,8 +22,8 @@ public interface TAServ {
 
     public TA getTAByIdEntity(Long id);
     public TaDto getTAByIdDto(Long id);
-    public Task getTaskById(int task_id, Long ta_id);
-    public Set<Task> getAllTasks(Long id);
+    public TaTaskDto getTaskById(int task_id, Long ta_id);
+    public List<TaTaskDto> getAllTasTasks(Long id);
     public boolean assignTask(Task task, Long id);
     public boolean deleteTaskById(int task_id, Long ta_id);
     public boolean restoreTAById(Long id);

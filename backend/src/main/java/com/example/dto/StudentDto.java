@@ -16,8 +16,10 @@ public class StudentDto {
     private String department;
     private Boolean isActive;
     private Boolean isGraduated;
+
+    public StudentDto(Long studentId, String studentName, String studentSurname) {
+        this.studentId = studentId;
+        this.studentName = studentName;
+        this.studentSurname = studentSurname;
+    }
 }
-
-
-
-
