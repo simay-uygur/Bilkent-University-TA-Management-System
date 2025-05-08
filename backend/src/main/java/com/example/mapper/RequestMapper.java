@@ -34,9 +34,13 @@ public class RequestMapper {
     private final TaTaskRepo taTaskRepo;
 
     public RequestDto toDto(Request req) {
+        Long recId = req.getReceiver().getId();
+        Long sendId = req.getSender().getId();
         if (req instanceof Leave leave) {
             LeaveDTO dto = new LeaveDTO();
             BeanUtils.copyProperties(leave, dto);
+            dto.setSenderId(sendId);
+            dto.setReceiverId(recId);
             dto.setSenderName(leave.getSender().getName() + " " + leave.getSender().getSurname());
             dto.setReceiverName(leave.getReceiver().getName() + " " + leave.getReceiver().getSurname());
             dto.setTasks(taTaskRepo.findTasksForTaInInterval(leave.getSender().getId(), dto.getDuration().getStart(), dto.getDuration().getFinish()).stream()
@@ -61,6 +65,8 @@ public class RequestMapper {
         else if (req instanceof Swap swap) {
             SwapDto dto = new SwapDto();
             BeanUtils.copyProperties(swap, dto);
+            dto.setSenderId(sendId);
+            dto.setReceiverId(recId);
             dto.setSenderName(swap.getSender().getName() + " " + swap.getSender().getSurname());
             dto.setReceiverName(swap.getReceiver().getName() + " " + swap.getReceiver().getSurname());
             dto.setExamName(swap.getExam().getDescription());
@@ -70,6 +76,8 @@ public class RequestMapper {
         else if (req instanceof SwapEnable se) {
             SwapEnableDto dto = new SwapEnableDto();
             BeanUtils.copyProperties(se, dto);
+            dto.setSenderId(sendId);
+            dto.setReceiverId(recId);
             dto.setSenderName(se.getSender().getName() + " " + se.getSender().getSurname());
             dto.setReceiverName(se.getReceiver().getName() + " " + se.getReceiver().getSurname());
             dto.setDuration(se.getExam().getDuration());
@@ -80,6 +88,8 @@ public class RequestMapper {
         else if (req instanceof TransferProctoring tp) {
             TransferProctoringDto dto = new TransferProctoringDto();
             BeanUtils.copyProperties(tp, dto);
+            dto.setSenderId(sendId);
+            dto.setReceiverId(recId);
             dto.setSenderName(tp.getSender().getName() + " " + tp.getSender().getSurname());
             dto.setReceiverName(tp.getReceiver().getName() + " " + tp.getReceiver().getSurname());
             dto.setDuration(tp.getExam().getDuration());
@@ -90,9 +100,12 @@ public class RequestMapper {
         else if (req instanceof ProctorTaFromFaculties pf) {
             ProctorTaFromFacultiesDto dto = new ProctorTaFromFacultiesDto();
             BeanUtils.copyProperties(pf, dto);
+            dto.setSenderId(sendId);
+            dto.setReceiverId(recId);
             dto.setSenderName(pf.getSender().getName() + " " + pf.getSender().getSurname());
             dto.setReceiverName(pf.getReceiver().getName() + " " + pf.getReceiver().getSurname());
-
+            dto.setRequiredTas(pf.getRequiredTas());
+            dto.setTasLeft(pf.getTasLeft());
             // collect its child ProctorTaInFaculty by matching sentTime
             List<ProctorTaInFacultyDto> children = pf.getProctorTaInFaculties()
                 .stream()
@@ -118,16 +131,22 @@ public class RequestMapper {
         else if (req instanceof ProctorTaInFaculty pi) {
             ProctorTaInFacultyDto dto = new ProctorTaInFacultyDto();
             BeanUtils.copyProperties(pi, dto);
+            dto.setSenderId(sendId);
+            dto.setReceiverId(recId);
             dto.setSenderName(pi.getSender().getName() + " " + pi.getSender().getSurname());
             dto.setReceiverName(pi.getReceiver().getName() + " " + pi.getReceiver().getSurname());
             dto.setFacultyName(pi.getFaculty().getCode());
             dto.setExamName(pi.getExam().getDescription());
             dto.setExamId(pi.getExam().getExamId());
+            dto.setRequiredTas(pi.getProctorTaFromFaculties().getRequiredTas());
+            dto.setTasLeft(pi.getProctorTaFromFaculties().getTasLeft());
             return dto;
         }
         else if (req instanceof WorkLoad wl) {
             WorkLoadDto dto = new WorkLoadDto();
             BeanUtils.copyProperties(wl, dto);
+            dto.setSenderId(sendId);
+            dto.setReceiverId(recId);
             dto.setSenderName(wl.getSender().getName() + " " + wl.getSender().getSurname());
             dto.setReceiverName(wl.getReceiver().getName() + " " + wl.getReceiver().getSurname());
             dto.setTaskId(wl.getTask().getTaskId());

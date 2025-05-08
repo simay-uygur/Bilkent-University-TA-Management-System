@@ -13,4 +13,6 @@ public class ProctorTaFromFacultiesDto extends RequestDto {
     private List<ProctorTaInFacultyDto> proctorTaInFacultyDtos;
     private String examName;
     private int    examId;
+    private int requiredTas;
+    private int tasLeft;
 }

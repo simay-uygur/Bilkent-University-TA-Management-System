@@ -2,9 +2,13 @@ package com.example.mapper;
 
 import org.springframework.stereotype.Component;
 
+import com.example.dto.DateDto;
+import com.example.dto.EventDto;
 import com.example.dto.LessonDto;
 import com.example.entity.Courses.Lesson;
 import com.example.entity.General.ClassRoom;
+import com.example.entity.General.Date;
+import com.example.entity.General.Event;
 
 import lombok.RequiredArgsConstructor;
 
@@ -12,43 +16,78 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class LessonMapper {
 
-    /**
-     * Entity → DTO
-     */
     public LessonDto toDto(Lesson lesson) {
         if (lesson == null) return null;
 
         LessonDto dto = new LessonDto();
 
-        // ISO-8601 duration string (e.g. "PT1H30M")
-        dto.setDuration(lesson.getDuration() != null ? lesson.getDuration() : null);
+        dto.setDuration(toEventDto(lesson.getDuration()));
 
         // classRoom → use classroomId and examCapacity
         ClassRoom room = lesson.getLessonRoom();
         if (room != null) {
-            dto.setRoom(room.getClassroomId());
-            dto.setExamCapacity(room.getExamCapacity());
+            dto.setClassroomId(room.getClassroomId());
+            //dto.setExamCapacity(room.getExamCapacity());
         }
+
+        dto.setLessonType(lesson.getLessonType().name());
+        dto.setSectionId(lesson.getSection() != null ? lesson.getSection().getSectionCode() : null);
+        dto.setDay(lesson.getDay() != null ? lesson.getDay().name() : null);
 
         return dto;
     }
 
-    /**
-     * DTO → Entity
-     *
-     * Note: we only parse the duration here.
-     *       Assigning the real ClassRoom entity is done in the service.
-     */
     public Lesson toEntity(LessonDto dto) {
         if (dto == null) return null;
 
         Lesson lesson = new Lesson();
 
-//        if (dto.getDuration() != null && !dto.getDuration().isEmpty()) {
-//            lesson.setDuration(Duration.parse(dto.getDuration()));
-//        }
+        lesson.setDuration(toEvent(dto.getDuration())); // this line now works
 
-        // lesson.setLessonRoom(...) must be assigned in the service
+        if (dto.getLessonType() != null) {
+            lesson.setLessonType(Lesson.LessonType.valueOf(dto.getLessonType()));
+        }
+
         return lesson;
     }
+
+    private Event toEvent(EventDto dto) {
+        if (dto == null) return null;
+        return new Event(
+                new Date(
+                        dto.getStart().getDay(),
+                        dto.getStart().getMonth(),
+                        dto.getStart().getYear(),
+                        dto.getStart().getHour(),
+                        dto.getStart().getMinute()
+                ),
+                new Date(
+                        dto.getFinish().getDay(),
+                        dto.getFinish().getMonth(),
+                        dto.getFinish().getYear(),
+                        dto.getFinish().getHour(),
+                        dto.getFinish().getMinute()
+                )
+        );
+    }
+
+    private EventDto toEventDto(Event event) {
+        return new EventDto(
+                new DateDto(
+                        event.getStart().getDay() != null ? event.getStart().getDay() : 0,
+                        event.getStart().getMonth() != null ? event.getStart().getMonth() : 0,
+                        event.getStart().getYear() != null ? event.getStart().getYear() : 0,
+                        event.getStart().getHour() != null ? event.getStart().getHour() : 0,
+                        event.getStart().getMinute() != null ? event.getStart().getMinute() : 0
+                ),
+                new DateDto(
+                        event.getFinish().getDay() != null ? event.getFinish().getDay() : 0,
+                        event.getFinish().getMonth() != null ? event.getFinish().getMonth() : 0,
+                        event.getFinish().getYear() != null ? event.getFinish().getYear() : 0,
+                        event.getFinish().getHour() != null ? event.getFinish().getHour() : 0,
+                        event.getFinish().getMinute() != null ? event.getFinish().getMinute() : 0
+                )
+        );
+    }
+
 }

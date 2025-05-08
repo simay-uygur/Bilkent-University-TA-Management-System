@@ -1,17 +1,8 @@
 package com.example.controller;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import com.example.dto.CourseDto;
-import com.example.dto.InstructorDto;
-import com.example.dto.TaDto;
-import com.example.dto.TaskDto;
-import com.example.entity.Courses.CourseOffering;
-import com.example.mapper.TaMapper;
-import com.example.service.CourseOfferingServ;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -29,7 +20,9 @@ import com.example.entity.Courses.Course;
 import com.example.entity.Courses.Section;
 import com.example.entity.Tasks.TaTask;
 import com.example.entity.Tasks.Task;
+import com.example.mapper.TaMapper;
 import com.example.repo.CourseRepo;
+import com.example.service.CourseOfferingServ;
 import com.example.service.CourseServ;
 
 import lombok.RequiredArgsConstructor;
@@ -39,14 +32,9 @@ import lombok.RequiredArgsConstructor;
 @RestController
 @RequiredArgsConstructor
 public class CourseController {
-    @Autowired
     private CourseServ courseServ; // this is used to check if the course exists in the database
-
-    @Autowired
     private CourseRepo courseRepo;
-
     private final TaMapper taMapper;
-    @Autowired
     private CourseOfferingServ courseOfferingServ;
 
     @DeleteMapping("api/course/{course_code}")
@@ -98,10 +86,10 @@ public class CourseController {
     }
     
     
-    @PostMapping("api/course/{course_code}/ta/{ta_id}")
-    public ResponseEntity<Boolean> assignTA(@PathVariable String course_code, @PathVariable Long ta_id) {
-        return new ResponseEntity<>(courseOfferingServ.assignTA(ta_id, course_code), HttpStatus.OK);  // newly added
-    }
+//    @PostMapping("api/course/{course_code}/ta/{ta_id}")
+//    public ResponseEntity<Boolean> assignTA(@PathVariable String course_code, @PathVariable Long ta_id) {
+//        return new ResponseEntity<>(courseOfferingServ.assignTA(ta_id, course_code), HttpStatus.OK);  // newly added
+//    }
 //
 //    @PostMapping("api/course/{course_code}/task")
 //    public ResponseEntity<Boolean> createTask(@PathVariable String course_code, @RequestBody Task task) {
@@ -112,17 +100,39 @@ public class CourseController {
     public ResponseEntity<Boolean> updateTask(@PathVariable String course_code, @RequestBody int task_id, @RequestBody Task task) {
         return new ResponseEntity<>(courseServ.updateTask(course_code,task_id,task), HttpStatus.ACCEPTED);
     }
-//
+
+    @GetMapping("api/course/{course_code}/task/{id}")
+    public ResponseEntity<TaskDto> getTask(
+            @PathVariable String course_code,
+            @PathVariable int id
+    ) {
+        Task task = courseServ.getTaskByID(course_code, id);
+
+        // map each TaTask → TaDto
+        List<TaDto> taDtos = task.getTasList().stream()
+                .map(TaTask::getTaOwner)
+                .map(taMapper::toDto)
+                .collect(Collectors.toList());
+
+        TaskDto dto = new TaskDto(
+                task.getTaskType().toString(),
+                taDtos,
+                "Task #" + task.getTaskId(),
+                task.getDuration(),
+                task.getStatus().toString(),
+                task.getWorkload()
+        );
+
+        return ResponseEntity.ok(dto);
+    }
+
 //    @GetMapping("api/course/{course_code}/task/{id}")
-//    public ResponseEntity<TaskDto> getTask(
-//            @PathVariable String course_code,
-//            @PathVariable int id
-//    ) {
+//    public TaskDto getTask(@PathVariable String course_code, @PathVariable int id) {
 //        Task task = courseServ.getTaskByID(course_code, id);
 //        List<TaDto> taDtos = new ArrayList<>();
 //        for (TaTask taTask : task.getTasList()){
 //            /*
-//    private Long id;
+//               private Long id;
 //    private String name;
 //    private String surname;
 //    private String academicLevel;
@@ -142,10 +152,10 @@ public class CourseController {
 //                    taTask.getTaOwner().getIsActive(),                 // isActive
 //                    taTask.getTaOwner().getIsGraduated(),              // isGraduated
 //                    taTask.getTaOwner().getDepartment(),               // department
-//                    taTask.getTaOwner().getOfferingsAsStudent().stream()          // courses → List<String>
-//                            .map(Course::getCourseCode)
+//                    taTask.getTaOwner().getOfferingsAsHelper().stream()          // courses → List<String>
+//                            .map(CourseOffering::getCourse)
 //                            .collect(Collectors.toList()),
-//                    taTask.getTaOwner().getTasOwnLessons().stream()    // lessons → List<String>
+//                    taTask.getTaOwner().getOfferingsAsStudent().stream()    // lessons → List<String>
 //                            .map(Section::getSectionCode)
 //                            .collect(Collectors.toList())
 //            );
@@ -162,6 +172,10 @@ public class CourseController {
 //            task.getStatus().toString() // Convert enum to String
 //        );
 //    }
+
+
+
+
     /*@PostMapping("/course/{course_code}/exam")
     public ResponseEntity<Boolean> createExam(@RequestBody Exam exam, @PathVariable String course_code) {
         return new ResponseEntity<>()

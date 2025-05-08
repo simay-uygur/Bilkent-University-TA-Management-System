@@ -1,5 +1,6 @@
 package com.example.repo;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -147,4 +148,22 @@ public interface TARepo extends JpaRepository<TA, Long> { // TA is the entity an
        WHERE  t.department = :deptName
        """)
     List<TA> findByDepartment(String deptName);
+
+    @Query("""
+    SELECT ta
+      FROM TA ta
+     WHERE ta.id IN :candidateIds
+       AND NOT EXISTS (
+         SELECT 1
+           FROM Exam e
+           JOIN e.assignedTas a
+          WHERE a   = ta
+            AND e.duration.start BETWEEN :windowStart AND :windowEnd
+       )
+    """)
+  List<TA> findAvailableWithinOneDayWindow(
+    @Param("candidateIds") List<Long> candidateIds,
+    @Param("windowStart")   LocalDateTime windowStart,
+    @Param("windowEnd")     LocalDateTime windowEnd
+  );
 }

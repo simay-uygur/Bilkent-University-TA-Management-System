@@ -12,7 +12,6 @@ import com.example.entity.Requests.ProctorTaInFaculty;
 import com.example.entity.Requests.Swap;
 import com.example.entity.Requests.SwapEnable;
 import com.example.entity.Requests.TransferProctoring;
-import com.example.entity.Tasks.Task;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
 import jakarta.persistence.CascadeType;
@@ -134,9 +133,6 @@ public class Exam {
     )
     private List<TransferProctoring> transferProctoringRequest; // this is used to get the transfer proctoring requests for this exam
 
-    @Column(name = "swap_enabled", unique = false, updatable = true)
-    private boolean swapEnabled; // this is used to enable/disable the swap requests for this exam
-
     @ManyToOne(
         fetch = FetchType.LAZY,
         optional = false
@@ -153,7 +149,21 @@ public class Exam {
     @Column(name = "amount_of_assigned_tas", unique = false, updatable = true)
     private Integer amountOfAssignedTAs = 0; // this is used to get the assigned tas for this exam
 
-    public Task getTask() {
-        throw new UnsupportedOperationException("Not supported yet.");
+    public boolean incr(){
+        if (amountOfAssignedTAs != requiredTAs)
+        {
+            amountOfAssignedTAs++;
+            return true;
+        }
+        return false;
+    }
+
+    public boolean decr(){
+        if (amountOfAssignedTAs > 0)
+        {
+            amountOfAssignedTAs--;
+            return true;
+        }
+        return false;
     }
 }

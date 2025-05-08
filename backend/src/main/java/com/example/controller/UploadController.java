@@ -4,6 +4,7 @@ import com.example.service.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -24,6 +25,7 @@ public class UploadController {
     private final SectionServ sectionService;
     private final InstructorServ instructorServ;
     private final ClassRoomServ classRoomService;
+    private final LessonServ lessonService;
 
     //for uploading students and ta's (from the same excel file)
     @PostMapping("/students")
@@ -147,4 +149,24 @@ public class UploadController {
         }
     }
 
+
+    @PostMapping("/lessons")
+    public ResponseEntity<Map<String, Object>> importLessons(@RequestParam("file") MultipartFile file) throws IOException {
+        Map<String, Object> result = lessonService.importLessonsFromExcel(file);
+        return ResponseEntity.ok(result);
+    }
+
+
+    @PostMapping(
+            "sections-instructor-coordinator"
+            //value = "/import",
+            //consumes = MediaType.MULTIPART_FORM_DATA_VALUE,
+            //produces = MediaType.APPLICATION_JSON_VALUE
+    )
+    public ResponseEntity<Map<String,Object>> importSectionsFromExcel(
+            @RequestPart("file") MultipartFile file
+    ) throws IOException {
+        Map<String,Object> report = sectionService.importSectionsAndInstructorsExcelWithCoordinators(file);
+        return ResponseEntity.ok(report);
+    }
 }

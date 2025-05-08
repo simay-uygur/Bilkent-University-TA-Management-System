@@ -89,7 +89,7 @@ public class TA extends User {
     private List<Section> sectionsAsHelper = new ArrayList<>();
 
     /** Individual tasks (grading, proctoring, etc.) */
-    @OneToMany(mappedBy = "taOwner", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "taOwner", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
     private List<TaTask> taTasks = new ArrayList<>();
 
     @ManyToMany(mappedBy = "tasAsStudentsList", fetch = LAZY)

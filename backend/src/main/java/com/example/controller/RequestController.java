@@ -36,6 +36,7 @@ import com.example.repo.RequestRepos.SwapEnableRepo;
 import com.example.repo.RequestRepos.SwapRepo;
 import com.example.repo.RequestRepos.TransferProctoringRepo;
 import com.example.repo.RequestRepos.WorkLoadRepo;
+import com.example.service.RequestServ;
 import com.example.service.RequestServices.LeaveServ;
 import com.example.service.RequestServices.ProctorTaFromFacultiesServ;
 import com.example.service.RequestServices.ProctorTaInFacultyServ;
@@ -45,6 +46,7 @@ import com.example.service.RequestServices.TransferProctoringServ;
 import com.example.service.RequestServices.WorkLoadServ;
 
 import lombok.RequiredArgsConstructor;
+
 
 @RestController
 @RequestMapping("/api")
@@ -65,6 +67,8 @@ public class RequestController {
     private final TransferProctoringRepo transferRepo;
     private final WorkLoadServ workLoadServ;
     private final WorkLoadRepo workLoadRepo;
+
+    private final RequestServ reqServ;
 
     private final InstructorRepo insRepo;
     private final RequestMapper requestMapper;
@@ -160,6 +164,12 @@ public class RequestController {
         boolean exists = workLoadRepo.existsBySenderIdAndTaskTaskIdAndIsRejected(taId, dto.getTaskId(), false);
         return new ResponseEntity<>(exists ? HttpStatus.CREATED : HttpStatus.BAD_REQUEST);
     }
+
+    @GetMapping("/{user_id}/receivedReqs")
+    public ResponseEntity<List<RequestDto>> getMethodName(@PathVariable Long user_id) {
+       return new ResponseEntity<>(reqServ.getRequestsOfTheUser(user_id), HttpStatus.ACCEPTED);
+    }
+    
 }
 /*
 Leave Request

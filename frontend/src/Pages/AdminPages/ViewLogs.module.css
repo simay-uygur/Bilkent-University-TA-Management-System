@@ -1,0 +1,20 @@
+/* src/pages/ViewLogs.module.css */
+.container {
+  display: flex;
+  flex-direction: column;
+  background: #f5f7fa;
+  min-height: 100vh;
+}
+
+.header {
+  font-size: 1.75rem;
+  font-weight: 600;
+  color: #1f1f1f;
+  margin: 1rem 0;
+  align-self: center;
+}
+
+.logsList {
+  display: grid;
+  gap: 1rem;
+}

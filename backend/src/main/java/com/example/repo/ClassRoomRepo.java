@@ -10,5 +10,6 @@ import com.example.entity.General.ClassRoom;
 @Repository
 public interface ClassRoomRepo extends JpaRepository<ClassRoom, String>{
     boolean existsByClassroomId(String id);
-    Optional<ClassRoom> findByClassroomId(String classroomCode);
+    Optional<ClassRoom> findClassRoomByClassroomId(String classroomId);
+    Optional<ClassRoom> findClassRoomByClassroomIdEqualsIgnoreCase(String classroomId);
 }

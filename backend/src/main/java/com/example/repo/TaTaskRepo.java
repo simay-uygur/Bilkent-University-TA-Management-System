@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -112,4 +113,9 @@ public interface TaTaskRepo extends JpaRepository<TaTask, Integer> {
           @Param("from") Date   from,
           @Param("to")   Date   to
       );
+
+      @Modifying
+      @Query("DELETE FROM TaTask t WHERE t.task.taskId = :taskId AND t.taOwner.id = :taId")
+      void deleteByTaskAndTa(@Param("taskId") int taskId,
+                            @Param("taId")   Long  taId);
 }

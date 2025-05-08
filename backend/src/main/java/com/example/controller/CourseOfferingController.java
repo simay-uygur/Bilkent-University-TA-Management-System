@@ -52,11 +52,33 @@ public class CourseOfferingController {
                 .collect(Collectors.toList());
     }
 
-    /*@GetMapping("/{id}")
-    public CourseOfferingDto get(@PathVariable Long id) {
-        return mapper.toDto(service.getById(id));
-    }*/
-
+    @GetMapping("/{id}")
+    public ResponseEntity<CourseOfferingDto> get(@PathVariable Long id) {
+        //return mapper.toDto(service.getById(id));
+        CourseOfferingDto dto = service.getById(id);
+        if (dto == null) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+        return new ResponseEntity<>(dto, HttpStatus.FOUND);
+    }
+    @GetMapping("/courseCode/{code}")
+    public ResponseEntity<List<CourseOfferingDto>> get(@PathVariable String code) {
+        //return mapper.toDto(service.getById(id));
+        List<CourseOfferingDto> dtos = service.getCoursesByCourseCode(code);
+        if (dtos == null) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+        return new ResponseEntity<>(dtos, HttpStatus.FOUND);
+    }
+    /* @GetMapping("/courseCode/{code}")
+    public ResponseEntity <CourseOfferingDto> get(@PathVariable String code) {
+        //return mapper.toDto(service.getById(id));
+       CourseOfferingDto dto = service.getByCourseCode(code);
+        if (dto == null) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+        return new ResponseEntity<>(dto, HttpStatus.FOUND);
+    } */
     @PutMapping("/{id}")
     public CourseOfferingDto update(@PathVariable Long id,
                                     @RequestBody CourseOfferingDto dto) {

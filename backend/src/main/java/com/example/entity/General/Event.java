@@ -5,12 +5,16 @@ import jakarta.persistence.AttributeOverrides;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 import jakarta.persistence.Embedded;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Embeddable
 @Getter
 @Setter
+@NoArgsConstructor
+@AllArgsConstructor
 public class Event {
     @Embedded
     @AttributeOverrides({
@@ -32,10 +36,19 @@ public class Event {
     })
     private Date finish;
 
+
     public boolean isOngoing() {
+        if (start == null || finish == null) return false;
+
         Date current = new Date().currenDate();
-        return (current.isAfter(start) || current.isBefore(start)) && current.isBefore(finish);
+        //return (current.isAfter(start) || current.isBefore(start)) && current.isBefore(finish);
+        return current.isAfter(start) && current.isBefore(finish);
     }
+
+//    public boolean isOngoing() {
+//        Date current = new Date().currenDate();
+//        return (current.isAfter(start) || current.isBefore(start)) && current.isBefore(finish);
+//    }
 
     @Override
     public boolean equals(Object obj) {
@@ -46,7 +59,7 @@ public class Event {
     }
 
     //not checked
-    public boolean has(Event dur){
+    /*public boolean has(Event dur){
         return ((dur.getStart().equals(start) && dur.getFinish().equals(finish)) || 
                 ((dur.getStart().getHour() >= start.getHour() && 
                   dur.getStart().getMinute() >= start.getMinute()) && 
@@ -56,10 +69,20 @@ public class Event {
                   dur.getFinish().getMinute() >= start.getMinute()) && 
                   (dur.getFinish().getHour() <= finish.getHour() &&
                    dur.getFinish().getMinute() <= finish.getMinute())));
+    }*/
+
+    public boolean has(Event other){
+        if ( this.finish.isBefore(other.getStart())
+        || this.start .isAfter(other.getFinish()) ) {
+            return false;
+        }
+        // otherwise we must overlap (start inside, end inside, fully containing, etc.)
+        return true;
     }
 
     @Override
     public String toString(){
         return "Start at: " + start.toString() + "\nFinish at: " + finish.toString();
     }
+
 }

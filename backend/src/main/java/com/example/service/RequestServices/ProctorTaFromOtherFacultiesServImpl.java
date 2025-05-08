@@ -54,6 +54,8 @@ public class ProctorTaFromOtherFacultiesServImpl implements ProctorTaFromFaculti
         parent.setSentTime(new Date().currenDate());
         parent.setSender(sender);
         parent.setReceiver(receiver);
+        parent.setRequiredTas(dto.getRequiredTas());
+        parent.setTasLeft(parent.getRequiredTas());
         Exam exam = examRepo.findByExamId(dto.getExamId())
                     .orElseThrow(() -> new GeneralExc(
                         "Exam not found: " + dto.getExamName()));

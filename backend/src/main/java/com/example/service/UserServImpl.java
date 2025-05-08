@@ -22,12 +22,9 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class UserServImpl implements UserServ{
 
-    @Autowired 
-    private UserRepo repo; 
 
-    @Autowired
-    private TARepo taRepo;
-
+    private final UserRepo repo; 
+    private final TARepo taRepo;
     private final PasswordEncoder encoder;
 
     
@@ -37,21 +34,21 @@ public class UserServImpl implements UserServ{
     }
     @Override
     public User createUser(User u) {
-    if (repo.findById(u.getId()).isPresent()) {
-        throw new UserExistsExc(u.getId());
-    }
-
-    String hashedPass = encoder.encode(u.getPassword());
-    u.setPassword(hashedPass);
-
-    switch (u.getRole()) {
-        case ADMIN -> {
+        if (repo.findById(u.getId()).isPresent()) {
+            throw new UserExistsExc(u.getId());
+        }
+    
+        String hashedPass = encoder.encode(u.getPassword());
+        u.setPassword(hashedPass);
+    
+        switch (u.getRole()) {
+            case ADMIN -> {
+                return repo.save(u);
             }
-
-        case DEANS_OFFICE -> {
+            case DEANS_OFFICE -> {
+                return repo.save(u);
             }
-
-        case TA -> {
+            case TA -> {
                 if (u instanceof TA) {
                     TA ta = (TA) u;
                     return taRepo.save(ta); 
@@ -59,22 +56,19 @@ public class UserServImpl implements UserServ{
                     throw new GeneralExc("User is not a TA instance.");
                 }
             }
-
-        /*case FACULTY_MEMBER -> {
-            }*/
-        // faculty member is not a role
-        case INSTRUCTOR ->  {
-
-        }
-
-        case DEPARTMENT_STAFF -> {
+            case INSTRUCTOR -> {
+                // Add return statement here
+                return repo.save(u);
             }
-
-
-        default -> throw new GeneralExc("Unsupported role: " + u.getRole());
+            case DEPARTMENT_STAFF -> {
+                // Add return statement here
+                return repo.save(u);
+            }
+            default -> throw new GeneralExc("Unsupported role: " + u.getRole());
+        }
+        // This line should never be reached, but you can leave it as a fallback
+        // return null;
     }
-    return null;
-}
     
     @Override
     public void deleteUser(User u) {

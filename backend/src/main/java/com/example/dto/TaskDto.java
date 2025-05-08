@@ -1,13 +1,13 @@
 package com.example.dto;
 
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-
 import java.util.List;
 
 import com.example.entity.General.Event;
+
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 /**
  * Data Transfer Object for Task entity.
@@ -38,11 +38,13 @@ public class TaskDto {
      */
     private String status;
 
+    private int workload;
+
     /**
      * Convenience constructor for tasks with no assigned TAs.
      */
-    public TaskDto(String type, String description, Event duration, String status) {
-        this(type, List.of(), description, duration, status);
+    public TaskDto(String type, String description, Event duration, String status, int workload) {
+        this(type, List.of(), description, duration, status, workload);
     }
 }
 

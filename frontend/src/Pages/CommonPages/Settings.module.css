@@ -1,0 +1,94 @@
+.pageWrapper {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    background-color: #d2e9ff;
+  }
+  
+  .content {
+    flex: 1;
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 24px;
+  }
+  
+  .heading {
+    font-size: 1.75rem;
+    margin-bottom: 24px;
+    color: #1f2937;
+  }
+  
+  .profileContainer {
+    background-color: #ffffff;
+    border-radius: 8px;
+    padding: 24px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    width: 400px;
+    height: 200px;
+  }
+  
+  .fieldGroup {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 16px;
+  }
+  
+  .label {
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: #374151;
+    margin-bottom: 8px;
+  }
+  
+  .input {
+    padding: 10px;
+    font-size: 1rem;
+    border: 1px solid #d1d5db;
+    border-radius: 4px;
+    background-color: #f3f4f6;
+  }
+  
+  .input:disabled {
+    opacity: 0.6;
+  }
+  
+  .buttonGroup {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    margin-top: 16px;
+  }
+  
+  .editBtn,
+  .saveBtn {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 4px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  
+  .editBtn {
+    background-color: #3b82f6;
+    color: #ffffff;
+  }
+  
+  .editBtn:hover {
+    background-color: #2563eb;
+  }
+  
+  .saveBtn {
+    background-color: #10b981;
+    color: #ffffff;
+  }
+  
+  .saveBtn:hover {
+    background-color: #047857;
+  }
+  
+  .errorText {
+    margin-top: 4px;
+    font-size: 0.875rem;
+    color: #dc2626;
+  }

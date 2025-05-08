@@ -1,7 +1,10 @@
 package com.example.entity.General;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
+import java.util.Objects;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
@@ -13,19 +16,20 @@ import lombok.Setter;
 @Embeddable
 public class Date {
 
-    @Column(nullable = false)
-    private int day;
-    @Column(nullable = false)
-    private int month;
-    @Column(nullable = false)
-    private int year;
-    
-    
-    @Column(nullable = false)
-    private int hour;
+    @Column(nullable = true, updatable = true)
+    private Integer day;
 
-    @Column(nullable = false)
-    private int minute;
+    @Column(nullable = true, updatable = true)
+    private Integer month;
+
+    @Column(nullable = true, updatable = true)
+    private Integer year;
+
+    @Column(nullable = true, updatable = true)
+    private Integer hour;
+
+    @Column(nullable = true, updatable = true)
+    private Integer minute;
 
     @Override
     public String toString() {
@@ -41,10 +45,10 @@ public class Date {
     }
     
     public boolean isBefore(Date other) { // other - 16:48, this - 16:45
-        if (this.year != other.year) return this.year < other.year; 
-        if (this.month != other.month) return this.month < other.month;
-        if (this.day != other.day) return this.day < other.day;
-        if (this.hour != other.hour) return this.hour < other.hour;
+        if (!Objects.equals(this.year, other.year)) return this.year < other.year; 
+        if (!Objects.equals(this.month, other.month)) return this.month < other.month;
+        if (!Objects.equals(this.day, other.day)) return this.day < other.day;
+        if (!Objects.equals(this.hour, other.hour)) return this.hour < other.hour;
         return this.minute <= other.minute;
     }
     
@@ -54,13 +58,21 @@ public class Date {
 
     public Date(){}
 
-    public Date(int day, int month, int year, int hour, int minute) {
+    public Date(Integer day, Integer month, Integer year, Integer hour, Integer minute) {
         this.day = day;
         this.month = month;
         this.year = year;
         this.hour = hour;
         this.minute = minute;
     }
+
+//    public Date(int day, int month, int year, int hour, int minute) {
+//        this.day = day;
+//        this.month = month;
+//        this.year = year;
+//        this.hour = hour;
+//        this.minute = minute;
+//    }
 
     public Date currenDate() {
         //java.time.ZonedDateTime now = java.time.ZonedDateTime.now(java.time.ZoneId.of("UTC"));
@@ -72,5 +84,13 @@ public class Date {
         currentDate.setHour(now.getHour());
         currentDate.setMinute(now.getMinute());
         return currentDate;
+    }
+
+    public LocalDate toLocalDate() {
+        return LocalDate.of(year, month, day);
+    }
+    
+    public LocalDateTime toLocalDateTime() {
+        return LocalDateTime.of(year, month, day, hour, minute);
     }
 }

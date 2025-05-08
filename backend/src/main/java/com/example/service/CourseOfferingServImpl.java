@@ -18,6 +18,7 @@ import com.example.dto.ExamDto;
 import com.example.dto.StudentMiniDto;
 import com.example.entity.Actors.TA;
 import com.example.entity.Courses.CourseOffering;
+import com.example.entity.Courses.Section;
 import com.example.entity.Exams.Exam;
 import com.example.entity.Exams.ExamRoom;
 import com.example.entity.General.ClassRoom;
@@ -37,6 +38,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class CourseOfferingServImpl implements CourseOfferingServ {
     
+    
     private final CourseOfferingRepo repo;
     private final SemesterServ semesterServ;
     private final CourseOfferingMapper courseMapper;
@@ -46,11 +48,27 @@ public class CourseOfferingServImpl implements CourseOfferingServ {
     private final ExamRepo examRepo;
 
     @Override
+    public CourseOfferingDto getCourseByCourseCode(String code) {
+        CourseOffering off = repo.findByCourseCode(code)
+                .orElseThrow(() -> new IllegalArgumentException("Offering not found: " + code));
+
+        return courseMapper.toDto(off);
+    }
+    @Override
+    public List<CourseOfferingDto> getCoursesByCourseCode(String code) {
+        List<CourseOffering> off = repo.findByCoursesCode(code)
+                .orElseThrow(() -> new IllegalArgumentException("Offering not found: " + code));
+
+        return off.stream()
+                .map(courseMapper::toDto)
+                .collect(Collectors.toList());
+    }
+    @Override
     public List<CourseOfferingDto> getOfferingsByDepartment(String deptName){
         List<CourseOffering> offerings = repo.findByCourseDepartmentName(deptName)
                 .orElseThrow(() -> new IllegalArgumentException("No offerings found for department: " + deptName));
-        
-                return offerings.stream()
+
+        return offerings.stream()
                 .map(courseMapper::toDto)
                 .collect(Collectors.toList());
     }
@@ -69,6 +87,7 @@ public class CourseOfferingServImpl implements CourseOfferingServ {
 
         return repo.save(offering);
     }
+
     @Override
     public CourseOffering update(Long id, CourseOffering offering) {
 
@@ -87,15 +106,14 @@ public class CourseOfferingServImpl implements CourseOfferingServ {
 
         return courseMapper.toDto(off);
     }
-    public CourseOfferingDto getByCourseCode(String code) {
+    /* public List<CourseOfferingDto> getByCourseCode(String code) {
         List<CourseOffering> off = repo.findByCourseCode(code)
                 .orElseThrow(() -> new IllegalArgumentException("Offering not found: " + code));
 
         return off.stream()
                 .map(courseMapper::toDto)
-                .findFirst()
-                .orElseThrow(() -> new IllegalArgumentException("Offering not found: " + code));
-    }
+                .collect(Collectors.toList());
+    } */
 
     @Override
     public List<CourseOffering> getAll() {
@@ -111,11 +129,6 @@ public class CourseOfferingServImpl implements CourseOfferingServ {
         return repo.findByCourse_CourseIdAndSemester_Id(courseId, semesterId);
     }
 
-    //this should be written
-    @Override
-    public boolean assignTA(Long taId, String courseCode) {
-        return false;
-    }
     //old one - fix needed
 //    @Override
 //    public boolean assignTA(Long taId, String courseCode) {
@@ -174,7 +187,6 @@ public class CourseOfferingServImpl implements CourseOfferingServ {
         }
         Exam exam = new Exam();
         exam.setDuration(dto.getDuration());
-        exam.setSwapEnabled(dto.getSwapIsEnabled());
         exam.setDescription(dto.getType());
         exam.setRequiredTAs(dto.getRequiredTas());
         exam.setWorkload(dto.getWorkload());
@@ -229,10 +241,10 @@ public class CourseOfferingServImpl implements CourseOfferingServ {
         for (String code : examRoomsDto){
             ExamRoom examRoom = new ExamRoom();
             examRoom.setExam(exam);
-            ClassRoom classRoom = classRoomRepo.findByClassroomId(code)
+            ClassRoom classRoom = classRoomRepo.findClassRoomByClassroomId(code)
                     .orElseThrow(() -> new GeneralExc("Classroom not found: " + code));
             for (ExamRoom examroom : classRoom.getExamRooms()) {
-                if (examroom.getExam().getDuration().equals(exam.getDuration())) {
+                if (examroom.getExam().getDuration().has(exam.getDuration())) {
                     throw new GeneralExc("Classroom " + code + " already assigned to an exam for that time " + exam.getDuration());
                 }
             }
@@ -285,5 +297,28 @@ public class CourseOfferingServImpl implements CourseOfferingServ {
             throw new GeneralExc("TA assignment to exam failed."); // Ensure GeneralExc is correctly imported
         }
         return CompletableFuture.completedFuture(true);
+    }
+
+    @Override
+    public Section getSectionByNumber(String courseCode, int sectionNumber) {
+        // 1) fetch the “current” offering exactly the way you already do
+        CourseOffering offering = getCurrentOffering(courseCode);
+    
+        // 2) look through its sections and split the sectionCode on “-”
+        return offering.getSections().stream()
+            .filter(s -> {
+                // e.g. "CS‑319‑1‑2025‑SPRING".split("-") → ["CS","319","1","2025","SPRING"]
+                String[] parts = s.getSectionCode().split("-");
+                // parts[2] is the “1” or “2” that you want
+                return parts.length >= 3
+                    && Integer.parseInt(parts[2]) == sectionNumber;
+            })
+            .findFirst()
+            .orElseThrow(() ->
+                new GeneralExc(
+                    "No section “" + sectionNumber +
+                    "” for course “" + courseCode + "”"
+                )
+            );
     }
 }
