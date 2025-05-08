@@ -36,7 +36,12 @@ public interface CourseRepo extends JpaRepository<Course, Integer>{
     Optional<Task> findTask(@Param("taskId") int taskId, 
                               @Param("courseCode") String courseCode);
                             
-    
+    @Query("""
+    SELECT c
+      FROM Course c
+     WHERE c.courseCode = :courseCode
+     """
+    )    
     Optional<Course> findCourseByCourseCode(String courseCode);
 
     Optional<Course> findCourseByCourseCodeAndDepartmentName(String courseCode, String departmentName);

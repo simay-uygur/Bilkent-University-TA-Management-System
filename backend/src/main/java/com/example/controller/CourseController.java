@@ -32,8 +32,8 @@ import lombok.RequiredArgsConstructor;
 @RestController
 @RequiredArgsConstructor
 public class CourseController {
-    private CourseServ courseServ; // this is used to check if the course exists in the database
-    private CourseRepo courseRepo;
+    private final CourseServ courseServ; // this is used to check if the course exists in the database
+    private final CourseRepo courseRepo;
     private final TaMapper taMapper;
     private CourseOfferingServ courseOfferingServ;
 
@@ -75,9 +75,9 @@ public class CourseController {
         return ResponseEntity.ok(dtos); */
     }
 
-    @GetMapping("api/course/{course_code}")
-    public ResponseEntity<CourseDto> getCourse(@PathVariable String course_code) {
-        return new ResponseEntity<>(courseServ.findCourse(course_code), HttpStatus.FOUND);
+    @GetMapping("api/course/{courseCode}")
+    public ResponseEntity<CourseDto> getCourse(@PathVariable String courseCode) {
+        return new ResponseEntity<>(courseServ.findCourse(courseCode), HttpStatus.FOUND);
     }
 
     @GetMapping("api/course/all")
