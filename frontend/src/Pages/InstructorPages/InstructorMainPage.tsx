@@ -18,6 +18,7 @@ export interface Instructor {
 export interface Section {
   sectionId: number;
   sectionCode: string;
+  //courseName: string;
   lessons: any[];
   instructor: Instructor;
   tas: any[];
@@ -137,39 +138,71 @@ const InsMainPage: React.FC = () => {
     };
 
     // Separate function to fetch course details
-    const fetchCourseDetails = async (courseCodes: string[]) => {
-      try {
-        const courseDetailsPromises = courseCodes.map(courseCode => 
-          axios.get(`/api/course/${courseCode}`)
-            .catch(err => {
-              console.warn(`Failed to fetch course details for ${courseCode}:`, err);
-              return null;
-            })
-        );
-        
-        const courseDetailsResponses = await Promise.all(courseDetailsPromises);
-        const courseDetailsMap: Record<string, CourseDetails> = {};
-        
-        courseDetailsResponses.forEach(response => {
-          if (response && response.data) {
-            const course = response.data;
-            courseDetailsMap[course.courseCode] = course;
-          }
-        });
-        
-        setCourseDetails(courseDetailsMap);
-      } catch (err) {
-        console.error('Error fetching course details:', err);
-        // We don't set an error state here since this is optional data
+   // Separate function to fetch course details
+const fetchCourseDetails = async (courseCodes: string[]) => {
+  try {
+    // Configure axios to follow redirects
+    const axiosConfig = {
+      maxRedirects: 5, // Allow up to 5 redirects
+      validateStatus: (status: number) => {
+        // Consider 2xx and 3xx responses as successful
+        return status >= 200 && status < 400;
       }
     };
+
+    const courseDetailsPromises = courseCodes.map(courseCode => 
+      axios.get(`/api/course/${courseCode}`, axiosConfig)
+        .then(response => {
+          // Handle both direct responses and redirected responses
+          if (response.status >= 300) {
+            console.log(`Redirect detected for ${courseCode}, status: ${response.status}`);
+            // For redirects, you might need to make a follow-up request
+            // or handle the response differently depending on your API
+          }
+          return response;
+        })
+        .catch(err => {
+          // This will now only catch actual errors (4xx, 5xx), not 302 redirects
+          console.warn(`Failed to fetch course details for ${courseCode}:`, err);
+          return null;
+        })
+    );
+    
+    const courseDetailsResponses = await Promise.all(courseDetailsPromises);
+    const courseDetailsMap: Record<string, CourseDetails> = {};
+    
+    courseDetailsResponses.forEach(response => {
+      if (response && response.data) {
+        const course = response.data;
+        console.log("Course details fetched successfully:", course);
+        courseDetailsMap[course.courseCode] = course;
+      }
+    });
+    
+    console.log("Course details map:", courseDetailsMap);
+    setCourseDetails(courseDetailsMap);
+  } catch (err) {
+    console.error('Error in fetchCourseDetails:', err);
+    // Still don't set error state as this is optional data
+  }
+};
 
     fetchInstructorData();
   }, []);
 
   // Handle showing course info
   const handleShowInfo = (section: Section) => {
-    setInfoCourse(section);
+    // Get the course name from courseDetails if available
+    const courseCode = extractCourseCode(section.sectionCode);
+    const courseDetail = courseDetails[courseCode];
+    
+    // Create an enhanced section with the course name
+    const enhancedSection = {
+      ...section,
+      name: courseDetail?.courseName || courseCode // Use the real course name or fall back to course code
+    };
+    
+    setInfoCourse(enhancedSection);
   };
 
   if (loading) {
@@ -221,7 +254,7 @@ const InsMainPage: React.FC = () => {
                     </button>
                     <button 
                       className={styles.actionButton} 
-                      onClick={() => navigate(`/instructor/assign-course/${courseCode}/${sectionNumber}`)}
+                      onClick={() => navigate(`/instructor/assign-course/${section.sectionCode}`)}
                     >
                       Course TA
                     </button>

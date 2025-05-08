@@ -65,7 +65,16 @@ public class TAServImpl implements TAServ {
     @Autowired
     private PasswordEncoder encoder;
 
-
+    @Override
+    public List<TaDto> getTAsBySectionCode(String sectionCode){
+        List<TA> tas = repo.findBySectionsAsStudent_SectionCode(sectionCode);
+        if (tas.isEmpty()) {
+            throw new UserNotFoundExc(sectionCode);
+        }
+        return tas.stream()
+                .map(taMapper::toDto)
+                .collect(Collectors.toList());
+    }
     @Override
     public TaDto getTAByIdDto(Long id){
         TA ta = repo.findById(id)

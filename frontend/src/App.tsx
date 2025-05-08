@@ -64,7 +64,7 @@ const App: React.FC = () => (
           <Route index element={<InstructorMainPage />} />
           <Route path="/instructor/exam-proctor-request/:courseID" element={<ExamProctorPage />} />
           <Route path="/instructor/exam-printing/:courseID" element={<ExamProctorPage />} />
-          <Route path="/instructor/assign-course/:courseID/:courseSec" element={<CourseTARequest />} />
+          <Route path="/instructor/assign-course/:sectionCode" element={<CourseTARequest />} />
           <Route path="/instructor/workload/:courseID/:courseSec" element={<ManageWorkload />} />
           <Route path="/instructor/workload/:courseID/:courseSec/:taskID" element={<AssignTATask />} />
           <Route path="/instructor/settings" element={<Settings />} />

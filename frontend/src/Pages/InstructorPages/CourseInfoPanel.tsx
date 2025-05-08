@@ -10,6 +10,7 @@ export interface Section {
   instructor: Instructor;
   tas: any[];
   students: any[];
+  name?: string; // This will hold the course name from your API
 }
 
 interface CourseInfoPanelProps {
@@ -38,15 +39,16 @@ const CourseInfoPanel: React.FC<CourseInfoPanelProps> = ({ course, onClose }) =>
           <p><strong>Code:</strong> {courseCode}</p>
           <p><strong>Section:</strong> {sectionNum}</p>
           <p><strong>Term:</strong> {semester} {year}</p>
+          <p><strong>Name:</strong> {course.name || 'Unknown Course'}</p>
           <p>
             <strong>Instructor:</strong>{' '}
             {course.instructor.name} {course.instructor.surname}
           </p>
-          <p><strong>Enrollment:</strong> {course.students.length} students</p>
-          <p><strong>Teaching Assistants:</strong> {course.tas.length}</p>
-          {course.tas.length > 0 && (
+          <p><strong>Enrollment:</strong> {course.students?.length || 0} students</p>
+          <p><strong>Teaching Assistants:</strong> {course.tas?.length || 0}</p>
+          {course.tas?.length > 0 && (
             <div className={styles.taList}>
-              {course.tas.map((ta: any, index) => (
+              {course.tas.map((ta, index) => (
                 <div key={index} className={styles.taItem}>
                   {ta.name} {ta.surname}
                 </div>

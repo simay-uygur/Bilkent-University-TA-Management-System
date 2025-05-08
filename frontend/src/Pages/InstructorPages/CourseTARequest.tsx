@@ -31,7 +31,19 @@ interface RawRequest {
 
 const CourseTAReq: React.FC = () => {
   const location = useLocation();
-  const courseCode = location.pathname.split('/')[2] || 'Unknown Course';
+  
+  // Extract course code from URL pattern: ".../assign-course/CS-464-1-2025-SPRING"
+  const pathParts = location.pathname.split('/');
+  const fullSectionCode = pathParts[pathParts.length - 1]; // Get the last part of the URL
+  
+  // Extract just the course code (CS-464) from the full section code
+  const parts = fullSectionCode.split('-');
+  const courseCode = parts.length >= 2 ? `${parts[0]}-${parts[1]}` : fullSectionCode;
+  
+  // Get section number for display
+  const sectionNumber = parts.length >= 3 ? parts[2] : '1';
+  
+  // Rest of your component remains the same...
   
   // Add states for loading and API data
   const [loading, setLoading] = useState(true);
@@ -143,7 +155,7 @@ const CourseTAReq: React.FC = () => {
       </div>
 
       <div className={styles.card}>
-        <div className={styles.cardHeader}>{courseCode}</div>
+        <div className={styles.cardHeader}>{courseCode + "-" + sectionNumber}</div>
 
         <label className={styles.label}>
           TA Needed:
