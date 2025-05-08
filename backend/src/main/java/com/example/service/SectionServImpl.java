@@ -576,11 +576,6 @@ public class SectionServImpl implements SectionServ {
         };
     }
 
-    private long getLongCellValue(Cell cell) {
-        return (long) getNumericCellValue(cell);
-    }
-
-
     @Transactional
     @Override
     public boolean assignTA(Long taId, String sectionCode) {
@@ -600,7 +595,7 @@ public class SectionServImpl implements SectionServ {
         sectionRepo.save(section);
         return true;
     }
-}
+    
 
 
 // old codes
@@ -820,27 +815,6 @@ public class SectionServImpl implements SectionServ {
 //                "failedRows",   failed
 //        );
 //    }
-
-
-    private String getStringCellValue(Cell cell) {
-        if (cell == null) return "";
-        return switch (cell.getCellType()) {
-            case STRING -> cell.getStringCellValue().trim();
-            case NUMERIC -> String.valueOf((int) cell.getNumericCellValue()).trim();
-            case BOOLEAN -> String.valueOf(cell.getBooleanCellValue()).trim();
-            case FORMULA -> cell.getCellFormula(); // Optional: handle formulas
-            default -> throw new IllegalStateException("Unexpected cell type: " + cell.getCellType());
-        };
-    }
-
-    private double getNumericCellValue(Cell cell) {
-        if (cell == null) throw new IllegalArgumentException("Cell is null");
-        return switch (cell.getCellType()) {
-            case NUMERIC -> cell.getNumericCellValue();
-            case STRING -> Double.parseDouble(cell.getStringCellValue().trim());
-            default -> throw new IllegalStateException("Expected numeric cell, but got: " + cell.getCellType());
-        };
-    }
 
     private long getLongCellValue(Cell cell) {
         return (long) getNumericCellValue(cell);

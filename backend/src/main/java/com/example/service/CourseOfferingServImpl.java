@@ -5,27 +5,19 @@ import java.time.LocalDate;
 import java.time.Month;
 import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.Comparator;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Objects;
-import java.util.Objects;
 import java.util.Optional;
-import java.util.concurrent.CompletableFuture;
-import java.util.stream.Collectors;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.transaction.annotation.Transactional;
 
 import com.example.dto.CourseOfferingDto;
-import com.example.dto.CourseOfferingDto;
 import com.example.dto.ExamDto;
-import com.example.dto.StudentMiniDto;
-import com.example.entity.Actors.TA;
 import com.example.dto.StudentMiniDto;
 import com.example.entity.Actors.TA;
 import com.example.entity.Courses.CourseOffering;
@@ -37,13 +29,9 @@ import com.example.entity.General.Student;
 import com.example.entity.General.Term;
 import com.example.exception.GeneralExc;
 import com.example.exception.NoPersistExc;
-import com.example.exception.NoPersistExc;
 import com.example.mapper.CourseOfferingMapper;
 import com.example.repo.ClassRoomRepo;
 import com.example.repo.CourseOfferingRepo;
-import com.example.repo.ExamRepo;
-import com.example.repo.StudentRepo;
-import com.example.repo.TARepo;
 import com.example.repo.ExamRepo;
 import com.example.repo.StudentRepo;
 import com.example.repo.TARepo;
@@ -58,10 +46,6 @@ public class CourseOfferingServImpl implements CourseOfferingServ {
     private final CourseOfferingRepo repo;
     private final SemesterServ semesterServ;
     private final CourseOfferingMapper courseMapper;
-    private final ClassRoomRepo classRoomRepo;
-    private final TARepo taRepo;
-    private final StudentRepo studentRepo;
-    private final ExamRepo examRepo;
     private final ClassRoomRepo classRoomRepo;
     private final TARepo taRepo;
     private final StudentRepo studentRepo;
@@ -107,6 +91,7 @@ public class CourseOfferingServImpl implements CourseOfferingServ {
 
         return repo.save(offering);
     }
+
     @Override
     public CourseOffering update(Long id, CourseOffering offering) {
 
@@ -148,11 +133,6 @@ public class CourseOfferingServImpl implements CourseOfferingServ {
         return repo.findByCourse_CourseIdAndSemester_Id(courseId, semesterId);
     }
 
-    //this should be written
-    @Override
-    public boolean assignTA(Long taId, String courseCode) {
-        return false;
-    }
     //old one - fix needed
 //    @Override
 //    public boolean assignTA(Long taId, String courseCode) {
@@ -202,11 +182,8 @@ public class CourseOfferingServImpl implements CourseOfferingServ {
     }
 
     @Transactional
-    @Transactional
     @Async("setExecutor")
     @Override
-    public CompletableFuture<Boolean> createExam(ExamDto dto, String courseCode) {
-        CourseOffering offering = getCurrentOffering(courseCode);
     public CompletableFuture<Boolean> createExam(ExamDto dto, String courseCode) {
         CourseOffering offering = getCurrentOffering(courseCode);
         if (offering == null) {
@@ -215,11 +192,6 @@ public class CourseOfferingServImpl implements CourseOfferingServ {
         Exam exam = new Exam();
         exam.setDuration(dto.getDuration());
         exam.setDescription(dto.getType());
-        exam.setRequiredTAs(dto.getRequiredTas());
-        exam.setWorkload(dto.getWorkload());
-        List<StudentMiniDto> studentsAndTas = getSortedListOfStudentsAndTas(offering);
-        List<ExamRoom> examRooms = findAndAssignToTheExamRooms(dto.getExamRooms(), studentsAndTas, exam);
-        exam.setExamRooms(examRooms);
         exam.setRequiredTAs(dto.getRequiredTas());
         exam.setWorkload(dto.getWorkload());
         List<StudentMiniDto> studentsAndTas = getSortedListOfStudentsAndTas(offering);

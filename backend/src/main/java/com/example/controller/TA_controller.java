@@ -1,7 +1,6 @@
 package com.example.controller;
 
 import java.util.List;
-import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -22,8 +21,10 @@ import com.example.entity.Tasks.Task;
 import com.example.exception.GeneralExc;
 import com.example.exception.UserNotFoundExc;
 import com.example.exception.taExc.TaNotFoundExc;
+import com.example.repo.TARepo;
 import com.example.repo.TaskRepo;
 import com.example.service.TAServ;
+import com.example.service.TaskServ;
 
 import lombok.RequiredArgsConstructor;
 
@@ -36,6 +37,12 @@ public class TA_controller {
     
     @Autowired
     private TaskServ taskServ;
+
+    @Autowired
+    private TARepo taRepo;
+
+    @Autowired
+    private TaskRepo taskRepo;
 
 
     @GetMapping("/api/ta/all")
@@ -72,7 +79,7 @@ public class TA_controller {
     }
 
     @GetMapping("/api/ta/{id}/tasks")
-    public Set<Task> getAllTasTasks(@PathVariable Long id) 
+    public List<TaTaskDto> getAllTasTasks(@PathVariable Long id) 
     {
         return serv.getAllTasTasks(id);
     }

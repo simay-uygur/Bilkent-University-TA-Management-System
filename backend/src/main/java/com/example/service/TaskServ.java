@@ -19,8 +19,8 @@ public interface TaskServ {
     public boolean updateTask(int task_id, Task task);
     public List<TaDto> assignTasToTask(List<TaDto> tas, int taskId, int sectionNum, String courseCode, Long instrId);
     public TA getTAById(int task_id, Long ta_id);
-    public boolean assignTA(int task_id, TA ta, Long instr_id);
-    public boolean unassignTA(int task_id, TA ta, Long instr_id);
+    public boolean assignTA(Task task, TA ta, Long instr_id);
+    public boolean unassignTA(Task task, TA ta, Long instr_id);
     public List<TaDto> getTAsByTaskId(int task_id);
     public boolean checkAndUpdateStatusTask(Task task);
     public HashSet<Task> getApprovedTasks() ;

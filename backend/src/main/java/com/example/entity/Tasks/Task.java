@@ -63,7 +63,7 @@ public class Task {
     @Column(name = "access_type", updatable = false)
     private TaskAccessType accessType;*/
 
-    @OneToMany(mappedBy = "task", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "task", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<TaTask> tasList = new ArrayList<>();
 
     /*@Column(name = "required_tas", nullable = false)
@@ -131,8 +131,12 @@ public class Task {
     @OneToMany(mappedBy = "task", cascade = CascadeType.ALL)
     private List<WorkLoad> workLoadRequestList = new ArrayList<>(); // List of WorkLoad objects associated with this task
 
-    public Object getExam() {
-        throw new UnsupportedOperationException("Not supported yet.");
+    @Override
+    public boolean equals(Object obj){
+        if (this == obj) return true; // Check if the objects are the same instance
+        if (obj == null || getClass() != obj.getClass()) return false; // Check for null or different class
+        Task task = (Task) obj; // Cast to Task
+        return this.taskId == task.taskId; // Compare based on taskId
     }
 }
 

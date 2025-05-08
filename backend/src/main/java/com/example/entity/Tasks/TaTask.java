@@ -17,16 +17,16 @@ public class TaTask {
 
     /* many – to – one : Task */
     @ManyToOne
-    @JoinColumn(name = "task_id", insertable = true, updatable = false)
+    @JoinColumn(name = "task_id", insertable = true, updatable = true)
     private Task task;
 
     /* many – to – one : TA (the “owner” of this sub-task) */
     @ManyToOne
-    @JoinColumn(name = "ta_id", insertable = true, updatable = false)
+    @JoinColumn(name = "ta_id", insertable = true, updatable = true)
     private TA taOwner;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "access_type", updatable = false)
+    @Column(name = "access_type", updatable = true)
     private TaskAccessType type;
 
     // Parameterized constructor
@@ -34,6 +34,15 @@ public class TaTask {
         this.taOwner = ta_owner;
         this.task = task;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof TaTask)) return false;
+        return id == (((TaTask)o).getId());
+    }
+
+    @Override public int hashCode() { return Integer.hashCode(id); }
 }
 
 /*

@@ -1,5 +1,7 @@
 package com.example.mapper;
 
+import org.springframework.stereotype.Component;
+
 import com.example.dto.DateDto;
 import com.example.dto.EventDto;
 import com.example.dto.LessonDto;

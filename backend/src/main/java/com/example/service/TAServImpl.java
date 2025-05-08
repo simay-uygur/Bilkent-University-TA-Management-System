@@ -13,7 +13,6 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.usermodel.WorkbookFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -48,24 +47,13 @@ import lombok.RequiredArgsConstructor;
 @Transactional(rollbackFor = Exception.class)
 public class TAServImpl implements TAServ {
     
-    @Autowired
-    private TARepo repo;
+    private final TARepo repo;
     private final TaMapper taMapper;
-
-
-    @Autowired
-    private TaskServ taskServ;
-    @Autowired
-    private TaTaskRepo taTaskRepo;
-    
-    @Autowired
-    private ScheduleServ scheduleServ;
-
-    @Autowired
-    private PasswordEncoder encoder;
-
-    @Autowired
-    private TaTaskMapper taTaskMapper;
+    private final TaskServ taskServ;
+    private final TaTaskRepo taTaskRepo;
+    private final ScheduleServ scheduleServ;
+    private final PasswordEncoder encoder;
+    private final TaTaskMapper taTaskMapper;
 
 
     @Override

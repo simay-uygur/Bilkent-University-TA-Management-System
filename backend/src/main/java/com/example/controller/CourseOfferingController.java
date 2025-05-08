@@ -52,14 +52,6 @@ public class CourseOfferingController {
                 .collect(Collectors.toList());
     }
 
-<<<<<<<<< Temporary merge branch 1
-    /*@GetMapping("/{id}")
-    public CourseOfferingDto get(@PathVariable Long id) {
-        return mapper.toDto(service.getById(id));
-    }*/
-
-=========
-    }
     @GetMapping("/{id}")
     public ResponseEntity<CourseOfferingDto> get(@PathVariable Long id) {
         //return mapper.toDto(service.getById(id));

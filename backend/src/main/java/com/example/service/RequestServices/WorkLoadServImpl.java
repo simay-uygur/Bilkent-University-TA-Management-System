@@ -48,6 +48,9 @@ public class WorkLoadServImpl implements WorkLoadServ {
         workloadReq.setTask(taTask.getTask());
         workloadReq.setSender(sender);
         workloadReq.setReceiver(receiver);
+        receiver.getReceivedRequests().add(workloadReq);
+        sender.getSendedRequests().add(workloadReq);
+        workLoadRepo.save(workloadReq);
     }
 
     @Override

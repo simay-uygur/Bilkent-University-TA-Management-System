@@ -2,13 +2,15 @@ package com.example.service;
 
 import java.util.List;
 
+import com.example.dto.RequestDto;
 import com.example.entity.Actors.User;
+import com.example.entity.General.Event;
 import com.example.entity.Requests.Request;
 
 public interface RequestServ {
     public List<Request> getAllRequests();
     public Request getRequestById(Long req_id);
-    public List<Request> getRequestsOfTheUser(User u);
+    public List<RequestDto> getRequestsOfTheUser(Long userId);
     public List<Request> getSwapRequestsOfTheUser(User u); //Swap
     public List<Request> getLeaveRequestsOfTheUser(User u); // Leave
     public List<Request> getSwapEnableLeaveRequestsOfTheUser(User u); // Swap Enable
@@ -17,4 +19,5 @@ public interface RequestServ {
     public List<Request> getProctorTaFromFacultiesRequestsOfTheUser(User u); // Ta from Faculties
     public boolean createRequest(Request req);
     public void checkLeaveRequests();
+    public void deleteAllReceivedAndSendedSwapAndTransferRequestsBySomeTime(User u, Event duration);
 }

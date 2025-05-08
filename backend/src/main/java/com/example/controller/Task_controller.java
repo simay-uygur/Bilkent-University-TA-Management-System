@@ -11,11 +11,11 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.dto.TaDto;
 import com.example.dto.TaskDto;
-import com.example.entity.Actors.TA;
 import com.example.entity.Tasks.Task;
 import com.example.exception.GeneralExc;
 import com.example.repo.TARepo;
@@ -24,6 +24,8 @@ import com.example.service.TaskServ;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+
+
 
 
 @RestController
@@ -54,6 +56,13 @@ public class Task_controller {
         }
         taskServ.checkAndUpdateStatusTask(task);
         return new ResponseEntity<>(task, HttpStatus.OK);
+    }
+
+    @PutMapping("path/{id}")
+    public String putMethodName(@PathVariable String id, @RequestBody String entity) {
+        //TODO: process PUT request
+        
+        return entity;
     }
 
     /*@PutMapping("api/task/{id}/reject")
@@ -98,20 +107,20 @@ public class Task_controller {
         return new ResponseEntity<>(taskServ.getDeletedTasks(), HttpStatus.OK);
     }
 
-    @PutMapping("/api/instr/{instr_id}/task/{task_id}/assign/{ta_id}")
-    @Transactional
-    public ResponseEntity<Boolean> assignTA(@PathVariable int task_id, @PathVariable Long ta_id, @PathVariable Long instr_id) {
-        TA ta = taRepo.findById(ta_id)
-                .orElseThrow(() -> new RuntimeException("TA with ID " + ta_id + " not found."));
-        return new ResponseEntity<>(taskServ.assignTA(task_id, ta, instr_id),HttpStatus.OK);
-    }   
+    
 
-    @PutMapping("/api/instr/{instr_id}/task/{task_id}/unassign/{ta_id}")
+    @PutMapping("/api/course/{course_code}/section/{section_num}/instr/{instr_id}/task/{task_id}/assign/{ta_id}")
+    @Transactional
+    public ResponseEntity<List<TaDto>> assignTA(@PathVariable int task_id, @RequestBody List<TaDto> tas, @PathVariable Long instr_id, @PathVariable int section_num, @PathVariable String course_code) {
+        return new ResponseEntity<>(taskServ.assignTasToTask(tas, task_id, section_num, course_code, instr_id),HttpStatus.OK);
+    } 
+
+    /*@PutMapping("/api/instr/{instr_id}/task/{task_id}/unassign/{ta_id}")
     public ResponseEntity<Boolean> unassignTA(@PathVariable int task_id, @PathVariable Long ta_id, @PathVariable Long instr_id) {
         TA ta = taRepo.findById(ta_id)
                 .orElseThrow(() -> new RuntimeException("TA with ID " + ta_id + " not found."));
         return new ResponseEntity<>(taskServ.unassignTA(task_id, ta, instr_id),HttpStatus.OK);
-    }
+    }*/
 
     @GetMapping("/api/task/{task_id}/tas")
     public ResponseEntity<?> getTAsByTaskId(@PathVariable int task_id) {
