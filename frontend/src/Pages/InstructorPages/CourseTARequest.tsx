@@ -37,6 +37,7 @@ interface SentRequest {
 
 const CourseTAReq: React.FC = () => {
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
   const location = useLocation();
   
   // Extract course code from URL pattern: ".../assign-course/CS-464-1-2025-SPRING"
@@ -65,6 +66,20 @@ const CourseTAReq: React.FC = () => {
 
 >>>>>>> Stashed changes
   
+=======
+  const { courseID } = useParams<{ courseID: string }>();
+  const { courseSec } = useParams<{ courseSec: string }>();
+  const courseCode = courseID!;
+  const courseSection = courseSec!;
+
+  // two modes: if sentRequest.sent is true, show current form; if false, show table of TAs
+  const [sentRequest] = useState<SentRequest>({
+    payload: { courseId: courseCode, neededTAs: 0, wantedTAs: [], unwantedTAs: [] },
+    sent: false,
+  });
+
+  
+>>>>>>> Stashed changes
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [tas, setTAs] = useState<TA[]>([]);
@@ -233,8 +248,12 @@ if (!sentRequest.sent) {
       <h1 className={styles.title}>Course TA Request</h1>
       <div className={styles.card}>
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
         <div className={styles.cardHeader}>{courseCode + "-" + sectionNumber}</div>
 
+=======
+        <div className={styles.cardHeader}>{courseCode}-{courseSection}</div>
+>>>>>>> Stashed changes
 =======
         <div className={styles.cardHeader}>{courseCode}-{courseSection}</div>
 >>>>>>> Stashed changes
