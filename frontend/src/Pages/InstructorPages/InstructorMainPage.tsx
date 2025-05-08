@@ -248,7 +248,7 @@ const fetchCourseDetails = async (courseCodes: string[]) => {
                     </button>
                     <button 
                       className={styles.actionButton} 
-                      onClick={() => navigate(`/instructor/workload/${courseCode}/${sectionNumber}`)}
+                      onClick={() => navigate(`/instructor/workload/${section.sectionCode}`)}
                     >
                       Manage Course Works
                     </button>

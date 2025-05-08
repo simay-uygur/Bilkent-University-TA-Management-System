@@ -29,12 +29,22 @@ const initialTasks: Task[] = [
 type RawConfirm = { action: 'delete' | 'deleteAll' | 'save'; id?: number };
 
 const ManageWorkload: React.FC = () => {
-  const { courseID } = useParams<{ courseID: string }>()
-  const { courseSec } = useParams<{ courseSec: string }>()
-  const navigate = useNavigate();
-  const courseCode = courseID;
-  const courseSection = courseSec;
+// Get the section code from URL params
+const { sectionCode } = useParams<{ sectionCode: string }>();
+const navigate = useNavigate();
 
+// Parse the section code format CS-319-1-2025-SPRING
+const parts = sectionCode?.split('-') || [];
+const courseCode = parts.length >= 2 ? `${parts[0]}-${parts[1]}` : sectionCode || '';
+const courseSection = parts.length >= 3 ? parts[2] : '1';
+  
+ /*  // If courseSec is undefined, we might have the full section code in courseID
+  if (!courseSec && courseID && courseID.split('-').length >= 3) {
+    const parts = courseID.split('-');
+    courseCode = `${parts[0]}-${parts[1]}`; // e.g., "CS-464"
+    courseSection = parts[2];                // e.g., "1"
+  } */
+  
   const [tasks, setTasks] = useState<Task[]>(initialTasks);
   const [modalOpen, setModalOpen] = useState(false);
   const [isEdit, setIsEdit] = useState(false);
@@ -190,7 +200,7 @@ const ManageWorkload: React.FC = () => {
                   </button>
                   <button
                     className={styles.assignBtn}
-                    onClick={() => navigate(`/instructor/workload/${courseCode}/${courseSec}/${t.id}`)}
+                    onClick={() => navigate(`/instructor/workload/${sectionCode}/${t.id}`)}
                   >
                     Assign TA
                   </button>
