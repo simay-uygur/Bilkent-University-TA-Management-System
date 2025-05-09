@@ -56,6 +56,11 @@ public class CourseOfferingController {
                 .map(mapper::toDto)
                 .collect(Collectors.toList());
     }
+    @GetMapping("/term/{term}/year/{year}")
+    public List<CourseOfferingDto> listByTermAndYear(@PathVariable String term, @PathVariable int year) {
+        return service.getByTermAndYear(term, year);
+               
+    }
 
     @GetMapping("/{id}")
     public ResponseEntity<CourseOfferingDto> get(@PathVariable Long id) {

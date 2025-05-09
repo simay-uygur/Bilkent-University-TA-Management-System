@@ -150,6 +150,7 @@ const DepartmentOffice: React.FC = () => {
                     <td>
                       <button
                         type="button"
+                        className={styles.detailsButton}
                         onClick={() => navigate(`instructor/${i.id}`)}
                       >
                         Details
@@ -180,8 +181,9 @@ const DepartmentOffice: React.FC = () => {
                     <td>{c.courseCode}</td>
                     <td>{c.courseName}</td>
                     <td>
-                      <button
+                      <button 
                         type="button"
+                        className={styles.detailsButton}
                         onClick={() => navigate(`course/${c.courseCode}`)}
                       >
                         Details
@@ -211,6 +213,15 @@ const DepartmentOffice: React.FC = () => {
                   <tr key={t.id}>
                     <td>{t.name} {t.surname}</td>
                     <td>{t.totalWorkload}</td>
+                    <td>
+                      <button
+                        type="button"
+                        className={styles.detailsButton}
+                        onClick={() => navigate(`ta/${t.id}`)}
+                      >
+                        Details
+                      </button>
+                    </td>
                   </tr>
                 ))
               ) : (

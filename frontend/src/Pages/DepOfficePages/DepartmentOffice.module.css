@@ -91,3 +91,18 @@
   padding: 0.5rem;
   text-align: left;
 } */
+
+.detailsButton {
+  background-color: #005a9e;
+  color: #fff;
+  border: none;
+  padding: 0.35rem 0.75rem;
+  border-radius: 4px;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.detailsButton:hover {
+  background-color: #004578;
+}

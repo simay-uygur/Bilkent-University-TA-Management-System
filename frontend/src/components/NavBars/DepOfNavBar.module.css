@@ -65,4 +65,21 @@
     align-items: center;
     color: inherit;
   }
+  .mainTitle {
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin-bottom: 0.4rem;
+  color: var(--text-primary);
+}
+
+.subtitle {
+  display: flex;
+  flex-direction: column;
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+}
+
+.subtitle span + span {
+  margin-top: 0.2rem;
+}
   

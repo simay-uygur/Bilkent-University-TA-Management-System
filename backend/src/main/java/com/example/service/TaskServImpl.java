@@ -71,7 +71,39 @@ public class TaskServImpl implements TaskServ {
             throw new GeneralExc("Task not found in the specified section!");
         }
     }
-@Override
+    @Override
+@Transactional
+public boolean deleteTask(String sectionCode, int taskId) {
+  // 1) load
+  Section section = sectionRepo
+      .findBySectionCodeIgnoreCase(sectionCode)
+      .orElseThrow(() -> new GeneralExc("Section not found!"));
+  Task task = taskRepo.findById(taskId)
+      .orElseThrow(() -> new TaskNotFoundExc(taskId));
+
+  // 2) verify ownership
+  if (!Objects.equals(task.getSection(), section)) {
+    throw new GeneralExc("Task not found in that section!");
+  }
+
+  // 3) break all TA links (will trigger orphanRemoval on tasList)
+  task.getTasList().clear();
+
+  // 4) also clear any other child collections you have
+  task.getWorkloadList().clear();    // if you have WorkLoad children
+
+  // 5) detach from section
+  section.getTasks().remove(task);
+  task.setSection(null);
+
+  // 6) flush these changes by saving the section
+  sectionRepo.save(section);
+
+  // 7) finally delete the task
+  taskRepo.delete(task);
+  return true;
+}
+/* @Override
 @Transactional
 public boolean deleteTask(String section_code, int task_id) {
     // Get the section
@@ -110,7 +142,7 @@ public boolean deleteTask(String section_code, int task_id) {
     } else {
         throw new GeneralExc("Task not found in the specified section!");
     }
-}
+} */
 /* public boolean deleteTask(String section_code, int task_id) {
     try {
         // Get the task

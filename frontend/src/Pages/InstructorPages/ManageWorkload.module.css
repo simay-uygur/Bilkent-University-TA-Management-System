@@ -256,3 +256,36 @@
   color: #388e3c;
   font-weight: 500;
 }
+.taTooltip {
+  position: relative;
+  display: inline-block;
+  cursor: pointer;
+}
+.tooltipContent {
+  visibility: hidden;
+  opacity: 0;
+  position: absolute;
+  bottom: 100%;               /* move above */
+  left: 50%;
+  transform: translateX(-50%) translateY(-0.5rem);
+  background-color: #fff;     /* solid white */
+  border: 1px solid var(--border);
+  padding: 1rem;              /* larger padding */
+  border-radius: 6px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+  z-index: 1000;
+  min-width: 200px;
+  max-width: 300px;
+  white-space: normal;        /* allow wrap */
+  transition: opacity 0.25s ease;
+}
+
+.taTooltip:hover .tooltipContent {
+  visibility: visible;
+  opacity: 1;
+}
+
+.tooltipItem {
+  font-size: 0.9rem;          /* slightly larger text */
+  margin: 0.3rem 0;
+}

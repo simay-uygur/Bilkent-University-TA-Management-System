@@ -82,7 +82,7 @@ public class Task {
     @JoinColumn(name = "section_id", nullable = false)
     private Section section;
 
-    @OneToMany(mappedBy = "task", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "task", cascade = CascadeType.ALL,  orphanRemoval = true   )
     private List<WorkLoad> workloadList = new ArrayList<>();
     /* ─── helper methods ─────────────────────────── */
 

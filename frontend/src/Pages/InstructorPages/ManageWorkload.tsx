@@ -257,12 +257,21 @@ const ManageWorkload: React.FC = () => {
                 <td>{t.description || 'Empty'}</td>
                 <td>{formatTime(t.duration.start)}</td>
                 <td>{formatTime(t.duration.finish)}</td>
-                <td>
-  {t.tas.length === 0 ? (
-    <span className={styles.noAssigned}>No</span>
-  ) : (
-    <span className={styles.yesAssigned}>Yes ({t.tas.length})</span>
-  )}
+                {/* inside your <tbody> map: */}
+<td>
+  <div className={styles.taTooltip}>
+    {t.tas.length === 0
+      ? <span className={styles.noAssigned}>No</span>
+      : <span className={styles.yesAssigned}>Yes ({t.tas.length})</span>
+    }
+    <div className={styles.tooltipContent}>
+      {t.tas.map(ta => (
+        <div key={ta.id} className={styles.tooltipItem}>
+          {ta.name}
+        </div>
+      ))}
+    </div>
+  </div>
 </td>
                 <td>{t.workload}</td>
                 <td>{t.status}</td>

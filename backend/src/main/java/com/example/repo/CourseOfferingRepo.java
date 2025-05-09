@@ -68,4 +68,12 @@ Optional<CourseOffering>findByCourseCode(@Param("code") String code);
     );
 
     Optional<CourseOffering> findByCourse_CourseCode(String courseCode);
+
+    @Query("""
+  SELECT co
+    FROM CourseOffering co
+   WHERE co.semester.term = :term
+     AND co.semester.year = :year
+""")
+    Optional<List<CourseOffering>> findBySemester_TermAndSemester_Year(String term, int year);
 }

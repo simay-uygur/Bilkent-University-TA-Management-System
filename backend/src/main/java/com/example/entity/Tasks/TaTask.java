@@ -16,12 +16,12 @@ public class TaTask {
     private int id;
 
     /* many – to – one : Task */
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY )
     @JoinColumn(name = "task_id", insertable = true, updatable = true)
     private Task task;
 
     /* many – to – one : TA (the “owner” of this sub-task) */
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "ta_id", insertable = true, updatable = true)
     private TA taOwner;
 

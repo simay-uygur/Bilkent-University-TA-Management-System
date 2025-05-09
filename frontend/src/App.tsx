@@ -102,14 +102,14 @@ const App: React.FC = () => (
       </Route>
 
       {/* Admin's Pages */}
-      <Route element={<ProtectedRoute requiredRole="ROLE_ADMIN" />}>
+      {/* <Route element={<ProtectedRoute requiredRole="ROLE_ADMIN" />}> */}
         <Route path="/admin" element={<AdminLayout />}>
           <Route index element={<AdminMainPage />} />
           <Route path= "/admin/view-logs"  element={<ViewLogs />} />
           <Route path="/admin/settings" element={<Settings />} />
           <Route path="/admin/notification" element={<Notification />} />
         </Route>
-      </Route>
+      {/* </Route> */}
 
       {/* Fallback */}
       <Route path="*" element={<Navigate to="/login" replace />} />

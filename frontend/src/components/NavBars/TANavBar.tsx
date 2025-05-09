@@ -15,6 +15,8 @@ const TANavBar: React.FC = () => {
   const navigate = useNavigate();
   const { pathname } = useLocation();
 
+  const userName = localStorage.getItem('userName') || 'User';
+
   const navItems: NavItem[] = [
     { label: 'Home',             icon: <Home size={18} />,      path: '/ta' },
     { label: 'Make Leave Request', icon: <FileText size={18} />, path: '/ta/leave-request' },
@@ -31,9 +33,18 @@ const TANavBar: React.FC = () => {
           alt="Bilkent University Logo"
           className={styles.logo}
         />
-        <span className={styles.title}>
-          TA Management - TA
-        </span>
+        <div className={styles.title}>
+          {/* move “TA Management System – Instructor” above the greeting */}
+          <div className={styles.mainTitle}>
+            TA Management System – Instructor
+          </div>
+
+          {/* now treat the greeting as a subtitle */}
+          <div className={styles.subtitle}>
+            <span>Hi, {userName}</span>
+           
+          </div>
+        </div>
       </div>
       <nav className={styles.navActions}>
         {navItems.map(item => {

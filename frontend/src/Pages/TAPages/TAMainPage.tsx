@@ -90,7 +90,7 @@ function TAMainPage() {
     const items = schedule.filter(item => item.days.includes(day) && item.hours.includes(hour));
     const tasks = scheduleTasks.filter(task => task.days.includes(day) && task.hours.includes(hour))
                                .map(t => ({ ...t, isTask: true }));
-    const combined = items.map(i => ({ ...i, isTask: false })).concat(tasks);
+    const combined = [...items.map(i => ({ ...i, isTask: false })), ...tasks];
 
     if (!combined.length) return null;
 
