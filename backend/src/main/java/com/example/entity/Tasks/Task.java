@@ -47,8 +47,6 @@ public class Task {
     @Column(name = "duration", nullable = false)
     private Event duration;
 
-    @Column(name = "description")
-    private String description;
 
     /*@Column(name = "is_time_passed", nullable = false)
     private boolean timePassed;*/
