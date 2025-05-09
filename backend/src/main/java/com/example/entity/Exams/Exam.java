@@ -74,7 +74,9 @@ public class Exam {
             inverseJoinColumns = @JoinColumn(name = "ta_id")
             )
             private List<TA> assignedTas; // this is used to get the tas for this exam
-            
+
+
+    /// should be deleted
     @ManyToMany(
       fetch  = FetchType.LAZY,
       cascade = { CascadeType.PERSIST, CascadeType.MERGE }

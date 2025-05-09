@@ -1,10 +1,10 @@
 package com.example.dto;
 
+import java.util.List;
+
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-import java.util.List;
 
 @Data
 @NoArgsConstructor
@@ -17,4 +17,5 @@ public class SectionDto {
     private InstructorDto instructor;
     private List<TaDto> tas;
     private List<StudentDto> students;
+    private Long coordinatorId;
 }

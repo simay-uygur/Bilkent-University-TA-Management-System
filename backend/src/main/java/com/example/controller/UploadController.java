@@ -26,6 +26,7 @@ public class UploadController {
     private final InstructorServ instructorServ;
     private final ClassRoomServ classRoomService;
     private final LessonServ lessonService;
+    private final ExamServ examService;
 
     //for uploading students and ta's (from the same excel file)
     @PostMapping("/students")
@@ -169,4 +170,19 @@ public class UploadController {
         Map<String,Object> report = sectionService.importSectionsAndInstructorsExcelWithCoordinators(file);
         return ResponseEntity.ok(report);
     }
+
+    /**
+     * Import exams from an Excel file.
+     * @param file multipart Excel (.xlsx) upload
+     * @return map with successCount, failedCount, and failedRows
+     */
+    @PostMapping("/exams")
+    public ResponseEntity<Map<String,Object>> importExams(
+            @RequestParam("file") MultipartFile file) throws IOException {
+
+        Map<String,Object> result = examService.importExamsFromExcel(file);
+        return ResponseEntity.ok(result);
+    }
+
+
 }

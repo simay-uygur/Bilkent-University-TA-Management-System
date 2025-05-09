@@ -21,14 +21,12 @@ import com.example.entity.Actors.Instructor;
 import com.example.entity.Requests.LeaveDTO;
 import com.example.entity.Requests.ProctorTaFromFacultiesDto;
 import com.example.entity.Requests.ProctorTaInDepartmentDto;
-import com.example.entity.Requests.Request;
 import com.example.entity.Requests.SwapDto;
 import com.example.entity.Requests.TransferProctoringDto;
 import com.example.entity.Requests.WorkLoad;
 import com.example.entity.Requests.WorkLoadDto;
 import com.example.exception.UserNotFoundExc;
 import com.example.mapper.RequestMapper;
-import com.example.repo.DepartmentRepo;
 import com.example.repo.InstructorRepo;
 import com.example.repo.RequestRepos.LeaveRepo;
 import com.example.repo.RequestRepos.ProctorTaFromFacultiesRepo;
@@ -58,8 +56,8 @@ public class RequestController {
     private final LeaveRepo leaveRepo;
     private final ProctorTaFromFacultiesServ proctorTaFromFacultiesServ;
     private final ProctorTaFromFacultiesRepo fromFacRepo;
-    private final ProctorTaInDepartmentServ proctorTaInDepartmentServ;
     private final ProctorTaInDepartmentRepo inDepRepo;
+    private final ProctorTaInDepartmentServ proctorTaInDepartmentServ;
     private final TransferProctoringServ transferProctoringServ;
     private final TransferProctoringRepo transferRepo;
     private final WorkLoadServ workLoadServ;
@@ -138,7 +136,7 @@ public class RequestController {
             @RequestBody ProctorTaInDepartmentDto dto
     ) {
         proctorTaInDepartmentServ.createProctorTaInDepartmentRequest(dto, instrId);
-        boolean exists = inDepRepo.existsBySender_IdAndReceiver_NameAndExam_ExamIdAndIsRejected(instrId, dto.getDepName(), dto.getExamId(), false);
+        boolean exists = inDepRepo.existsBySender_IdAndReceiver_NameAndExam_ExamIdAndIsRejected(instrId, dto.getReceiverName(), dto.getExamId(), false);
         return new ResponseEntity<>(exists ? HttpStatus.CREATED : HttpStatus.BAD_REQUEST);
     }
 

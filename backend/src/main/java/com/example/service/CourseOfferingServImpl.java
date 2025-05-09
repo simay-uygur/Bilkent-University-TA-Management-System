@@ -1,6 +1,5 @@
 // com/example/service/CourseOfferingServiceImpl.java
 package com.example.service;
-
 import java.time.LocalDate;
 import java.time.Month;
 import java.util.ArrayList;
@@ -11,11 +10,9 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
-
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
 import com.example.dto.CourseOfferingDto;
 import com.example.dto.ExamDto;
 import com.example.dto.StudentMiniDto;
@@ -35,7 +32,6 @@ import com.example.repo.CourseOfferingRepo;
 import com.example.repo.ExamRepo;
 import com.example.repo.StudentRepo;
 import com.example.repo.TARepo;
-
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -133,24 +129,6 @@ public class CourseOfferingServImpl implements CourseOfferingServ {
         return repo.findByCourse_CourseIdAndSemester_Id(courseId, semesterId);
     }
 
-    //old one - fix needed
-//    @Override
-//    public boolean assignTA(Long taId, String courseCode) {
-//        Course course = repo.findCourseByCourseCode(courseCode)
-//                .orElseThrow(() -> new CourseNotFoundExc(courseCode));
-//        TA ta = taServ.getTAById(taId);
-//        if (ta.getSectionsAsHelper().contains(course)) {
-//            throw new GeneralExc("TA " + taId + " already assigned to " + courseCode);
-//        }
-//        if (ta.get().stream()
-//                .anyMatch(sec -> sec.getOffering().getCourse().getCourseCode().equals(courseCode))) {
-//            throw new GeneralExc("TA " + taId + " takes this course as a student");
-//        }
-//        course.getCourseTas().add(ta);
-//        courseRepo.save(course);
-//        return true;
-//    }
-//
     @Override
     public CourseOffering getCurrentOffering(String courseCode) {
         LocalDate today = LocalDate.now();
@@ -167,19 +145,40 @@ public class CourseOfferingServImpl implements CourseOfferingServ {
 
     /** Map month → academic term */
     private Term determineTerm(Month month) {
-        if (month.getValue() >= Month.MARCH.getValue() &&
-            month.getValue() <= Month.MAY.getValue()) {
-            return Term.SPRING;
-        }
-        else if (month.getValue() >= Month.JUNE.getValue() &&
-                 month.getValue() <= Month.AUGUST.getValue()) {
-            return Term.SUMMER;
-        }
-        else {
-            // September–February (incl. December, January, February) → FALL
-            return Term.FALL;
+        switch (month) {
+            // February → June  = SPRING
+            case FEBRUARY:
+            case MARCH:
+            case APRIL:
+            case MAY:
+            case JUNE:
+                return Term.SPRING;
+
+            // July & August = SUMMER
+            case JULY:
+            case AUGUST:
+                return Term.SUMMER;
+
+            // September → January = FALL
+            default:
+                // (covers SEPTEMBER, OCTOBER, NOVEMBER, DECEMBER, JANUARY)
+                return Term.FALL;
         }
     }
+//    private Term determineTerm(Month month) {
+//        if (month.getValue() >= Month.MARCH.getValue() &&
+//            month.getValue() <= Month.MAY.getValue()) {
+//            return Term.SPRING;
+//        }
+//        else if (month.getValue() >= Month.JUNE.getValue() &&
+//                 month.getValue() <= Month.AUGUST.getValue()) {
+//            return Term.SUMMER;
+//        }
+//        else {
+//            // September–February (incl. December, January, February) → FALL
+//            return Term.FALL;
+//        }
+//    }
 
     @Transactional
     @Async("setExecutor")

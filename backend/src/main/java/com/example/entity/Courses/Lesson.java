@@ -3,6 +3,10 @@ package com.example.entity.Courses;
 import com.example.entity.General.ClassRoom;
 import com.example.entity.General.DayOfWeek;
 import com.example.entity.General.Event;
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.databind.PropertyNamingStrategies;
+import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -36,10 +40,29 @@ public class Lesson {
     @Column(name = "lesson_type", nullable = false)
     private LessonType lessonType;
 
+//    public enum LessonType {
+//        LESSON,
+//        SPARE_HOUR,
+//        LAB,
+//        RECITATION,
+//        OFFICE_HOUR
+//    }
+
+    @JsonFormat(shape = JsonFormat.Shape.STRING)
+    @JsonNaming(PropertyNamingStrategies.UpperCamelCaseStrategy.class)
     public enum LessonType {
         LESSON,
-        SPARE_HOUR
+        SPARE_HOUR,
+        LAB,
+        RECITATION,
+        OFFICE_HOUR;
+
+        @JsonCreator
+        public static LessonType from(String key) {
+            return LessonType.valueOf(key.trim().toUpperCase());
+        }
     }
+
 
     @Enumerated(EnumType.STRING)
     @Column(name = "day_of_week", nullable = false)
