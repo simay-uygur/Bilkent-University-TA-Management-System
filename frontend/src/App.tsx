@@ -47,9 +47,15 @@ const App: React.FC = () => (
       {/* TA Area (requires ROLE_TA) */}
       <Route element={<ProtectedRoute requiredRole="ROLE_TA" />}>
         <Route path="/ta" element={<TALayout />}>
+<<<<<<< Updated upstream
           <Route index element={<TAMainPage />}/>
           <Route path="/ta/leave-request" element={<MakeLeaveRequest />}/>
           <Route path="/ta/monthly-schedule" element={<TAMonthlySchedulePage />}/>
+=======
+          <Route index element={<TAMainPage />} />
+          <Route path="/ta/leave-request" element={<MakeLeaveRequest />} />
+          <Route path="/ta/monthly-schedule" element={<TAMonthlySchedulePage />} />
+>>>>>>> Stashed changes
           <Route path="/ta/view-proctoring" element={<TAViewProctoringGradingPage />} />
           <Route path="/ta/settings" element={<Settings />} />
           <Route path="/ta/notification" element={<Notification />} />

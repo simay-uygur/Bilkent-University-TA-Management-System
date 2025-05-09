@@ -180,6 +180,7 @@ const ManageWorkload: React.FC = () => {
     }
   };
 
+<<<<<<< Updated upstream
   // ——— Save (POST/PUT) ———
   const save = async () => {
     if (!currentDescription.trim()) {
@@ -199,6 +200,38 @@ const ManageWorkload: React.FC = () => {
       if (startM < lunchEnd && endM > lunchStart) {
         showError('Cannot overlap 12:30–13:30.');
         return;
+=======
+  // validate & save
+  const validate = () => {
+    if (current.type !== 'Grading') {
+      // helper to turn a slot index into an “HH:MM” string
+const startLabel = startTimes[current.startTime! - 1];
+const endLabel   = endTimes[current.endTime! - 1];
+
+// 1) Make sure end > start
+if (current.endTime! < current.startTime!) {
+  showError('End time must be after start time.');
+  return false;
+}
+    // 2) Ban any overlap with 12:30–13:30
+    function toMins(t: string) {
+      const [h, m] = t.split(':').map(Number);
+      return h * 60 + m;
+    }
+    const taskStart = toMins(startLabel);
+    const taskEnd   = toMins(endLabel);
+    const lunchStart = toMins('12:30');
+    const lunchEnd   = toMins('13:30');
+
+    if (taskStart < lunchEnd && taskEnd > lunchStart) {
+      showError('Lab and Recitation may not overlap the 12:30–13:30 break.');
+      return false;
+    }
+    } else {
+      if (!current.gradingEndTime) {
+        showError('Please select an end time for grading.');
+        return false;
+>>>>>>> Stashed changes
       }
     }
 
