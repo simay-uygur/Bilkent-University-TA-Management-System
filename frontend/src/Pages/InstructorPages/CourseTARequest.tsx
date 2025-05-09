@@ -144,11 +144,12 @@ const CourseTAReq: React.FC = () => {
       if (!instructorId) throw new Error('No instructorId in localStorage');
 
       await axios.post(
-        `/api/instructors/${instructorId}/sections/${fullSectionCode}/assignTAs`,
+        `/api/instructors/${instructorId}/sections/${fullSectionCode}/preferTas`,
         {
-          preferredTaIDlist: state.wanted,
-          unpreferredTaIDlist: state.unwanted,
-          neededTA: state.needed,
+          preferredTas: state.wanted,
+          nonPreferredTas: state.unwanted,
+          taNeeded: state.needed,
+          request_type: 'PreferTasToCourse'
         }
       );
 
