@@ -43,7 +43,8 @@ import lombok.Setter;
     @JsonSubTypes.Type(value = Swap.class, name = "Swap"),
     @JsonSubTypes.Type(value = WorkLoad.class, name = "Workload"),
     @JsonSubTypes.Type(value = TransferProctoring.class, name = "TransferProctoring"),
-    @JsonSubTypes.Type(value = ProctorTaFromOtherFaculty.class, name = "ProctorTaFromFaculty")
+    @JsonSubTypes.Type(value = ProctorTaFromOtherFaculty.class, name = "ProctorTaFromFaculty"),
+    @JsonSubTypes.Type(value = PreferTasToCourse.class, name = "PreferTasToCourse")
 })
 
 public class Request {
@@ -52,7 +53,7 @@ public class Request {
     @Column(name = "request_id", unique = true)
     private Long requestId ;
 
-    @Column(name = "request_type", unique = false)
+    @Column(name = "request_type", unique = false, length = 50)
     @Enumerated(EnumType.STRING)
     private RequestType requestType;
 
