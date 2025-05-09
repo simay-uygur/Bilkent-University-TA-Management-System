@@ -1,5 +1,3 @@
-/* src/pages/AssignTACourse/AssignTACourse.module.css */
-
 .pageWrapper {
   display: flex;
   flex-direction: column;
@@ -30,9 +28,8 @@
 }
 
 .table {
-  width: 98%;
+  width: 100%;
   border-collapse: collapse;
-  align-self: center;
 }
 
 .headings {
@@ -52,24 +49,22 @@
   font-weight: 600;
 }
 
-/* row styling */
+/* Base row style and hover */
 .rowBase {
   transition: background-color 0.2s;
-  /* make it look interactive */
-  cursor: pointer;
 }
 
-/* hover state */
 .rowBase:hover {
   background-color: rgba(0, 0, 0, 0.05);
 }
 
+/* Completed vs. incomplete rows */
 .completedRow {
-  background-color: #a7f1cb;  /* light green */
+  background-color: #a7f1cb;
 }
 
 .incompleteRow {
-  background-color: #f1a0a0;  /* light red */
+  background-color: #f1a0a0;
 }
 
 .actionsCell {

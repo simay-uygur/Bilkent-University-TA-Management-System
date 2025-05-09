@@ -69,7 +69,7 @@ public class Task {
     private TaskAccessType accessType;*/
 
     @OneToMany(mappedBy = "task", 
-    cascade = CascadeType.REMOVE , 
+    cascade = CascadeType.ALL , 
     orphanRemoval = true)
     private List<TaTask> tasList = new ArrayList<>();
 

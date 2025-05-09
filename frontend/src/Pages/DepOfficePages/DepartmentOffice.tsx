@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styles from './DepartmentOffice.module.css';
 import axios from 'axios';
+import LoadingPage from '../CommonPages/LoadingPage';
 
 interface StaffDto {
   id: number;
@@ -73,6 +74,7 @@ const DepartmentOffice: React.FC = () => {
           .then(res => res.json())
           .then(staff => {
             setStaffData(staff);
+            localStorage.setItem('departmentCode', staff.departmentName);
             const departmentCode = staff.departmentName;
             
             // Load instructors
@@ -116,7 +118,7 @@ const DepartmentOffice: React.FC = () => {
     
 
   if (loading) {
-    return <div className={styles.loading}>Loading department data...</div>;
+    return <LoadingPage/>;
   }
 
   if (error) {

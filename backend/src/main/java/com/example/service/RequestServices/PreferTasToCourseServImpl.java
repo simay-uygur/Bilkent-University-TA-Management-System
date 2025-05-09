@@ -40,6 +40,14 @@ public class PreferTasToCourseServImpl implements PreferTasToCourseServ{
     private final SectionRepo sectionRepo;
     private final CourseOfferingServ offeringServ;
     
+
+    @Override
+    @Transactional
+    public PreferTasToCourseDto getRequestById(Long reqId) {
+        PreferTasToCourse req = prefRepo.findById(reqId)
+            .orElseThrow(() -> new GeneralExc("Request not found: " + reqId));
+        return mapper.toDto(req);
+    }
     @Override
     @Transactional
     public List<PreferTasToCourseDto> getRequestsOfTheDeparment(String depName) {
