@@ -1,8 +1,10 @@
 package com.example.entity.Courses;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import com.example.entity.General.Faculty;
+import com.example.entity.Requests.PreferTasToCourse;
 import com.example.entity.Requests.ProctorTaInDepartment;
 
 import jakarta.persistence.CascadeType;
@@ -43,6 +45,9 @@ public class Department {
         orphanRemoval = true,
         cascade= CascadeType.ALL)
     private List<ProctorTaInDepartment> receivedFromInstructorRequests;
+
+    @OneToMany(mappedBy = "receiver", fetch = FetchType.LAZY, cascade= CascadeType.REMOVE)
+    private List<PreferTasToCourse> preferTasRequests = new ArrayList<>();
 
     
 }

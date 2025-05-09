@@ -1,13 +1,37 @@
 package com.example.mapper;
 
 import java.util.stream.Collectors;
+
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
+
 import com.example.dto.RequestDto;
 import com.example.dto.TaskDto;
-import com.example.entity.Requests.*;
-import com.example.entity.Tasks.Task;
-import com.example.repo.*;
+import com.example.entity.Requests.Leave;
+import com.example.entity.Requests.LeaveDTO;
+import com.example.entity.Requests.PreferTasToCourse;
+import com.example.entity.Requests.PreferTasToCourseDto;
+import com.example.entity.Requests.PreferTasToCourseDto.TaInfo;
+import com.example.entity.Requests.ProctorTaFromFaculties;
+import com.example.entity.Requests.ProctorTaFromFacultiesDto;
+import com.example.entity.Requests.ProctorTaFromOtherFaculty;
+import com.example.entity.Requests.ProctorTaFromOtherFacultyDto;
+import com.example.entity.Requests.ProctorTaInDepartment;
+import com.example.entity.Requests.ProctorTaInDepartmentDto;
+import com.example.entity.Requests.Request;
+import com.example.entity.Requests.Swap;
+import com.example.entity.Requests.SwapDto;
+import com.example.entity.Requests.TransferProctoring;
+import com.example.entity.Requests.TransferProctoringDto;
+import com.example.entity.Requests.WorkLoad;
+import com.example.entity.Requests.WorkLoadDto;
+import com.example.repo.DepartmentRepo;
+import com.example.repo.ExamRepo;
+import com.example.repo.InstructorRepo;
+import com.example.repo.TARepo;
+import com.example.repo.TaTaskRepo;
+import com.example.repo.TaskRepo;
+
 import lombok.RequiredArgsConstructor;
 
 @Component

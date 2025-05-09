@@ -124,6 +124,11 @@ public class Task_controller {
         return new ResponseEntity<>(taskServ.unassignTA(task, ta, instr_id),HttpStatus.OK);
     }
 
+    @PutMapping("/api/instr/{instr_id}/task/{task_id}/unassign/tas")
+    public ResponseEntity<Boolean> unassignTA(@PathVariable int task_id, @PathVariable Long instr_id) {
+        return new ResponseEntity<>(taskServ.unassignTas(task_id, instr_id),HttpStatus.OK);
+    }
+
     @GetMapping("/api/task/{task_id}/tas")
     public ResponseEntity<?> getTAsByTaskId(@PathVariable int task_id) {
         return new ResponseEntity<>(taskServ.getTAsByTaskId(task_id), HttpStatus.OK);

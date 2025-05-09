@@ -17,8 +17,10 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.example.dto.RequestDto;
+import com.example.dto.TAAssignmentRequest;
 import com.example.entity.Actors.Instructor;
 import com.example.entity.Requests.LeaveDTO;
+import com.example.entity.Requests.PreferTasToCourseDto;
 import com.example.entity.Requests.ProctorTaFromFacultiesDto;
 import com.example.entity.Requests.ProctorTaInDepartmentDto;
 import com.example.entity.Requests.SwapDto;
@@ -36,6 +38,7 @@ import com.example.repo.RequestRepos.TransferProctoringRepo;
 import com.example.repo.RequestRepos.WorkLoadRepo;
 import com.example.service.RequestServ;
 import com.example.service.RequestServices.LeaveServ;
+import com.example.service.RequestServices.PreferTasToCourseServ;
 import com.example.service.RequestServices.ProctorTaFromFacultiesServ;
 import com.example.service.RequestServices.ProctorTaInDepartmentServ;
 import com.example.service.RequestServices.SwapServ;
@@ -68,6 +71,43 @@ public class RequestController {
     private final InstructorRepo insRepo;
     private final RequestMapper requestMapper;
 
+    private final PreferTasToCourseServ prefService;
+
+    // Get all requests sent to a department
+    @GetMapping("/department/{depName}/preferTas")
+    public ResponseEntity<List<PreferTasToCourseDto>> getByDepartment(
+            @PathVariable String depName) {
+        List<PreferTasToCourseDto> requests =
+            prefService.getRequestsOfTheDeparment(depName);
+        return ResponseEntity.ok(requests);
+    }
+
+    // Get all requests created by an instructor
+    @GetMapping("/instructor/{instrId}/preferTas")
+    public ResponseEntity<List<PreferTasToCourseDto>> getByInstructor(
+            @PathVariable Long instrId) {
+              List<PreferTasToCourseDto> requests =
+            prefService.getRequestsOfTheInstructor(instrId);
+        return ResponseEntity.ok(requests);
+    }
+
+    // Create a new preference request
+    @PostMapping(
+        path = "/instructor/{instrId}/section/{sectionCode}/preferTas"
+    )
+    public ResponseEntity<Void> createRequest(
+            @RequestBody TAAssignmentRequest dto,
+            @PathVariable Long instrId,
+            @PathVariable String sectionCode) {
+        prefService.createRequest(dto.getPreferredTas(), dto.getNonPreferredTas(), dto.getTaNeeded(), instrId, sectionCode);
+        return new ResponseEntity<>(HttpStatus.CREATED);
+    }
+    /*public ResponseEntity<Boolean> createRequest(
+      @PathVariable Long instrId, 
+      @PathVariable String sectionCode, 
+      @RequestBody PreferTasToCourseDto dto){
+        prefService.createRequest(dto.getPreferredTas(), dto.getNonPreferredTas(), dto.getTaNeeded(), instrId, sectionCode);
+    }*/
     @PostMapping(
         path = "/ta/{taId}/request/leave",
         consumes = MediaType.MULTIPART_FORM_DATA_VALUE   // ← **must** declare this

@@ -5,8 +5,9 @@ public enum RequestType {
     SwapEnable,
     Leave,
     TransferProctoring,
-    ProctorTaFromFaculties,
-    ProctorTaFromFaculty,
+    ProctTaFromFaculties,
+    ProctTaFromFaculty,
     ProctorTaInFaculty,
+    PreferTasToCourse,
     WorkLoad
 }

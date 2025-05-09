@@ -42,7 +42,6 @@ public class Task {
     private int taskId;
 
     @Embedded
-    @Column(name = "duration", nullable = false)
     private Event duration;
 
     @Column(name = "description")
@@ -66,7 +65,9 @@ public class Task {
     @Column(name = "access_type", updatable = false)
     private TaskAccessType accessType;*/
 
-    @OneToMany(mappedBy = "task", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "task", 
+    cascade = CascadeType.REMOVE , 
+    orphanRemoval = true)
     private List<TaTask> tasList = new ArrayList<>();
 
     /*@Column(name = "required_tas", nullable = false)
@@ -79,7 +80,11 @@ public class Task {
     @JoinColumn(name = "section_id", nullable = false)
     private Section section;
 
-    @OneToMany(mappedBy = "task", cascade = CascadeType.ALL)
+    @OneToMany(
+        mappedBy      = "task",
+        cascade       = CascadeType.ALL,
+        orphanRemoval = true
+    )
     private List<WorkLoad> workloadList = new ArrayList<>();
     /* ─── helper methods ─────────────────────────── */
 

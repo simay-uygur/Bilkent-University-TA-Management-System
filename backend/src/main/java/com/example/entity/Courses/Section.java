@@ -8,6 +8,7 @@ import org.hibernate.annotations.DynamicUpdate;
 import com.example.entity.Actors.Instructor;
 import com.example.entity.Actors.TA;
 import com.example.entity.General.Student;
+import com.example.entity.Requests.PreferTasToCourse;
 import com.example.entity.Tasks.Task;
 
 import jakarta.persistence.CascadeType;
@@ -63,10 +64,10 @@ public class Section {
     private List<TA> unpreffered_TAS = new ArrayList<>(); // ta's which are taking this course (registered)
 
     @OneToMany(
-            mappedBy      = "section",
-            fetch         = FetchType.LAZY,
-            cascade       = CascadeType.ALL,
-            orphanRemoval = true
+        mappedBy      = "section",
+        fetch         = FetchType.LAZY,
+        cascade       = CascadeType.ALL,
+        orphanRemoval = true
     )
     private List<Task> tasks = new ArrayList<>();
 
@@ -122,6 +123,9 @@ public class Section {
             cascade       = CascadeType.ALL,
             orphanRemoval = true)
     private List<Lesson> lessons = new ArrayList<>();
+
+    @OneToMany(mappedBy = "section", fetch = FetchType.LAZY, orphanRemoval= true)
+    private List<PreferTasToCourse> preferTasRequest;
 
     @Override
     public String toString(){
