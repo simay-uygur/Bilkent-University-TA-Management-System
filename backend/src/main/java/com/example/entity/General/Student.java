@@ -53,12 +53,12 @@ public class Student {
     @ManyToMany(mappedBy = "registeredStudents", fetch = FetchType.LAZY)
     @JsonIgnore
     private List<CourseOffering> registeredCourseOfferings = new ArrayList<>();
-
-    @ManyToMany(
-      mappedBy = "assignedStudents",
-      fetch    = FetchType.LAZY
-    )
-    private List<Exam> exams = new ArrayList<>();
+//
+//    @ManyToMany(
+//      mappedBy = "assignedStudents",
+//      fetch    = FetchType.LAZY
+//    )
+//    private List<Exam> exams = new ArrayList<>();
 
 
 

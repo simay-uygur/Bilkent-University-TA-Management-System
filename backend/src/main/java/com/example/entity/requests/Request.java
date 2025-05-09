@@ -1,8 +1,6 @@
 package com.example.entity.Requests;
 
-import com.example.entity.Actors.User;
 import com.example.entity.General.Date;
-import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -10,19 +8,15 @@ import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 
-import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
-import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Inheritance;
 import jakarta.persistence.InheritanceType;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -44,12 +38,12 @@ import lombok.Setter;
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "type")
 @JsonSubTypes({
     @JsonSubTypes.Type(value = Leave.class, name = "Leave"),
-    @JsonSubTypes.Type(value = ProctorTaInFaculty.class, name = "ProctorTaInFaculty"),
+    @JsonSubTypes.Type(value = ProctorTaInDepartment.class, name = "ProctorTaInFaculty"),
     @JsonSubTypes.Type(value = ProctorTaFromFaculties.class, name = "ProctorTaFromFaculties"),
     @JsonSubTypes.Type(value = Swap.class, name = "Swap"),
-    @JsonSubTypes.Type(value = SwapEnable.class, name = "SwapEnable"),
     @JsonSubTypes.Type(value = WorkLoad.class, name = "Workload"),
-    @JsonSubTypes.Type(value = TransferProctoring.class, name = "TransferProctoring")
+    @JsonSubTypes.Type(value = TransferProctoring.class, name = "TransferProctoring"),
+    @JsonSubTypes.Type(value = ProctorTaFromOtherFaculty.class, name = "ProctorTaFromFaculty")
 })
 
 public class Request {
@@ -74,7 +68,7 @@ public class Request {
     @Column(name = "sent_time", unique = false)
     private Date sentTime;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    /*@ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "sender_id")
     //@JsonBackReference
       @JsonIgnoreProperties("sended_requests") // Break recursion
@@ -84,7 +78,7 @@ public class Request {
     @JoinColumn(name = "receiver_id")
     @JsonIgnoreProperties("received_requests") // Break recursion
     //@JsonBackReference
-    private User receiver;
+    private User receiver;*/
 
     @Column(name = "description", unique = false, nullable = true)
     private String description;

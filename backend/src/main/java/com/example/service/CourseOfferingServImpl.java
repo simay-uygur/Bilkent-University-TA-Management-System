@@ -1,21 +1,23 @@
 // com/example/service/CourseOfferingServiceImpl.java
 package com.example.service;
-
+import java.io.IOException;
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.time.Month;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.NoSuchElementException;
-import java.util.Objects;
-import java.util.Optional;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
+import com.example.dto.FailedRowInfo;
+import com.example.entity.General.Event;
+import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
 import com.example.dto.CourseOfferingDto;
 import com.example.dto.ExamDto;
 import com.example.dto.StudentMiniDto;
@@ -35,8 +37,8 @@ import com.example.repo.CourseOfferingRepo;
 import com.example.repo.ExamRepo;
 import com.example.repo.StudentRepo;
 import com.example.repo.TARepo;
-
 import lombok.RequiredArgsConstructor;
+import org.springframework.web.multipart.MultipartFile;
 
 @Service
 @RequiredArgsConstructor
@@ -50,6 +52,7 @@ public class CourseOfferingServImpl implements CourseOfferingServ {
     private final TARepo taRepo;
     private final StudentRepo studentRepo;
     private final ExamRepo examRepo;
+
 
     @Override
     public CourseOfferingDto getCourseByCourseCode(String code) {
@@ -133,24 +136,6 @@ public class CourseOfferingServImpl implements CourseOfferingServ {
         return repo.findByCourse_CourseIdAndSemester_Id(courseId, semesterId);
     }
 
-    //old one - fix needed
-//    @Override
-//    public boolean assignTA(Long taId, String courseCode) {
-//        Course course = repo.findCourseByCourseCode(courseCode)
-//                .orElseThrow(() -> new CourseNotFoundExc(courseCode));
-//        TA ta = taServ.getTAById(taId);
-//        if (ta.getSectionsAsHelper().contains(course)) {
-//            throw new GeneralExc("TA " + taId + " already assigned to " + courseCode);
-//        }
-//        if (ta.get().stream()
-//                .anyMatch(sec -> sec.getOffering().getCourse().getCourseCode().equals(courseCode))) {
-//            throw new GeneralExc("TA " + taId + " takes this course as a student");
-//        }
-//        course.getCourseTas().add(ta);
-//        courseRepo.save(course);
-//        return true;
-//    }
-//
     @Override
     public CourseOffering getCurrentOffering(String courseCode) {
         LocalDate today = LocalDate.now();
@@ -167,19 +152,40 @@ public class CourseOfferingServImpl implements CourseOfferingServ {
 
     /** Map month → academic term */
     private Term determineTerm(Month month) {
-        if (month.getValue() >= Month.MARCH.getValue() &&
-            month.getValue() <= Month.MAY.getValue()) {
-            return Term.SPRING;
-        }
-        else if (month.getValue() >= Month.JUNE.getValue() &&
-                 month.getValue() <= Month.AUGUST.getValue()) {
-            return Term.SUMMER;
-        }
-        else {
-            // September–February (incl. December, January, February) → FALL
-            return Term.FALL;
+        switch (month) {
+            // February → June  = SPRING
+            case FEBRUARY:
+            case MARCH:
+            case APRIL:
+            case MAY:
+            case JUNE:
+                return Term.SPRING;
+
+            // July & August = SUMMER
+            case JULY:
+            case AUGUST:
+                return Term.SUMMER;
+
+            // September → January = FALL
+            default:
+                // (covers SEPTEMBER, OCTOBER, NOVEMBER, DECEMBER, JANUARY)
+                return Term.FALL;
         }
     }
+//    private Term determineTerm(Month month) {
+//        if (month.getValue() >= Month.MARCH.getValue() &&
+//            month.getValue() <= Month.MAY.getValue()) {
+//            return Term.SPRING;
+//        }
+//        else if (month.getValue() >= Month.JUNE.getValue() &&
+//                 month.getValue() <= Month.AUGUST.getValue()) {
+//            return Term.SUMMER;
+//        }
+//        else {
+//            // September–February (incl. December, January, February) → FALL
+//            return Term.FALL;
+//        }
+//    }
 
     @Transactional
     @Async("setExecutor")
@@ -193,7 +199,11 @@ public class CourseOfferingServImpl implements CourseOfferingServ {
         exam.setDuration(dto.getDuration());
         exam.setDescription(dto.getType());
         exam.setRequiredTAs(dto.getRequiredTas());
-        exam.setWorkload(dto.getWorkload());
+        //exam.setWorkload(dto.getWorkload());
+        if (dto.getWorkload() != null) {
+            exam.setWorkload(dto.getWorkload());
+        }
+
         List<StudentMiniDto> studentsAndTas = getSortedListOfStudentsAndTas(offering);
         List<ExamRoom> examRooms = findAndAssignToTheExamRooms(dto.getExamRooms(), studentsAndTas, exam);
         exam.setExamRooms(examRooms);
@@ -209,34 +219,77 @@ public class CourseOfferingServImpl implements CourseOfferingServ {
     }
 
     private List<StudentMiniDto> getSortedListOfStudentsAndTas(CourseOffering offering) {
-        List<StudentMiniDto> studentsAndTas = getStudentsDto(offering);
-        return studentsAndTas.stream()
-                    .sorted(
-                        Comparator
-                        .comparing(StudentMiniDto::getSurname)    // primary key: surname
-                        .thenComparing(StudentMiniDto::getName)    // secondary key: name
-                    )
-                    .collect(Collectors.toList());
+        return getStudentsDto(offering).stream()
+                .sorted(
+                        Comparator.comparing(StudentMiniDto::getSurname)
+                                .thenComparing(StudentMiniDto::getName)
+                )
+                .collect(Collectors.toList());
     }
 
+//    private List<StudentMiniDto> getSortedListOfStudentsAndTas(CourseOffering offering) {
+//        List<StudentMiniDto> studentsAndTas = getStudentsDto(offering);
+//        return studentsAndTas.stream()
+//                    .sorted(
+//                        Comparator
+//                        .comparing(StudentMiniDto::getSurname)    // primary key: surname
+//                        .thenComparing(StudentMiniDto::getName)    // secondary key: name
+//                    )
+//                    .collect(Collectors.toList());
+//    }
+
+//this was for getting students from offering entity
+//    private List<StudentMiniDto> getStudentsDto(CourseOffering offering) {
+//        List<StudentMiniDto> studentsDto = new ArrayList<>();
+//        for (Student student : offering.getRegisteredStudents()) {
+//            StudentMiniDto dto = new StudentMiniDto();
+//            dto.setId(student.getStudentId());
+//            dto.setName(student.getStudentName());
+//            dto.setSurname(student.getStudentSurname());
+//            studentsDto.add(dto);
+//        }
+//        for(TA ta : offering.getRegisteredTas()) {
+//            StudentMiniDto dto = new StudentMiniDto();
+//            dto.setId(ta.getId());
+//            dto.setName(ta.getName());
+//            dto.setSurname(ta.getSurname());
+//            dto.setIsTa(true);
+//            studentsDto.add(dto);
+//        }
+//        return studentsDto;
+//    }
+
+    // this is for getting students from the sections of the offering
     private List<StudentMiniDto> getStudentsDto(CourseOffering offering) {
-        List<StudentMiniDto> studentsDto = new ArrayList<>();
-        for (Student student : offering.getRegisteredStudents()) {
-            StudentMiniDto dto = new StudentMiniDto();
-            dto.setId(student.getStudentId());
-            dto.setName(student.getStudentName());
-            dto.setSurname(student.getStudentSurname());
-            studentsDto.add(dto);
-        }
-        for(TA ta : offering.getRegisteredTas()) {
-            StudentMiniDto dto = new StudentMiniDto();
-            dto.setId(ta.getId());
-            dto.setName(ta.getName());
-            dto.setSurname(ta.getSurname());
-            dto.setIsTa(true);
-            studentsDto.add(dto);
-        }
-        return studentsDto;
+        // Use a LinkedHashMap to preserve insertion‐order (optional)
+        Map<Long, StudentMiniDto> unique = new LinkedHashMap<>();
+
+        offering.getSections().forEach(section -> {
+            // students
+            for (Student student : section.getRegisteredStudents()) {
+                unique.computeIfAbsent(student.getStudentId(), id -> {
+                    StudentMiniDto dto = new StudentMiniDto();
+                    dto.setId(student.getStudentId());
+                    dto.setName(student.getStudentName());
+                    dto.setSurname(student.getStudentSurname());
+                    // isTa defaults to false
+                    return dto;
+                });
+            }
+            // TAs
+            for (TA ta : section.getRegisteredTas()) {
+                unique.computeIfAbsent(ta.getId(), id -> {
+                    StudentMiniDto dto = new StudentMiniDto();
+                    dto.setId(ta.getId());
+                    dto.setName(ta.getName());
+                    dto.setSurname(ta.getSurname());
+                    dto.setIsTa(true);
+                    return dto;
+                });
+            }
+        });
+
+        return new ArrayList<>(unique.values());
     }
 
     private List<ExamRoom> findAndAssignToTheExamRooms(List<String> examRoomsDto, List<StudentMiniDto> students, Exam exam) {
@@ -295,7 +348,7 @@ public class CourseOfferingServImpl implements CourseOfferingServ {
         } 
         Integer prevAmount = exam.getAmountOfAssignedTAs();
         exam.setAmountOfAssignedTAs(exam.getAmountOfAssignedTAs() + tas.size());
-        exam.setAssignedTas(tasList);
+        //exam.setAssignedTas(tasList);
         Exam checkExam = examRepo.save(exam);
         if (checkExam.getAmountOfAssignedTAs() != prevAmount + tas.size()) {
             throw new GeneralExc("TA assignment to exam failed."); // Ensure GeneralExc is correctly imported
@@ -325,4 +378,122 @@ public class CourseOfferingServImpl implements CourseOfferingServ {
                 )
             );
     }
+
+    //exam import function
+    @Override
+    public Map<String,Object> importExamsFromExcel(MultipartFile file) throws IOException {
+        List<FailedRowInfo> failed    = new ArrayList<>();
+        int                  success   = 0;
+
+        DataFormatter formatter = new DataFormatter();
+        DateTimeFormatter timeFmt   = DateTimeFormatter.ofPattern("H:mm");
+
+        try (Workbook wb = new XSSFWorkbook(file.getInputStream())) {
+            Sheet sheet = wb.getSheetAt(0);
+            for (Row row : sheet) {
+                if (row.getRowNum() == 0) continue;  // header
+
+                try {
+                    // --- parse exactly as before into an ExamDto ---
+                    Cell dateCell = row.getCell(0);
+                    LocalDate examDate;
+                    if (dateCell.getCellType() == CellType.NUMERIC
+                            && DateUtil.isCellDateFormatted(dateCell)) {
+                        java.util.Date d = dateCell.getDateCellValue();
+                        examDate = d.toInstant()
+                                .atZone(ZoneId.systemDefault())
+                                .toLocalDate();
+                    } else {
+                        String dateStr = formatter.formatCellValue(dateCell).trim();
+                        examDate = LocalDate.parse(dateStr);
+                    }
+
+                    LocalTime sTime = LocalTime.parse(
+                            formatter.formatCellValue(row.getCell(1)).trim(),
+                            timeFmt
+                    );
+                    LocalTime eTime = LocalTime.parse(
+                            formatter.formatCellValue(row.getCell(2)).trim(),
+                            timeFmt
+                    );
+
+                    Event duration = new Event(
+                            new com.example.entity.General.Date(examDate.getDayOfMonth(), examDate.getMonthValue(), examDate.getYear(),
+                                    sTime.getHour(), sTime.getMinute()),
+                            new com.example.entity.General.Date(examDate.getDayOfMonth(), examDate.getMonthValue(), examDate.getYear(),
+                                    eTime.getHour(), eTime.getMinute())
+                    );
+
+                    String courseCode = formatter
+                            .formatCellValue(row.getCell(3))
+                            .trim()
+                            .toUpperCase();
+
+                    String type       = formatter.formatCellValue(row.getCell(4)).trim();
+
+                    List<String> rooms = Arrays.stream(
+                                    formatter.formatCellValue(row.getCell(5))
+                                            .split(","))
+                            .map(String::trim)
+                            .filter(rc -> !rc.isEmpty())
+                            .collect(Collectors.toList());
+
+                    int requiredTAs = Integer.parseInt(
+                            formatter.formatCellValue(row.getCell(6)).trim()
+                    );
+
+                    String wl = formatter.formatCellValue(row.getCell(7)).trim();
+                    Integer workload = wl.isEmpty() ? null : Integer.valueOf(wl);
+
+                    ExamDto dto = new ExamDto(
+                            duration,
+                            courseCode,
+                            type,
+                            rooms,
+                            requiredTAs,
+                            workload
+                    );
+
+                    // --- now delegate to your async createExam and wait ---
+                    Boolean created = createExam(dto, courseCode) //not actual transaction
+                            .get();  // wait on the future
+
+                    if (Boolean.TRUE.equals(created)) {
+                        success++;
+                    } else {
+                        failed.add(new FailedRowInfo(
+                                row.getRowNum(),
+                                "createExam returned false"
+                        ));
+                    }
+
+                } catch (InterruptedException ie) {
+                    Thread.currentThread().interrupt();
+                    failed.add(new FailedRowInfo(
+                            row.getRowNum(),
+                            "Interrupted: " + ie.getMessage()
+                    ));
+                } catch (ExecutionException ee) {
+                    Throwable cause = ee.getCause() != null ? ee.getCause() : ee;
+                    failed.add(new FailedRowInfo(
+                            row.getRowNum(),
+                            cause.getClass().getSimpleName() + ": " + cause.getMessage()
+                    ));
+                } catch (Exception e) {
+                    failed.add(new FailedRowInfo(
+                            row.getRowNum(),
+                            e.getClass().getSimpleName() + ": " + e.getMessage()
+                    ));
+                }
+            }
+        }
+
+        return Map.of(
+                "successCount", success,
+                "failedCount",  failed.size(),
+                "failedRows",   failed
+        );
+    }
+
+
 }

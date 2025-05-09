@@ -14,7 +14,7 @@ import lombok.Setter;
 @Getter
 @Setter
 @Embeddable
-public class Date {
+public class Date implements Comparable<Date>{
 
     @Column(nullable = true, updatable = true)
     private Integer day;
@@ -93,9 +93,9 @@ public class Date {
     public LocalDateTime toLocalDateTime() {
         return LocalDateTime.of(year, month, day, hour, minute);
     }
-    /* @Override
-    public int compareTo(Date o){
-        return this.compareTo(o);
-    } */
 
+    @Override
+    public int compareTo(Date o) {
+        return this.compareTo(o);
+    }
 }

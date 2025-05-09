@@ -29,6 +29,7 @@ public class TaskMapper {
         }
         TaskDto dto = new TaskDto();
         // map enum to its name
+        dto.setId(task.getTaskId());
         dto.setType(task.getTaskType().name());
         // map list of TaTask → list of TaDto
         dto.setTas(

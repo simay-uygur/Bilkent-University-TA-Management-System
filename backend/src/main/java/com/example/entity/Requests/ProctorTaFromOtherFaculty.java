@@ -1,24 +1,26 @@
 package com.example.entity.Requests;
 
+import com.example.entity.Actors.DeanOffice;
 import com.example.entity.Exams.Exam;
-import com.example.entity.General.Faculty;
 
-import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import lombok.Data;
 
 @Data
 @Entity
-@Table(name = "proctor_ta_in_faculty_requests")
-public class ProctorTaInFaculty extends Request{
+@Table(name = "proctor_ta_from_other_faculty_requests")
+public class ProctorTaFromOtherFaculty extends Request{
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "code", referencedColumnName = "code")
-    private Faculty faculty;
+    @JoinColumn(name = "sended_fac_code", referencedColumnName = "id")
+    private DeanOffice sender;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "received_fac_code", referencedColumnName = "id")
+    private DeanOffice receiver;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "exam_id", referencedColumnName = "exam_id")

@@ -8,9 +8,9 @@ import com.example.entity.Courses.CourseOffering;
 import com.example.entity.General.Event;
 import com.example.entity.General.Student;
 import com.example.entity.Requests.ProctorTaFromFaculties;
-import com.example.entity.Requests.ProctorTaInFaculty;
+import com.example.entity.Requests.ProctorTaFromOtherFaculty;
+import com.example.entity.Requests.ProctorTaInDepartment;
 import com.example.entity.Requests.Swap;
-import com.example.entity.Requests.SwapEnable;
 import com.example.entity.Requests.TransferProctoring;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
@@ -63,6 +63,20 @@ public class Exam {
     )
     private List<ExamRoom> examRooms;
 
+
+    @ManyToMany(
+        fetch  = FetchType.LAZY,
+        cascade = { CascadeType.PERSIST, CascadeType.MERGE }
+        )
+        @JoinTable(
+            name               = "exam_tas_as_proctors",
+            joinColumns        = @JoinColumn(name = "exam_id"),
+            inverseJoinColumns = @JoinColumn(name = "ta_id")
+            )
+            private List<TA> assignedTas; // this is used to get the tas for this exam
+
+
+    /*Requests*/
     @OneToMany(
         mappedBy = "exam",
         fetch = FetchType.LAZY,
@@ -71,27 +85,21 @@ public class Exam {
     )
     private List<Swap> swapRequests; // this is used to get the swap requests for this exam
 
-    @ManyToMany(
-        fetch  = FetchType.LAZY,
-        cascade = { CascadeType.PERSIST, CascadeType.MERGE }
-      )
-      @JoinTable(
-        name               = "exam_tas_as_proctors",
-        joinColumns        = @JoinColumn(name = "exam_id"),
-        inverseJoinColumns = @JoinColumn(name = "ta_id")
-      )
-    private List<TA> assignedTas; // this is used to get the tas for this exam
-
-    @ManyToMany(
-      fetch  = FetchType.LAZY,
-      cascade = { CascadeType.PERSIST, CascadeType.MERGE }
+    @OneToMany(
+        mappedBy = "exam",
+        fetch = FetchType.LAZY,
+        cascade = CascadeType.ALL,
+        orphanRemoval = true
+        )
+    private List<ProctorTaInDepartment> proctorTaInDepartment; // this is used to get the proctor ta in faculties for this exam
+        
+    @OneToMany(
+        mappedBy = "exam",
+        fetch = FetchType.LAZY,
+        cascade = CascadeType.ALL,
+        orphanRemoval = true
     )
-    @JoinTable(
-      name               = "exam_students_as_proctors",
-      joinColumns        = @JoinColumn(name = "exam_id"),
-      inverseJoinColumns = @JoinColumn(name = "student_id")
-    )
-    private List<Student> assignedStudents = new ArrayList<>();
+    private List<ProctorTaFromFaculties> proctorTaFromFaculties;
 
     @OneToMany(
         mappedBy = "exam",
@@ -99,16 +107,8 @@ public class Exam {
         cascade = CascadeType.ALL,
         orphanRemoval = true
     )
-    private List<ProctorTaInFaculty> proctorTaInFaculties; // this is used to get the proctor ta in faculties for this exam
-
-    @OneToMany(
-        mappedBy = "exam",
-        fetch = FetchType.LAZY,
-        cascade = CascadeType.ALL,
-        orphanRemoval = true
-    )
-    private List<ProctorTaFromFaculties> proctorTaFromFaculties; // this is used to get the proctor ta from faculties for this exam
-
+    private List<ProctorTaFromOtherFaculty> proctorTaFromOtherFaculty;
+    
     @OneToMany(
         mappedBy = "exam",
         fetch = FetchType.LAZY,
@@ -123,15 +123,9 @@ public class Exam {
         cascade = CascadeType.ALL,
         orphanRemoval = true
     )
-    private List<SwapEnable> swapEnableRequests; // this is used to get the swap enable requests for this exam
-
-    @OneToMany(
-        mappedBy = "exam",
-        fetch = FetchType.LAZY,
-        cascade = CascadeType.ALL,
-        orphanRemoval = true
-    )
     private List<TransferProctoring> transferProctoringRequest; // this is used to get the transfer proctoring requests for this exam
+
+    /*-------*/
 
     @ManyToOne(
         fetch = FetchType.LAZY,
@@ -148,4 +142,22 @@ public class Exam {
 
     @Column(name = "amount_of_assigned_tas", unique = false, updatable = true)
     private Integer amountOfAssignedTAs = 0; // this is used to get the assigned tas for this exam
+
+    public boolean incr(){
+        if (amountOfAssignedTAs != requiredTAs)
+        {
+            amountOfAssignedTAs++;
+            return true;
+        }
+        return false;
+    }
+
+    public boolean decr(){
+        if (amountOfAssignedTAs > 0)
+        {
+            amountOfAssignedTAs--;
+            return true;
+        }
+        return false;
+    }
 }

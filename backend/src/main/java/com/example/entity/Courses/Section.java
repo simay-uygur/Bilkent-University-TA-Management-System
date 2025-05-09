@@ -50,6 +50,7 @@ public class Section {
     @Column(name = "section_code", nullable = false, unique = true) // CS-319-1
     private String sectionCode;
 
+    //this should be deleted
     @Column(name = "course_name", nullable = true) // Object-orianted-software engineering
     private String courseName;
 
@@ -128,6 +129,4 @@ public class Section {
         String[] parts = this.sectionCode.split("-");
         return parts[0] + "-" + parts[1] + "-" + parts[2];
     }
-    
-
 }

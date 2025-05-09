@@ -1,49 +1,98 @@
 package com.example.mapper;
 
-import java.util.List;
-
-import org.springframework.beans.BeanUtils;
+import java.util.stream.Collectors;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
-
 import com.example.dto.RequestDto;
 import com.example.dto.TaskDto;
-import com.example.entity.Requests.Leave;
-import com.example.entity.Requests.LeaveDTO;
-import com.example.entity.Requests.ProctorTaFromFaculties;
-import com.example.entity.Requests.ProctorTaFromFacultiesDto;
-import com.example.entity.Requests.ProctorTaInFaculty;
-import com.example.entity.Requests.ProctorTaInFacultyDto;
-import com.example.entity.Requests.Request;
-import com.example.entity.Requests.Swap;
-import com.example.entity.Requests.SwapDto;
-import com.example.entity.Requests.SwapEnable;
-import com.example.entity.Requests.SwapEnableDto;
-import com.example.entity.Requests.TransferProctoring;
-import com.example.entity.Requests.TransferProctoringDto;
-import com.example.entity.Requests.WorkLoad;
-import com.example.entity.Requests.WorkLoadDto;
-import com.example.repo.TaTaskRepo;
-
+import com.example.entity.Requests.*;
+import com.example.entity.Tasks.Task;
+import com.example.repo.*;
 import lombok.RequiredArgsConstructor;
 
 @Component
 @RequiredArgsConstructor
 public class RequestMapper {
 
+    private final TARepo taRepo;
+    private final ExamRepo examRepo;
+    private final TaskRepo taskRepo;
+    private final InstructorRepo instrRepo;
+    private final DepartmentRepo deptRepo;
     private final TaTaskRepo taTaskRepo;
 
-    public RequestDto toDto(Request req) {
-        Long recId = req.getReceiver().getId();
-        Long sendId = req.getSender().getId();
-        if (req instanceof Leave leave) {
-            LeaveDTO dto = new LeaveDTO();
-            BeanUtils.copyProperties(leave, dto);
-            dto.setSenderId(sendId);
-            dto.setReceiverId(recId);
-            dto.setSenderName(leave.getSender().getName() + " " + leave.getSender().getSurname());
-            dto.setReceiverName(leave.getReceiver().getName() + " " + leave.getReceiver().getSurname());
-            dto.setTasks(taTaskRepo.findTasksForTaInInterval(leave.getSender().getId(), dto.getDuration().getStart(), dto.getDuration().getFinish()).stream()
+    /**
+     * Generic dispatcher to convert any Request subtype to its DTO.
+     */
+    public RequestDto toDto(Request r) {
+        if (r instanceof Swap) {
+            return toDto((Swap) r);
+        } else if (r instanceof TransferProctoring) {
+            return toDto((TransferProctoring) r);
+        } else if (r instanceof WorkLoad) {
+            return toDto((WorkLoad) r);
+        } else if (r instanceof Leave) {
+            return toDto((Leave) r);
+        } else if (r instanceof ProctorTaFromFaculties) {
+            return toDto((ProctorTaFromFaculties) r);
+        } else if (r instanceof ProctorTaFromOtherFaculty) {
+            return toDto((ProctorTaFromOtherFaculty) r);
+        } else if (r instanceof ProctorTaInDepartment) {
+            return toDto((ProctorTaInDepartment) r);
+        }
+        throw new IllegalArgumentException("Unknown Request type: " + r.getClass());
+    }
+
+    private SwapDto toDto(Swap e) {
+        SwapDto dto = new SwapDto();
+        copyBase(e, dto);
+        dto.setReceiverId(e.getReceiver().getId());
+        dto.setSenderId(e.getSender().getId());
+        dto.setDescription(e.getExam().getDescription());
+        dto.setSenderName(e.getSender().getName() + " " + e.getSender().getSurname());
+        dto.setReceiverName(e.getReceiver().getName() + " " + e.getReceiver().getSurname());
+        dto.setExamId(e.getExam().getExamId());
+        dto.setExamName(e.getExam().getDescription());
+        return dto;
+    }
+
+    private TransferProctoringDto toDto(TransferProctoring e) {
+        TransferProctoringDto dto = new TransferProctoringDto();
+        copyBase(e, dto);
+        dto.setDescription(e.getExam().getDescription());
+        dto.setSenderId(e.getSender().getId());
+        dto.setReceiverId(e.getReceiver().getId());
+        dto.setDuration(e.getExam().getDuration());
+        dto.setExamId(e.getExam().getExamId());
+        dto.setExamName(e.getExam().getDescription());
+        return dto;
+    }
+
+    private WorkLoadDto toDto(WorkLoad e) {
+        WorkLoadDto dto = new WorkLoadDto();
+        copyBase(e, dto);
+        dto.setReceiverId(e.getReceiver().getId());
+        dto.setSenderId(e.getSender().getId());
+        dto.setTaskId(e.getTask().getTaskId());
+        dto.setSenderName(e.getSender().getName() + " " + e.getSender().getSurname());
+        dto.setReceiverName(e.getReceiver().getName() + " " + e.getReceiver().getSurname());
+        dto.setTaskType(e.getTask().getTaskType().name());
+        dto.setDuration(e.getTask().getDuration());
+        dto.setWorkload(e.getTask().getWorkload());
+        return dto;
+    }
+
+    private LeaveDTO toDto(Leave e) {
+        LeaveDTO dto = new LeaveDTO();
+        copyBase(e, dto);
+        dto.setSenderId(e.getSender().getId());
+        dto.setDepName(e.getReceiver().getName());
+        dto.setDuration(e.getDuration());
+        dto.setAttachmentFilename(e.getAttachmentFilename());
+        dto.setAttachmentContentType(e.getAttachmentContentType());
+        dto.setSenderName(e.getSender().getName() + " " + e.getSender().getSurname());
+        dto.setReceiverName(e.getReceiver().getName());
+        dto.setTasks(taTaskRepo.findTasksForTaInInterval(e.getSender().getId(), dto.getDuration().getStart(), dto.getDuration().getFinish()).stream()
                     .map(task -> {
                         TaskDto taskDto = new TaskDto();
                         taskDto.setDuration(task.getDuration());
@@ -51,108 +100,64 @@ public class RequestMapper {
                         return taskDto;
                     })
                     .toList());
+        String url = ServletUriComponentsBuilder.fromCurrentContextPath()
+            .path("/api/requests/")
+            .path(e.getRequestId().toString())
+            .path("/attachment")
+            .toUriString();
+        dto.setAttachmentUrl(url);
+        return dto;
+    }
 
-            // build absolute (or relative) URL to the download endpoint
-            String url = ServletUriComponentsBuilder.fromCurrentContextPath()
-                .path("/api/requests/")
-                .path(req.getRequestId().toString())
-                .path("/attachment")
-                .toUriString();
+    private ProctorTaFromFacultiesDto toDto(ProctorTaFromFaculties e) {
+        ProctorTaFromFacultiesDto dto = new ProctorTaFromFacultiesDto();
+        copyBase(e, dto);
+        dto.setDescription(e.getExam().getDescription());
+        dto.setDeansId(e.getSender().getId());
+        dto.setExamId(e.getExam().getExamId());
+        dto.setExamName(e.getExam().getDescription());
+        dto.setSenderName(e.getSender().getName());
+        dto.setRequiredTas(e.getRequiredTas());
+        dto.setTasLeft(e.getTasLeft());
+        dto.setProctorTaInFacultyDtos(
+            e.getProctorTaFromOtherFacs().stream()
+             .map(this::toDto)
+             .collect(Collectors.toList())
+        );
+        return dto;
+    }
 
-            dto.setAttachmentUrl(url);
-            return dto;
-        }
-        else if (req instanceof Swap swap) {
-            SwapDto dto = new SwapDto();
-            BeanUtils.copyProperties(swap, dto);
-            dto.setSenderId(sendId);
-            dto.setReceiverId(recId);
-            dto.setSenderName(swap.getSender().getName() + " " + swap.getSender().getSurname());
-            dto.setReceiverName(swap.getReceiver().getName() + " " + swap.getReceiver().getSurname());
-            dto.setExamName(swap.getExam().getDescription());
-            dto.setExamId(swap.getExam().getExamId());
-            return dto;
-        }
-        else if (req instanceof SwapEnable se) {
-            SwapEnableDto dto = new SwapEnableDto();
-            BeanUtils.copyProperties(se, dto);
-            dto.setSenderId(sendId);
-            dto.setReceiverId(recId);
-            dto.setSenderName(se.getSender().getName() + " " + se.getSender().getSurname());
-            dto.setReceiverName(se.getReceiver().getName() + " " + se.getReceiver().getSurname());
-            dto.setDuration(se.getExam().getDuration());
-            dto.setExamName(se.getExam().getDescription());
-            dto.setExamId(se.getExam().getExamId());
-            return dto;
-        }
-        else if (req instanceof TransferProctoring tp) {
-            TransferProctoringDto dto = new TransferProctoringDto();
-            BeanUtils.copyProperties(tp, dto);
-            dto.setSenderId(sendId);
-            dto.setReceiverId(recId);
-            dto.setSenderName(tp.getSender().getName() + " " + tp.getSender().getSurname());
-            dto.setReceiverName(tp.getReceiver().getName() + " " + tp.getReceiver().getSurname());
-            dto.setDuration(tp.getExam().getDuration());
-            dto.setExamId(tp.getExam().getExamId());
-            dto.setExamName(tp.getExam().getDescription());
-            return dto;
-        }
-        else if (req instanceof ProctorTaFromFaculties pf) {
-            ProctorTaFromFacultiesDto dto = new ProctorTaFromFacultiesDto();
-            BeanUtils.copyProperties(pf, dto);
-            dto.setSenderId(sendId);
-            dto.setReceiverId(recId);
-            dto.setSenderName(pf.getSender().getName() + " " + pf.getSender().getSurname());
-            dto.setReceiverName(pf.getReceiver().getName() + " " + pf.getReceiver().getSurname());
+    private ProctorTaFromOtherFacultyDto toDto(ProctorTaFromOtherFaculty e) {
+        ProctorTaFromOtherFacultyDto dto = new ProctorTaFromOtherFacultyDto();
+        copyBase(e, dto);
+        dto.setDescription(e.getExam().getDescription());
+        dto.setSenderId(e.getSender().getId());
+        dto.setReceiverId(e.getReceiver().getId());
+        dto.setSenderName(e.getSender().getName());
+        dto.setReceiverName(e.getReceiver().getName());
+        dto.setExamId(e.getExam().getExamId());
+        dto.setExamName(e.getExam().getDescription());
+        return dto;
+    }
 
-            // collect its child ProctorTaInFaculty by matching sentTime
-            List<ProctorTaInFacultyDto> children = pf.getProctorTaInFaculties()
-                .stream()
-                .map(child -> {
-                    ProctorTaInFacultyDto cdto = new ProctorTaInFacultyDto();
-                    // copies Request‑inherited fields (id, type, description, sentTime, etc)
-                    BeanUtils.copyProperties(child, cdto);
-        
-                    // now subclass‑specific properties:
-                    cdto.setFacultyName(child.getFaculty().getCode());
-                    cdto.setExamName  (child.getExam().getDescription());
-                    cdto.setExamId    (child.getExam().getExamId());
-                    // if your entity ProctorTaInFaculty has requiredTas:
-                    // cdto.setRequiredTas(child.getRequiredTas());
-        
-                    return cdto;
-                })
-            .toList();
+    private ProctorTaInDepartmentDto toDto(ProctorTaInDepartment e) {
+        ProctorTaInDepartmentDto dto = new ProctorTaInDepartmentDto();
+        copyBase(e, dto);
+        dto.setDescription(e.getExam().getDescription());
+        dto.setDepName(e.getReceiver().getName());
+        dto.setInstrId(e.getSender().getId());
+        dto.setExamId(e.getExam().getExamId());
+        dto.setExamName(e.getExam().getDescription());
+        dto.setRequiredTas(e.getRequiredTas());
+        dto.setTasLeft(e.getTasLeft());
+        return dto;
+    }
 
-            dto.setProctorTaInFacultyDtos(children);
-            return dto;
-        }
-        else if (req instanceof ProctorTaInFaculty pi) {
-            ProctorTaInFacultyDto dto = new ProctorTaInFacultyDto();
-            BeanUtils.copyProperties(pi, dto);
-            dto.setSenderId(sendId);
-            dto.setReceiverId(recId);
-            dto.setSenderName(pi.getSender().getName() + " " + pi.getSender().getSurname());
-            dto.setReceiverName(pi.getReceiver().getName() + " " + pi.getReceiver().getSurname());
-            dto.setFacultyName(pi.getFaculty().getCode());
-            dto.setExamName(pi.getExam().getDescription());
-            dto.setExamId(pi.getExam().getExamId());
-            return dto;
-        }
-        else if (req instanceof WorkLoad wl) {
-            WorkLoadDto dto = new WorkLoadDto();
-            BeanUtils.copyProperties(wl, dto);
-            dto.setSenderId(sendId);
-            dto.setReceiverId(recId);
-            dto.setSenderName(wl.getSender().getName() + " " + wl.getSender().getSurname());
-            dto.setReceiverName(wl.getReceiver().getName() + " " + wl.getReceiver().getSurname());
-            dto.setTaskId(wl.getTask().getTaskId());
-            dto.setDuration(wl.getTask().getDuration());
-            dto.setTaskType(wl.getTask().getTaskType().toString());
-            return dto;
-        }
-        else {
-            throw new IllegalStateException("Unknown request type: " + req.getClass());
-        }
+    // common fields
+    private void copyBase(Request e, RequestDto dto) {
+        dto.setRequestId(e.getRequestId());
+        dto.setSentTime(e.getSentTime());
+        dto.setRequestType(e.getRequestType());
+        dto.setPending(e.isPending());
     }
 }

@@ -4,12 +4,14 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import com.example.entity.Actors.Role;
+import com.example.entity.Actors.TA;
 import com.example.entity.General.Date;
 import com.example.entity.Requests.Swap;
 import com.example.entity.Requests.SwapDto;
 import com.example.exception.GeneralExc;
 import com.example.exception.UserNotFoundExc;
 import com.example.repo.ExamRepo;
+import com.example.repo.TARepo;
 import com.example.repo.RequestRepos.SwapRepo;
 import com.example.repo.UserRepo;
 
@@ -22,21 +24,15 @@ public class SwapServImpl implements SwapServ{
     private final SwapRepo swapRepo;
     private final UserRepo userRepo;
     private final ExamRepo examRepo;
+    private final TARepo taRepo;
 
     @Async("setExecutor")
     @Override
     public void createSwapRequest(SwapDto dto, Long senderId) {
-        var sender = userRepo.findById(senderId)
+        TA sender = taRepo.findById(senderId)
             .orElseThrow(() -> new UserNotFoundExc(senderId));
-        var receiver = userRepo.findById(dto.getReceiverId())
+        TA receiver = taRepo.findById(dto.getReceiverId())
             .orElseThrow(() -> new UserNotFoundExc(dto.getReceiverId()));
-        
-        if (receiver.getId() == sender.getId()) {
-            throw new GeneralExc("Sender and receiver cannot be the same.");
-        }
-        if (receiver.getRole() != Role.TA) {
-            throw new GeneralExc("Receiver must be a TA member.");
-        }
 
         // lookup your Exam however you’ve defined in ExamRepo
         var exam = examRepo.findById(dto.getExamId())

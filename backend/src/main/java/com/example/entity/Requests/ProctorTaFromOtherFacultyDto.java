@@ -1,16 +1,15 @@
 package com.example.entity.Requests;
 
 import com.example.dto.RequestDto;
-import com.example.entity.General.Event;
 
 import lombok.Data;
-import lombok.EqualsAndHashCode;
 
-@EqualsAndHashCode(callSuper = true)
 @Data
-public class SwapDto extends RequestDto {
+public class ProctorTaFromOtherFacultyDto extends RequestDto{
     private Long senderId;
     private Long receiverId;
     private String examName;
-    private int examId;
+    private int    examId;
+    private int requiredTas;
+    private int tasLeft;
 }

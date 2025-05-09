@@ -4,7 +4,10 @@ import java.util.List;
 import org.hibernate.annotations.DynamicUpdate;
 import com.example.entity.Courses.Department;
 import com.example.entity.Courses.Section;
+import com.example.entity.Requests.ProctorTaInDepartment;
+import com.example.entity.Requests.WorkLoad;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -42,4 +45,11 @@ public class Instructor extends User{
     @OneToMany(mappedBy = "instructor", fetch = FetchType.LAZY)
     private List<Section> sections = new ArrayList<>(); //newly added 
 
+    @OneToMany(mappedBy = "receiver",fetch= FetchType.LAZY, cascade= {CascadeType.REFRESH,CascadeType.MERGE})
+    //@JsonManagedReference
+    private List<WorkLoad> receivedWorkloadRequests;
+
+    @OneToMany(mappedBy = "sender",fetch= FetchType.LAZY, cascade= {CascadeType.REFRESH,CascadeType.MERGE})
+    //@JsonManagedReference
+    private List<ProctorTaInDepartment> receivedProctorTaInDepRequests;
 }

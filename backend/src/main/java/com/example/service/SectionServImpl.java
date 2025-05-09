@@ -2,9 +2,11 @@ package com.example.service;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
@@ -20,7 +22,10 @@ import com.example.entity.Actors.Instructor;
 import com.example.entity.Actors.TA;
 import com.example.entity.Courses.Course;
 import com.example.entity.Courses.CourseOffering;
+import com.example.entity.Courses.Lesson;
 import com.example.entity.Courses.Section;
+import com.example.entity.General.DayOfWeek;
+import com.example.entity.General.Event;
 import com.example.entity.General.Semester;
 import com.example.entity.General.Student;
 import com.example.entity.General.Term;
@@ -846,6 +851,38 @@ public class SectionServImpl implements SectionServ {
             sectionTasks.add(taskMapper.toDto(task));
         }
         return sectionTasks;
+    }
+
+    public static List<Event> getFirstTwoLessonEventsForDay(Section section, DayOfWeek day) {
+        return section.getLessons().stream()
+                // filter to only lessons on that day
+                .filter(lesson -> lesson.getDay() == day)
+                // sort by start DateTime
+                .sorted(Comparator.comparing(l -> l.getDuration().getStart().toLocalDateTime()))
+                // limit to first two
+                .limit(2)
+                // extract the Event
+                .map(Lesson::getDuration)
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * Returns a map from each DayOfWeek present in the section to the list of
+     * Event durations for its first two lessons.
+     */
+    public static Map<DayOfWeek, List<Event>> getFirstTwoLessonEventsEachDay(Section section) {
+        return section.getLessons().stream()
+                // group lessons by day
+                .collect(Collectors.groupingBy(Lesson::getDay))
+                .entrySet().stream()
+                .collect(Collectors.toMap(
+                        Map.Entry::getKey,            // the DayOfWeek
+                        e -> e.getValue().stream()    // its list of lessons
+                                 .sorted(Comparator.comparing(l -> l.getDuration().getStart().toLocalDateTime()))
+                                 .limit(2)
+                                 .map(Lesson::getDuration)
+                                 .collect(Collectors.toList())
+                ));
     }
 }
 

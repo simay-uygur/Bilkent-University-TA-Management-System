@@ -47,6 +47,9 @@ public class Task {
     @Column(name = "duration", nullable = false)
     private Event duration;
 
+    @Column(name = "description")
+    private String description;
+
     /*@Column(name = "is_time_passed", nullable = false)
     private boolean timePassed;*/
 
@@ -133,8 +136,9 @@ public class Task {
         else 
             this.workload = workload;
     }
-    @OneToMany(mappedBy = "task", cascade = CascadeType.ALL)
-    private List<WorkLoad> workLoadRequestList = new ArrayList<>(); // List of WorkLoad objects associated with this task
+    
+    /*@OneToMany(mappedBy = "task", cascade = CascadeType.ALL)
+    private List<WorkLoad> workLoadRequestList = new ArrayList<>(); // List of WorkLoad objects associated with this task*/
 
     @Override
     public boolean equals(Object obj){

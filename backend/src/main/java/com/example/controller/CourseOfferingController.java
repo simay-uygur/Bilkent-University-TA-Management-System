@@ -15,12 +15,16 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.example.dto.ClassRoomDto;
 import com.example.dto.CourseOfferingDto;
 import com.example.dto.ExamDto;
 import com.example.entity.Courses.CourseOffering;
+import com.example.entity.General.Event;
 import com.example.mapper.CourseOfferingMapper;
+import com.example.repo.ClassRoomRepo;
 import com.example.repo.CourseOfferingRepo;
 import com.example.repo.CourseRepo;
+import com.example.service.ClassRoomServ;
 import com.example.service.CourseOfferingServ;
 import com.example.service.ExamServ;
 
@@ -36,6 +40,7 @@ public class CourseOfferingController {
     private final CourseRepo courseRepo;
     private final CourseOfferingRepo courseOfferingRepo;
     private final ExamServ examServ;
+    private final ClassRoomServ roomServ;
 
     @PostMapping
     public CourseOfferingDto create(@RequestBody CourseOfferingDto dto) {
@@ -104,6 +109,11 @@ public class CourseOfferingController {
         });
     }
 
+    @GetMapping("/course/{course_code}/exam/classrooms")
+    public ResponseEntity<List<ClassRoomDto>> getAvailableClassRooms(@RequestBody Event event, @PathVariable String course_code){
+        return new ResponseEntity<>(roomServ.getClassRoomsByTime(event),HttpStatus.OK);
+    }
+
     @PostMapping("/course/{course_code}/exam/{exam_id}/tas")
     public CompletableFuture<ResponseEntity<Boolean>> addTAs(@PathVariable String course_code, @PathVariable Integer exam_id, @RequestBody List<Long> tas) {
         return service.addTAs(course_code, exam_id, tas).thenApply(success -> {
@@ -116,10 +126,11 @@ public class CourseOfferingController {
             }
         });
     }
+
+
 }
 
 
-//package com.example.controller;
 //
 //import com.example.entity.Courses.CourseOffering;
 //

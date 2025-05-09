@@ -7,9 +7,11 @@ import lombok.EqualsAndHashCode;
 
 @EqualsAndHashCode(callSuper = true)
 @Data
-public class ProctorTaInFacultyDto extends RequestDto{
-    private String facultyName;
+public class ProctorTaInDepartmentDto extends RequestDto{
+    private String depName;
+    private Long instrId;
     private String examName;
     private int examId;
     private int requiredTas;
+    private int tasLeft;
 }

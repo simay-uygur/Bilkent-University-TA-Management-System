@@ -15,7 +15,8 @@ public class LeaveDTO extends RequestDto {
     private Event duration;
     private boolean isPending;
     private List<TaskDto> tasks;
-
+    private Long senderId;
+    private String depName;
     private String attachmentFilename;
     private String attachmentContentType;
     private String attachmentUrl;
