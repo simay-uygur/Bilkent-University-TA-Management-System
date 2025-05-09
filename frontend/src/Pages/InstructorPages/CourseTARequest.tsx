@@ -120,7 +120,7 @@ const CourseTAReq: React.FC = () => {
     }
   };
 
-  const handleConfirm = async () => {
+  /* const handleConfirm = async () => {
     if (!confirmData) return;
     
     try {
@@ -134,6 +134,32 @@ const CourseTAReq: React.FC = () => {
     } catch (err) {
       console.error('Error submitting TA request:', err);
       setErrorMsg('Failed to submit TA request. Please try again.');
+    }
+  }; */
+  const handleConfirm = async () => {
+    if (!confirmData) return;
+
+    try {
+      const instructorId = localStorage.getItem('userId');
+      if (!instructorId) throw new Error('No instructorId in localStorage');
+
+      await axios.post(
+        `/api/instructors/${instructorId}/sections/${fullSectionCode}/assignTAs`,
+        {
+          preferredTaIDlist: state.wanted,
+          unpreferredTaIDlist: state.unwanted,
+          neededTA: state.needed,
+        }
+      );
+
+      // reset on success
+      setConfirmData(null);
+      setState(initialState);
+      setResetKey({ wanted: 0, unwanted: 0 });
+    } catch (err) {
+      console.error('Error submitting TA request:', err);
+      setErrorMsg('Failed to submit TA request. Please try again.');
+      setConfirmData(null);
     }
   };
 

@@ -121,7 +121,7 @@ public class Task_controller {
     public ResponseEntity<Boolean> assignTAs(@PathVariable String sectionCode, @PathVariable int taskId, @RequestBody List<Long> taIds) {
         return new ResponseEntity<>(taskServ.assignTasToTaskByTheirId(sectionCode, taskId, taIds),HttpStatus.OK);
     } 
-
+}
 
 
     /* @PutMapping("/api/sectionCode/{sectionCode}/task/{taskId}/assign/{taId}")
@@ -186,3 +186,4 @@ public class Task_controller {
         });
     }
 }
+*/
