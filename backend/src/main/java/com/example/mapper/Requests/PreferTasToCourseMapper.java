@@ -15,18 +15,19 @@ import lombok.RequiredArgsConstructor;
 public class PreferTasToCourseMapper {
     public PreferTasToCourseDto toDto(PreferTasToCourse e){
         PreferTasToCourseDto dto = new PreferTasToCourseDto();
+        dto.setDescription(e.getDescription());
+        dto.setRequestType(e.getRequestType());
         dto.setRequestId(e.getRequestId());
         dto.setSentTime(e.getSentTime());
-        dto.setRequestId(e.getRequestId());
-        dto.setRequesType(e.getRequestType());
-        dto.setDepartmentName(e.getReceiver().getName());
+        dto.setSenderName(e.getSender().getName() +" "+ e.getSender().getSurname());
         dto.setInstructorId(e.getSender().getId());
-        dto.setInstructorName(e.getSender().getName());
-        dto.setInstructorSurname(e.getSender().getSurname());
+        dto.setReceiverName(e.getReceiver().getName());
         dto.setSectionId(e.getSection().getSectionId());
         dto.setSectionCode(e.getSection().getSectionCode());
         dto.setTaNeeded(e.getTaNeeded());
         dto.setAmountOfAssignedTas(e.getAmountOfAssignedTas());
+        String[] parts = e.getSection().getSectionCode().split("-");
+        dto.setCourseCode(parts[0] +"-"+ parts[1]);
         dto.setPreferredTas(e.getPreferredTas().stream()
             .map(t -> {
                 TaInfo ti = new TaInfo();

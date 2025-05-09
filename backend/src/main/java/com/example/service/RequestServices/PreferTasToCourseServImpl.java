@@ -39,7 +39,9 @@ public class PreferTasToCourseServImpl implements PreferTasToCourseServ{
     private final TARepo taRepo;
     private final SectionRepo sectionRepo;
     private final CourseOfferingServ offeringServ;
+    
     @Override
+    @Transactional
     public List<PreferTasToCourseDto> getRequestsOfTheDeparment(String depName) {
         List<PreferTasToCourse> reqs= prefRepo.findByReceiver_Name(depName).orElse(Collections.emptyList());
         return     reqs
@@ -49,6 +51,7 @@ public class PreferTasToCourseServImpl implements PreferTasToCourseServ{
     }
 
     @Override
+    @Transactional
     public List<PreferTasToCourseDto> getRequestsOfTheInstructor(Long instrId) {
         List<PreferTasToCourse> reqs = prefRepo.findBySender_Id(instrId).orElse(Collections.emptyList());
         return     reqs

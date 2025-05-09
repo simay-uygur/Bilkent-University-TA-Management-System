@@ -9,18 +9,12 @@ import lombok.Data;
 
 @Data
 public class PreferTasToCourseDto extends RequestDto{
-    private Long requestId;
-
-    // Department that receives the request
-    private String departmentName;
 
     // Instructor who sent the request
     private Long instructorId;
-    private String instructorName;
-    private String instructorSurname;
 
     // Course for which TAs are preferred
-    private Long courseId;
+    private String courseCode;
 
     // Section for which the request applies
     private Long sectionId;
@@ -38,9 +32,7 @@ public class PreferTasToCourseDto extends RequestDto{
     // Non-preferred TAs
     private List<TaInfo> nonPreferredTas;
 
-    private Date sentTime;
-
-    private RequestType requesType;
+    private RequestType requestType;
     @Data
     public static class TaInfo {
         private Long id;

@@ -522,7 +522,6 @@ public class SectionServImpl implements SectionServ {
                     sec.setSectionCode(sectionCode);
                     sec.setOffering(off);
                     sec.setInstructor(instr);
-                    sec.setCourseName(courseName);
                     sec.setPreffered_TAS(null);
                     sec.setUnpreffered_TAS(null);
 
