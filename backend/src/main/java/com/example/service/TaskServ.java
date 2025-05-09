@@ -17,7 +17,7 @@ public interface TaskServ {
     public TaskDto getTaskById(int task_id);
     public List<Task> getAllTasks();
     public boolean updateTask(int task_id, Task task);
-    public List<TaDto> assignTasToTask(List<TaDto> tas, int taskId, int sectionNum, String courseCode, Long instrId);
+    public List<TaDto> assignTasToTask(List<Long> tas, int taskId, int sectionNum, String courseCode, Long instrId);
     public TA getTAById(int task_id, Long ta_id);
     public boolean assignTA(Task task, TA ta, Long instr_id);
     public boolean unassignTA(Task task, TA ta, Long instr_id);

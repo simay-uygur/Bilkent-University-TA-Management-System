@@ -90,6 +90,10 @@ public class TaskServImpl implements TaskServ {
         if (taskOptional.isEmpty()) {
             throw new TaskNotFoundExc(id);
         }
+        Long i = (long)123;
+        Task task = taskOptional.get();
+        task.getTasList().clear();
+        task.getWorkloadList().clear();
         taskRepo.deleteById(id);
         return true;
     }
@@ -177,11 +181,11 @@ public class TaskServImpl implements TaskServ {
     }
 
     @Override
-    public List<TaDto> assignTasToTask(List<TaDto> tas, int taskId, int sectionNum, String courseCode, Long instrId){
+    public List<TaDto> assignTasToTask(List<Long> tas, int taskId, int sectionNum, String courseCode, Long instrId){
         Task task = taskRepo.findById(taskId).orElseThrow(() -> new TaskNotFoundExc(taskId));
         unassignTas(task, instrId);
-        for(TaDto taDto : tas){
-            TA ta = taRepo.findById(taDto.getId()).orElseThrow(() -> new TaNotFoundExc(taDto.getId()));
+        for(Long taId : tas){
+            TA ta = taRepo.findById(taId).orElseThrow(() -> new TaNotFoundExc(taId));
             assignTA(task, ta, instrId);
         }
         return getTAsByTaskId(taskId);

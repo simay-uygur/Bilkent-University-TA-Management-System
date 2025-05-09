@@ -11,6 +11,7 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.Id;
+import jakarta.persistence.ManyToMany;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import lombok.Getter;
@@ -38,10 +39,24 @@ public class ClassRoom {
     @OneToMany(mappedBy = "examRoom", fetch = FetchType.LAZY)
     private List<ExamRoom> examRooms = new ArrayList<>();
 
-    @OneToMany(
+    @ManyToMany(
             mappedBy = "lessonRoom",
             fetch = FetchType.LAZY,
-            cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REFRESH}
+            cascade = {CascadeType.MERGE, CascadeType.REFRESH}
     )
     private List<Lesson> lessons = new ArrayList<>();
+
+    public boolean isFree(Event event){
+        for (Lesson lesson : lessons){
+            if (lesson.getDuration().has(event))
+                return true;
+        }
+
+        for(ExamRoom examRoom : examRooms){
+            if (examRoom.getExam().getDuration().has(event))
+                return true;
+        }
+
+        return false;
+    }
 }
