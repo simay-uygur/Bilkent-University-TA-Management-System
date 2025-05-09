@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.example.entity.Courses.CourseOffering;
-import com.example.entity.Exams.Exam;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import jakarta.persistence.Column;
@@ -53,13 +52,4 @@ public class Student {
     @ManyToMany(mappedBy = "registeredStudents", fetch = FetchType.LAZY)
     @JsonIgnore
     private List<CourseOffering> registeredCourseOfferings = new ArrayList<>();
-//
-//    @ManyToMany(
-//      mappedBy = "assignedStudents",
-//      fetch    = FetchType.LAZY
-//    )
-//    private List<Exam> exams = new ArrayList<>();
-
-
-
 }

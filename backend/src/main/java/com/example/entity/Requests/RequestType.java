@@ -9,5 +9,6 @@ public enum RequestType {
     ProctorTaFromFaculty,
     TaFromOtherFaculties,
     ProctorTaInFaculty,
+    PreferTasToCourse,
     WorkLoad
 }

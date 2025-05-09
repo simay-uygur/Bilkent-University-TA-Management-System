@@ -28,6 +28,7 @@ import com.example.exception.NoPersistExc;
 import com.example.exception.taExc.TaNotFoundExc;
 import com.example.exception.taskExc.TaskNotFoundExc;
 import com.example.mapper.TaskMapper;
+import com.example.repo.RequestRepos.WorkLoadRepo;
 import com.example.repo.SectionRepo;
 import com.example.repo.TARepo;
 import com.example.repo.TaTaskRepo;
@@ -52,6 +53,7 @@ public class TaskServImpl implements TaskServ {
     private final TaskMapper taskMapper;
     private final SectionRepo sectionRepo;
     private final WorkLoadServ workLoadServ;
+    private final WorkLoadRepo workLoadRepo;
     private final CourseOfferingServ courseOfferingServ;
     private final RequestServ reqServ;
     @Override
@@ -272,15 +274,25 @@ public boolean deleteTask(String section_code, int task_id) {
 
     @Override
     public boolean strict_deleteTask(int id) {
-        Optional<Task> taskOptional = taskRepo.findById(id);
-        if (taskOptional.isEmpty()) {
-            throw new TaskNotFoundExc(id);
-        }
-        Long i = (long)123;
-        Task task = taskOptional.get();
+        taTaskRepo.deleteAllByTaskTaskId((long) id);
+        taTaskRepo.flush();   
+
+        // 2) Bulk delete every workload_requests row referencing this Task
+        workLoadRepo.deleteAllByTaskTaskId((long) id);
+        workLoadRepo.flush();
+        Task task = taskRepo.findById(id)
+        .orElseThrow(() -> new TaskNotFoundExc(id));
         task.getTasList().clear();
-        task.getWorkloadList().clear();
-        taskRepo.deleteById(id);
+        //   c) Detach from its Section parent
+        Section parentSection = task.getSection();
+        if (parentSection != null) {
+            parentSection.getTasks().remove(task);
+        }
+        //sectionRepo.save(parentSection);
+        taskRepo.saveAndFlush(task);
+
+        // 4) Finally delete the Task
+        taskRepo.delete(task);
         return true;
     }
 
@@ -369,7 +381,7 @@ public boolean deleteTask(String section_code, int task_id) {
     @Override
     public List<TaDto> assignTasToTask(List<Long> tas, int taskId, int sectionNum, String courseCode, Long instrId){
         Task task = taskRepo.findById(taskId).orElseThrow(() -> new TaskNotFoundExc(taskId));
-        unassignTas(task, instrId);
+        unassignTas(taskId, instrId);
         for(Long taId : tas){
             TA ta = taRepo.findById(taId).orElseThrow(() -> new TaNotFoundExc(taId));
             assignTA(task, ta, instrId);
@@ -394,11 +406,14 @@ public boolean deleteTask(String section_code, int task_id) {
         return true;
     }
 
-
-    public void unassignTas(Task task, Long instr_id){
+    @Override
+    @Transactional
+    public boolean unassignTas(int task_id, Long instr_id){
+        Task task = taskRepo.findById(task_id).orElseThrow(() -> new GeneralExc("Task with ID " + task_id + " not found."));
         for(TaTask taTask : task.getTasList()){
             unassignTA(task, taTask.getTaOwner(), instr_id);
         }
+        return true;
     }
     @Override
     @Transactional

@@ -33,4 +33,5 @@ public interface TaskServ {
     //public boolean assignTaToTask(String sectionCode, int taskId, Long taId);
     public boolean assignTasToTaskByTheirId(String sectionCode, int taskId, List<Long> tas);
    
+    public boolean unassignTas(int task_id, Long instr_id);
 }

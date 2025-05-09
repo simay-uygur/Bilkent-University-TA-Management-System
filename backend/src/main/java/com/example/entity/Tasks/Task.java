@@ -44,7 +44,6 @@ public class Task {
     private int taskId;
 
     @Embedded
-    @Column(name = "duration", nullable = false)
     private Event duration;
 
 
@@ -69,7 +68,9 @@ public class Task {
     @Column(name = "access_type", updatable = false)
     private TaskAccessType accessType;*/
 
-    @OneToMany(mappedBy = "task", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "task", 
+    cascade = CascadeType.REMOVE , 
+    orphanRemoval = true)
     private List<TaTask> tasList = new ArrayList<>();
 
     /*@Column(name = "required_tas", nullable = false)
