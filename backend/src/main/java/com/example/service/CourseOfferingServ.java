@@ -1,7 +1,9 @@
 // com/example/service/CourseOfferingService.java
 package com.example.service;
 
+import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
@@ -10,6 +12,7 @@ import com.example.dto.ExamDto;
 import com.example.entity.Courses.CourseOffering;
 import com.example.entity.Courses.Section;
 import com.example.exception.GeneralExc;
+import org.springframework.web.multipart.MultipartFile;
 
 public interface CourseOfferingServ {
     CourseOffering create(CourseOffering offering);
@@ -28,6 +31,9 @@ public interface CourseOfferingServ {
     CompletableFuture<Boolean> createExam(ExamDto exam, String courseCode); // Assuming you have an ExamDto class
     CompletableFuture<Boolean> addTAs(String courseCode, Integer examId, List<Long> tas) throws GeneralExc; // Assuming you have an ExamDto class
     Section getSectionByNumber(String courseCode, int sectionNumber) ;
+
+    //exam import function
+    Map<String,Object> importExamsFromExcel(MultipartFile file) throws IOException;
 }
 
 

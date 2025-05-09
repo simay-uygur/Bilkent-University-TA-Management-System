@@ -50,6 +50,7 @@ public class Section {
     @Column(name = "section_code", nullable = false, unique = true) // CS-319-1
     private String sectionCode;
 
+    //this should be deleted
     @Column(name = "course_name", nullable = true) // Object-orianted-software engineering
     private String courseName;
 

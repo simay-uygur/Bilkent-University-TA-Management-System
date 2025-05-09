@@ -176,13 +176,32 @@ public class UploadController {
      * @param file multipart Excel (.xlsx) upload
      * @return map with successCount, failedCount, and failedRows
      */
-    @PostMapping("/exams")
-    public ResponseEntity<Map<String,Object>> importExams(
-            @RequestParam("file") MultipartFile file) throws IOException {
+//    @PostMapping("/exams")
+//    public ResponseEntity<Map<String,Object>> importExams(
+//            @RequestParam("file") MultipartFile file) throws IOException {
+//
+//        Map<String,Object> result = examService.importExamsFromExcel(file);
+//        return ResponseEntity.ok(result);
+//    }
 
-        Map<String,Object> result = examService.importExamsFromExcel(file);
+    private final CourseOfferingServ courseOfferingServ;
+
+    /**
+     * Bulk‐import exams from an Excel file.
+     *
+     * Expects a multipart/form-data POST with a “file” parameter.
+     * Delegates each row to courseOfferingServ.createExam(...) and waits on the Future.
+     */
+    @PostMapping(
+            path = "/exams" //,
+//            consumes = MediaType.MULTIPART_FORM_DATA_VALUE,
+//            produces = MediaType.APPLICATION_JSON_VALUE
+    )
+    public ResponseEntity<Map<String,Object>> importExams(
+            @RequestPart("file") MultipartFile file
+    ) throws IOException {
+        Map<String,Object> result = courseOfferingServ.importExamsFromExcel(file);
         return ResponseEntity.ok(result);
     }
-
 
 }

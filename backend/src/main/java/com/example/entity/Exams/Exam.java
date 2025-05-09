@@ -63,7 +63,7 @@ public class Exam {
     )
     private List<ExamRoom> examRooms;
 
-    
+
     @ManyToMany(
         fetch  = FetchType.LAZY,
         cascade = { CascadeType.PERSIST, CascadeType.MERGE }
@@ -75,18 +75,6 @@ public class Exam {
             )
             private List<TA> assignedTas; // this is used to get the tas for this exam
 
-
-    /// should be deleted
-    @ManyToMany(
-      fetch  = FetchType.LAZY,
-      cascade = { CascadeType.PERSIST, CascadeType.MERGE }
-    )
-    @JoinTable(
-      name               = "exam_students_as_proctors",
-      joinColumns        = @JoinColumn(name = "exam_id"),
-      inverseJoinColumns = @JoinColumn(name = "student_id")
-    )
-    private List<Student> assignedStudents = new ArrayList<>();
 
     /*Requests*/
     @OneToMany(
