@@ -72,7 +72,91 @@ public class TaskServImpl implements TaskServ {
         }
     }
     @Override
-    public boolean deleteTask(String section_code, int task_id) {
+@Transactional
+public boolean deleteTask(String section_code, int task_id) {
+    try {
+        // Get the task
+        Task task = taskRepo.findById(task_id)
+                .orElseThrow(() -> new TaskNotFoundExc(task_id));
+        
+        // Verify task belongs to the section
+        if (task.getSection() == null || !task.getSection().getSectionCode().equalsIgnoreCase(section_code)) {
+            throw new GeneralExc("Task not found in the specified section!");
+        }
+        
+        // First handle the TaTask relationships using a simpler approach
+        if (task.getTasList() != null && !task.getTasList().isEmpty()) {
+            // Use JPQL to directly delete the relationships from the database
+            // This avoids manipulating the in-memory collections which can cause issues
+            taTaskRepo.deleteAllByTaskId(task.getTaskId());
+            
+            // Clear the collection without triggering cascades
+            task.getTasList().clear();
+            
+            // Persist this change
+            taskRepo.saveAndFlush(task);
+        }
+        
+        // Remove the task from the section's task collection
+        if (task.getSection() != null) {
+            Section section = task.getSection();
+            section.getTasks().remove(task);
+            task.setSection(null);
+            sectionRepo.saveAndFlush(section);
+        }
+        
+        // Finally delete the task
+        taskRepo.delete(task);
+        return true;
+    } catch (Exception e) {
+        // Fallback to soft delete if hard delete fails
+        log.error("Error during hard delete of task: " + e.getMessage(), e);
+        return soft_deleteTask(task_id);
+    }
+}
+   /*  public boolean deleteTask(String section_code, int task_id) {
+        // Get the section
+        Section section = sectionRepo.findBySectionCodeIgnoreCase(section_code)
+                .orElseThrow(() -> new GeneralExc("Section not found!"));
+        
+        // Get the task
+        Task task = taskRepo.findById(task_id)
+                .orElseThrow(() -> new TaskNotFoundExc(task_id));
+        
+        // Verify task belongs to the section
+        if (task.getSection() != null && task.getSection().getSectionCode().equals(section_code)) {
+            // First, remove all TA assignments for this task
+            if (task.getTasList() != null && !task.getTasList().isEmpty()) {
+                // Get instructor ID for unassigning TAs
+                Long instructorId = section.getInstructor().getId();
+                
+                // Create a new list to avoid ConcurrentModificationException
+                List<TaTask> tasToRemove = new ArrayList<>(task.getTasList());
+                
+                // Unassign all TAs from the task
+                for (TaTask taTask : tasToRemove) {
+                    TA ta = taTask.getTaOwner();
+                    if (ta != null) {
+                        // Use existing method to properly remove the relationship
+                        unassignTA(task, ta, instructorId);
+                    }
+                }
+                
+                // Make sure the list is empty
+                task.getTasList().clear();
+                
+                // Save the task with empty TA list before deleting
+                taskRepo.saveAndFlush(task);
+            }
+            
+            // Now delete the task
+            taskRepo.delete(task);
+            return true;
+        } else {
+            throw new GeneralExc("Task not found in the specified section!");
+        }
+    } */
+    /* public boolean deleteTask(String section_code, int task_id) {
         Section section = sectionRepo.findBySectionCodeIgnoreCase(section_code)
                 .orElseThrow(() -> new GeneralExc("Section not found!"));
         Task task = taskRepo.findById(task_id)
@@ -83,7 +167,7 @@ public class TaskServImpl implements TaskServ {
         } else {
             throw new GeneralExc("Task not found in the specified section!");
         }
-    }
+    } */
     @Override
     public TaskDto createTask(TaskDto taskDto, String sectionCode) {
         if (taskDto == null) {

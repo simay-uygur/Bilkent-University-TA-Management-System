@@ -118,4 +118,13 @@ public interface TaTaskRepo extends JpaRepository<TaTask, Integer> {
       @Query("DELETE FROM TaTask t WHERE t.task.taskId = :taskId AND t.taOwner.id = :taId")
       void deleteByTaskAndTa(@Param("taskId") int taskId,
                             @Param("taId")   Long  taId);
+    
+ 
+    
+    @Modifying
+    @Query("DELETE FROM TaTask tt WHERE tt.task.taskId = :taskId")
+    void deleteAllByTaskId(@Param("taskId") int taskId);
+    
+    // Your other methods
 }
+
