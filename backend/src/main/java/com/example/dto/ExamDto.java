@@ -18,6 +18,5 @@ public class ExamDto {
     private String       type;
     private List<String> examRooms;
     private int   requiredTas;
-    private Boolean swapIsEnabled;
     private Integer workload;
 }
