@@ -219,41 +219,7 @@ export interface Instructor {
   sections: string[];
 }
 
-<<<<<<< Updated upstream
-export interface Section {
-  sectionId: number;
-  sectionCode: string;
-  lessons: any[];
-  instructor: Instructor;
-  tas: any[];
-  students: any[];
-}
-
-// Interface for course details API response
-type CourseDetails = {
-  courseId: number;
-  courseCode: string;
-  courseName: string;
-  courseAcademicStatus: string;
-  department: string;
-  prereqs: string[];
-};
-
-// Utility functions
-const extractCourseCode = (sectionCode: string): string => {
-  const parts = sectionCode.split('-');
-  return parts.length >= 2 ? `${parts[0]}-${parts[1]}` : sectionCode;
-};
-
-const extractSectionNumber = (sectionCode: string): string => {
-  const parts = sectionCode.split('-');
-  return parts.length >= 3 ? parts[2] : '1';
-};
-
-const InsMainPage: React.FC = () => {
-=======
 const InstructorMainPage: React.FC = () => {
->>>>>>> Stashed changes
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [instructor, setInstructor] = useState<Instructor | null>(null);
@@ -640,11 +606,7 @@ const fetchCourseDetails = async (courseCodes: string[]) => {
   };
 
   if (loading) {
-<<<<<<< Updated upstream
-    return <LoadingPage/>;
-=======
     return <LoadingPage />;
->>>>>>> Stashed changes
   }
 
   if (error) {
@@ -720,10 +682,6 @@ const fetchCourseDetails = async (courseCodes: string[]) => {
   );
 };
 
-<<<<<<< Updated upstream
-export default InsMainPage;
- */
-=======
 export default InstructorMainPage;
 /* import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -839,4 +797,3 @@ const InstructorMainPage: React.FC = () => {
 
 export default InsMainPage;
  */
->>>>>>> Stashed changes
