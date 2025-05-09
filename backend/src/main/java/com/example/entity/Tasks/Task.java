@@ -66,7 +66,7 @@ public class Task {
     private TaskAccessType accessType;*/
 
     @OneToMany(mappedBy = "task", 
-    cascade = CascadeType.REMOVE , 
+    cascade = CascadeType.ALL , 
     orphanRemoval = true)
     private List<TaTask> tasList = new ArrayList<>();
 
@@ -99,8 +99,7 @@ public class Task {
             tasList = new ArrayList<>(); // Initialize the list if it's null
         TaTask link = new TaTask(this, ta);
         // set both sides
-        tasList.add(link);
-        //ta.getTaTasks().add(link);
+        this.getTasList().add(link);
         // update counter
         amountOfTas++;
     }

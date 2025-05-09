@@ -5,6 +5,8 @@ import java.util.List;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import com.example.entity.General.Date;
@@ -32,22 +34,35 @@ public interface SwapRepo extends JpaRepository<Swap, Long>{
 
     @Modifying
     @Transactional
-    int deleteByReceiverIdAndSentTimeBetweenAndRequestTypeInAndIsPendingTrue(
-        Long receiverId,
-        Date start,
-        Date end,
-        Collection<RequestType> types
+    @Query("""
+      DELETE FROM Swap s
+       WHERE s.receiver.id = :taId
+         AND s.isPending = true
+         AND s.exam.duration.start <= :to
+         AND s.exam.duration.finish >= :from
+    """)
+    int deleteReceivedForTaInInterval(
+        @Param("taId")   Long taId,
+        @Param("from")   Date from,
+        @Param("to")     Date to
     );
 
     /**
-     * Same for swaps *sent* by the user.
+     * Delete all pending SwapRequests that a TA sent
+     * for exams whose duration overlaps [from .. to].
      */
     @Modifying
     @Transactional
-    int deleteBySenderIdAndSentTimeBetweenAndRequestTypeInAndIsPendingTrue(
-        Long senderId,
-        Date start,
-        Date end,
-        Collection<RequestType> types
+    @Query("""
+      DELETE FROM Swap s
+       WHERE s.sender.id = :taId
+         AND s.isPending = true
+         AND s.exam.duration.start <= :to
+         AND s.exam.duration.finish >= :from
+    """)
+    int deleteSentByTaInInterval(
+        @Param("taId")   Long taId,
+        @Param("from")   Date from,
+        @Param("to")     Date to
     );
 }

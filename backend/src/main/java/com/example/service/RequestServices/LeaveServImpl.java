@@ -8,33 +8,32 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.example.dto.TaskDto;
-import com.example.entity.Actors.Role;
 import com.example.entity.Actors.TA;
-import com.example.entity.Actors.User;
 import com.example.entity.Courses.Department;
+import com.example.entity.Exams.Exam;
 import com.example.entity.General.Date;
 import com.example.entity.Requests.Leave;
 import com.example.entity.Requests.LeaveDTO;
 import com.example.exception.GeneralExc;
-import com.example.exception.UserNotFoundExc;
 import com.example.exception.taExc.TaNotFoundExc;
-import com.example.repo.RequestRepos.LeaveRepo;
 import com.example.repo.DepartmentRepo;
+import com.example.repo.ExamRepo;
+import com.example.repo.RequestRepos.LeaveRepo;
 import com.example.repo.TARepo;
 import com.example.repo.TaTaskRepo;
-import com.example.repo.UserRepo;
 
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
 public class LeaveServImpl implements LeaveServ{
 
-    private final UserRepo userRepo;
     private final LeaveRepo leaveRepo;
     private final TARepo taRepo;
     private final TaTaskRepo taTaskRepo;
     private final DepartmentRepo depRepo;
+    private final ExamRepo examRepo;
 
     @Async("setExecutor")
     @Override
@@ -63,9 +62,21 @@ public class LeaveServImpl implements LeaveServ{
     }
 
     @Override
-    public void approveLeaveRequest(Long requestId, Long approverId) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'approveLeaveRequest'");
+    @Transactional
+    public boolean approveLeaveRequest(Long requestId, Long approverId) {
+        Leave req = leaveRepo.findById(requestId).orElseThrow(() -> new GeneralExc("There is no such leave request."));
+        TA sender = req.getSender();
+        taTaskRepo.deleteTaTasksForTaInInterval(sender.getId(), req.getDuration().getStart(), req.getDuration().getFinish());
+        sender.getExams().clear();
+        List<Exam> exams = examRepo.findAllByAssignedTasContaining(sender);
+        for (Exam exam : exams) {
+        exam.getAssignedTas().remove(sender);
+        examRepo.save(exam);
+        }
+        sender.setActive(false);
+        req.setApproved(true);
+        taRepo.saveAndFlush(sender);
+        return true;
     }
 
     @Override

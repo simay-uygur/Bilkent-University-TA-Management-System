@@ -16,22 +16,17 @@ import com.example.entity.General.Event;
 import com.example.entity.Requests.Leave;
 import com.example.entity.Requests.Request;
 import com.example.entity.Requests.RequestType;
-import com.example.entity.Requests.Swap;
-import com.example.entity.Requests.TransferProctoring;
 import com.example.exception.Requests.NoSuchRequestExc;
 import com.example.exception.taExc.TaNotFoundExc;
-import com.example.exception.UserNotFoundExc;
 import com.example.mapper.RequestMapper;
 import com.example.repo.RequestRepos.LeaveRepo;
 import com.example.repo.RequestRepos.RequestRepo;
 import com.example.repo.RequestRepos.SwapRepo;
 import com.example.repo.RequestRepos.TransferProctoringRepo;
-
-import jakarta.transaction.Transactional;
-
 import com.example.repo.TARepo;
 import com.example.repo.UserRepo;
 
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 
 @Service 
@@ -144,32 +139,28 @@ public class RequestServImpl implements RequestServ{
 
         transRepo.deleteAll(senTransfers);
         transRepo.deleteAll(recTransfers);*/
-        swapRepo.deleteByReceiverIdAndSentTimeBetweenAndRequestTypeInAndIsPendingTrue(
+        swapRepo.deleteReceivedForTaInInterval(
             u.getId(),
             duration.getStart(),
-            duration.getFinish(),
-            want
+            duration.getFinish()
         );
 
-        swapRepo.deleteBySenderIdAndSentTimeBetweenAndRequestTypeInAndIsPendingTrue(
+        swapRepo.deleteSentByTaInInterval(
             u.getId(),
             duration.getStart(),
-            duration.getFinish(),
-            want
+            duration.getFinish()
         );
 
-        transRepo.deleteByReceiverIdAndSentTimeBetweenAndRequestTypeInAndIsPendingTrue(
+        transRepo.deleteReceivedForTaInInterval(
             u.getId(),
             duration.getStart(),
-            duration.getFinish(),
-            want
+            duration.getFinish()
         );
 
-        transRepo.deleteBySenderIdAndSentTimeBetweenAndRequestTypeInAndIsPendingTrue(
+        transRepo.deleteSentByTaInInterval(
             u.getId(),
             duration.getStart(),
-            duration.getFinish(),
-            want
+            duration.getFinish()
         );
     }
 }

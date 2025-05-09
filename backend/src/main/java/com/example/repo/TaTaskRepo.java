@@ -13,6 +13,8 @@ import com.example.entity.General.Date;
 import com.example.entity.Tasks.TaTask;
 import com.example.entity.Tasks.Task;
 
+import jakarta.transaction.Transactional;
+
 @Repository
 public interface TaTaskRepo extends JpaRepository<TaTask, Integer> {
 
@@ -109,6 +111,20 @@ public interface TaTaskRepo extends JpaRepository<TaTask, Integer> {
            AND t.duration.finish   >= :from
       """)
       List<Task> findTasksForTaInInterval(
+          @Param("taId") Long taId,
+          @Param("from") Date   from,
+          @Param("to")   Date   to
+      );
+
+      @Modifying
+      @Transactional
+      @Query("""
+        DELETE FROM TaTask tt
+        WHERE tt.taOwner.id              = :taId
+          AND tt.task.duration.start     <= :to
+          AND tt.task.duration.finish    >= :from
+      """)
+      int deleteTaTasksForTaInInterval(
           @Param("taId") Long taId,
           @Param("from") Date   from,
           @Param("to")   Date   to

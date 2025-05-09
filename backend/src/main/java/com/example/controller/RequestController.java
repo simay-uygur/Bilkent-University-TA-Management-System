@@ -10,6 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestPart;
@@ -46,6 +47,7 @@ import com.example.service.RequestServices.TransferProctoringServ;
 import com.example.service.RequestServices.WorkLoadServ;
 
 import lombok.RequiredArgsConstructor;
+
 
 
 @RestController
@@ -120,6 +122,11 @@ public class RequestController {
         leaveServ.createLeaveRequest(dto, file, taId);
         boolean exists = leaveRepo.existsBySenderIdAndReceiverNameAndIsRejected(taId, dto.getDepName(), false);
         return new ResponseEntity<>(exists ? HttpStatus.CREATED : HttpStatus.BAD_REQUEST);
+    }
+
+    @PutMapping("/instructor/{instrId}/section/{sectionCode}/leave/{id}/approve")
+    public ResponseEntity<Boolean> approveLeaveRequest(@PathVariable Long instrId, @PathVariable Long id) {
+        return new ResponseEntity<>(leaveServ.approveLeaveRequest(id, instrId),HttpStatus.I_AM_A_TEAPOT);
     }
 
     @GetMapping("/ta/{taId}/request/leave/all")
