@@ -11,9 +11,10 @@ export interface JwtResponse {
   userId: string;
   token: string;
   id: number;
-  username: string;
+  userName: string;
   role: string;
   department: string;
+  currentSemester: string;
 }
 
 export function login(

@@ -71,9 +71,47 @@ public class TaskServImpl implements TaskServ {
             throw new GeneralExc("Task not found in the specified section!");
         }
     }
-    @Override
+@Override
 @Transactional
 public boolean deleteTask(String section_code, int task_id) {
+    // Get the section
+    Section section = sectionRepo.findBySectionCodeIgnoreCase(section_code)
+            .orElseThrow(() -> new GeneralExc("Section not found!"));
+    
+    // Get the task
+    Task task = taskRepo.findById(task_id)
+            .orElseThrow(() -> new TaskNotFoundExc(task_id));
+    
+    // Verify task belongs to the section
+    if (task.getSection() != null && task.getSection().getSectionCode().equals(section_code)) {
+        // First, remove all TA assignments for this task - USE DIRECT REPOSITORY ACCESS
+        if (task.getTasList() != null && !task.getTasList().isEmpty()) {
+            // Delete TA task relationships directly from the repository
+            taTaskRepo.deleteAllByTaskId(task.getTaskId());
+            
+            // Detach task from section
+            if (task.getSection() != null) {
+                Section taskSection = task.getSection();
+                taskSection.getTasks().remove(task);
+                task.setSection(null);
+            }
+            
+            // Refresh task from database after relationship changes
+            taskRepo.flush();
+            
+            // Clear collection (don't rely on cascade)
+            task.getTasList().clear();
+            taskRepo.save(task);
+        }
+        
+        // Now delete the task
+        taskRepo.delete(task);
+        return true;
+    } else {
+        throw new GeneralExc("Task not found in the specified section!");
+    }
+}
+/* public boolean deleteTask(String section_code, int task_id) {
     try {
         // Get the task
         Task task = taskRepo.findById(task_id)
@@ -113,7 +151,7 @@ public boolean deleteTask(String section_code, int task_id) {
         log.error("Error during hard delete of task: " + e.getMessage(), e);
         return soft_deleteTask(task_id);
     }
-}
+} */
    /*  public boolean deleteTask(String section_code, int task_id) {
         // Get the section
         Section section = sectionRepo.findBySectionCodeIgnoreCase(section_code)

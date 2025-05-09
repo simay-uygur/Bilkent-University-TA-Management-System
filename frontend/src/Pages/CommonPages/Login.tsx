@@ -15,7 +15,8 @@ interface JwtResponse {
   token: string;
   role: string;
   userId?: string;
-  name?: string;
+  userName: string;
+  currentSemester: string;
 }
 
 const Login: React.FC = () => {
@@ -57,7 +58,8 @@ const Login: React.FC = () => {
       const jwt = data.token;
       const role = data.role;
       const userId = data.userId || username;
-      const name = data.name;
+      const userName = data.userName;
+      const currentSemester = data.currentSemester || '2025-SPRING'; // default semester
 
       if (!jwt) {
         setErrors({ password: 'Invalid username or password.' });
@@ -69,7 +71,8 @@ const Login: React.FC = () => {
       localStorage.setItem('jwt', jwt);
       localStorage.setItem('userId', userId);
       localStorage.setItem('userRole', role);
-      if (name) localStorage.setItem('userName', name);
+      localStorage.setItem('userName', userName);
+      localStorage.setItem('currentSemester', currentSemester);
 
       // choose landing page by role
       let home = '/login';

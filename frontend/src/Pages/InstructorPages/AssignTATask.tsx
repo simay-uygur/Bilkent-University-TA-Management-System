@@ -6,6 +6,7 @@ import SearchSelect from '../../components/SearchSelect';
 import ErrPopUp from '../../components/PopUp/ErrPopUp';
 import ConPop from '../../components/PopUp/ConPop';
 import styles from './AssignTATask.module.css';
+import LoadingPage from '../CommonPages/LoadingPage';
 
 export interface TA {
   id: string;
@@ -131,7 +132,7 @@ const AssignTATask: React.FC = () => {
 
   // Show loading state
   if (loading) {
-    return <div className={styles.loading}>Loading TAs...</div>;
+    return <LoadingPage/>;
   }
 
   // Show error state

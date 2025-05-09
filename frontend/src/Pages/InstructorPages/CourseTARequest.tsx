@@ -10,6 +10,7 @@ import ConPop from '../../components/PopUp/ConPop';
 import styles from './CourseTARequest.module.css';
 import axios from 'axios';
 import SearchSelect from '../../components/SearchSelect';
+import LoadingPage from '../CommonPages/LoadingPage';
 
 // Updated TA interface to match API response
 export interface TA {
@@ -140,7 +141,7 @@ const CourseTAReq: React.FC = () => {
 
   // Show loading state
   if (loading) {
-    return <div className={styles.loading}>Loading TAs...</div>;
+    return <LoadingPage/>;
   }
 
   // Show error state
