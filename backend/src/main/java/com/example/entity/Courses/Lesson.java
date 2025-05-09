@@ -21,7 +21,6 @@ public class Lesson {
     @Column(name = "lesson_id")
     private Long lessonId;
 
-    @Embedded
     @Column(name = "duration")
     private Event duration;                       // start / end date-times
 

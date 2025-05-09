@@ -128,6 +128,4 @@ public class Section {
         String[] parts = this.sectionCode.split("-");
         return parts[0] + "-" + parts[1] + "-" + parts[2];
     }
-    
-
 }

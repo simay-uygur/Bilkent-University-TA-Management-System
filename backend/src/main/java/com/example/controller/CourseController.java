@@ -115,6 +115,7 @@ public class CourseController {
                 .collect(Collectors.toList());
 
         TaskDto dto = new TaskDto(
+                task.getTaskId(),
                 task.getTaskType().toString(),
                 taDtos,
                 "Task #" + task.getTaskId(),

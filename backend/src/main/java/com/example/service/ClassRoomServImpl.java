@@ -4,6 +4,8 @@ package com.example.service;
 import com.example.dto.ClassRoomDto;
 import com.example.dto.FailedRowInfo;
 import com.example.entity.General.ClassRoom;
+import com.example.entity.General.Event;
+import com.example.exception.GeneralExc;
 import com.example.repo.ClassRoomRepo;
 import lombok.RequiredArgsConstructor;
 import org.apache.poi.ss.usermodel.Row;
@@ -121,6 +123,22 @@ public class ClassRoomServImpl implements ClassRoomServ {
     @Override
     public List<ClassRoomDto> getAll() {
         return classRoomRepo.findAll().stream().map(this::toDto).collect(Collectors.toList());
+    }
+
+    @Override
+    public List<ClassRoomDto> getClassRoomsByTime(Event duration){
+        List<ClassRoomDto> availableRooms = classRoomRepo.findAll().parallelStream()
+        .filter(room -> room.isFree(duration))
+        .map(r -> new ClassRoomDto(
+            r.getClassroomId(),
+            r.getClassCapacity(),
+            r.getExamCapacity()))
+        .collect(Collectors.toList());
+        if (availableRooms.isEmpty())
+        {
+            throw new GeneralExc("No classrooms are available for that time");
+        }
+        return availableRooms;
     }
 }
 
