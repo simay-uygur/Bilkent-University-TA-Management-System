@@ -39,7 +39,7 @@ public class ClassRoom {
     @OneToMany(mappedBy = "examRoom", fetch = FetchType.LAZY)
     private List<ExamRoom> examRooms = new ArrayList<>();
 
-    @ManyToMany(
+    @OneToMany(
             mappedBy = "lessonRoom",
             fetch = FetchType.LAZY,
             cascade = {CascadeType.MERGE, CascadeType.REFRESH}
