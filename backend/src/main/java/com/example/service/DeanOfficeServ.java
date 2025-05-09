@@ -2,6 +2,7 @@ package com.example.service;
 
 
 import com.example.dto.DeanOfficeDto;
+import com.example.dto.FacultyCourseOfferingsDto;
 import com.example.entity.Actors.DeanOffice;
 import java.util.List;
 
@@ -11,6 +12,6 @@ public interface DeanOfficeServ {
     List<DeanOfficeDto> getAll();
     DeanOffice getById(Long id);
     void deleteById(Long id);
-
     DeanOffice saveFromDto(DeanOfficeDto deanOfficeDto, String facultyCode);
+    FacultyCourseOfferingsDto getFacultyCourseData(String facultyCode);
 }

@@ -3,6 +3,7 @@ package com.example.repo;
 
 import java.util.Optional;
 
+import com.example.entity.Courses.Department;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -68,4 +69,15 @@ Optional<CourseOffering>findByCourseCode(@Param("code") String code);
     );
 
     Optional<CourseOffering> findByCourse_CourseCode(String courseCode);
+
+    List<CourseOffering>
+    findByCourse_Department_Faculty_CodeAndSemester_YearAndSemester_Term(
+            String facultyCode, int year, Term term);
+
+
+    List<CourseOffering> findByCourse_DepartmentInAndSemester_YearAndSemester_Term(
+            List<Department> departments,
+            int year,
+            Term term
+    );
 }
