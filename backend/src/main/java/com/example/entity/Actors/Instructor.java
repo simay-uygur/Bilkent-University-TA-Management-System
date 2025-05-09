@@ -7,6 +7,7 @@ import org.hibernate.annotations.DynamicUpdate;
 
 import com.example.entity.Courses.Department;
 import com.example.entity.Courses.Section;
+import com.example.entity.Requests.PreferTasToCourse;
 import com.example.entity.Requests.ProctorTaInDepartment;
 import com.example.entity.Requests.WorkLoad;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -56,4 +57,7 @@ public class Instructor extends User{
     @OneToMany(mappedBy = "sender",fetch= FetchType.LAZY, cascade= {CascadeType.REFRESH,CascadeType.MERGE})
     //@JsonManagedReference
     private List<ProctorTaInDepartment> receivedProctorTaInDepRequests;
+
+    @OneToMany(mappedBy = "sender", fetch = FetchType.LAZY, cascade= CascadeType.REMOVE)
+    private List<PreferTasToCourse> preferTasRequests = new ArrayList<>();
 }
