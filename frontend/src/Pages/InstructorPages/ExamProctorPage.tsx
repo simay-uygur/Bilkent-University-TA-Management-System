@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { useParams } from 'react-router-dom';
 import BackBut from '../../components/Buttons/BackBut';
-import ExamProctorReq, { Exam} from './ExamProctorRequest';
+import ExamProctorReq, { Exam } from './ExamProctorRequest';
 import ErrPopUp from '../../components/PopUp/ErrPopUp';
 import ConPop from '../../components/PopUp/ConPop';
 import styles from './ExamProctorPage.module.css';
@@ -22,14 +22,15 @@ interface BackendPayload {
 
 const ExamProctorPage: React.FC = () => {
   const { courseID } = useParams<{ courseID: string }>()
-  const courseCode = courseID;
+  const courseCode = courseID!;
 
   const initialExams: Exam[] = [
     { id: `${courseCode}-mid`,   name: `${courseCode} Midterm`, type: 'Midterm', studentCount: 120 },
     { id: `${courseCode}-final`, name: `${courseCode} Final`,   type: 'Final',   studentCount: 120 },
   ];
 
-  const [exams] = useState<Exam[]>(initialExams);
+  // now with setter so we can remove one
+  const [exams, setExams] = useState<Exam[]>(initialExams);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [confirmData, setConfirmData] = useState<RawRequest | null>(null);
   const [resetExamId, setResetExamId] = useState<string | null>(null);
@@ -57,15 +58,15 @@ const ExamProctorPage: React.FC = () => {
     console.log('Sending to backend:', payload);
     // TODO: POST payload to your API
 
-    // close popup & reset only that exam’s input
+    // remove that exam card
+    setExams(prev => prev.filter(e => e.id !== examId));
+    // reset and clear popup
     setConfirmData(null);
     setResetExamId(examId);
   };
 
   return (
     <div className={styles.container}>
-      
-
       <div className={styles.headerRow}>
         <BackBut to="/instructor" />
         <h1 className={styles.title}>Exam Proctoring for {courseCode}</h1>

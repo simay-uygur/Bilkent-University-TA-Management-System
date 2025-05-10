@@ -15,7 +15,7 @@
   }
   
   .content {
-    background-color: var(--bg-content);
+    background-color: #f0faff;
     flex: 1;
     padding: 2rem;
     display: flex;

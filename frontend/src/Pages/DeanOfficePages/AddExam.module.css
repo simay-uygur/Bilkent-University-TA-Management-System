@@ -6,49 +6,49 @@
     background: #fff;
     border-radius: 8px;
     box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-}
-
-.header {
+  }
+  
+  .header {
     display: flex;
     align-items: center;
     gap: 16px;       /* gap between back button and title */
     margin-bottom: 24px; /* space below header */
-}
-
-.title {
+  }
+  
+  .title {
     font-size: 1.75rem;
     margin: 0;
-}
-
-.formTable {
+  }
+  
+  .formTable {
     width: 100%;
     border-collapse: separate;
     border-spacing: 0 12px;
     margin-bottom: 16px;
-}
-
-.formTable td {
+  }
+  
+  .formTable td {
     vertical-align: middle;
     padding: 4px 8px;
-}
-
-.inputCell {
+  }
+  
+  .inputCell {
     display: flex;
     flex-direction: column;
     gap: 8px;
-}
-
-.searchInput,
-.selectInput,
-.textInput {
+  }
+  
+  .searchInput,
+  .selectInput,
+  .textInput {
     width: 100%;
     padding: 8px;
     font-size: 1rem;
     border: 1px solid #ccc;
     border-radius: 4px;
-}
-
-.showRoomsBtn {
+  }
+  
+  .showRoomsBtn {
     display: block;
     margin: 0 auto 24px;
     padding: 10px 20px;
@@ -58,32 +58,32 @@
     background: #0d6efd;
     color: #fff;
     cursor: pointer;
-}
-
-.showRoomsBtn:disabled {
+  }
+  
+  .showRoomsBtn:disabled {
     background: #6c757d;
     cursor: not-allowed;
-}
-
-.roomSection {
+  }
+  
+  .roomSection {
     margin-top: 16px;
-}
-
-.roomSection h2 {
+  }
+  
+  .roomSection h2 {
     font-size: 1.25rem;
     margin-bottom: 12px;
-}
-
-.roomList {
+  }
+  
+  .roomList {
     list-style: none;
     display: flex;
     flex-wrap: wrap;
     gap: 12px;
     padding: 0;
     margin-bottom: 16px;
-}
-
-.roomItem {
+  }
+  
+  .roomItem {
     flex: 1 0 calc(33.333% - 12px);
     padding: 12px;
     text-align: center;
@@ -91,14 +91,14 @@
     border: 1px solid #ddd;
     border-radius: 4px;
     cursor: pointer;
-}
-
-.selectedRoom {
+  }
+  
+  .selectedRoom {
     background: #d1e7dd;
     border-color: #0f5132;
-}
-
-.saveBtn {
+  }
+  
+  .saveBtn {
     display: block;
     margin: 0 auto;
     padding: 10px 24px;
@@ -108,9 +108,10 @@
     background: #198754;
     color: #fff;
     cursor: pointer;
-}
-
-.saveBtn:disabled {
+  }
+  
+  .saveBtn:disabled {
     background: #6c757d;
     cursor: not-allowed;
-}
+  }
+  

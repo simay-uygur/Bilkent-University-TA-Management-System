@@ -70,7 +70,15 @@ public class CourseOfferingServImpl implements CourseOfferingServ {
     private final StudentRepo studentRepo;
     private final ExamRepo examRepo;
 
+    @Override
+    public List<CourseOfferingDto> getByTermAndYear(String term, int year) {
+        List<CourseOffering> offerings = repo.findBySemester_TermAndSemester_Year(term, year)
+                .orElseThrow(() -> new IllegalArgumentException("No offerings found for term: " + term + " and year: " + year));
 
+        return offerings.stream()
+                .map(courseMapper::toDto)
+                .collect(Collectors.toList());
+    }
     @Override
     public CourseOfferingDto getCourseByCourseCode(String code) {
         CourseOffering off = repo.findByCourseCode(code)

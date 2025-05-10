@@ -2,7 +2,7 @@ import React from 'react';
 import styles from './ConPop.module.css';
 
 interface ConfirmationModalProps {
-  message: string;
+  message: React.ReactNode;
   onConfirm: () => void;
   onCancel: () => void;
 }

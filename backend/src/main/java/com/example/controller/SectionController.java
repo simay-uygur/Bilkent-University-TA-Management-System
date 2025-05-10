@@ -26,6 +26,14 @@ import com.example.service.TaskServ;
 
 import lombok.RequiredArgsConstructor;
 
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.stream.Collectors;
+
 @RestController
 @RequestMapping("api/sections")
 @RequiredArgsConstructor
@@ -42,6 +50,10 @@ public class SectionController {
         Section sec = sectionServ.getById(id);
         return sectionMapper.toDto(sec);
     }
+    /* @PostMapping("/{section_code}/task")
+    public ResponseEntity<TaskDto> createTask(@RequestBody TaskDto entity, @PathVariable String section_code) {
+        return new ResponseEntity<>(taskServ.createTask(entity, section_code), HttpStatus.CREATED);
+    } */
 
     @GetMapping("/sectionCode/{sectionCode}")
     public SectionDto getBySectionCode(@PathVariable String sectionCode) {
@@ -59,6 +71,7 @@ public class SectionController {
                 .map(sectionMapper::toDto)
                 .collect(Collectors.toList());
     }
+
 
     @PostMapping
     public Section createSection(@RequestBody Section section) {
@@ -79,7 +92,19 @@ public class SectionController {
     public ResponseEntity<TaskDto> createTask(@RequestBody TaskDto entity, @PathVariable String section_code) {
         return new ResponseEntity<>(taskServ.createTask(entity, section_code), HttpStatus.CREATED);
     }
-    
+    @GetMapping("section/{section_code}/task")
+    public ResponseEntity<List<TaskDto>> getTasks(@PathVariable String section_code) {
+        return new ResponseEntity<>(sectionServ.getTasks(section_code), HttpStatus.OK);
+    }
+    @GetMapping("section/task/{task_id}")
+    public ResponseEntity<TaskDto> getTaskById(@PathVariable int task_id) {
+        return new ResponseEntity<>(taskServ.getTaskById(task_id), HttpStatus.OK);
+    }
+    @DeleteMapping("section/{section_code}/task/{task_id}")
+    public ResponseEntity<Boolean> deleteTask(@PathVariable String section_code, @PathVariable int task_id) {
+        
+        return new ResponseEntity<>(taskServ.deleteTask(section_code, task_id),HttpStatus.NO_CONTENT);
+    }
 
     //if this takes sectiondto update that  and also ta dto
     @PostMapping("/{sectionCode}/tas/{taId}")

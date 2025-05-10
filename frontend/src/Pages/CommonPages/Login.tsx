@@ -1,9 +1,10 @@
-// src/pages/Login.tsx
+/* src/pages/Login.tsx */
 import React, { useState, FormEvent, useEffect } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate, useLocation, Link } from 'react-router-dom';
 import NavBar from '../../components/NavBars/NavBar';
 import { login } from '../../api';
 import styles from './Login.module.css';
+import LoadingPage from './LoadingPage';
 
 interface Credentials {
   id: string;
@@ -13,18 +14,22 @@ interface Credentials {
 interface JwtResponse {
   token: string;
   role: string;
-  // other fields as returned
+  userId?: string;
+  userName: string;
+  currentSemester: string;
 }
 
 const Login: React.FC = () => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [errors, setErrors]   = useState<{ username?: string; password?: string }>({});
+  const [submitError, setSubmitError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
+
   const navigate = useNavigate();
   const location = useLocation();
   const [referrer, setReferrer] = useState<string | null>(null);
 
-  // capture optional ?ref= redirect target
   useEffect(() => {
     const params = new URLSearchParams(location.search);
     const r = params.get('ref');
@@ -33,33 +38,41 @@ const Login: React.FC = () => {
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    const newErrors: { username?: string; password?: string } = {};
+    setSubmitError(null);
 
+    const newErrors: { username?: string; password?: string } = {};
     if (!username.trim()) newErrors.username = 'Username is required.';
     if (!password)      newErrors.password = 'Password is required.';
-
     if (Object.keys(newErrors).length) {
       setErrors(newErrors);
       return;
     }
 
-    try {
-      setErrors({});
-      const res = await login({ id: username, password });
-      const jwt  = res.data?.token;
-      const role = res.data?.role;
+    setLoading(true);
+    setErrors({});
 
-      if (!jwt) {
+    try {
+      const res = await login({ id: username, password });
+      const data: JwtResponse = res.data;
+      const jwt = data.token;
+      const role = data.role;
+      const userId = data.userId || username;
+      const userName = data.userName;
+      const currentSemester = data.currentSemester || '2025-SPRING'; // default semester
+
+     if (!jwt) {
         setErrors({ password: 'Invalid username or password.' });
+        setLoading(false);
         return;
       }
 
-      // store token
+      // store token and user info
       localStorage.setItem('jwt', jwt);
-      // set axios default header if used elsewhere
-      // axios.defaults.headers.common['Authorization'] = `Bearer ${jwt}`;
+      localStorage.setItem('userId', userId);
+      localStorage.setItem('userRole', role);
+      localStorage.setItem('userName', userName);
+      localStorage.setItem('currentSemester', currentSemester);
 
-      // choose landing page by role
       let home = '/login';
       switch (role) {
         case 'ROLE_TA':
@@ -74,17 +87,18 @@ const Login: React.FC = () => {
         case 'ROLE_DEANS_OFFICE':
           home = '/deans-office';
           break;
-          case 'ROLE_ADMIN':
-          home = '/admin';
-          break;
       }
 
       navigate(referrer || home, { replace: true });
     } catch (err) {
       console.error('Login failed', err);
-      setErrors({ password: 'Invalid username or password.' });
+      setSubmitError('An error occurred. Please try again.');
+    } finally {
+      setLoading(false);
     }
   };
+  
+  if (loading) return <LoadingPage />;
 
   return (
     <div className={styles.loginPageWrapper}>
@@ -93,6 +107,7 @@ const Login: React.FC = () => {
       <div className={styles.container}>
         <div className={styles.card}>
           <h1 className={styles.title}>Sign In</h1>
+          {submitError && <div className={styles.errorText}>{submitError}</div>}
           <form onSubmit={handleSubmit} className={styles.form} noValidate>
             <div className={styles.formGroup}>
               <label htmlFor="username" className={styles.label}>Username</label>
@@ -119,6 +134,9 @@ const Login: React.FC = () => {
             </div>
 
             <button type="submit" className={styles.button}>Log In</button>
+            <p className={styles.forgotLink}>
+              <Link to="/forgot-password">Forgot my password?</Link>
+            </p>
           </form>
         </div>
       </div>

@@ -11,7 +11,7 @@ import com.example.entity.General.Event;
 import com.example.entity.Tasks.Task;
 
 public interface TaskServ {
-    public TaskDto createTask(TaskDto task, String sectionCode);
+    public TaskDto createTask(TaskDto task, String section_code);
     public boolean soft_deleteTask(int task_id);
     public boolean strict_deleteTask(int task_id);
     public boolean restoreTask(int task_id);
@@ -30,6 +30,11 @@ public interface TaskServ {
     public HashSet<Task> getDeletedTasks() ;
     public boolean assignProctoring(int task_id, List<Long> ta_id);
     public CompletableFuture<List<TaDto>> getTasToAssignToTask(String courseCode, String sectionCode, int task_id, Long instrId);
+    public boolean deleteTask(String section_code, int task_id);
+    //public boolean assignTaToTask(String sectionCode, int taskId, Long taId);
+    public boolean assignTasToTaskByTheirId(String sectionCode, int taskId, List<Long> tas);
+   
     public boolean unassignTas(int task_id, Long instr_id);
     public boolean hasDutyOrLessonOrExam(TA ta, Event duration);
+    public boolean unassignTasToTaskByTheirId(String sectionCode, int taskId, List<Long> taIds);
 }

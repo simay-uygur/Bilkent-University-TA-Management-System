@@ -1,5 +1,7 @@
 package com.example.controller;
 
+import java.time.LocalDate;
+import java.time.Month;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -19,6 +21,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.entity.Actors.User;
+import com.example.entity.Courses.CourseOffering;
+import com.example.entity.General.Term;
 import com.example.exception.IncorrectWebMailException;
 import com.example.exception.UserExistsExc;
 import com.example.exception.UserNotFoundExc;
@@ -96,9 +100,13 @@ public class AuthController {
             jwt,
             user.getId(),
             user.getUsername(),
+            user.getName(),
             user.getAuthorities().stream()
                 .map(GrantedAuthority::getAuthority)
-                .findFirst().orElse("ROLE_USER")
+                .findFirst().orElse("ROLE_USER"),
+            getCurrentSemester()
+            
+            
         );
         return ResponseEntity.ok(body);
     }
@@ -117,5 +125,38 @@ public class AuthController {
         }
         serv.deleteUser(u);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
+
+    private String getCurrentSemester(){
+
+        LocalDate today = LocalDate.now();
+        int year = today.getYear();
+        Term term;
+        Month month = today.getMonth();
+
+        switch (month) {
+            // February → June  = SPRING
+            case FEBRUARY:
+            case MARCH:
+            case APRIL:
+            case MAY:
+            case JUNE:
+                term = Term.SPRING;
+                break;
+
+            // July & August = SUMMER
+            case JULY:
+            case AUGUST:
+                term = Term.SUMMER;
+                break;
+
+            // September → January = FALL
+            default:
+                // (covers SEPTEMBER, OCTOBER, NOVEMBER, DECEMBER, JANUARY)
+                term = Term.FALL;
+                break;
+        }
+        return year + "-" + term;
+    
     }
 }

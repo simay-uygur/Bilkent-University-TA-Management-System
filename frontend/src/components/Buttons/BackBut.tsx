@@ -1,19 +1,25 @@
+// src/components/Buttons/BackBut.tsx
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
 import styles from './BackBut.module.css';
 
 interface BackButtonProps {
-  /** Optional path to go to instead of history.back() */
   to?: string;
+  onClick?: () => void;
 }
 
-const BackButton: React.FC<BackButtonProps> = ({ to }) => {
+const BackButton: React.FC<BackButtonProps> = ({ to, onClick }) => {
   const navigate = useNavigate();
 
   const handleClick = () => {
-    if (to) navigate(to);
-    else navigate(-1);
+    if (onClick) {
+      onClick();
+    } else if (to) {
+      navigate(to);
+    } else {
+      navigate(-1);
+    }
   };
 
   return (

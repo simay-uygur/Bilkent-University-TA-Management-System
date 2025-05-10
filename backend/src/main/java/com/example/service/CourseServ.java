@@ -16,9 +16,9 @@ import com.example.entity.Tasks.Task;
 public interface CourseServ {
     public boolean addSection(String course_code, Section section);
     //public boolean addTask(String course_code, Task task);
-    public boolean courseExists(String course_code);
+    public boolean courseExists(String courseCode);
     public boolean createCourse(Course course);
-    public CourseDto findCourse(String course_code);
+    public CourseDto findCourse(String courseCode);
     //public boolean assignTA(Long ta_id, String course_code);
     public boolean updateTask(String course_code,int task_id,Task task);
     public Task getTaskByID(String course_code, int task_id);

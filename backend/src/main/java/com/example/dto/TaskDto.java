@@ -4,10 +4,15 @@ package com.example.dto;
 import java.util.List;
 
 import com.example.entity.General.Event;
+import com.example.entity.Tasks.TaskType;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import java.util.List;
+
+import com.example.entity.General.Event;
 
 /**
  * Data Transfer Object for Task entity.
@@ -16,7 +21,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class TaskDto {
-    private int id;
+    private int taskId;
     private String type;
 
     /**
@@ -44,8 +49,8 @@ public class TaskDto {
     /**
      * Convenience constructor for tasks with no assigned TAs.
      */
-    public TaskDto(int id, String type, String description, Event duration, String status, int workload) {
-        this(id, type, List.of(), description, duration, status, workload);
+    public TaskDto(int taskId, String type, String description, Event duration, String status, int workload) {
+        this(taskId, type, List.of(), description, duration, status, workload);
     }
 }
 

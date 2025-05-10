@@ -14,8 +14,6 @@ import org.springframework.stereotype.Repository;
 import com.example.entity.Tasks.Task;
 import com.example.entity.Tasks.TaskState;
 
-import jakarta.transaction.Transactional;
-
 @Repository
 public interface TaskRepo extends JpaRepository<Task, Integer>{
     // Find all APPROVED tasks

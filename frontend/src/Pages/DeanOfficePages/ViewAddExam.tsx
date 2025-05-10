@@ -5,6 +5,7 @@ import BackBut from '../../components/Buttons/BackBut';
 import ConPop from '../../components/PopUp/ConPop';
 import ErrPopUp from '../../components/PopUp/ErrPopUp';
 import styles from './ViewAddExam.module.css';
+import axios from 'axios';
 
 export interface Exam {
   id: string;
@@ -13,8 +14,9 @@ export interface Exam {
   date: string;
   startTime: string;
   endTime: string;
-  neededTAs: number;
-  filledTAs: number;
+  neededTAs?: number;
+  filledTAs?: number;
+  classroom: string;
 }
 
 const sampleExams: Exam[] = [
@@ -27,6 +29,7 @@ const sampleExams: Exam[] = [
     endTime: '12:00',
     neededTAs: 5,
     filledTAs: 2,
+    classroom: 'A-101',
   },
   {
     id: 'e2',
@@ -37,6 +40,7 @@ const sampleExams: Exam[] = [
     endTime: '16:00',
     neededTAs: 4,
     filledTAs: 4,
+    classroom: 'A-101',
   },
   {
     id: 'e3',
@@ -47,6 +51,7 @@ const sampleExams: Exam[] = [
     endTime: '11:00',
     neededTAs: 3,
     filledTAs: 1,
+    classroom: 'A-101',
   },
 ];
 
@@ -70,14 +75,39 @@ const ViewAddExam: React.FC = () => {
       setShowError(true);
     } else {
       setShowConfirm(true);
+
     }
   };
 
-  const handleConfirmAdd = () => {
-    // TODO: implement actual add-exam logic here
-    console.log('Approved adding exams from file:', selectedFile);
-    setShowConfirm(false);
-    setSelectedFile(null);
+  const handleExam = () => {
+    navigate("/deans-office/add-exams");
+  };
+
+  const handleConfirmAdd = async () => {
+    if (!selectedFile) return;
+  
+    const formData = new FormData();
+    formData.append('file', selectedFile);
+  
+    try {
+      const response = await axios.post<Map<string, any>>(
+        '/api/upload/exams',
+        formData,
+        {
+          headers: {
+            'Content-Type': 'multipart/form-data'
+          }
+        }
+      );
+      console.log('Import result:', response.data);
+      // TODO: show success (toast, popup) or update UI based on response
+    } catch (err) {
+      console.error('Failed to import exams', err);
+      // TODO: set an error state and show ErrPopUp if you want
+    } finally {
+      setShowConfirm(false);
+      setSelectedFile(null);
+    }
   };
 
   return (
@@ -105,6 +135,7 @@ const ViewAddExam: React.FC = () => {
               <th>Date</th>
               <th>Start</th>
               <th>End</th>
+              <th>Classroom</th>
               <th>TA Needed</th>
               <th>TA Filled</th>
               <th>TA Left</th>
@@ -118,6 +149,7 @@ const ViewAddExam: React.FC = () => {
                 <td>{exam.date}</td>
                 <td>{exam.startTime}</td>
                 <td>{exam.endTime}</td>
+                <td>{exam.classroom}</td>
                 <td>{exam.neededTAs}</td>
                 <td>{exam.filledTAs}</td>
                 <td>{exam.neededTAs-exam.filledTAs}</td>
@@ -129,12 +161,17 @@ const ViewAddExam: React.FC = () => {
         <div className={styles.actions}>
           <input
             type="file"
-            accept=".csv"
+            accept=".xlsx"
             onChange={e => setSelectedFile(e.target.files?.[0] || null)}
             className={styles.fileInput}
           />
           <button onClick={handleAddExams} className={styles.addButton}>
-            Add Exams
+            Add Exams by File
+          </button>
+        </div>
+        <div>
+          <button onClick={handleExam} className={styles.nav}>
+            Add Exam
           </button>
         </div>
       </div>

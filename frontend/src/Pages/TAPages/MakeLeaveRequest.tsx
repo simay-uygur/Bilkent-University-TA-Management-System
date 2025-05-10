@@ -41,7 +41,6 @@ const MakeLeaveRequest: React.FC = () => {
 
     // TODO: replace with real API call
     
-    navigate('/ta');
   };
 
   return (

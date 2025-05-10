@@ -19,7 +19,6 @@ import org.springframework.web.bind.annotation.RestController;
 import com.example.entity.Courses.CourseOffering;
 import com.example.entity.General.Event;
 import com.example.mapper.CourseOfferingMapper;
-import com.example.repo.ClassRoomRepo;
 import com.example.repo.CourseOfferingRepo;
 import com.example.repo.CourseRepo;
 import com.example.service.ClassRoomServ;
@@ -54,6 +53,12 @@ public class CourseOfferingController {
                 .map(mapper::toDto)
                 .collect(Collectors.toList());
     }
+    @GetMapping("/term/{term}/year/{year}")
+    public List<CourseOfferingDto> listByTermAndYear(@PathVariable String term, @PathVariable int year) {
+        return service.getByTermAndYear(term, year);
+               
+    }
+
     @GetMapping("/{id}")
     public ResponseEntity<CourseOfferingDto> get(@PathVariable Long id) {
         //return mapper.toDto(service.getById(id));
@@ -63,6 +68,7 @@ public class CourseOfferingController {
         }
         return new ResponseEntity<>(dto, HttpStatus.FOUND);
     }
+    
     @GetMapping("/courseCode/{code}")
     public ResponseEntity<List<CourseOfferingDto>> get(@PathVariable String code) {
         //return mapper.toDto(service.getById(id));

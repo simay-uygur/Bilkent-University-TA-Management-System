@@ -1,0 +1,83 @@
+/* TAViewProctoringPage.module.css */
+.pageWrapper {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background: #f0faff;
+}
+
+.mainContainer {
+  padding: 0;
+  flex: 1;
+  margin-top: 16px;
+}
+
+/* ---- header row ---- */
+.headerRow {
+  display: flex;
+  align-items: center;
+  position: relative;    /* for back button alignment */
+  margin-bottom: 16px;
+}
+
+/* Center group: title + toggle */
+.headerCenter {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin: 0 auto;       /* push to exact center */
+}
+
+.headerCenter h2 {
+  margin: 0;
+  color: #1e3a8a;
+}
+
+/* ---- mode toggle ---- */
+.modeToggle {
+  display: flex;
+  gap: 8px;
+}
+.modeButton {
+  background: rgba(255, 255, 255, 0.8);
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  transition: background 0.2s, box-shadow 0.2s;
+  font-weight: 500;
+}
+.modeButton:hover {
+  background: rgba(255, 255, 255, 0.95);
+}
+.active {
+  background: #2563eb;
+  color: white;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* ---- table wrapper ---- */
+.tableWrapper {
+  overflow-x: auto;
+  margin: 0 16px;
+}
+
+/* ---- schedule / grading table ---- */
+.scheduleTable {
+  width: 100%;
+  border-collapse: collapse;
+}
+.scheduleTable th,
+.scheduleTable td {
+  padding: 12px;
+  border: 1px solid #e2e8f0;
+  text-align: left;
+}
+.scheduleTable th {
+  background: #1e3a8a;
+  color: #ffffff;
+  font-weight: 600;
+}
+.scheduleTable tbody tr:nth-child(even) {
+  background: #e0f2fe;
+}
