@@ -24,4 +24,12 @@ public interface InstructorRepo extends JpaRepository<Instructor, Long> {
     List<Section> findSectionsByInstructor(@Param("instId") Long instructorId);
 
     Optional<List<Instructor>> findByDepartmentName(String departmentName);
+
+    Optional<Instructor> findByIdAndDepartment_Faculty_Code(
+            Long id,
+            String facultyCode
+    );
+
+
+
 }

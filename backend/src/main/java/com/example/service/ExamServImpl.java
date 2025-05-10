@@ -251,6 +251,45 @@ public class ExamServImpl implements ExamServ{
         return exportStudentsToPdf(groupedData);
     }
 
+    @Override
+    public byte[] exportExamToPdfOnlyId(Integer examId) throws IOException {
+        Exam exam = examRepo.findById(examId)
+                .orElseThrow(() -> new IllegalArgumentException("Exam not found: " + examId));
+
+
+
+        // Build groupedData: roomCode → List<StudentMiniDto>
+        Map<String, List<StudentMiniDto>> groupedData = new LinkedHashMap<>();
+        for (ExamRoom er : exam.getExamRooms()) {
+            String roomCode = er.getExamRoom().getClassroomId();
+
+            // combine students + TAs
+            List<StudentMiniDto> roster = new ArrayList<>();
+            er.getStudentsList().forEach(s -> {
+                StudentMiniDto dto = new StudentMiniDto();
+                dto.setId(s.getStudentId());
+                dto.setName(s.getStudentName());
+                dto.setSurname(s.getStudentSurname());
+                dto.setIsTa(false);
+                roster.add(dto);
+            });
+            er.getTasAsStudentsList().forEach(t -> {
+                StudentMiniDto dto = new StudentMiniDto();
+                dto.setId(t.getId());
+                dto.setName(t.getName());
+                dto.setSurname(t.getSurname());
+                dto.setIsTa(true);
+                roster.add(dto);
+            });
+
+            groupedData.put(roomCode, roster);
+        }
+
+        // render PDF via OpenPDF
+        return exportStudentsToPdf(groupedData);
+    }
+
+
     private byte[] exportStudentsToPdf(Map<String, List<StudentMiniDto>> groupedData)
             throws IOException {
         try {

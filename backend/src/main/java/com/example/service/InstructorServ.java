@@ -27,4 +27,10 @@ public interface InstructorServ {
     List<InstructorDto> getInstructorsByDepartment(String departmentName);
 
     InstructorDto getInstructorById(Long id);
+
+    void validateInstructorCourseAndExam(
+            Integer instructorId,
+            String courseCode,
+            Integer examId
+    );
 }
