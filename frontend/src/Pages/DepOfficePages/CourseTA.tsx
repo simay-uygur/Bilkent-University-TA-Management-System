@@ -97,17 +97,22 @@ useEffect(() => {
     setLoadingCourseNames(true);
     
     // Create a list of promises for each course code
-    const promises = uniqueCourses.map(courseCode => 
-      axios.get<CourseInfo>(`/api/course/${courseCode}`)
-        .then(res => ({
-          courseCode,
-          courseName: res.data.courseName
-        }))
-        .catch(err => {
-          console.error(`Failed to fetch course name for ${courseCode}:`, err);
-          return { courseCode, courseName: courseCode }; // Fallback to using the code as the name
-        })
-    );
+   const promises = uniqueCourses.map(courseCode => 
+  axios.get<CourseInfo>(`/api/course/${courseCode}`, { 
+    maxRedirects: 5,  // Allow up to 5 redirects
+    validateStatus: function (status) {
+      return status >= 200 && status < 400; // Accept all 2xx and 3xx status codes
+    }
+  })
+  .then(res => ({
+    courseCode,
+    courseName: res.data.courseName
+  }))
+  .catch(err => {
+    console.error(`Failed to fetch course name for ${courseCode}:`, err);
+    return { courseCode, courseName: courseCode }; // Fallback to using the code as the name
+  })
+);
     // Wait for all requests to complete
     Promise.all(promises)
       .then(results => {
