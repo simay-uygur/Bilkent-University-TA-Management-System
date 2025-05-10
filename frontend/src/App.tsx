@@ -37,6 +37,8 @@ import SetWorkload from './Pages/DepOfficePages/SetWorkload';
 import ProctorTASelectionIn from './Pages/DeanOfficePages/ProctorTASelectionIn';
 import ProctorCourseSelectionOut from './Pages/DeanOfficePages/ProctorCourseSelectionOut';
 import ProctorTASelectionOut from './Pages/DeanOfficePages/ProctorTASelectionOut';
+import ForgotPassword from './Pages/CommonPages/ForgotPassword';
+import AddExam from './Pages/DeanOfficePages/AddExam';
 
 const App: React.FC = () => (
   <BrowserRouter>
@@ -44,6 +46,7 @@ const App: React.FC = () => (
     
       {/* Public */}
       <Route path="/login" element={<Login />} />
+      <Route path="/forgot-password" element={<ForgotPassword />} />
       {/* TA Area (requires ROLE_TA) */}
       <Route element={<ProtectedRoute requiredRole="ROLE_TA" />}>
         <Route path="/ta" element={<TALayout />}>
@@ -98,6 +101,7 @@ const App: React.FC = () => (
           <Route path="/deans-office/proctor-in/:examID" element={<ProctorTASelectionIn />} />
           <Route path= "/deans-office/proctor-out/:examID"  element={<ProctorTASelectionOut />} />
           <Route path="/deans-office/view-add-exams" element={<ViewAddExam />} />
+          <Route path="/deans-office/add-exams" element={<AddExam />} />
         </Route>
       </Route>
 

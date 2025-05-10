@@ -77,6 +77,10 @@ const ViewAddExam: React.FC = () => {
     }
   };
 
+  const handleExam = () => {
+    navigate("/deans-office/add-exam");
+  };
+
   const handleConfirmAdd = () => {
     // TODO: implement actual add-exam logic here
     console.log('Approved adding exams from file:', selectedFile);
@@ -140,7 +144,12 @@ const ViewAddExam: React.FC = () => {
             className={styles.fileInput}
           />
           <button onClick={handleAddExams} className={styles.addButton}>
-            Add Exams
+            Add Exams by File
+          </button>
+        </div>
+        <div>
+          <button onClick={handleExam} className={styles.nav}>
+            Add Exam
           </button>
         </div>
       </div>

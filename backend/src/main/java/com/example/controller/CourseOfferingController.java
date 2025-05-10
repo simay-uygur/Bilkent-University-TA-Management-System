@@ -21,7 +21,6 @@ import com.example.dto.ExamDto;
 import com.example.entity.Courses.CourseOffering;
 import com.example.entity.General.Event;
 import com.example.mapper.CourseOfferingMapper;
-import com.example.repo.ClassRoomRepo;
 import com.example.repo.CourseOfferingRepo;
 import com.example.repo.CourseRepo;
 import com.example.service.ClassRoomServ;
@@ -71,6 +70,7 @@ public class CourseOfferingController {
         }
         return new ResponseEntity<>(dto, HttpStatus.FOUND);
     }
+    
     @GetMapping("/courseCode/{code}")
     public ResponseEntity<List<CourseOfferingDto>> get(@PathVariable String code) {
         //return mapper.toDto(service.getById(id));
