@@ -8,12 +8,16 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.RequiredArgsConstructor;
 
 @Entity
 @Data
 @Table(name = "swap_requests")
+@NoArgsConstructor(access = AccessLevel.PROTECTED)   // ← add this line
 @AllArgsConstructor
 public class Swap extends Request {
 
@@ -26,10 +30,15 @@ public class Swap extends Request {
     private TA receiver;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "exam_id", referencedColumnName = "exam_id")
-    private Exam exam;
+    @JoinColumn(name = "sender_exam_id", referencedColumnName = "exam_id")
+    private Exam sendersExam;
 
-    public Swap(Exam exam){
-        this.exam = exam;
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "receiver_exam_id", referencedColumnName = "exam_id")
+    private Exam receiversExam;
+
+    public Swap(Exam exam, Exam exam1){
+        this.sendersExam = exam;
+        this.receiversExam = exam1;
     }
 }

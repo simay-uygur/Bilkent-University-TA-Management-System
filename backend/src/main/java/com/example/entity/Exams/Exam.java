@@ -1,12 +1,10 @@
 package com.example.entity.Exams;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import com.example.entity.Actors.TA;
 import com.example.entity.Courses.CourseOffering;
 import com.example.entity.General.Event;
-import com.example.entity.General.Student;
 import com.example.entity.Requests.ProctorTaFromFaculties;
 import com.example.entity.Requests.ProctorTaFromOtherFaculty;
 import com.example.entity.Requests.ProctorTaInDepartment;
@@ -63,7 +61,7 @@ public class Exam {
     )
     private List<ExamRoom> examRooms;
 
-    
+
     @ManyToMany(
         fetch  = FetchType.LAZY,
         cascade = { CascadeType.PERSIST, CascadeType.MERGE }
@@ -76,26 +74,23 @@ public class Exam {
             private List<TA> assignedTas; // this is used to get the tas for this exam
 
 
-    /// should be deleted
-    @ManyToMany(
-      fetch  = FetchType.LAZY,
-      cascade = { CascadeType.PERSIST, CascadeType.MERGE }
-    )
-    @JoinTable(
-      name               = "exam_students_as_proctors",
-      joinColumns        = @JoinColumn(name = "exam_id"),
-      inverseJoinColumns = @JoinColumn(name = "student_id")
-    )
-    private List<Student> assignedStudents = new ArrayList<>();
-
     /*Requests*/
     @OneToMany(
-        mappedBy = "exam",
+        mappedBy = "sendersExam",
         fetch = FetchType.LAZY,
         cascade = CascadeType.ALL,
         orphanRemoval = true
     )
-    private List<Swap> swapRequests; // this is used to get the swap requests for this exam
+    private List<Swap> swapRequestsSender; // this is used to get the swap requests for this exam
+    
+    /*Requests*/
+    @OneToMany(
+        mappedBy = "receiversExam",
+        fetch = FetchType.LAZY,
+        cascade = CascadeType.ALL,
+        orphanRemoval = true
+    )
+    private List<Swap> swapRequestsReceiver; // this is used to get the swap requests for this exam
 
     @OneToMany(
         mappedBy = "exam",

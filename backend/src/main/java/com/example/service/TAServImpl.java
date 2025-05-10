@@ -18,11 +18,13 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.example.dto.ExamDto;
 import com.example.dto.FailedRowInfo;
 import com.example.dto.TaDto;
 import com.example.dto.TaTaskDto;
 import com.example.entity.Actors.Role;
 import com.example.entity.Actors.TA;
+import com.example.entity.Exams.Exam;
 import com.example.entity.General.AcademicLevelType;
 import com.example.entity.General.Date;
 import com.example.entity.Schedule.Schedule;
@@ -35,8 +37,10 @@ import com.example.exception.UserNotFoundExc;
 import com.example.exception.taExc.TaNotFoundExc;
 import com.example.exception.taskExc.TaskIsNotActiveExc;
 import com.example.exception.taskExc.TaskNotFoundExc;
+import com.example.mapper.ExamMapper;
 import com.example.mapper.TaMapper;
 import com.example.mapper.TaTaskMapper;
+import com.example.repo.ExamRepo;
 import com.example.repo.TARepo;
 import com.example.repo.TaTaskRepo;
 
@@ -54,7 +58,8 @@ public class TAServImpl implements TAServ {
     private final ScheduleServ scheduleServ;
     private final PasswordEncoder encoder;
     private final TaTaskMapper taTaskMapper;
-
+    private final ExamRepo examRepo;
+    private final ExamMapper examMapper;
 
     @Override
     public TaDto getTAByIdDto(Long id){
@@ -365,4 +370,13 @@ public class TAServImpl implements TAServ {
         }
         return taDtos;
     } */
+
+    @Override
+    public List<ExamDto> getAssignedExamsOfTa(Long taId){
+        return examRepo.findAllByTaId(taId)
+                       .stream()
+                       .filter(Exam::getIsActive)   // optional – drop if you want inactive too
+                       .map(examMapper::toDto)
+                       .toList();
+    }
 }

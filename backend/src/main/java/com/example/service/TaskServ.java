@@ -7,6 +7,7 @@ import java.util.concurrent.CompletableFuture;
 import com.example.dto.TaDto;
 import com.example.dto.TaskDto;
 import com.example.entity.Actors.TA;
+import com.example.entity.General.Event;
 import com.example.entity.Tasks.Task;
 
 public interface TaskServ {
@@ -30,4 +31,5 @@ public interface TaskServ {
     public boolean assignProctoring(int task_id, List<Long> ta_id);
     public CompletableFuture<List<TaDto>> getTasToAssignToTask(String courseCode, String sectionCode, int task_id, Long instrId);
     public boolean unassignTas(int task_id, Long instr_id);
+    public boolean hasDutyOrLessonOrExam(TA ta, Event duration);
 }

@@ -9,9 +9,6 @@ import com.example.dto.RequestDto;
 import com.example.dto.TaskDto;
 import com.example.entity.Requests.Leave;
 import com.example.entity.Requests.LeaveDTO;
-import com.example.entity.Requests.PreferTasToCourse;
-import com.example.entity.Requests.PreferTasToCourseDto;
-import com.example.entity.Requests.PreferTasToCourseDto.TaInfo;
 import com.example.entity.Requests.ProctorTaFromFaculties;
 import com.example.entity.Requests.ProctorTaFromFacultiesDto;
 import com.example.entity.Requests.ProctorTaFromOtherFaculty;
@@ -72,11 +69,13 @@ public class RequestMapper {
         copyBase(e, dto);
         dto.setReceiverId(e.getReceiver().getId());
         dto.setSenderId(e.getSender().getId());
-        dto.setDescription(e.getExam().getDescription());
+        dto.setDescription("TA with id " + e.getSender().getId() + " wants to swap his proctoring with the TA with id " + e.getReceiver().getId());
         dto.setSenderName(e.getSender().getName() + " " + e.getSender().getSurname());
         dto.setReceiverName(e.getReceiver().getName() + " " + e.getReceiver().getSurname());
-        dto.setExamId(e.getExam().getExamId());
-        dto.setExamName(e.getExam().getDescription());
+        dto.setSenderExamId(e.getSendersExam().getExamId());
+        dto.setReceiverExamId(e.getReceiversExam().getExamId());
+        dto.setSenderExamName(e.getSendersExam().getDescription());
+        dto.setReceiverExamName(e.getReceiversExam().getDescription());
         return dto;
     }
 
