@@ -1,7 +1,7 @@
 // src/App.tsx
 import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-//import ProtectedRoute from './Pages/ProtectedRoute';
+import ProtectedRoute from './Pages/ProtectedRoute';
 
 import TALayout            from './components/Layouts/TALayout';
 import InstructorLayout    from './components/Layouts/InstructorLayout';
@@ -37,6 +37,8 @@ import AdminLayout from './components/Layouts/AdminLayout';
 import ViewLogs from './Pages/AdminPages/ViewLogs';
 import ProctorTASelection from './Pages/DeanOfficePages/ProctorTASelection';
 import ProctorCourseSelection from './Pages/DeanOfficePages/ProctorCourseSelection';
+import DeansOffice from "./Pages/DeanOfficePages/DeansOffice.tsx";
+import AddExam from "./Pages/DeanOfficePages/AddExam.tsx";
 
 const App: React.FC = () => (
   <BrowserRouter>
@@ -45,7 +47,7 @@ const App: React.FC = () => (
       {/* Public */}
       <Route path="/login" element={<Login />} />
       {/* TA Area (requires ROLE_TA) */}
-      {/*<Route element={<ProtectedRoute requiredRole="ROLE_TA" />}>*/}
+      <Route element={<ProtectedRoute requiredRole="ROLE_TA" />}>
         <Route path="/ta" element={<TALayout />}>
           <Route index element={<TAMainPage />} />
           <Route path="/ta/leave-request" element={<MakeLeaveRequest />} />
@@ -54,10 +56,10 @@ const App: React.FC = () => (
           <Route path="/ta/settings" element={<Settings />} />
           <Route path="/ta/notification" element={<Notification />} />
         </Route>
-      {/*</Route>*/}
+      </Route>
 
       {/* Instructor Area (requires ROLE_INSTRUCTOR) */}
-      {/*<Route element={<ProtectedRoute requiredRole="ROLE_INSTRUCTOR" />}>*/}
+      <Route element={<ProtectedRoute requiredRole="ROLE_INSTRUCTOR" />}>
         <Route path="/instructor" element={<InstructorLayout />}>
           <Route index element={<InstructorMainPage />} />
           <Route path="/instructor/exam-proctor-request/:courseID" element={<ExamProctorPage />} />
@@ -68,10 +70,10 @@ const App: React.FC = () => (
           <Route path="/instructor/settings" element={<Settings />} />
           <Route path="/instructor/notification" element={<Notification />} />
         </Route>
-      {/*</Route>*/}
+      </Route>
 
       {/* Department Office Area (requires ROLE_DEPARTMENT) */}
-      {/*<Route element={<ProtectedRoute requiredRole="ROLE_DEPARTMENT_STAFF" />}>*/}
+      <Route element={<ProtectedRoute requiredRole="ROLE_DEPARTMENT_STAFF" />}>
         <Route path="/department-office" element={<DepartmentLayout />}>
           <Route index element={<DepartmentOffice />} />
           <Route path="/department-office/:courseCode" element={<CourseDetails />} />
@@ -83,20 +85,21 @@ const App: React.FC = () => (
           <Route path="/department-office/settings" element={<Settings />} />
           <Route path="/department-office/notification" element={<Notification />} />
         </Route>
-      {/*</Route>*/}
+      </Route>
 
       {/* Dean’s Office Area (requires ROLE_DEAN) */}
-      {/*<Route element={<ProtectedRoute requiredRole="ROLE_DEANS_OFFICE" />}>*/}
+      <Route element={<ProtectedRoute requiredRole="ROLE_DEANS_OFFICE" />}>
         <Route path="/deans-office" element={<DeansLayout />}>
-          {/*<Route index element={<DeansOffice />} />*/}
+          <Route index element={<DeansOffice />} />
           <Route path= "/deans-office/proctor"  element={<ProctorCourseSelection />} />
           <Route path="/deans-office/department/:dept" element={<DeansDepartmentDetailPage />}/>
           <Route path="/deans-office/settings" element={<Settings />} />
           <Route path="/deans-office/notification" element={<Notification />} />
           <Route path="/deans-office/proctor/:examID" element={<ProctorTASelection />} />
           <Route path="/deans-office/view-add-exams" element={<ViewAddExam />} />
+          <Route path="/deans-office/add-exams" element={<AddExam />} />
         </Route>
-      {/*</Route>*/}
+      </Route>
 
       {/* Admin's Pages */}
       {/*<Route element={<ProtectedRoute requiredRole="ROLE_ADMIN" />}>*/}

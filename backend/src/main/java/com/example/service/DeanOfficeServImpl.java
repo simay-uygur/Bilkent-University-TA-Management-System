@@ -125,12 +125,11 @@ public class DeanOfficeServImpl implements DeanOfficeServ {
     }
 
     private Term determineTerm(Month m) {
-        switch (m) {
-            case FEBRUARY, MARCH, APRIL, MAY, JUNE:    return Term.SPRING;
-            case JULY, AUGUST:                         return Term.SUMMER;
-            default:                                   return Term.FALL;
-
-        }
+        return switch (m) {
+            case FEBRUARY, MARCH, APRIL, MAY, JUNE -> Term.SPRING;
+            case JULY, AUGUST -> Term.SUMMER;
+            default -> Term.FALL;
+        };
     }
 
 

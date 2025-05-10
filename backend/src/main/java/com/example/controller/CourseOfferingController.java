@@ -132,7 +132,8 @@ public class CourseOfferingController {
             @RequestBody ExamDto dto
     ) {
         return service
-                .createExamWithClassRoomGiven(dto, courseCode)
+                //.createExamWithClassRoomGiven(dto, courseCode)
+                .createExam(dto, courseCode) //try another
                 .thenApply(success -> {
                     // if you want to return the new exam’s id you could switch to returning a body
                     return ResponseEntity

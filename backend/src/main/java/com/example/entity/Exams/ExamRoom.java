@@ -1,5 +1,6 @@
 package com.example.entity.Exams;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import com.example.entity.Actors.TA;
@@ -50,7 +51,7 @@ public class ExamRoom {
             joinColumns        = @JoinColumn(name = "examroom_id"),
             inverseJoinColumns = @JoinColumn(name = "student_id")
     )
-    private List<Student> studentsList;
+    private List<Student> studentsList = new ArrayList<>();
 
     @ManyToMany(fetch = FetchType.LAZY,
             cascade = { CascadeType.PERSIST, CascadeType.MERGE })
@@ -59,7 +60,7 @@ public class ExamRoom {
             joinColumns        = @JoinColumn(name = "examroom_id"),
             inverseJoinColumns = @JoinColumn(name = "ta_id")
     )
-    private List<TA> tasAsStudentsList; // TODO: change to TA entity
+    private List<TA> tasAsStudentsList = new ArrayList<>(); // TODO: change to TA entity
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "exam_id", nullable = false)

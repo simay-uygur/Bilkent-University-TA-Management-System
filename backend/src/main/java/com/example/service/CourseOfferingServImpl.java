@@ -231,36 +231,57 @@ public class CourseOfferingServImpl implements CourseOfferingServ {
         Exam exam = new Exam();
         exam.setDuration(dto.getDuration());         // date & time window
         exam.setDescription(dto.getType());          // e.g. “Midterm 1”
-        exam.setRequiredTAs(dto.getRequiredTas());  // how many TAs you’ll need
+        exam.setRequiredTAs(dto.getRequiredTas());  // how many TAs you’ll need -  maybe not needed
 
-        // 3) now map your List<String> → List<ExamRoom>
-        List<ExamRoom> rooms = dto.getExamRooms().stream()
-                .map(code -> {
-                    ClassRoom cr = classRoomRepo
-                            .findClassRoomByClassroomId(code)
-                            .orElseThrow(() -> new GeneralExc("Classroom not found: " + code));
+//        // 3) now map your List<String> → List<ExamRoom>
+//        List<ExamRoom> rooms = dto.getExamRooms().stream()
+//                .map(code -> {
+//                    ClassRoom cr = classRoomRepo
+//                            .findClassRoomByClassroomId(code)
+//                            .orElseThrow(() -> new GeneralExc("Classroom not found: " + code));
+//
+//                    ExamRoom er = new ExamRoom();
+//                    er.setExam(exam);
+//                    er.setExamRoom(cr);
+//                    return er;
+//                })
+//                .collect(Collectors.toList());
+//
 
-                    ExamRoom er = new ExamRoom();
-                    er.setExam(exam);
-                    er.setExamRoom(cr);
-                    return er;
-                })
-                .collect(Collectors.toList());
+        if (dto.getWorkload() != null) {
+            exam.setWorkload(dto.getWorkload());
+        }
+        exam.setCourseOffering(offering);
 
-        // 4) attach them and re‐save
-        exam.setExamRooms(rooms);
+        // 3) collect and sort students & TAs
+        List<StudentMiniDto> studentsAndTas = getSortedListOfStudentsAndTas(offering);
+
+        // 4) assign both rooms AND people in one helper
+        List<ExamRoom> examRooms = findAndAssignToTheExamRooms(dto.getExamRooms(), studentsAndTas, exam);
+        exam.setExamRooms(examRooms);
 
         if (dto.getWorkload() != null) {
             exam.setWorkload(dto.getWorkload());     // override default if provided
         }
-        exam.setCourseOffering(offering);
-
-        // persist
+        // 5) save Exam (cascade will persist rooms and join-tables)
         examRepo.save(exam);
 
-        // 5) keep your offering in sync
+        // 6) keep your offering in sync
         offering.getExams().add(exam);
         repo.save(offering);
+
+//        // 4) attach them and re‐save
+//        exam.setExamRooms(rooms);
+
+
+//        exam.setCourseOffering(offering);
+//
+//        // persist
+//        examRepo.save(exam);
+//
+//        // 5) keep your offering in sync
+//        offering.getExams().add(exam);
+//        repo.save(offering);
 
         return CompletableFuture.completedFuture(true);
 
@@ -274,6 +295,7 @@ public class CourseOfferingServImpl implements CourseOfferingServ {
                                 .thenComparing(StudentMiniDto::getName)
                 )
                 .collect(Collectors.toList());
+
     }
 
 //    private List<StudentMiniDto> getSortedListOfStudentsAndTas(CourseOffering offering) {
@@ -352,7 +374,7 @@ public class CourseOfferingServImpl implements CourseOfferingServ {
                 dto.setId(student.getStudentId());
                 dto.setName(student.getStudentName());
                 dto.setSurname(student.getStudentSurname());
-                // isTa defaults to false
+                dto.setIsTa(false);        // isTa defaults to false
                 list.add(dto);
             }
             // add every TA
