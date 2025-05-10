@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.example.dto.SectionDto;
 import com.example.dto.TaDto;
 import com.example.dto.TaTaskDto;
 import com.example.entity.General.Date;
@@ -122,26 +123,12 @@ public ResponseEntity<List<TaTaskDto>> getTATasks(@PathVariable Long id) {
         Date date = new Date().currenDate() ;
         return new ResponseEntity<>(serv.getWeeklyScheduleForTA(id, date), HttpStatus.OK);
     }
-    @GetMapping("/api/ta/{taId}/assignedExams")
-    public ResponseEntity<List<ExamDto>> getAssignedExamsOfTa(@PathVariable Long taId) {
-        return new ResponseEntity<>(serv.getAssignedExamsOfTa(taId), HttpStatus.OK);
-    }
 
     @GetMapping("/api/ta/sectionCode/{sectionCode}")
     public ResponseEntity<?> getTAsBySectionCode(@PathVariable String sectionCode) {
         return new ResponseEntity<>(serv.getTAsBySectionCode(sectionCode), HttpStatus.OK);
     }
-}
 
-    /*@GetMapping("/api/ta/{id}/schedule/day") // date in format "yyyy-MM-dd"
-    public ResponseEntity<?> getDaySchedule(@PathVariable Long id, @RequestParam String date) {
-        TA ta = serv.getTAByIdEntity(id);
-        if (ta == null) {
-            throw new TaNotFoundExc(-1l);
-        }
-        date = date.substring(1,date.length()-1) ; // remove quotes
-        return new ResponseEntity<>(serv.getScheduleOfTheDay(ta, date), HttpStatus.OK);
-    }*/
 
     @GetMapping("api/ta/{taId}/assignedExams")
     public CompletableFuture<ResponseEntity<List<TaProctorDto>>> getProctoringExams(@PathVariable Long taId) {
@@ -174,7 +161,6 @@ public ResponseEntity<List<TaTaskDto>> getTATasks(@PathVariable Long id) {
                     .body(gradingList);
         });
     }
-    
 }
 /*{
   "task_type" : "Lab",

@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.entity.Actors.User;
@@ -37,6 +38,8 @@ import com.example.service.UserServ;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 // better to use different controllers for each role, because the logic for each role is different
+import org.springframework.web.bind.annotation.PutMapping;
+
 @RestController
 @RequiredArgsConstructor
 public class AuthController {    
@@ -158,5 +161,17 @@ public class AuthController {
         }
         return year + "-" + term;
     
+    }
+
+    @PutMapping("api/{userId}/changePassword")
+    public ResponseEntity<Boolean> changePasswordById(@PathVariable Long userId, @RequestBody ChangePasswordDto body) {
+        serv.changePasswordById(body.getPassword(), userId);
+        return ResponseEntity.noContent().build();
+    }
+
+    public static class ChangePasswordDto {
+        private String password;
+        public String getPassword() { return password; }
+        public void setPassword(String password) { this.password = password; }
     }
 }
