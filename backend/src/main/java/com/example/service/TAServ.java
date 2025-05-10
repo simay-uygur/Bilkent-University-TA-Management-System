@@ -7,8 +7,10 @@ import java.util.Map;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.example.dto.ExamDto;
+import com.example.dto.SectionDto;
 import com.example.dto.TaDto;
 import com.example.dto.TaTaskDto;
+import com.example.dto.TaskDto;
 import com.example.entity.Actors.TA;
 import com.example.entity.General.Date;
 import com.example.entity.Schedule.Schedule;
@@ -35,4 +37,6 @@ public interface TAServ {
        // public List<ScheduleItem> getScheduleOfTheDay(TA ta, String date);
     List<ExamDto> getAssignedExamsOfTa(Long taId);
     public List<TaDto> getTAsBySectionCode(String sectionCode);
+    List<SectionDto> getTASections(Long id);
+    List<TaTaskDto> getTATasks(Long id);
 }

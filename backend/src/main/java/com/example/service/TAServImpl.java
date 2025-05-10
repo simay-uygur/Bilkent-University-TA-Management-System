@@ -20,10 +20,13 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.example.dto.ExamDto;
 import com.example.dto.FailedRowInfo;
+import com.example.dto.SectionDto;
 import com.example.dto.TaDto;
 import com.example.dto.TaTaskDto;
+import com.example.dto.TaskDto;
 import com.example.entity.Actors.Role;
 import com.example.entity.Actors.TA;
+import com.example.entity.Courses.Section;
 import com.example.entity.Exams.Exam;
 import com.example.entity.General.AcademicLevelType;
 import com.example.entity.General.Date;
@@ -39,6 +42,7 @@ import com.example.exception.taExc.TaNotFoundExc;
 import com.example.exception.taskExc.TaskIsNotActiveExc;
 import com.example.exception.taskExc.TaskNotFoundExc;
 import com.example.mapper.ExamMapper;
+import com.example.mapper.SectionMapper;
 import com.example.mapper.TaMapper;
 import com.example.repo.SectionRepo;
 import com.example.mapper.TaTaskMapper;
@@ -62,9 +66,38 @@ public class TAServImpl implements TAServ {
     private final TaTaskMapper taTaskMapper;
     private final ExamRepo examRepo;
     private final ExamMapper examMapper;
-
+private final SectionMapper sectionMapper;
     private final SectionRepo sectionRepo;
+   
 
+    @Override
+public List<TaTaskDto> getTATasks(Long id) {
+    TA ta = getTAByIdEntity(id);
+    if (ta == null) {
+        throw new UserNotFoundExc(id);
+    }
+    ta.getTaTasks();
+    List<TaTaskDto> taskDtos = new ArrayList<>();
+    for (TaTask taTask : ta.getTaTasks()) {
+        TaTaskDto taskDto = taTaskMapper.toDto(taTask);
+        taskDtos.add(taskDto);
+    }
+    return taskDtos;
+}
+    @Override
+    public List<SectionDto> getTASections(Long id) {
+         TA ta = getTAByIdEntity(id);
+    if (ta == null) {
+        throw new UserNotFoundExc(id);
+}
+    ta.getSectionsAsHelper();
+    List<SectionDto> sectionDtos = new ArrayList<>();
+    for (Section section : ta.getSectionsAsHelper()) {
+        SectionDto sectionDto = sectionMapper.toDto(section);
+        sectionDtos.add(sectionDto);
+    }
+    return sectionDtos;
+}
     @Override
     public List<TaDto> getTAsBySectionCode(String sectionCode){
         List<TA> tas = sectionRepo.findTasBySectionCode(sectionCode);

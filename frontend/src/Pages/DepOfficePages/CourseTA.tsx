@@ -37,6 +37,14 @@ interface PreferTasRequest {
   approved: boolean;
   pending: boolean;
 }
+interface CourseInfo {
+  courseId: number;
+  courseCode: string;
+  courseName: string;
+  courseAcademicStatus: string;
+  department: string;
+  prereqs: string[];
+}
 
 // Helper to extract section number
 const extractSectionNumber = (code: string): string => code.split('-')[2] || '';
@@ -51,6 +59,10 @@ const courseNameMap: Record<string, string> = {
 
 const CourseTA: React.FC = () => {
   const navigate = useNavigate();
+   // Add this new state for course names
+  const [courseNames, setCourseNames] = useState<Record<string, string>>({});
+  const [loadingCourseNames, setLoadingCourseNames] = useState(false);
+
 // In your CourseTA component, add this new state
 const [sectionTACounts, setSectionTACounts] = useState<Record<string, number>>({});
 const [loadingCounts, setLoadingCounts] = useState(false);
@@ -75,9 +87,52 @@ useEffect(() => {
 }, []); 
 
 
+
+   useEffect(() => {
+    if (requests.length === 0) return;
+    
+    // Extract unique course codes
+    const uniqueCourses = [...new Set(requests.map(req => req.courseCode))];
+    
+    setLoadingCourseNames(true);
+    
+    // Create a list of promises for each course code
+    const promises = uniqueCourses.map(courseCode => 
+      axios.get<CourseInfo>(`/api/course/${courseCode}`)
+        .then(res => ({
+          courseCode,
+          courseName: res.data.courseName
+        }))
+        .catch(err => {
+          console.error(`Failed to fetch course name for ${courseCode}:`, err);
+          return { courseCode, courseName: courseCode }; // Fallback to using the code as the name
+        })
+    );
+    // Wait for all requests to complete
+    Promise.all(promises)
+      .then(results => {
+        // Convert array of results to a record object for easy lookup
+        const nameMap: Record<string, string> = {};
+        results.forEach(item => {
+          nameMap[item.courseCode] = item.courseName;
+        });
+        
+        setCourseNames(nameMap);
+      })
+      .catch(err => {
+        console.error('Error fetching course names:', err);
+      })
+      .finally(() => {
+        setLoadingCourseNames(false);
+      });
+  }, [requests]);
+
+
 useEffect(() => {
   if (requests.length === 0) return;
   
+
+
   setLoadingCounts(true);
   
   // Create a list of promises for each section code
@@ -218,7 +273,8 @@ const handleFinishAssignment = (request: PreferTasRequest) => {
   {requests.map(r => {
     const section = extractSectionNumber(r.sectionCode);
     const courseId = r.courseCode;
-    const courseName = courseNameMap[courseId] || courseId;
+     const courseName = courseNames[courseId] || (loadingCourseNames ? `${courseId} (loading...)` : courseId);
+     
     const preferredCount = r.preferredTas.length;
     const unprefferredCount = r.nonPreferredTas.length;
     const assignedCount = sectionTACounts[r.sectionCode] || 0;

@@ -23,3 +23,116 @@
   /* existing styles */
   background-color: #d2e9ff;
 }
+.container {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+  gap: 24px;
+  margin-top: 16px;
+}
+
+.examCard {
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  overflow: hidden;
+  background-color: white;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.examCard:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+}
+
+.cardHeader {
+  padding: 16px;
+  background-color: #f5f5f5;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.cardHeader h3 {
+  margin: 0 0 8px 0;
+  font-size: 18px;
+}
+
+.courseCode {
+  font-size: 14px;
+  color: #666;
+  font-weight: 600;
+}
+
+.examDetails {
+  padding: 16px;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.examInfo {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.examInfo:last-child {
+  margin-bottom: 0;
+}
+
+.infoLabel {
+  font-weight: 600;
+  color: #555;
+}
+
+.inputGroup {
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.label {
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.inputNumber {
+  width: 80px;
+  padding: 8px 12px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 16px;
+  text-align: center;
+}
+
+.submitButton {
+  padding: 10px 16px;
+  background-color: #28a745;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 16px;
+  transition: background-color 0.2s;
+  align-self: flex-end;
+}
+
+.submitButton:hover:not(:disabled) {
+  background-color: #218838;
+}
+
+.submitButton:disabled {
+  background-color: #a0c4a0;
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+.noExams {
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: 40px;
+  background-color: #f8f9fa;
+  border-radius: 8px;
+  color: #6c757d;
+  font-size: 18px;
+}

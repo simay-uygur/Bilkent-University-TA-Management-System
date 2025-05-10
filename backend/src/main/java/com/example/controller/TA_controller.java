@@ -12,8 +12,10 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.dto.ExamDto;
+import com.example.dto.SectionDto;
 import com.example.dto.TaDto;
 import com.example.dto.TaTaskDto;
+import com.example.dto.TaskDto;
 import com.example.entity.Actors.TA;
 import com.example.entity.General.Date;
 import com.example.entity.Schedule.ScheduleItemDto;
@@ -53,6 +55,14 @@ public class TA_controller {
     {
         return serv.getTAByIdDto(id);
     }
+   @GetMapping("/api/ta/{id}/sections")
+public ResponseEntity<List<SectionDto>> getTASections(@PathVariable Long id) {
+    return new ResponseEntity<>(serv.getTASections(id), HttpStatus.OK);
+}
+@GetMapping("/api/ta/{id}/task")
+public ResponseEntity<List<TaTaskDto>> getTATasks(@PathVariable Long id) {
+    return new ResponseEntity<>(serv.getTATasks(id), HttpStatus.OK);
+}
 
     @GetMapping("/api/ta/department/{deptName}")
     public ResponseEntity<List<TaDto>> getTAByDepartment(@PathVariable String deptName) 
