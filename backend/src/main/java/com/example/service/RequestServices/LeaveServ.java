@@ -11,7 +11,7 @@ import com.example.entity.Requests.LeaveDTO;
 
 public interface LeaveServ {
     public void createLeaveRequest(LeaveDTO dto, MultipartFile file, Long senderId) throws IOException;
-    public void approveLeaveRequest(Long requestId, Long approverId);
+    public boolean approveLeaveRequest(Long requestId, Long approverId);
     public void rejectLeaveRequest(Long requestId, Long approverId);
     public void cancelLeaveRequest(Long requestId, Long senderId);
     public LeaveDTO getLeaveRequestById(Long requestId, Long userId);

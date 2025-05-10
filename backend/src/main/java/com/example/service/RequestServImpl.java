@@ -16,25 +16,23 @@ import com.example.entity.General.Event;
 import com.example.entity.Requests.Leave;
 import com.example.entity.Requests.Request;
 import com.example.entity.Requests.RequestType;
-import com.example.entity.Requests.Swap;
-import com.example.entity.Requests.TransferProctoring;
 import com.example.exception.Requests.NoSuchRequestExc;
 import com.example.exception.taExc.TaNotFoundExc;
-import com.example.exception.UserNotFoundExc;
 import com.example.mapper.RequestMapper;
+import com.example.repo.ExamRepo;
 import com.example.repo.RequestRepos.LeaveRepo;
 import com.example.repo.RequestRepos.RequestRepo;
 import com.example.repo.RequestRepos.SwapRepo;
 import com.example.repo.RequestRepos.TransferProctoringRepo;
-
-import jakarta.transaction.Transactional;
-
 import com.example.repo.TARepo;
 import com.example.repo.UserRepo;
 
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Service 
+@Slf4j
 @RequiredArgsConstructor
 public class RequestServImpl implements RequestServ{
 
@@ -46,6 +44,7 @@ public class RequestServImpl implements RequestServ{
     private final TransferProctoringRepo transRepo;
     private final TARepo taRepo;
     private final RequestMapper mapper;
+    private final ExamRepo examRepo;
 
     @Override
     public List<Request> getAllRequests() {
@@ -129,7 +128,7 @@ public class RequestServImpl implements RequestServ{
         swapRepo.
         findAllBySenderIdAndSentTimeBetweenAndRequestTypeInAndIsPendingTrue
         (u.getId(), duration.getStart(), duration.getFinish(), want);
-        
+
         swapRepo.deleteAll(recSwaps);
         swapRepo.deleteAll(senSwaps);
 
@@ -144,32 +143,18 @@ public class RequestServImpl implements RequestServ{
 
         transRepo.deleteAll(senTransfers);
         transRepo.deleteAll(recTransfers);*/
-        swapRepo.deleteByReceiverIdAndSentTimeBetweenAndRequestTypeInAndIsPendingTrue(
-            u.getId(),
-            duration.getStart(),
-            duration.getFinish(),
-            want
-        );
 
-        swapRepo.deleteBySenderIdAndSentTimeBetweenAndRequestTypeInAndIsPendingTrue(
-            u.getId(),
-            duration.getStart(),
-            duration.getFinish(),
-            want
-        );
+        List<Integer> overlapping = examRepo.findOverlappingExamIds(
+        duration.getStart(), duration.getFinish());
+        log.info("overlapping exams = {}", overlapping);
+        // 2) delete swaps
+        int recSwaps = swapRepo.deleteAllSwapsForTaAndExamIds(u.getId(), overlapping);
 
-        transRepo.deleteByReceiverIdAndSentTimeBetweenAndRequestTypeInAndIsPendingTrue(
-            u.getId(),
-            duration.getStart(),
-            duration.getFinish(),
-            want
-        );
+        // 3) delete transfers
+        int trans = transRepo.deleteAllSwapsForTaAndExamIds(u.getId(), overlapping);
 
-        transRepo.deleteBySenderIdAndSentTimeBetweenAndRequestTypeInAndIsPendingTrue(
-            u.getId(),
-            duration.getStart(),
-            duration.getFinish(),
-            want
-        );
-    }
+        log.info("cleanup: recSwaps={}, sentSwaps={}, recTrans={}, sentTrans={}",
+            recSwaps, trans);
+  }
+
 }

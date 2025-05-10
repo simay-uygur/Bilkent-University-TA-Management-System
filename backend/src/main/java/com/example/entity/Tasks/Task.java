@@ -5,6 +5,7 @@ import java.util.List;
 
 import com.example.entity.Actors.TA;
 import com.example.entity.Courses.Section;
+import com.example.entity.General.ClassRoom;
 import com.example.entity.General.Event;
 import com.example.entity.Requests.WorkLoad;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -22,6 +23,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -66,7 +68,7 @@ public class Task {
     private TaskAccessType accessType;*/
 
     @OneToMany(mappedBy = "task", 
-    cascade = CascadeType.REMOVE , 
+    cascade = CascadeType.ALL , 
     orphanRemoval = true)
     private List<TaTask> tasList = new ArrayList<>();
 
@@ -86,6 +88,14 @@ public class Task {
         orphanRemoval = true
     )
     private List<WorkLoad> workloadList = new ArrayList<>();
+
+    @OneToOne(fetch = FetchType.LAZY, 
+              cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    @JoinColumn(
+        name = "classroom_id",          
+        referencedColumnName = "classroom_id" 
+    )
+    private ClassRoom room;
     /* ─── helper methods ─────────────────────────── */
 
     /** true if the task’s Event says it is currently ongoing */
@@ -99,8 +109,7 @@ public class Task {
             tasList = new ArrayList<>(); // Initialize the list if it's null
         TaTask link = new TaTask(this, ta);
         // set both sides
-        tasList.add(link);
-        //ta.getTaTasks().add(link);
+        this.getTasList().add(link);
         // update counter
         amountOfTas++;
     }

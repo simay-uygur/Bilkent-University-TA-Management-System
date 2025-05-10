@@ -6,6 +6,8 @@ import com.example.entity.Requests.WorkLoadDto;
 
 public interface WorkLoadServ {
     public void createWorkLoad(WorkLoadDto workLoadDto, Long senderId) ;
+    public boolean approveRequest(Long instrId, Long requestId);
+    public boolean rejectRequest(Long instrId, Long requestId);
     public void updateWorkLoad(WorkLoadDto workLoadDto, Long senderId) ;
     public void deleteWorkLoad(Long id, Long senderId) ;
     public WorkLoadDto getWorkLoadById(Long id, Long senderId) ;

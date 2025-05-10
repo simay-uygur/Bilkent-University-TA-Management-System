@@ -5,13 +5,16 @@ import java.util.List;
 
 import com.example.entity.Courses.Lesson;
 import com.example.entity.Exams.ExamRoom;
+import com.example.entity.Tasks.Task;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
@@ -44,6 +47,9 @@ public class ClassRoom {
             cascade = {CascadeType.MERGE, CascadeType.REFRESH}
     )
     private List<Lesson> lessons = new ArrayList<>();
+
+    @OneToOne(mappedBy = "room", fetch = FetchType.LAZY)
+    private Task task;
 
     public boolean isFree(Event event){
         for (Lesson lesson : lessons){

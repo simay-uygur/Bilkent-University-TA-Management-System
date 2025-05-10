@@ -2,7 +2,6 @@ package com.example.controller;
 
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -10,7 +9,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.dto.ExamDto;
@@ -18,10 +16,10 @@ import com.example.dto.TaDto;
 import com.example.dto.TaTaskDto;
 import com.example.entity.Actors.TA;
 import com.example.entity.General.Date;
+import com.example.entity.Schedule.ScheduleItemDto;
 import com.example.entity.Tasks.Task;
 import com.example.exception.GeneralExc;
 import com.example.exception.UserNotFoundExc;
-import com.example.exception.taExc.TaNotFoundExc;
 import com.example.repo.TARepo;
 import com.example.repo.TaskRepo;
 import com.example.service.TAServ;
@@ -107,13 +105,13 @@ public class TA_controller {
     } 
 
     @GetMapping("/api/ta/{id}/schedule")
-    public ResponseEntity<?> getWeeklyScheduleForTA(@PathVariable Long id) {
+    public ResponseEntity<List<ScheduleItemDto>> getWeeklyScheduleForTA(@PathVariable Long id) {
         TA ta = serv.getTAByIdEntity(id);
         Date date = new Date().currenDate() ;
         return new ResponseEntity<>(serv.getWeeklyScheduleForTA(ta, date), HttpStatus.OK);
     }
 
-    @GetMapping("/api/ta/{id}/schedule/day") // date in format "yyyy-MM-dd"
+    /*@GetMapping("/api/ta/{id}/schedule/day") // date in format "yyyy-MM-dd"
     public ResponseEntity<?> getDaySchedule(@PathVariable Long id, @RequestParam String date) {
         TA ta = serv.getTAByIdEntity(id);
         if (ta == null) {
@@ -121,7 +119,7 @@ public class TA_controller {
         }
         date = date.substring(1,date.length()-1) ; // remove quotes
         return new ResponseEntity<>(serv.getScheduleOfTheDay(ta, date), HttpStatus.OK);
-    }
+    }*/
 
     @GetMapping("api/ta/{taId}/assignedExams")
     public ResponseEntity<List<ExamDto>> getMethodName(@PathVariable Long taId) {
