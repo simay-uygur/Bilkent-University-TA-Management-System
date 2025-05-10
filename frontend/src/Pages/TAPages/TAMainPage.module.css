@@ -5,17 +5,16 @@
   display: flex;
   flex-direction: column;
   min-height: 100vh;
-  background-color: #d2e9ff;
+  background-color: #f0faff;
 }
 
 /* Content wrapper */
 .contentWrapper {
   flex: 1;
-  display: flex;
-  justify-content: center;
+  display: flex;               /* row layout */
+  justify-content: center;     /* center the whole block */
   align-items: flex-start;
   padding: 20px;
-  overflow-y: auto;
 }
 
 /* Table styling */
@@ -23,7 +22,6 @@
   width: 80%;
   border-collapse: collapse;
   text-align: center;
-  margin: 0 auto;
   background-color: #efdef8;
 }
 
@@ -47,33 +45,31 @@
 
 /* ==== ITEM TYPE STYLES ==== */
 .course {
-  /* green for courses */
   background-color: #d3f8e2;
   padding: 4px;
   border-radius: 4px;
 }
 
 .lab {
-  /* orange for labs */
   background-color: #f9e0a3;
   padding: 4px;
   border-radius: 4px;
 }
 
 .recitation {
-  /* purple for recitations */
   background-color: #c8d0f2;
   padding: 4px;
   border-radius: 4px;
 }
 
-/* Buttons */
+/* Buttons: now pulled to top-right beside the table */
 .buttonContainer {
   display: flex;
   flex-direction: column;
   gap: 20px;
-  margin: 40px 0;
-  align-items: center;
+  margin: 0;                   /* remove vertical margin */
+  align-self: flex-start;      /* align at top of the flex row */
+  margin-left: 20px;           /* spacing from the table’s right edge */
 }
 
 .button {
@@ -87,18 +83,27 @@
   cursor: pointer;
   transition: background-color 0.3s, transform 0.2s;
 }
-
 .button:hover {
   background-color: #45a049;
   transform: translateY(-2px);
 }
-
 .button:focus {
   outline: none;
   box-shadow: 0 0 0 2px rgba(72, 163, 244, 0.5);
 }
-
 .button:active {
   background-color: #388e3c;
   transform: none;
+}
+
+/* Cells */
+.cell {
+  vertical-align: top;
+  min-height: 60px;
+}
+
+.office_hours {
+  background-color: #b2dfdb;  /* soft teal */
+  padding: 4px;
+  border-radius: 4px;
 }

@@ -1,7 +1,7 @@
 /* src/pages/AssignTA/SelectTACourse.module.css */
 
 .pageWrapper {
-  background: #d2e9ff;
+  background: #f0faff;
   min-height: 100vh;
   padding: 1rem;
 }
@@ -138,3 +138,17 @@
   background-color: #2563eb;
   box-shadow: 0 4px 12px rgba(0,0,0,0.2);
 }
+.rowBase {
+  transition: background 0.2s;
+  /* …your existing base row styles… */
+}
+.assignedRow {
+  outline: 2px solid var(--accent);
+}
+.preferredRow {
+  background-color: #e6ffe6;   /* light green */
+}
+.unpreferredRow {
+  background-color: #ffe6e6;   /* light red */
+}
+/* normal rows get no extra background */

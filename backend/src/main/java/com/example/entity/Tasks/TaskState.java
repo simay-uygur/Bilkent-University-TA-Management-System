@@ -6,5 +6,6 @@ public enum TaskState
     NOT_ACTIVE,
     COMPLETED,
     UNKNOWN,
-    DELETED
+    DELETED,
+    
 }

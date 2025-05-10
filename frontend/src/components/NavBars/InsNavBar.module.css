@@ -65,4 +65,31 @@
     align-items: center;
     color: inherit;
   }
-  
+  .greeting {
+  display: flex;
+  flex-direction: column;
+  margin: 0 1rem 1rem;
+  color: var(--text-primary);
+  font-size: 0.9rem;
+}
+.greeting span + span {
+  margin-top: 0.25rem;
+  font-weight: 500;
+}
+.mainTitle {
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin-bottom: 0.4rem;
+  color: var(--text-primary);
+}
+
+.subtitle {
+  display: flex;
+  flex-direction: column;
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+}
+
+.subtitle span + span {
+  margin-top: 0.2rem;
+}

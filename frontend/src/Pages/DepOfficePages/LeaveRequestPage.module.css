@@ -1,4 +1,4 @@
-.pageWrapper { padding:20px; }
+.pageWrapper { padding:20px;background: #f0faff; }
 .heading     { font-size:24px; margin-bottom:12px; }
 .table       { width:100%; border-collapse:collapse; margin-bottom:12px; }
 .table th, .table td { border:1px solid #ddd; padding:8px; }

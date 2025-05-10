@@ -17,6 +17,7 @@ public class SectionMapper {
     private final InstructorMapper instructorMapper;
     private final TaMapper taMapper;
     private final StudentMapper studentMapper;
+    private final TaskMapper taskMapper;
 
     /** Entity → DTO */
     public SectionDto toDto(Section section) {
@@ -34,7 +35,7 @@ public class SectionMapper {
             instructorMapper.toDto(section.getInstructor())
         );
         dto.setTas(
-            section.getRegisteredTas().stream()
+            section.getAssignedTas().stream()
                    .map(taMapper::toDto)
                    .collect(Collectors.toList())
         );

@@ -40,6 +40,7 @@ import com.example.exception.taskExc.TaskIsNotActiveExc;
 import com.example.exception.taskExc.TaskNotFoundExc;
 import com.example.mapper.ExamMapper;
 import com.example.mapper.TaMapper;
+import com.example.repo.SectionRepo;
 import com.example.mapper.TaTaskMapper;
 import com.example.repo.ExamRepo;
 import com.example.repo.TARepo;
@@ -62,6 +63,18 @@ public class TAServImpl implements TAServ {
     private final ExamRepo examRepo;
     private final ExamMapper examMapper;
 
+    private final SectionRepo sectionRepo;
+
+    @Override
+    public List<TaDto> getTAsBySectionCode(String sectionCode){
+        List<TA> tas = sectionRepo.findTasBySectionCode(sectionCode);
+        if (tas.isEmpty()) {
+            throw new UserNotFoundExc(sectionCode);
+        }
+        return tas.stream()
+                .map(taMapper::toDto)
+                .collect(Collectors.toList());
+    }
     @Override
     public TaDto getTAByIdDto(Long id){
         TA ta = repo.findById(id)

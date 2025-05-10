@@ -3,6 +3,8 @@ package com.example.entity.Tasks;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.springframework.security.access.method.P;
+
 import com.example.entity.Actors.TA;
 import com.example.entity.Courses.Section;
 import com.example.entity.General.ClassRoom;
@@ -46,8 +48,6 @@ public class Task {
     @Embedded
     private Event duration;
 
-    @Column(name = "description")
-    private String description;
 
     /*@Column(name = "is_time_passed", nullable = false)
     private boolean timePassed;*/
@@ -58,6 +58,9 @@ public class Task {
     @Enumerated(EnumType.STRING)
     @Column(name = "task_type", nullable = false)
     private TaskType taskType;
+
+    @Column(name = "description", nullable = true)
+    private String description;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false)
@@ -82,11 +85,7 @@ public class Task {
     @JoinColumn(name = "section_id", nullable = false)
     private Section section;
 
-    @OneToMany(
-        mappedBy      = "task",
-        cascade       = CascadeType.ALL,
-        orphanRemoval = true
-    )
+    @OneToMany(mappedBy = "task", cascade = CascadeType.ALL,  orphanRemoval = true   )
     private List<WorkLoad> workloadList = new ArrayList<>();
 
     @OneToOne(fetch = FetchType.LAZY, 
@@ -128,7 +127,7 @@ public class Task {
                 : null;
     }
 
-    public Task(Section section, Event duration, String type, int workload)
+    public Task(Section section, Event duration,String description, String type, int workload)
     {
         this.section = section;
         this.duration = duration;

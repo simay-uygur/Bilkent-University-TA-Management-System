@@ -4,7 +4,7 @@
   display: flex;
   flex-direction: column;
   min-height: 100vh;
-  background: #d2e9ff;
+  background: #f0faff;
 }
 
 .notFound {
@@ -93,7 +93,7 @@
 }
 
 .table th {
-  background: #e0e7ff;
+  background: #c3d1fc;
 }
 
 .selectedRow {
@@ -163,4 +163,11 @@
 
 .confirmButton:hover {
   background: #1e40af;
+}
+
+.info{
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 1.5rem;
 }

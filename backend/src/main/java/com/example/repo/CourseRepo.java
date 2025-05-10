@@ -30,13 +30,18 @@ public interface CourseRepo extends JpaRepository<Course, Integer>{
     boolean existsByCourseCode(@Param("courseCode") String courseCode);
 
     @Query(value = "SELECT t.* FROM task_table t " +
-            "JOIN course c ON t.course_id = c.course_id " +
-            "WHERE t.task_id = :taskId AND c.course_code = :courseCode",
-            nativeQuery = true)
-    Optional<Task> findTask(@Param("taskId") int taskId,
-                            @Param("courseCode") String courseCode);
-
-
+    "JOIN course c ON t.course_id = c.course_id " +
+    "WHERE t.task_id = :taskId AND c.course_code = :courseCode", 
+    nativeQuery = true)
+    Optional<Task> findTask(@Param("taskId") int taskId, 
+                              @Param("courseCode") String courseCode);
+                            
+    @Query("""
+    SELECT c
+      FROM Course c
+     WHERE c.courseCode = :courseCode
+     """
+    )    
     Optional<Course> findCourseByCourseCode(String courseCode);
 
     Optional<Course> findCourseByCourseCodeAndDepartmentName(String courseCode, String departmentName);

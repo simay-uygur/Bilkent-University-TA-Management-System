@@ -110,6 +110,16 @@ public class TA_controller {
         Date date = new Date().currenDate() ;
         return new ResponseEntity<>(serv.getWeeklyScheduleForTA(ta, date), HttpStatus.OK);
     }
+    @GetMapping("api/ta/{taId}/assignedExams")
+    public ResponseEntity<List<ExamDto>> getMethodName(@PathVariable Long taId) {
+        return new ResponseEntity<>(serv.getAssignedExamsOfTa(taId), HttpStatus.OK);
+    }
+
+    @GetMapping("/api/ta/sectionCode/{sectionCode}")
+    public ResponseEntity<?> getTAsBySectionCode(@PathVariable String sectionCode) {
+        return new ResponseEntity<>(serv.getTAsBySectionCode(sectionCode), HttpStatus.OK);
+    }
+}
 
     /*@GetMapping("/api/ta/{id}/schedule/day") // date in format "yyyy-MM-dd"
     public ResponseEntity<?> getDaySchedule(@PathVariable Long id, @RequestParam String date) {
@@ -119,13 +129,10 @@ public class TA_controller {
         }
         date = date.substring(1,date.length()-1) ; // remove quotes
         return new ResponseEntity<>(serv.getScheduleOfTheDay(ta, date), HttpStatus.OK);
-    }*/
-
-    @GetMapping("api/ta/{taId}/assignedExams")
-    public ResponseEntity<List<ExamDto>> getMethodName(@PathVariable Long taId) {
-        return new ResponseEntity<>(serv.getAssignedExamsOfTa(taId), HttpStatus.OK);
     }
-    
+        
+
+
 
 }
 /*{
