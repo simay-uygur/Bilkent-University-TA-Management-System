@@ -23,12 +23,14 @@ import com.example.entity.Requests.LeaveDTO;
 import com.example.entity.Requests.PreferTasToCourseDto;
 import com.example.entity.Requests.ProctorTaFromFacultiesDto;
 import com.example.entity.Requests.ProctorTaInDepartmentDto;
+import com.example.entity.Requests.Request;
 import com.example.entity.Requests.SwapDto;
 import com.example.entity.Requests.TransferProctoringDto;
 import com.example.entity.Requests.WorkLoad;
 import com.example.entity.Requests.WorkLoadDto;
 import com.example.exception.UserNotFoundExc;
 import com.example.mapper.RequestMapper;
+import com.example.mapper.Requests.PreferTasToCourseMapper;
 import com.example.repo.InstructorRepo;
 import com.example.repo.RequestRepos.LeaveRepo;
 import com.example.repo.RequestRepos.ProctorTaFromFacultiesRepo;
@@ -46,6 +48,8 @@ import com.example.service.RequestServices.TransferProctoringServ;
 import com.example.service.RequestServices.WorkLoadServ;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.web.bind.annotation.RequestParam;
+
 
 
 @RestController
@@ -65,6 +69,8 @@ public class RequestController {
     private final TransferProctoringRepo transferRepo;
     private final WorkLoadServ workLoadServ;
     private final WorkLoadRepo workLoadRepo;
+    private final PreferTasToCourseMapper preferTasToCourseMapper;
+    private final PreferTasToCourseServ preferTasToCourseServ;
 
     private final RequestServ reqServ;
 
@@ -108,6 +114,22 @@ public class RequestController {
       @RequestBody PreferTasToCourseDto dto){
         prefService.createRequest(dto.getPreferredTas(), dto.getNonPreferredTas(), dto.getTaNeeded(), instrId, sectionCode);
     }*/
+    // Get all requests sent to a department
+    @GetMapping("/request/{reqId}")
+    public ResponseEntity<RequestDto> getRequestById(
+            @PathVariable Long reqId) {
+        Request request = reqServ.getRequestById(reqId);
+        return ResponseEntity.ok(requestMapper.toDto(request));
+    }
+    @GetMapping("/request/preferTas/{reqId}")
+    public ResponseEntity<PreferTasToCourseDto> getPreferTasRequestById(
+            @PathVariable Long reqId) {
+        return ResponseEntity.ok((prefService.getRequestById(reqId)));
+    }
+    public String getMethodName(@RequestParam String param) {
+        return new String();
+    }
+    
     @PostMapping(
         path = "/ta/{taId}/request/leave",
         consumes = MediaType.MULTIPART_FORM_DATA_VALUE   // ← **must** declare this

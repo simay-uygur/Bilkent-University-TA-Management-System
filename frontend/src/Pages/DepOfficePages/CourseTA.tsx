@@ -1,4 +1,311 @@
-// src/pages/AssignTACourse/AssignTACourse.tsx
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import BackBut from '../../components/Buttons/BackBut';
+import ConPop from '../../components/PopUp/ConPop';
+import styles from './CourseTA.module.css';
+import axios from 'axios';
+
+interface TaDto {
+  id: number;
+  name: string;
+  surname: string;
+}
+
+interface PreferTasRequest {
+  requestId: number;
+  requestType: string;
+  description: string;
+  senderName: string;
+  receiverName: string;
+  sentTime: {
+    day: number; month: number; year: number;
+    hour: number; minute: number;
+  };
+  instructorId: number;
+  courseCode: string;
+  sectionId: number;
+  sectionCode: string;
+  taNeeded: number;
+  amountOfAssignedTas: number;
+  preferredTas: TaDto[];
+  nonPreferredTas: TaDto[];
+  rejected: boolean;
+  approved: boolean;
+  pending: boolean;
+}
+
+// Helper to extract section number
+const extractSectionNumber = (code: string): string => code.split('-')[2] || '';
+
+// Optional mapping from courseCode to human-readable course name
+const courseNameMap: Record<string, string> = {
+  'CS-101': 'Intro to CS',
+  'MATH-201': 'Calculus II',
+  'PHY-301': 'Physics III',
+  // add more mappings as needed
+};
+
+const CourseTA: React.FC = () => {
+  const navigate = useNavigate();
+
+  // state for department requests
+  const [requests, setRequests] = useState<PreferTasRequest[]>([]);
+  const [loadingReq, setLoadingReq] = useState(false);
+  const [reqError, setReqError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const deptCode = localStorage.getItem('departmentCode') || '';
+    setLoadingReq(true);
+    axios
+      .get<PreferTasRequest[]>(`/api/department/${deptCode}/preferTas`)
+      .then(res => setRequests(res.data))
+      .catch(err => {
+        console.error(err);
+        setReqError('Failed to load TA‐preference requests');
+      })
+      .finally(() => setLoadingReq(false));
+  }, []);
+
+  if (loadingReq) {
+    return <div>Loading requests…</div>;
+  }
+  if (reqError) {
+    return <div className={styles.error}>{reqError}</div>;
+  }
+
+  return (
+    <div className={styles.pageWrapper}>
+      <div className={styles.headerRow}>
+        <BackBut to="/department-office" />
+        <h1 className={styles.title}>Assign TAs to Course</h1>
+      </div>
+
+      <div className={styles.container}>
+        <table className={styles.table}>
+          <thead className={styles.headings}>
+            <tr>
+              <th>Course Name</th>
+              <th>Section</th>
+              <th>Course ID</th>
+              <th>Needed TAs</th>
+              <th>Preferred TAs</th>
+              <th>Non-Preferred TAs</th>
+              {/* <th>TAs Left</th> */}
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {requests.map(r => {
+              const section = extractSectionNumber(r.sectionCode);
+              const courseId = r.courseCode;
+              const courseName = courseNameMap[courseId] || courseId;
+              const preferredCount = r.preferredTas.length;
+              const unprefferredCount = r.nonPreferredTas.length;
+              const leftCount = r.taNeeded - r.amountOfAssignedTas;
+              const completed = leftCount <= 0;
+
+              return (
+                <tr
+                  key={r.requestId}
+                  className={`${styles.rowBase} ${
+                    completed ? styles.completedRow : styles.incompleteRow
+                  }`}
+                >
+                  <td>{courseName}</td>
+                  <td>{section}</td>
+                  <td>{courseId}</td>
+                  <td>{r.taNeeded}</td>
+                  <td>
+        {r.preferredTas.length > 0
+          ? r.preferredTas
+              .map(ta => `${ta.name} ${ta.surname}`)
+              .join(', ')
+          : 'None'}
+      </td>
+      <td>
+        {r.nonPreferredTas.length > 0
+          ? r.nonPreferredTas
+              .map(ta => `${ta.name} ${ta.surname}`)
+              .join(', ')
+          : 'None'}
+      </td>
+                  <td>
+        {r.pending
+          ? 'Pending'
+          : r.approved
+          ? 'Approved'
+          : 'Rejected'}
+      </td>
+                  <td className={styles.actionsCell}>
+                    <button
+                      className={styles.assignBtn}
+                      onClick={() => navigate(`/department-office/assign-course/${r.requestId}`)}
+                    >
+                      Assign TA
+                    </button>
+                    <button
+                      className={styles.finishBtn}
+                      onClick={() => console.log('Finish assignment for', r.requestId)}
+                    >
+                      Finish Assignment
+                    </button>
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+};
+
+export default CourseTA;
+
+
+/* import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import BackBut from '../../components/Buttons/BackBut';
+import ConPop from '../../components/PopUp/ConPop';
+import styles from './CourseTA.module.css';
+import axios from 'axios';
+
+interface TaDto {
+  id: number;
+  name: string;
+  surname: string;
+}
+
+interface PreferTasRequest {
+  requestId: number;
+  requestType: string;
+  description: string;
+  senderName: string;
+  receiverName: string;
+  sentTime: {
+    day: number; month: number; year: number;
+    hour: number; minute: number;
+  };
+  instructorId: number;
+  courseCode: string;
+  sectionId: number;
+  sectionCode: string;
+  taNeeded: number;
+  amountOfAssignedTas: number;
+  preferredTas: TaDto[];
+  nonPreferredTas: TaDto[];
+  rejected: boolean;
+  approved: boolean;
+  pending: boolean;
+}
+
+const CourseTA: React.FC = () => {
+  const navigate = useNavigate();
+
+  // state for department requests
+  const [requests, setRequests] = useState<PreferTasRequest[]>([]);
+  const [loadingReq, setLoadingReq] = useState(false);
+  const [reqError, setReqError] = useState<string | null>(null);
+  const [detailReq, setDetailReq] = useState<PreferTasRequest | null>(null);
+
+  useEffect(() => {
+    const deptCode = localStorage.getItem('departmentCode') || '';
+    setLoadingReq(true);
+    axios
+      .get<PreferTasRequest[]>(`/api/department/${deptCode}/preferTas`)
+      .then(res => setRequests(res.data))
+      .catch(err => {
+        console.error(err);
+        setReqError('Failed to load TA‐preference requests');
+      })
+      .finally(() => setLoadingReq(false));
+  }, []);
+
+  return (
+    <div className={styles.pageWrapper}>
+      <div className={styles.headerRow}>
+        <BackBut to="/department-office" />
+        <h1 className={styles.title}>TA Preference Requests</h1>
+      </div>
+
+      {loadingReq && <div>Loading requests…</div>}
+      {reqError && <div className={styles.error}>{reqError}</div>}
+
+      {!loadingReq && !reqError && (
+        <table className={styles.table}>
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Course</th>
+              <th>Section</th>
+              <th>Needed</th>
+              <th>Preferred</th>
+              <th>Non‐Pref.</th>
+              <th>Status</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            {requests.map(r => (
+              <tr key={r.requestId}>
+                <td>{r.requestId}</td>
+                <td>{r.courseCode}</td>
+                <td>{r.sectionCode}</td>
+                <td>{r.taNeeded}</td>
+                <td>{r.preferredTas.length}</td>
+                <td>{r.nonPreferredTas.length}</td>
+                <td>
+                  {r.pending
+                    ? 'Pending'
+                    : r.approved
+                    ? 'Approved'
+                    : 'Rejected'}
+                </td>
+                <td>
+                  <button
+                    className={styles.detailsButton}
+                    onClick={() => setDetailReq(r)}
+                  >
+                    View
+                  </button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      )}
+
+      {detailReq && (
+        <ConPop
+          message={
+            <div>
+              <h3>Request #{detailReq.requestId}</h3>
+              <p>{detailReq.description}</p>
+              <strong>Preferred TAs:</strong>
+              <ul>
+                {detailReq.preferredTas.map(t =>
+                  <li key={t.id}>{t.name} {t.surname}</li>
+                )}
+              </ul>
+              <strong>Non‐Preferred TAs:</strong>
+              <ul>
+                {detailReq.nonPreferredTas.map(t =>
+                  <li key={t.id}>{t.name} {t.surname}</li>
+                )}
+              </ul>
+            </div>
+          }
+          onConfirm={() => setDetailReq(null)}
+          onCancel={() => setDetailReq(null)}
+        />
+      )}
+    </div>
+  );
+};
+
+export default CourseTA; */
+/* // src/pages/AssignTACourse/AssignTACourse.tsx
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import BackBut from '../../components/Buttons/BackBut';
@@ -166,7 +473,7 @@ const CourseTA: React.FC = () => {
   );
 };
 
-export default CourseTA;
+export default CourseTA; */
 
 /* // src/pages/AssignTACourse/AssignTACourse.tsx
 import React, { useState } from 'react';

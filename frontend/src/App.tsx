@@ -79,7 +79,7 @@ const App: React.FC = () => (
           <Route index element={<DepartmentOffice />} />
           <Route path="/department-office/course/:courseCode" element={<CourseDetails />} />
           <Route path="/department-office/instructor/:id" element={<InstructorDetails />} />
-          <Route path="/department-office/assign-course/:sectionCode" element={<SelectCourseTA/>} />
+          <Route path="/department-office/assign-course/:requestId" element={<SelectCourseTA/>} />
           <Route path="/department-office/assign-course" element={<CourseTA />} />
           <Route path="/department-office/assign-proctor/:examID" element={<AssignProctorTA />} />
           <Route path="/department-office/assign-proctor" element={<AssignProctor />} />

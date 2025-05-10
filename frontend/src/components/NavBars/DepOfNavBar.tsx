@@ -68,6 +68,11 @@ const DepOfNavBar: React.FC = () => {
               onClick={() => {
                 if (isLogout) {
                   localStorage.removeItem('jwt');
+                  localStorage.removeItem('userRole');
+                  localStorage.removeItem('userId');
+                  localStorage.removeItem('userName');
+                  localStorage.removeItem('currentSemester');
+                  localStorage.removeItem('departmentCode');
                   navigate(item.path, { replace: true });
                 } else {
                   navigate(item.path);

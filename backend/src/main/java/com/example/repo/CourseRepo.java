@@ -28,7 +28,7 @@ public interface CourseRepo extends JpaRepository<Course, Integer>{
          WHERE c.courseCode = :courseCode
     """)
     boolean existsByCourseCode(@Param("courseCode") String courseCode);
-    
+
     @Query(value = "SELECT t.* FROM task_table t " +
     "JOIN course c ON t.course_id = c.course_id " +
     "WHERE t.task_id = :taskId AND c.course_code = :courseCode", 
@@ -55,9 +55,11 @@ public interface CourseRepo extends JpaRepository<Course, Integer>{
       FROM Course c
      WHERE c.department.name = :deptName
 """)
-  Optional<List<Course>> findCourseByDepartmentName(
-    @Param("deptName") String deptName
-); 
-    
+    Optional<List<Course>> findCourseByDepartmentName(
+            @Param("deptName") String deptName
+    );
 
+    List<Course> findByDepartment_Faculty_Code(String facultyCode);
+
+    List<Course> findByDepartmentIn(List<Department> departments);
 }
