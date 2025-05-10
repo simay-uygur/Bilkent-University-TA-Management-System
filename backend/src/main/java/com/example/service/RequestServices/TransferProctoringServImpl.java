@@ -8,6 +8,7 @@ import com.example.entity.Actors.TA;
 import com.example.entity.Actors.User;
 import com.example.entity.Exams.Exam;
 import com.example.entity.General.Date;
+import com.example.entity.Requests.Swap;
 import com.example.entity.Requests.TransferProctoring;
 import com.example.entity.Requests.TransferProctoringDto;
 import com.example.exception.GeneralExc;
@@ -64,4 +65,43 @@ public class TransferProctoringServImpl implements TransferProctoringServ {
         throw new UnsupportedOperationException("Unimplemented method 'deleteTransferProctoringReq'");
     }
 
+    @Override
+    public void approveRequest(Long requestId, Long receiverId)
+    {
+        TransferProctoring req = transferRepo.findById(requestId).orElseThrow(() -> new GeneralExc("There is no such swap request with id "+ requestId));
+
+        int senderExamWorkload = req.getExam().getWorkload();
+
+        TA sender = req.getSender();
+        TA receiver = req.getReceiver();
+
+        /*if(taskServ.hasDutyOrLessonOrExam(sender, req.getReceiversExam().getDuration())){
+            throw new GeneralExc("TA was assigned to another task");
+        }
+
+        if(taskServ.hasDutyOrLessonOrExam(receiver, req.getSendersExam().getDuration())){
+            throw new GeneralExc("TA was assigned to another task");
+        }*/
+
+        sender.decreaseWorkload(senderExamWorkload);
+        receiver.increaseWorkload(senderExamWorkload);
+
+        Exam senExam = req.getExam();
+
+        senExam.getAssignedTas().remove(sender);
+        senExam.getAssignedTas().add(receiver);
+        sender.getExams().remove(senExam);
+        receiver.getExams().add(senExam);
+
+        req.setApproved(true);
+        req.setPending(false);
+    }
+    @Override
+    public void rejectRequest(Long requestId, Long receiverId){
+        TransferProctoring req = transferRepo.findById(requestId).orElseThrow(() -> new GeneralExc("There is no such swap request with id "+ requestId));
+        req.setApproved(false);
+        req.setRejected(true);
+        req.setPending(false);
+        transferRepo.save(req);
+    }
 }
