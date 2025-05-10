@@ -1,35 +1,51 @@
 package com.example.service;
 
 import java.time.DayOfWeek;
+import java.time.Duration;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.TemporalAdjusters;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 
+import org.apache.poi.hpsf.Array;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.example.entity.Actors.TA;
 import com.example.entity.Courses.Lesson;
 import com.example.entity.Courses.Section;
+import com.example.entity.Exams.ExamRoom;
+import com.example.entity.General.ClassRoom;
 import com.example.entity.General.Date;
 import com.example.entity.General.Event;
 import com.example.entity.Schedule.Schedule;
 import com.example.entity.Schedule.ScheduleItem;
+import com.example.entity.Schedule.ScheduleItemDto;
 import com.example.entity.Schedule.ScheduleItemType;
 import com.example.entity.Tasks.TaTask;
 import com.example.entity.Tasks.Task;
 import com.example.exception.taExc.TaNotFoundExc;
+import com.example.repo.LessonRepo;
 import com.example.repo.TARepo;
 import com.example.repo.TaTaskRepo;
 
 import jakarta.persistence.Embeddable;
+import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
 
 @Embeddable
 @Service
+@RequiredArgsConstructor
 public class ScheduleServImpl implements ScheduleServ {
+
+    @FunctionalInterface
+    private interface Splitter {
+        void split(LocalDateTime start, LocalDateTime end, ScheduleItemType type, String classroom, String code, Long refId);
+    }
     // Implement the methods defined in the ScheduleServ interface here
     // For example:
     // @Override
@@ -42,17 +58,92 @@ public class ScheduleServImpl implements ScheduleServ {
      * @param date any date within the week.
      * @return the Monday of that week.
      */
-    @Autowired
-    private TARepo taRepo;
+    private final TARepo taRepo;
 
-    @Autowired
-    private TaTaskRepo taTaskRepo;
+    private final TaTaskRepo taTaskRepo;
+    private final LessonRepo lessonRepo;
 
-    @Override
     public LocalDate getWeekStart(LocalDate date) {
         return date.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY));
     }
+    
+    @Override
+    public List<ScheduleItemDto> getWeeklySchedule(TA ta, LocalDateTime weekStart){
+        List<ScheduleItemDto> schedule = new ArrayList<>();
+        Splitter splitter = (LocalDateTime start, LocalDateTime end,
+                             ScheduleItemType type, String classroom, String code, Long refId) -> {
+            long totalMinutes = Duration.between(start, end).toMinutes();
+            int segments = (int) Math.ceil(totalMinutes / 50.0);
+            for (int i = 0; i < segments; i++) {
+                LocalDateTime segStart = start.plusMinutes(i * 50);
+                int slotIdx = computeSlotIndex(segStart);
+                ScheduleItemDto dto = new ScheduleItemDto();
+                dto.setDate(segStart.toLocalDate());
+                dto.setSlotIndex(slotIdx);
+                dto.setType(type);
+                dto.setReferenceId(refId);
+                // only on the first segment do we set these
+                if (i == 0) {
+                    dto.setClassroom(classroom);
+                    dto.setCode(code);
+                }
+                schedule.add(dto);
+            }
+        };
+        // 3a. lessons
+        List<Lesson> lessons = lessonRepo.findBySection_AssignedTas_Id(ta.getId());
+        for (Lesson l : lessons) {
+            var dur = l.getDuration();
+            splitter.split(dur.getStart().toLocalDateTime(), dur.getFinish().toLocalDateTime(),
+                           ScheduleItemType.LESSON,
+                           l.getLessonRoom().getClassroomId(),
+                           l.getSection().getSectionCode(),
+                           l.getLessonId());
+        }
 
+        // 3b. tasks
+        List<TaTask> tasks = taTaskRepo.findAllByTaId(ta.getId());
+        for (TaTask tt : tasks) {
+            var t = tt.getTask();
+            var dur = t.getDuration();
+            splitter.split(dur.getStart().toLocalDateTime(), dur.getFinish().toLocalDateTime(),
+                           ScheduleItemType.TASK,
+                           t.getRoom().getClassroomId(),
+                           t.getSection().getSectionCode(),
+                           (long) t.getTaskId());
+        }
+
+        // 3c. proctorings
+        for (ExamRoom er : ta.getExamRooms()) {
+            var dur = er.getExam().getDuration();
+            ClassRoom room = er.getExamRoom();
+            splitter.split(dur.getStart().toLocalDateTime(), dur.getFinish().toLocalDateTime(),
+                           ScheduleItemType.PROCTORING,
+                           room == null ? "" : room.getClassroomId(),
+                           er.getExam().getCourseOffering().getCourse().getCourseCode(),
+                           (long) er.getExamRoomId());
+        }
+
+        // you can sort by date then slotIndex if you like
+        schedule.sort(Comparator
+            .comparing(ScheduleItemDto::getDate)
+            .thenComparingInt(ScheduleItemDto::getSlotIndex));
+        return schedule;
+    }
+    
+
+    private int computeSlotIndex(LocalDateTime dt) {
+            // minutes since 8:30
+            int mins = dt.getHour() * 60 + dt.getMinute() - (8 * 60 + 30);
+            return 1 + (mins / 50);
+    }
+    private String returnCourseCode(String sectionCode){
+        String[] parts = sectionCode.split("-");
+        return parts[0] +"-"+ parts[1] +"-"+ parts[2];
+    }
+    
+}
+    /*
     // Example method to build the weekly schedule for a TA.
     @Override
     public Schedule getWeeklyScheduleForTA(TA ta, Date anyCustomDate) {
@@ -157,4 +248,5 @@ public class ScheduleServImpl implements ScheduleServ {
         }
         return scheduleItems;
     }
-}
+    */
+

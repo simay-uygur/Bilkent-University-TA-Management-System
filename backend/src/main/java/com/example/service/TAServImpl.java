@@ -29,6 +29,7 @@ import com.example.entity.General.AcademicLevelType;
 import com.example.entity.General.Date;
 import com.example.entity.Schedule.Schedule;
 import com.example.entity.Schedule.ScheduleItem;
+import com.example.entity.Schedule.ScheduleItemDto;
 import com.example.entity.Tasks.TaTask;
 import com.example.entity.Tasks.Task;
 import com.example.exception.GeneralExc;
@@ -92,26 +93,6 @@ public class TAServImpl implements TAServ {
             return tas.stream()
                     .map(taMapper::toDto)
                     .collect(Collectors.toList());
-            /* return tas.stream()
-                    .map(ta -> new TaDto(
-                            ta.getId(),
-                            ta.getName(),
-                            ta.getSurname(),
-                            ta.getAcademicLevel().name(),
-                            ta.getTotalWorkload(),
-                            ta.getIsActive(),
-                            ta.getIsGraduated(),
-                            ta.getDepartment(),
-                           
-                            ta.getSectionsAsStudent().stream()
-                                    .map(Section::getSectionCode)
-                                    .collect(Collectors.toList()),
-                            ta.getSectionsAsHelper().stream()
-                                    .map(Section::getSectionCode)
-                                    .collect(Collectors.toList()),
-                            ta.getOfferingsAsHelper().stream()
-                    ))
-                    .collect(Collectors.toList()); */
     } 
 
     @Override
@@ -123,33 +104,6 @@ public class TAServImpl implements TAServ {
         return tas.stream()
                 .map(taMapper::toDto)
                 .collect(Collectors.toList());
-       /*  return tas.stream()
-                .map(ta -> new TaDto(
-                        ta.getId(),
-                        ta.getName(),
-                        ta.getSurname(),
-                        ta.getAcademicLevel().name(),
-                        ta.getTotalWorkload(),
-                        ta.getIsActive(),
-                        ta.getIsGraduated(),
-                        ta.getDepartment(),
-                        ta.getSectionsAsStudent().stream()
-                                .map(Section::getSectionCode)
-                                .collect(Collectors.toList()),
-                        ta.getSectionsAsHelper().stream()
-                                .map(Section::getSectionCode)
-                                .collect(Collectors.toList()),
-                        ta.getOfferingsAsHelper().stream()
-                                .map(offering -> offering.getCourse().getCourseCode())
-                                .collect(Collectors.toList()),
-                        ta.getTasOwnLessons().stream()
-                                .map(Section::getSectionCode)
-                                .collect(Collectors.toList()
-                )
-                )
-                )
-                .collect(Collectors.toList()); */
-
     }
 
     @Override
@@ -266,17 +220,13 @@ public class TAServImpl implements TAServ {
     }
 
     @Override
-    public Schedule getWeeklyScheduleForTA(TA ta, Date anyCustomDate) {
+    public List<ScheduleItemDto> getWeeklyScheduleForTA(TA ta, Date anyCustomDate) {
         if (ta == null) {
             throw new TaNotFoundExc(-1L);
         }
-        return scheduleServ.getWeeklyScheduleForTA(ta, anyCustomDate);
+        return scheduleServ.getWeeklySchedule(ta, anyCustomDate.toLocalDateTime());
     }
 
-    @Override
-    public List<ScheduleItem> getScheduleOfTheDay(TA ta, String date) {
-        return scheduleServ.getDaySchedule(ta, date);
-    }
 
     //rows are
     @Override

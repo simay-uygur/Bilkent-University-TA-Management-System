@@ -27,9 +27,12 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+
 import static jakarta.persistence.FetchType.LAZY;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -74,6 +77,9 @@ public class TA extends User {
 
     @Column(name = "is_graduated", nullable = false)
     private Boolean isGraduated = false;
+
+    @ManyToMany(mappedBy = "assignedTas", fetch = FetchType.LAZY)
+    private List<ExamRoom> examRooms = new ArrayList<>();
 
     @ManyToMany(
       mappedBy = "assignedTas",

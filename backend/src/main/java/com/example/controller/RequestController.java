@@ -209,6 +209,16 @@ public class RequestController {
         return new ResponseEntity<>(exists ? HttpStatus.CREATED : HttpStatus.BAD_REQUEST);
     }
 
+    @PutMapping("/instructor/{instrId}/requests/workload/{requestId}/approve")
+    public ResponseEntity<Boolean> approveWorkloadRequest(@PathVariable Long instrId, @RequestBody Long requestId) {
+        return new ResponseEntity<>(workLoadServ.approveRequest(instrId, requestId),HttpStatus.ACCEPTED);
+    }
+
+    @PutMapping("/instructor/{instrId}/requests/workload/{requestId}/reject")
+    public ResponseEntity<Boolean> rejectWorkloadRequest(@PathVariable Long instrId, @RequestBody Long requestId) {
+        return new ResponseEntity<>(workLoadServ.rejectRequest(instrId, requestId),HttpStatus.ACCEPTED);
+    }
+
     @GetMapping("/{user_id}/receivedReqs")
     public ResponseEntity<List<RequestDto>> getReceivedRequests(@PathVariable Long user_id) {
        return new ResponseEntity<>(reqServ.getReceivedRequestsOfTheUser(user_id), HttpStatus.ACCEPTED);
