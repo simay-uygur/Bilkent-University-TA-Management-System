@@ -18,6 +18,7 @@ import com.example.entity.Courses.Lesson;
 import com.example.entity.Courses.Section;
 import com.example.entity.Exams.Exam;
 import com.example.entity.General.Date;
+import com.example.entity.General.Event;
 import com.example.entity.Requests.RequestType;
 import com.example.entity.Requests.WorkLoadDto;
 import com.example.entity.Tasks.TaTask;
@@ -211,7 +212,7 @@ public class TaskServImpl implements TaskServ {
             throw new GeneralExc("TA is already assigned to this task");
         }
         
-        if (hasDutyOrLessonOrExam(ta, task))
+        if (hasDutyOrLessonOrExam(ta, task.getDuration()))
             throw new GeneralExc("TA has a duty or lesson or exam on the same duration as the task");
         
         task.assignTo(ta);
@@ -445,7 +446,7 @@ public class TaskServImpl implements TaskServ {
         
         Section section = courseOfferingServ.getSectionByNumber(courseCode, Integer.parseInt(sectionCode));
         for (TA ta : section.getAssignedTas()){
-            if (ta.isActive() && !ta.isDeleted() && !hasDutyOrLessonOrExam(ta, task))
+            if (ta.isActive() && !ta.isDeleted() && !hasDutyOrLessonOrExam(ta, task.getDuration()))
             {
                 TaDto taDto = new TaDto();
                 taDto.setId(ta.getId());
@@ -457,21 +458,22 @@ public class TaskServImpl implements TaskServ {
         return CompletableFuture.completedFuture(tas);
     }
 
-    public boolean hasDutyOrLessonOrExam(TA ta, Task task) {
+    @Override
+    public boolean hasDutyOrLessonOrExam(TA ta, Event duration) {
         for (TaTask taTask : ta.getTaTasks()) {
-            if (taTask.getTask().getDuration().has(task.getDuration())) {
+            if (taTask.getTask().getDuration().has(duration)) {
                 return true;
             }
         }
         for (Section section : ta.getSectionsAsStudent()){
             for (Lesson lesson : section.getLessons()) {
-                if (lesson.getDuration().has(task.getDuration())) {
+                if (lesson.getDuration().has(duration)) {
                     return true;
                 }
             }
         }
         for (Exam exam : ta.getExams()){
-            if (exam.getDuration().has(task.getDuration())) {
+            if (exam.getDuration().has(duration)) {
                 return true;
             }
         }

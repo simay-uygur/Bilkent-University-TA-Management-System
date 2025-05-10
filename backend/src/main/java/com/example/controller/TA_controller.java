@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.example.dto.ExamDto;
 import com.example.dto.TaDto;
 import com.example.dto.TaTaskDto;
 import com.example.entity.Actors.TA;
@@ -32,17 +33,13 @@ import lombok.RequiredArgsConstructor;
 @RestController
 @RequiredArgsConstructor
 public class TA_controller {
-    @Autowired
-    private TAServ serv;
+    private final TAServ serv;
     
-    @Autowired
-    private TaskServ taskServ;
+    private final TaskServ taskServ;
 
-    @Autowired
-    private TARepo taRepo;
+    private final TARepo taRepo;
 
-    @Autowired
-    private TaskRepo taskRepo;
+    private final TaskRepo taskRepo;
 
 
     @GetMapping("/api/ta/all")
@@ -126,7 +123,11 @@ public class TA_controller {
         return new ResponseEntity<>(serv.getScheduleOfTheDay(ta, date), HttpStatus.OK);
     }
 
-
+    @GetMapping("api/ta/{taId}/assignedExams")
+    public ResponseEntity<List<ExamDto>> getMethodName(@PathVariable Long taId) {
+        return new ResponseEntity<>(serv.getAssignedExamsOfTa(taId), HttpStatus.OK);
+    }
+    
 
 }
 /*{

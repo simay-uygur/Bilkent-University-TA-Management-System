@@ -2,6 +2,7 @@ package com.example.controller;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
 import org.springframework.http.HttpStatus;
@@ -10,6 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestPart;
@@ -46,6 +48,7 @@ import com.example.service.RequestServices.TransferProctoringServ;
 import com.example.service.RequestServices.WorkLoadServ;
 
 import lombok.RequiredArgsConstructor;
+
 
 
 @RestController
@@ -141,13 +144,24 @@ public class RequestController {
     }
 
     @PostMapping("/ta/{taId}/swap")
-    public ResponseEntity<?> sendSwap(
+    public CompletableFuture<ResponseEntity<Boolean>> sendSwap(
         @PathVariable Long taId,
         @RequestBody SwapDto dto
     ) {
-        swapServ.createSwapRequest(dto, taId);
-        boolean exists = swapRepo.existsBySenderIdAndReceiverIdAndExamExamIdAndIsRejectedFalse(taId, dto.getReceiverId(), dto.getExamId());
-        return new ResponseEntity<>(exists ? HttpStatus.CREATED : HttpStatus.BAD_REQUEST);
+        return swapServ.createSwapRequest(dto, taId).thenApply(success -> {
+          if (success) {
+            return ResponseEntity.status(HttpStatus.CREATED).body(true);
+          } else {
+            return ResponseEntity
+                  .status(HttpStatus.BAD_REQUEST)
+                  .body(false);
+          }
+      });
+    }
+
+    @PutMapping("ta/{taId}/swap/{swapId}/approve")
+    public ResponseEntity<Boolean> approveSwapRequest(@PathVariable Long swapId, @PathVariable Long taId) {
+      return new ResponseEntity<>(swapServ.acceptSwapRequest(swapId, taId),HttpStatus.OK);
     }
 
     @PostMapping("/transfer-proctoring")

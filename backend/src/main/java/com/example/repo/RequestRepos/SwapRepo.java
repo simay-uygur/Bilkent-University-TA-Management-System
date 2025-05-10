@@ -16,7 +16,11 @@ import jakarta.transaction.Transactional;
 @Repository
 public interface SwapRepo extends JpaRepository<Swap, Long>{
     boolean existsBySenderIdAndReceiverId(Long senderId, Long receiverId);
-    boolean existsBySenderIdAndReceiverIdAndExamExamIdAndIsRejectedFalse(Long id, Long receiverId, int examId);
+    boolean existsBySender_IdAndReceiver_IdAndSendersExam_ExamIdAndReceiversExam_ExamIdAndIsRejectedFalse(
+            Long    senderId,
+            Long    receiverId,
+            Integer senderExamId,
+            Integer receiverExamId);
     List<Swap> findAllByReceiverIdAndSentTimeBetweenAndRequestTypeInAndIsPendingTrue(
         Long receiverId,
         Date from,

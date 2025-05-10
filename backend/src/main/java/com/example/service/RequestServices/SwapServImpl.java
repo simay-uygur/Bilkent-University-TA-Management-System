@@ -1,20 +1,24 @@
 package com.example.service.RequestServices;
 
+import java.util.concurrent.CompletableFuture;
+
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
-import com.example.entity.Actors.Role;
 import com.example.entity.Actors.TA;
+import com.example.entity.Exams.Exam;
 import com.example.entity.General.Date;
 import com.example.entity.Requests.Swap;
 import com.example.entity.Requests.SwapDto;
 import com.example.exception.GeneralExc;
 import com.example.exception.UserNotFoundExc;
 import com.example.repo.ExamRepo;
-import com.example.repo.TARepo;
 import com.example.repo.RequestRepos.SwapRepo;
+import com.example.repo.TARepo;
 import com.example.repo.UserRepo;
+import com.example.service.TaskServ;
 
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -25,37 +29,84 @@ public class SwapServImpl implements SwapServ{
     private final UserRepo userRepo;
     private final ExamRepo examRepo;
     private final TARepo taRepo;
+    private final TaskServ taskServ;
 
     @Async("setExecutor")
     @Override
-    public void createSwapRequest(SwapDto dto, Long senderId) {
+    @Transactional
+    public CompletableFuture<Boolean> createSwapRequest(SwapDto dto, Long senderId) {
+        if (swapRepo.
+        existsBySender_IdAndReceiver_IdAndSendersExam_ExamIdAndReceiversExam_ExamIdAndIsRejectedFalse
+        (senderId, dto.getReceiverId(), dto.getSenderExamId(), dto.getReceiverExamId()))
+        {
+            throw new GeneralExc("Request already sent");
+        }
         TA sender = taRepo.findById(senderId)
             .orElseThrow(() -> new UserNotFoundExc(senderId));
         TA receiver = taRepo.findById(dto.getReceiverId())
             .orElseThrow(() -> new UserNotFoundExc(dto.getReceiverId()));
 
         // lookup your Exam however you’ve defined in ExamRepo
-        var exam = examRepo.findById(dto.getExamId())
-            .orElseThrow(() -> new RuntimeException("Exam not found: " + dto.getExamName()));
-
-        Swap req = new Swap(exam);
+        Exam senderExam = examRepo.findById(dto.getSenderExamId())
+            .orElseThrow(() -> new RuntimeException("Exam not found: " + dto.getSenderExamName()));
+        Exam receiverExam = examRepo.findById(dto.getReceiverExamId())
+        .orElseThrow(() -> new RuntimeException("Exam not found: " + dto.getReceiverExamName()));
+        Swap req = new Swap(senderExam, receiverExam);
         req.setRequestType(dto.getRequestType());
         req.setDescription(dto.getDescription());
         req.setSentTime(new Date().currenDate());
         req.setSender(sender);
         req.setReceiver(receiver);
-        req.setExam(exam);
+        //req.setExam(exam);
 
         swapRepo.saveAndFlush(req);
+        return CompletableFuture.completedFuture(true);
     }
 
     @Override
-    public void acceptSwapRequest(Long requestId, Long receiverId) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'acceptSwapRequest'");
+    @Transactional
+    public boolean acceptSwapRequest(Long requestId, Long receiverId) {
+        Swap req = swapRepo.findById(requestId).orElseThrow(() -> new GeneralExc("There is no such swap request with id "+ requestId));
+
+        int senderExamWorkload = req.getSendersExam().getWorkload();
+        int receiverExamWorkload = req.getReceiversExam().getWorkload();
+
+        TA sender = req.getSender();
+        TA receiver = req.getReceiver();
+
+        /*if(taskServ.hasDutyOrLessonOrExam(sender, req.getReceiversExam().getDuration())){
+            throw new GeneralExc("TA was assigned to another task");
+        }
+
+        if(taskServ.hasDutyOrLessonOrExam(receiver, req.getSendersExam().getDuration())){
+            throw new GeneralExc("TA was assigned to another task");
+        }*/
+        int senderWorkload = sender.getTotalWorkload();
+        int receiverWorkload = receiver.getTotalWorkload();
+        sender.setTotalWorkload(senderWorkload - senderExamWorkload + receiverExamWorkload);
+        receiver.setTotalWorkload(receiverWorkload - receiverExamWorkload + senderExamWorkload);
+
+        Exam recExam = req.getReceiversExam();
+        Exam senExam = req.getSendersExam();
+
+        senExam.getAssignedTas().remove(sender);
+        senExam.getAssignedTas().add(receiver);
+        sender.getExams().remove(senExam);
+        sender.getExams().add(recExam);
+
+        recExam.getAssignedTas().remove(receiver);
+        recExam.getAssignedTas().add(sender);
+        receiver.getExams().remove(recExam);
+        receiver.getExams().add(senExam);
+
+        req.setApproved(true);
+        req.setPending(false);
+
+        return true;
     }
 
     @Override
+    @Transactional
     public void rejectSwapRequest(Long requestId, Long receiverId) {
         // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'rejectSwapRequest'");

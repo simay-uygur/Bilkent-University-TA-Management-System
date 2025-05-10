@@ -1,12 +1,10 @@
 package com.example.entity.Exams;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import com.example.entity.Actors.TA;
 import com.example.entity.Courses.CourseOffering;
 import com.example.entity.General.Event;
-import com.example.entity.General.Student;
 import com.example.entity.Requests.ProctorTaFromFaculties;
 import com.example.entity.Requests.ProctorTaFromOtherFaculty;
 import com.example.entity.Requests.ProctorTaInDepartment;
@@ -78,12 +76,21 @@ public class Exam {
 
     /*Requests*/
     @OneToMany(
-        mappedBy = "exam",
+        mappedBy = "sendersExam",
         fetch = FetchType.LAZY,
         cascade = CascadeType.ALL,
         orphanRemoval = true
     )
-    private List<Swap> swapRequests; // this is used to get the swap requests for this exam
+    private List<Swap> swapRequestsSender; // this is used to get the swap requests for this exam
+    
+    /*Requests*/
+    @OneToMany(
+        mappedBy = "receiversExam",
+        fetch = FetchType.LAZY,
+        cascade = CascadeType.ALL,
+        orphanRemoval = true
+    )
+    private List<Swap> swapRequestsReceiver; // this is used to get the swap requests for this exam
 
     @OneToMany(
         mappedBy = "exam",

@@ -6,24 +6,45 @@ import java.time.LocalTime;
 import java.time.Month;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Map;
+import java.util.NoSuchElementException;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
-import com.example.dto.*;
-import com.example.entity.General.Event;
-import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellType;
+import org.apache.poi.ss.usermodel.DataFormatter;
+import org.apache.poi.ss.usermodel.DateUtil;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
+
+import com.example.dto.ClassRoomDto;
+import com.example.dto.CourseOfferingDto;
+import com.example.dto.EventDto;
+import com.example.dto.ExamDto;
+import com.example.dto.ExamSlotInfoDto;
+import com.example.dto.FailedRowInfo;
+import com.example.dto.StudentMiniDto;
 import com.example.entity.Actors.TA;
 import com.example.entity.Courses.CourseOffering;
 import com.example.entity.Courses.Section;
 import com.example.entity.Exams.Exam;
 import com.example.entity.Exams.ExamRoom;
 import com.example.entity.General.ClassRoom;
+import com.example.entity.General.Event;
 import com.example.entity.General.Student;
 import com.example.entity.General.Term;
 import com.example.exception.GeneralExc;
@@ -33,8 +54,8 @@ import com.example.repo.CourseOfferingRepo;
 import com.example.repo.ExamRepo;
 import com.example.repo.StudentRepo;
 import com.example.repo.TARepo;
+
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.multipart.MultipartFile;
 
 @Service
 @RequiredArgsConstructor
@@ -187,6 +208,7 @@ public class CourseOfferingServImpl implements CourseOfferingServ {
     @Async("setExecutor")
     @Override
     public CompletableFuture<Boolean> createExam(ExamDto dto, String courseCode) {
+        
         CourseOffering offering = getCurrentOffering(courseCode);
         if (offering == null) {
             throw new GeneralExc("No current offering found for course: " + courseCode);
@@ -417,12 +439,15 @@ public class CourseOfferingServImpl implements CourseOfferingServ {
         if(tas.size() > exam.getRequiredTAs() || Objects.equals(exam.getRequiredTAs(), exam.getAmountOfAssignedTAs())) {
             throw new GeneralExc("Number of TAs exceeds the required number for this exam.");
         }
-        List<TA> tasList = new ArrayList<>();
-        for (Long i : tas) {
-            TA ta = taRepo.findById(i)
-                    .orElseThrow(() -> new GeneralExc("TA not found: " + i));
-            tasList.add(ta);
-        } 
+        List<TA> tasList = taRepo.findAllById(tas);
+
+        for (TA ta : tasList) {
+            if (!exam.getAssignedTas().contains(ta)) {
+                exam.getAssignedTas().add(ta);   // owning side ⇒ join-table row
+                ta.getExams().add(exam);         // keep inverse side in sync
+            }
+        }
+
         Integer prevAmount = exam.getAmountOfAssignedTAs();
         exam.setAmountOfAssignedTAs(exam.getAmountOfAssignedTAs() + tas.size());
         //exam.setAssignedTas(tasList);
