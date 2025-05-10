@@ -81,6 +81,7 @@ public class SwapServImpl implements SwapServ{
         if(taskServ.hasDutyOrLessonOrExam(receiver, req.getSendersExam().getDuration())){
             throw new GeneralExc("TA was assigned to another task");
         }*/
+
         int senderWorkload = sender.getTotalWorkload();
         int receiverWorkload = receiver.getTotalWorkload();
         sender.setTotalWorkload(senderWorkload - senderExamWorkload + receiverExamWorkload);

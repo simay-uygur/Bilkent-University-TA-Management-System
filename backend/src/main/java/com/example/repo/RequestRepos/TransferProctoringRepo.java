@@ -1,12 +1,13 @@
 package com.example.repo.RequestRepos;
 
+import java.util.Collection;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-import com.example.entity.General.Date;
 import com.example.entity.Requests.TransferProctoring;
 
 import jakarta.transaction.Transactional;
@@ -15,37 +16,19 @@ import jakarta.transaction.Transactional;
 public interface TransferProctoringRepo extends JpaRepository<TransferProctoring, Long> {
     boolean existsBySenderIdAndReceiverId(Long senderId, Long receiverId);
     boolean existsBySenderIdAndReceiverIdAndExamExamIdAndIsRejected(Long id, Long recId, int examId, boolean isRejected);
-    @Modifying
+    
+    @Modifying(clearAutomatically = true)
     @Transactional
     @Query("""
-      DELETE FROM TransferProctoring tp
-       WHERE tp.receiver.id = :taId
-         AND tp.isPending = true
-         AND tp.exam.duration.start <= :to
-         AND tp.exam.duration.finish >= :from
+    DELETE FROM Swap s
+    WHERE s.isPending = true
+        AND ( s.sendersExam.examId   IN :examIds
+            OR s.receiversExam.examId IN :examIds )
+        AND ( s.sender.id   = :taId
+            OR s.receiver.id = :taId )
     """)
-    int deleteReceivedForTaInInterval(
-        @Param("taId") Long taId,
-        @Param("from") Date   from,
-        @Param("to")   Date   to
-    );
-
-    /**
-     * Delete all pending TransferProctoring requests that a TA sent
-     * for exams whose duration overlaps [from .. to].
-     */
-    @Modifying
-    @Transactional
-    @Query("""
-      DELETE FROM TransferProctoring tp
-       WHERE tp.sender.id = :taId
-         AND tp.isPending = true
-         AND tp.exam.duration.start <= :to
-         AND tp.exam.duration.finish >= :from
-    """)
-    int deleteSentByTaInInterval(
-        @Param("taId") Long taId,
-        @Param("from") Date   from,
-        @Param("to")   Date   to
+    int deleteAllSwapsForTaAndExamIds(
+        @Param("taId")    Long taId,
+        @Param("examIds") Collection<Integer> examIds
     );
 }

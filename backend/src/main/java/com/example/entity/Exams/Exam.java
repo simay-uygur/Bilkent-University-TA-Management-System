@@ -14,6 +14,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
+import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
@@ -50,8 +51,8 @@ public class Exam {
     @Column(name = "workload", nullable = false)
     private Integer workload = 4;
 
-    @Column(name = "duration", nullable = false)
-    private Event duration; // this is used to get the duration of the exam
+    @Embedded
+    private Event duration;
 
     @OneToMany(
         mappedBy = "exam",

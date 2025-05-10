@@ -18,11 +18,13 @@ import jakarta.transaction.Transactional;
 @Repository
 public interface SwapRepo extends JpaRepository<Swap, Long>{
     boolean existsBySenderIdAndReceiverId(Long senderId, Long receiverId);
+
     boolean existsBySender_IdAndReceiver_IdAndSendersExam_ExamIdAndReceiversExam_ExamIdAndIsRejectedFalse(
             Long    senderId,
             Long    receiverId,
             Integer senderExamId,
-            Integer receiverExamId);
+            Integer receiverExamId
+    );
     List<Swap> findAllByReceiverIdAndSentTimeBetweenAndRequestTypeInAndIsPendingTrue(
         Long receiverId,
         Date from,
@@ -36,37 +38,19 @@ public interface SwapRepo extends JpaRepository<Swap, Long>{
         Collection<RequestType> types
     );
 
-    @Modifying
+    @Modifying(clearAutomatically = true)
     @Transactional
     @Query("""
-      DELETE FROM Swap s
-       WHERE s.receiver.id = :taId
-         AND s.isPending = true
-         AND s.exam.duration.start <= :to
-         AND s.exam.duration.finish >= :from
+    DELETE FROM Swap s
+    WHERE s.isPending = true
+        AND ( s.sendersExam.examId   IN :examIds
+            OR s.receiversExam.examId IN :examIds )
+        AND ( s.sender.id   = :taId
+            OR s.receiver.id = :taId )
     """)
-    int deleteReceivedForTaInInterval(
-        @Param("taId")   Long taId,
-        @Param("from")   Date from,
-        @Param("to")     Date to
+    int deleteAllSwapsForTaAndExamIds(
+        @Param("taId")    Long taId,
+        @Param("examIds") Collection<Integer> examIds
     );
 
-    /**
-     * Delete all pending SwapRequests that a TA sent
-     * for exams whose duration overlaps [from .. to].
-     */
-    @Modifying
-    @Transactional
-    @Query("""
-      DELETE FROM Swap s
-       WHERE s.sender.id = :taId
-         AND s.isPending = true
-         AND s.exam.duration.start <= :to
-         AND s.exam.duration.finish >= :from
-    """)
-    int deleteSentByTaInInterval(
-        @Param("taId")   Long taId,
-        @Param("from")   Date from,
-        @Param("to")     Date to
-    );
 }

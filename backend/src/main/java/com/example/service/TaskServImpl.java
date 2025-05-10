@@ -470,7 +470,7 @@ public class TaskServImpl implements TaskServ {
     @Override
     public boolean hasDutyOrLessonOrExam(TA ta, Event duration) {
         for (TaTask taTask : ta.getTaTasks()) {
-            if (taTask.getTask().getDuration().has(duration)) {
+            if (taTask.getTask().getDuration().has(duration) && !taTask.getTask().getStatus().equals(TaskState.DELETED)) {
                 return true;
             }
         }

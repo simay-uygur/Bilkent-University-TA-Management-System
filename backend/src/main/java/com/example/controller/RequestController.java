@@ -213,7 +213,6 @@ public class RequestController {
     public ResponseEntity<List<RequestDto>> getReceivedRequests(@PathVariable Long user_id) {
        return new ResponseEntity<>(reqServ.getReceivedRequestsOfTheUser(user_id), HttpStatus.ACCEPTED);
     }
-    
 }
 /*
 Leave Request

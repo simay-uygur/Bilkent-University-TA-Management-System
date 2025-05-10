@@ -38,7 +38,7 @@ public class LeaveServImpl implements LeaveServ{
     @Async("setExecutor")
     @Override
     public void createLeaveRequest(LeaveDTO dto, MultipartFile file, Long senderId) throws IOException {
-        TA sender = taRepo.findById(dto.getSenderId()).
+        TA sender = taRepo.findById(senderId).
         orElseThrow(() -> new TaNotFoundExc(dto.getSenderId()));
         Department department = depRepo.findById(dto.getDepName()).
         orElseThrow(() -> new GeneralExc("Deparment with name " + dto.getDepName() + " not found"));
@@ -68,10 +68,10 @@ public class LeaveServImpl implements LeaveServ{
         TA sender = req.getSender();
         taTaskRepo.deleteTaTasksForTaInInterval(sender.getId(), req.getDuration().getStart(), req.getDuration().getFinish());
         sender.getExams().clear();
-        List<Exam> exams = examRepo.findAllByAssignedTasContaining(sender);
+        List<Exam> exams = examRepo.findAllByTaId(sender.getId());
         for (Exam exam : exams) {
-        exam.getAssignedTas().remove(sender);
-        examRepo.save(exam);
+            exam.getAssignedTas().remove(sender);
+            examRepo.save(exam);
         }
         sender.setActive(false);
         req.setApproved(true);
