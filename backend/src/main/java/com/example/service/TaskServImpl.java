@@ -1,5 +1,6 @@
 package com.example.service;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -7,6 +8,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
+import com.example.entity.General.DayOfWeek;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -94,77 +96,77 @@ public class TaskServImpl implements TaskServ {
         }
     }
     @Override
-@Transactional
-public boolean deleteTask(String sectionCode, int taskId) {
-  // 1) load
-  Section section = sectionRepo
-      .findBySectionCodeIgnoreCase(sectionCode)
-      .orElseThrow(() -> new GeneralExc("Section not found!"));
-  Task task = taskRepo.findById(taskId)
-      .orElseThrow(() -> new TaskNotFoundExc(taskId));
+    @Transactional
+    public boolean deleteTask(String sectionCode, int taskId) {
+        // 1) load
+        Section section = sectionRepo
+                .findBySectionCodeIgnoreCase(sectionCode)
+                .orElseThrow(() -> new GeneralExc("Section not found!"));
+        Task task = taskRepo.findById(taskId)
+                .orElseThrow(() -> new TaskNotFoundExc(taskId));
 
-  // 2) verify ownership
-  if (!Objects.equals(task.getSection(), section)) {
-    throw new GeneralExc("Task not found in that section!");
-  }
-
-  // 3) break all TA links (will trigger orphanRemoval on tasList)
-  task.getTasList().clear();
-
-  // 4) also clear any other child collections you have
-  task.getWorkloadList().clear();    // if you have WorkLoad children
-
-  // 5) detach from section
-  section.getTasks().remove(task);
-  task.setSection(null);
-
-  // 6) flush these changes by saving the section
-  sectionRepo.save(section);
-
-  // 7) finally delete the task
-  taskRepo.delete(task);
-  return true;
-}
-/* @Override
-@Transactional
-public boolean deleteTask(String section_code, int task_id) {
-    // Get the section
-    Section section = sectionRepo.findBySectionCodeIgnoreCase(section_code)
-            .orElseThrow(() -> new GeneralExc("Section not found!"));
-    
-    // Get the task
-    Task task = taskRepo.findById(task_id)
-            .orElseThrow(() -> new TaskNotFoundExc(task_id));
-    
-    // Verify task belongs to the section
-    if (task.getSection() != null && task.getSection().getSectionCode().equals(section_code)) {
-        // First, remove all TA assignments for this task - USE DIRECT REPOSITORY ACCESS
-        if (task.getTasList() != null && !task.getTasList().isEmpty()) {
-            // Delete TA task relationships directly from the repository
-            taTaskRepo.deleteAllByTaskId(task.getTaskId());
-            
-            // Detach task from section
-            if (task.getSection() != null) {
-                Section taskSection = task.getSection();
-                taskSection.getTasks().remove(task);
-                task.setSection(null);
-            }
-            
-            // Refresh task from database after relationship changes
-            taskRepo.flush();
-            
-            // Clear collection (don't rely on cascade)
-            task.getTasList().clear();
-            taskRepo.save(task);
+        // 2) verify ownership
+        if (!Objects.equals(task.getSection(), section)) {
+            throw new GeneralExc("Task not found in that section!");
         }
-        
-        // Now delete the task
+
+        // 3) break all TA links (will trigger orphanRemoval on tasList)
+        task.getTasList().clear();
+
+        // 4) also clear any other child collections you have
+        task.getWorkloadList().clear();    // if you have WorkLoad children
+
+        // 5) detach from section
+        section.getTasks().remove(task);
+        task.setSection(null);
+
+        // 6) flush these changes by saving the section
+        sectionRepo.save(section);
+
+        // 7) finally delete the task
         taskRepo.delete(task);
         return true;
-    } else {
-        throw new GeneralExc("Task not found in the specified section!");
     }
-} */
+    /* @Override
+    @Transactional
+    public boolean deleteTask(String section_code, int task_id) {
+        // Get the section
+        Section section = sectionRepo.findBySectionCodeIgnoreCase(section_code)
+                .orElseThrow(() -> new GeneralExc("Section not found!"));
+
+        // Get the task
+        Task task = taskRepo.findById(task_id)
+                .orElseThrow(() -> new TaskNotFoundExc(task_id));
+
+        // Verify task belongs to the section
+        if (task.getSection() != null && task.getSection().getSectionCode().equals(section_code)) {
+            // First, remove all TA assignments for this task - USE DIRECT REPOSITORY ACCESS
+            if (task.getTasList() != null && !task.getTasList().isEmpty()) {
+                // Delete TA task relationships directly from the repository
+                taTaskRepo.deleteAllByTaskId(task.getTaskId());
+
+                // Detach task from section
+                if (task.getSection() != null) {
+                    Section taskSection = task.getSection();
+                    taskSection.getTasks().remove(task);
+                    task.setSection(null);
+                }
+
+                // Refresh task from database after relationship changes
+                taskRepo.flush();
+
+                // Clear collection (don't rely on cascade)
+                task.getTasList().clear();
+                taskRepo.save(task);
+            }
+
+            // Now delete the task
+            taskRepo.delete(task);
+            return true;
+        } else {
+            throw new GeneralExc("Task not found in the specified section!");
+        }
+    } */
 /* public boolean deleteTask(String section_code, int task_id) {
     try {
         // Get the task
@@ -270,7 +272,7 @@ public boolean deleteTask(String section_code, int task_id) {
         Task task = new Task(section, taskDto.getDuration(),taskDto.getDescription(), taskDto.getType(), 0);
         checkAndUpdateStatusTask(task);
         Task newTask = taskRepo.save(task);
-        
+
         return taskMapper.toDto(newTask);
     }
 
@@ -295,13 +297,13 @@ public boolean deleteTask(String section_code, int task_id) {
     @Override
     public boolean strict_deleteTask(int id) {
         taTaskRepo.deleteAllByTaskTaskId((long) id);
-        taTaskRepo.flush();   
+        taTaskRepo.flush();
 
         // 2) Bulk delete every workload_requests row referencing this Task
         workLoadRepo.deleteAllByTaskTaskId((long) id);
         workLoadRepo.flush();
         Task task = taskRepo.findById(id)
-        .orElseThrow(() -> new TaskNotFoundExc(id));
+                .orElseThrow(() -> new TaskNotFoundExc(id));
         task.getTasList().clear();
         //   c) Detach from its Section parent
         Section parentSection = task.getSection();
@@ -349,14 +351,14 @@ public boolean deleteTask(String section_code, int task_id) {
     @Override
     public boolean updateTask(int task_id, Task incoming) {
         Task existing = taskRepo.findById(task_id)
-            .orElseThrow(() -> new TaskNotFoundExc(task_id));
-        
+                .orElseThrow(() -> new TaskNotFoundExc(task_id));
+
         existing.setDuration(incoming.getDuration());
         existing.setWorkload(incoming.getWorkload());
         existing.setTaskType(incoming.getTaskType());
         existing.setStatus(incoming.getStatus());
         existing.setSection(incoming.getSection());
-        
+
         taskRepo.save(existing);
         return taskRepo.existsById(task_id);
     }
@@ -376,7 +378,7 @@ public boolean deleteTask(String section_code, int task_id) {
     @Override
     public boolean assignProctoring(int task_id, List<Long> ta_ids){
         Task task = taskRepo.findById(task_id)
-                    .orElseThrow(() -> new TaskNotFoundExc(task_id));
+                .orElseThrow(() -> new TaskNotFoundExc(task_id));
         for (Long ta_id : ta_ids){
             TA ta = taRepo.findById(ta_id).orElseThrow(() -> new TaNotFoundExc(ta_id));
             if (taTaskRepo.exists(task_id, ta.getId())) {
@@ -418,10 +420,10 @@ public boolean deleteTask(String section_code, int task_id) {
         if (taTaskRepo.exists(task.getTaskId(), ta.getId())) {
             throw new GeneralExc("TA is already assigned to this task");
         }
-        
+
         if (hasDutyOrLessonOrExam(ta, task.getDuration()))
             throw new GeneralExc("TA has a duty or lesson or exam on the same duration as the task");
-        
+
         task.assignTo(ta);
         taskRepo.saveAndFlush(task);
         reqServ.deleteAllReceivedAndSendedSwapAndTransferRequestsBySomeTime(ta, task.getDuration());
@@ -432,7 +434,7 @@ public boolean deleteTask(String section_code, int task_id) {
     @Transactional
     public boolean unassignTas(int task_id, Long instr_id) {
         Task task = taskRepo.findById(task_id)
-            .orElseThrow(() -> new GeneralExc("Task with ID " + task_id + " not found."));
+                .orElseThrow(() -> new GeneralExc("Task with ID " + task_id + " not found."));
 
         // Take a copy of the current TaTask links
         List<TaTask> snapshot = new ArrayList<>( task.getTasList() );
@@ -452,9 +454,9 @@ public boolean deleteTask(String section_code, int task_id) {
     public boolean unassignTA(Task task, TA ta, Long instr_id) {
         int taskId = task.getTaskId();
         TaTask link = taTaskRepo.findByTaskIdAndTaId(taskId, ta.getId())
-            .orElseThrow(() -> new GeneralExc(
-                "TA with id " + ta.getId() +
-                " is not assigned to task " + taskId));
+                .orElseThrow(() -> new GeneralExc(
+                        "TA with id " + ta.getId() +
+                                " is not assigned to task " + taskId));
 
         // Remove the join from both sides
         task.getTasList().remove(link);
@@ -472,7 +474,7 @@ public boolean deleteTask(String section_code, int task_id) {
         }
 
         Task task = taskOptional.get();
-        
+
         List<TaDto> tas_list = new ArrayList<>();
         for (TaTask t : task.getTasList()) {
             if (t.getTaOwner() == null) {
@@ -553,19 +555,19 @@ public boolean deleteTask(String section_code, int task_id) {
         if (task == null) {
             throw new GeneralExc("Task not found!");
         }
-        
+
         if (task.getStatus() == TaskState.DELETED) {
             return false;
         }
         Date current = new Date().currenDate();
         if (current.isBefore(task.getDuration().getStart()))
-            {mark_not_active(task);}
+        {mark_not_active(task);}
         else if (current.isAfter(task.getDuration().getStart()) && current.isBefore(task.getDuration().getFinish()))
-            {mark_active(task);}
+        {mark_active(task);}
         else{
-            mark_completed(task); 
+            mark_completed(task);
             for (TaTask ta : task.getTasList()){
-                TA t = ta.getTaOwner(); 
+                TA t = ta.getTaOwner();
                 WorkLoadDto workLoadDto = new WorkLoadDto();
                 workLoadDto.setTaskId(task.getTaskId());
                 workLoadDto.setWorkload(task.getWorkload());
@@ -576,11 +578,11 @@ public boolean deleteTask(String section_code, int task_id) {
                 workLoadDto.setSentTime(new Date().currenDate());
                 workLoadDto.setReceiverId(task.getSection().getInstructor().getId());
                 workLoadDto.setReceiverName(task.getSection().getInstructor().getName() + " " + task.getSection().getInstructor().getSurname());
-                workLoadDto.setDescription("Workload request from " + 
-                                            workLoadDto.getSenderName() + " for task " + 
-                                            task.getTaskId() + " of type " + 
-                                            task.getTaskType().toString() + " with workload of " + 
-                                            task.getWorkload() + " hours.");
+                workLoadDto.setDescription("Workload request from " +
+                        workLoadDto.getSenderName() + " for task " +
+                        task.getTaskId() + " of type " +
+                        task.getTaskType().toString() + " with workload of " +
+                        task.getWorkload() + " hours.");
                 workLoadServ.createWorkLoad(workLoadDto, t.getId());
             }
         }
@@ -633,7 +635,7 @@ public boolean deleteTask(String section_code, int task_id) {
         t.setStatus(TaskState.ACTIVE);
     }
 
-   
+
 
     private void mark_completed(Task t) {
         t.setStatus(TaskState.COMPLETED);
@@ -643,7 +645,7 @@ public boolean deleteTask(String section_code, int task_id) {
     @Scheduled(cron = "0 * * * * *")
     public void checkTasksForTime(){
         List<Task> tasks = taskRepo.findByStatusNotIn(
-            List.of(TaskState.COMPLETED, TaskState.DELETED)
+                List.of(TaskState.COMPLETED, TaskState.DELETED)
         );
         for(Task task : tasks){
             //log.info("status I " + task.getStatus() + " " + task.getDuration().getStart().getHour()+":"+task.getDuration().getStart().getMinute() + "/" + task.getDuration().getFinish().getHour()+":"+task.getDuration().getFinish().getMinute() + " " + "-" + Thread.currentThread().getName());
@@ -657,7 +659,7 @@ public boolean deleteTask(String section_code, int task_id) {
         Task task = taskRepo.findById(task_id)
                 .orElseThrow(() -> new TaskNotFoundExc(task_id));
         List<TaDto> tas = new ArrayList<>();
-        
+
         Section section = courseOfferingServ.getSectionByNumber(courseCode, Integer.parseInt(sectionCode));
         for (TA ta : section.getAssignedTas()){
             if (ta.isActive() && !ta.isDeleted() && !hasDutyOrLessonOrExam(ta, task.getDuration()))
@@ -674,14 +676,21 @@ public boolean deleteTask(String section_code, int task_id) {
 
     @Override
     public boolean hasDutyOrLessonOrExam(TA ta, Event duration) {
+        LocalDate currentDate = duration.getStart().toLocalDate();
+        DayOfWeek currentDow  = DayOfWeek.valueOf(currentDate.getDayOfWeek().name());
+
         for (TaTask taTask : ta.getTaTasks()) {
             if (taTask.getTask().getDuration().has(duration) && !taTask.getTask().getStatus().equals(TaskState.DELETED)) {
                 return true;
             }
         }
-        for (Section section : ta.getSectionsAsStudent()){
+        // 3) for each lesson, first match day‐of‐week, then time‐of‐day
+        for (Section section : ta.getSectionsAsStudent()) {
             for (Lesson lesson : section.getLessons()) {
-                if (lesson.getDuration().has(duration)) {
+                if (lesson.getDay() != currentDow) {
+                    continue; // different weekday → no conflict
+                }
+                if (timeOverlap(lesson.getDuration(), duration)) {
                     return true;
                 }
             }
@@ -692,5 +701,13 @@ public boolean deleteTask(String section_code, int task_id) {
             }
         }
         return false;
+    }
+
+    private boolean timeOverlap(Event a, Event b) {
+        int aStart = a.getStart().getHour() * 60 + a.getStart().getMinute();
+        int aEnd   = a.getFinish().getHour() * 60 + a.getFinish().getMinute();
+        int bStart = b.getStart().getHour() * 60 + b.getStart().getMinute();
+        int bEnd   = b.getFinish().getHour() * 60 + b.getFinish().getMinute();
+        return aStart < bEnd && bStart < aEnd;
     }
 }
