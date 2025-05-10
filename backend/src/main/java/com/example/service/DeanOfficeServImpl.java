@@ -1,16 +1,31 @@
 package com.example.service;
 
+import com.example.dto.CourseDto;
+import com.example.dto.CourseOfferingDto;
 import com.example.dto.DeanOfficeDto;
+import com.example.dto.FacultyCourseOfferingsDto;
 import com.example.entity.Actors.DeanOffice;
 import com.example.entity.Actors.Role;
+import com.example.entity.Courses.Course;
+import com.example.entity.Courses.CourseOffering;
+import com.example.entity.Courses.Department;
 import com.example.entity.General.Faculty;
+import com.example.entity.General.Term;
+import com.example.mapper.CourseMapper;
+import com.example.mapper.CourseOfferingMapper;
 import com.example.mapper.DeanOfficeMapper;
+import com.example.repo.CourseOfferingRepo;
+import com.example.repo.CourseRepo;
 import com.example.repo.DeanOfficeRepo;
 import com.example.repo.FacultyRepo;
-import jakarta.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import java.time.Month;
+import com.example.entity.General.Term;
+
+import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -21,6 +36,10 @@ public class DeanOfficeServImpl implements DeanOfficeServ {
     private final DeanOfficeRepo deanOfficeRepo;
     private final FacultyRepo facultyRepo;
     private final PasswordEncoder encoder;
+    private final CourseOfferingRepo courseOfferingRepo;
+    private final CourseMapper courseMapper;
+    private final CourseRepo courseRepo;
+    private final CourseOfferingMapper courseOfferingMapper;
     
 
     @Override
@@ -73,4 +92,46 @@ public class DeanOfficeServImpl implements DeanOfficeServ {
         DeanOffice deanOffice = deanOfficeMapper.toEntity(deanOfficeDto, faculty);
         return deanOfficeRepo.save(deanOffice);
     }
+
+    @Override
+    @Transactional(readOnly = true)
+    public FacultyCourseOfferingsDto getFacultyCourseData(String facultyCode) {
+        // 1) load faculty and its departments
+        Faculty faculty = facultyRepo.findById(facultyCode)
+                .orElseThrow(() -> new IllegalArgumentException("Faculty not found: " + facultyCode));
+        List<Department> depts = faculty.getDepartments();
+
+        // 2) figure out “current” term & year
+        LocalDate now = LocalDate.now();
+        Term   term = determineTerm(now.getMonth());
+        int    year = now.getYear();
+
+        // 3) fetch only those offerings in our departments _and_ in this term
+        List<CourseOffering> offerings = courseOfferingRepo
+                .findByCourse_DepartmentInAndSemester_YearAndSemester_Term(depts, year, term);
+
+        // map to DTO
+        List<CourseOfferingDto> offeringDtos = offerings.stream()
+                .map(courseOfferingMapper::toDto)
+                .collect(Collectors.toList());
+
+        // 4) fetch all courses in those same departments (no term-filter here)
+        List<Course> courses = courseRepo.findByDepartmentIn(depts);
+        List<CourseDto> courseDtos = courses.stream()
+                .map(courseMapper::toDto)
+                .collect(Collectors.toList());
+
+        return new FacultyCourseOfferingsDto(offeringDtos, courseDtos);
+    }
+
+    private Term determineTerm(Month m) {
+        switch (m) {
+            case FEBRUARY, MARCH, APRIL, MAY, JUNE:    return Term.SPRING;
+            case JULY, AUGUST:                         return Term.SUMMER;
+            default:                                   return Term.FALL;
+
+        }
+    }
+
+
 }

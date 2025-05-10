@@ -1,10 +1,12 @@
 package com.example.controller;
 
 import com.example.dto.DeanOfficeDto;
+import com.example.dto.FacultyCourseOfferingsDto;
 import com.example.entity.Actors.DeanOffice;
 import com.example.mapper.DeanOfficeMapper;
 import com.example.service.DeanOfficeServ;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -44,6 +46,17 @@ public class DeanOfficeController {
     public void delete(@PathVariable Long id) {
         deanOfficeServ.deleteById(id);
     }
+
+    @GetMapping("/{facultyCode}/getCourses")
+    public ResponseEntity<FacultyCourseOfferingsDto> getCourses(
+            @PathVariable String facultyCode) {
+
+        FacultyCourseOfferingsDto dto =
+                deanOfficeServ.getFacultyCourseData(facultyCode);
+
+        return ResponseEntity.ok(dto);
+    }
+
 }
 
 /*

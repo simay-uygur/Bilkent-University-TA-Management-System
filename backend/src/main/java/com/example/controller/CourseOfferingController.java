@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
+import com.example.dto.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -15,9 +16,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.example.dto.ClassRoomDto;
-import com.example.dto.CourseOfferingDto;
-import com.example.dto.ExamDto;
 import com.example.entity.Courses.CourseOffering;
 import com.example.entity.General.Event;
 import com.example.mapper.CourseOfferingMapper;
@@ -131,6 +129,31 @@ public class CourseOfferingController {
             }
         });
     }
+
+    //this is for frontend
+    @PostMapping("/{courseCode}/add-exam")
+    public CompletableFuture<ResponseEntity<Void>> createExam(
+            @PathVariable String courseCode,
+            @RequestBody ExamDto dto
+    ) {
+        return service
+                .createExamWithClassRoomGiven(dto, courseCode)
+                .thenApply(success -> {
+                    // if you want to return the new exam’s id you could switch to returning a body
+                    return ResponseEntity
+                            .status(HttpStatus.CREATED)
+                            .<Void>build();
+                });
+    }
+
+    @PostMapping("/{courseCode}/exam/slot-info")
+    public CompletableFuture<ExamSlotInfoDto> getExamSlotInfo(
+            @PathVariable String courseCode,
+            @RequestBody EventDto duration
+    ) {
+        return service.getExamSlotInfo(courseCode, duration);
+    }
+
 
 
 }
