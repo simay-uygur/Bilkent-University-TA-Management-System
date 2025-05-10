@@ -72,6 +72,7 @@ public class SectionController {
                 .collect(Collectors.toList());
     }
 
+
     @PostMapping
     public Section createSection(@RequestBody Section section) {
         return sectionServ.create(section);
@@ -94,6 +95,10 @@ public class SectionController {
     @GetMapping("section/{section_code}/task")
     public ResponseEntity<List<TaskDto>> getTasks(@PathVariable String section_code) {
         return new ResponseEntity<>(sectionServ.getTasks(section_code), HttpStatus.OK);
+    }
+    @GetMapping("section/task/{task_id}")
+    public ResponseEntity<TaskDto> getTaskById(@PathVariable int task_id) {
+        return new ResponseEntity<>(taskServ.getTaskById(task_id), HttpStatus.OK);
     }
     @DeleteMapping("section/{section_code}/task/{task_id}")
     public ResponseEntity<Boolean> deleteTask(@PathVariable String section_code, @PathVariable int task_id) {

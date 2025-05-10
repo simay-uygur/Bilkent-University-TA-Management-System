@@ -56,6 +56,24 @@ public class TaskServImpl implements TaskServ {
     private final WorkLoadRepo workLoadRepo;
     private final CourseOfferingServ courseOfferingServ;
     private final RequestServ reqServ;
+
+    @Override
+    public boolean unassignTasToTaskByTheirId(String sectionCode, int taskId, List<Long> taIds){
+        Task task = taskRepo.findById(taskId)
+                .orElseThrow(() -> new TaskNotFoundExc(taskId));
+        Section section = sectionRepo.findBySectionCodeIgnoreCase(sectionCode)
+                .orElseThrow(() -> new GeneralExc("Section not found!"));
+        if (task.getSection() != null && task.getSection().getSectionCode().equals(sectionCode)) {
+            for (Long taId : taIds) {
+                TA ta = taRepo.findById(taId)
+                        .orElseThrow(() -> new TaNotFoundExc(taId));
+                unassignTA(task, ta, section.getInstructor().getId());
+            }
+            return true;
+        } else {
+            throw new GeneralExc("Task not found in the specified section!");
+        }
+    }
     @Override
     public boolean assignTasToTaskByTheirId(String sectionCode, int taskId, List<Long> tas) {
         Task task = taskRepo.findById(taskId)

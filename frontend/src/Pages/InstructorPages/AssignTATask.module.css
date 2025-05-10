@@ -81,4 +81,87 @@
     font-size: 1rem;
     cursor: pointer;
   }
-  
+  /* Add to your AssignTATask.module.css */
+.existingTag {
+  background-color: #e0e0ff; /* Light blue for existing TAs */
+  border: 1px solid #b0b0ff;
+}
+
+.newTag {
+  background-color: #e0ffe0; /* Light green for newly selected TAs */
+  border: 1px solid #b0ffb0;
+}
+
+.taskDetails {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 1rem;
+  font-size: 0.9rem;
+}
+
+.taskType {
+  font-weight: bold;
+  margin-bottom: 0.25rem;
+}
+
+.taskDesc {
+  font-style: italic;
+}
+
+.taOption {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+}
+
+.taLevel {
+  color: #666;
+  font-size: 0.8rem;
+  margin: 0 0.5rem;
+}
+
+.taWorkload {
+  font-size: 0.8rem;
+  color: #666;
+}
+  .taskInfoCard {
+  background-color: #f8f8f8;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 20px;
+}
+
+.taskInfoCard h2 {
+  margin-top: 0;
+  color: #444;
+}
+
+.taskTime {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  color: #666;
+  font-size: 0.9rem;
+  margin: 8px 0;
+}
+
+.statusBadge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 4px;
+  background-color: #eee;
+  font-size: 0.85rem;
+  font-weight: bold;
+}
+
+.existingTag {
+  background-color: #e0e0ff; /* Light blue for existing TAs */
+  border: 1px solid #b0b0ff;
+}
+
+.newTag {
+  background-color: #e0ffe0; /* Light green for newly selected TAs */
+  border: 1px solid #b0ffb0;
+}

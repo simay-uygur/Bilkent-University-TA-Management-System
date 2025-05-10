@@ -81,7 +81,7 @@ public class Task_controller {
 
     @GetMapping("/api/task/{id}")
     public ResponseEntity<TaskDto> getTaskByID(@PathVariable int id) {
-        return new ResponseEntity<>(taskServ.getTaskById(id),HttpStatus.FOUND);
+        return new ResponseEntity<>(taskServ.getTaskById(id),HttpStatus.OK);
     }
 
     @GetMapping("/api/task/all")
@@ -116,10 +116,16 @@ public class Task_controller {
     public ResponseEntity<List<TaDto>> assignTA(@PathVariable int task_id, @RequestBody List<Long> tas, @PathVariable Long instr_id, @PathVariable int section_num, @PathVariable String course_code) {
         return new ResponseEntity<>(taskServ.assignTasToTask(tas, task_id, section_num, course_code, instr_id),HttpStatus.OK);
     } 
+    
     @PutMapping("/api/task/sectionCode/{sectionCode}/task/{taskId}/assign")
     @Transactional
     public ResponseEntity<Boolean> assignTAs(@PathVariable String sectionCode, @PathVariable int taskId, @RequestBody List<Long> taIds) {
         return new ResponseEntity<>(taskServ.assignTasToTaskByTheirId(sectionCode, taskId, taIds),HttpStatus.OK);
+    } 
+    @PutMapping("/api/task/sectionCode/{sectionCode}/task/{taskId}/unassign")
+    @Transactional
+    public ResponseEntity<Boolean> unassignTAs(@PathVariable String sectionCode, @PathVariable int taskId, @RequestBody List<Long> taIds) {
+        return new ResponseEntity<>(taskServ.unassignTasToTaskByTheirId(sectionCode, taskId, taIds),HttpStatus.OK);
     } 
 }
 
