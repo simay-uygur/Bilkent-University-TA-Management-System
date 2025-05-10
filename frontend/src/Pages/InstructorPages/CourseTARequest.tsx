@@ -406,7 +406,7 @@ const CourseTARequest: React.FC = () => {
             <div className={styles.selectorBlock}>
               <span className={styles.selectorTitle}>Wanted TAs:</span>
               <SearchSelect<TA>
-                key={`wanted-${resetKey.wanted}`}
+                key={wanted-${resetKey.wanted}}
                 options={tas.filter(t => !selectedSet.has(t.id))}
                 filterOption={t => t.name}
                 renderOption={t => <>{t.name}</>}
@@ -436,7 +436,7 @@ const CourseTARequest: React.FC = () => {
             <div className={styles.selectorBlock}>
               <span className={styles.selectorTitle}>Unwanted TAs:</span>
               <SearchSelect<TA>
-                key={`unwanted-${resetKey.unwanted}`}
+                key={unwanted-${resetKey.unwanted}}
                 options={tas.filter(t => !selectedSet.has(t.id))}
                 filterOption={t => t.name}
                 renderOption={t => <>{t.name}</>}

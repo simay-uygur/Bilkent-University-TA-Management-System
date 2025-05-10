@@ -9,7 +9,6 @@ interface DeptStats {
   tas: number
 }
 
-// Static department data with placeholder statistics
 const DEPARTMENTS: DeptStats[] = [
   { dept: 'CS', instructors: 24, courses: 42, tas: 76 },
   { dept: 'IE', instructors: 18, courses: 35, tas: 52 },

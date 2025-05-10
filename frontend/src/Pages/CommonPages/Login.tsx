@@ -1,6 +1,6 @@
-// src/pages/Login.tsx
+/* src/pages/Login.tsx */
 import React, { useState, FormEvent, useEffect } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate, useLocation, Link } from 'react-router-dom';
 import NavBar from '../../components/NavBars/NavBar';
 import { login } from '../../api';
 import styles from './Login.module.css';
@@ -15,8 +15,7 @@ interface JwtResponse {
   token: string;
   role: string;
   userId?: string;
-  userName: string;
-  currentSemester: string;
+  name?: string;
 }
 
 const Login: React.FC = () => {
@@ -30,7 +29,6 @@ const Login: React.FC = () => {
   const location = useLocation();
   const [referrer, setReferrer] = useState<string | null>(null);
 
-  // capture optional ?ref= redirect target
   useEffect(() => {
     const params = new URLSearchParams(location.search);
     const r = params.get('ref');
@@ -58,8 +56,7 @@ const Login: React.FC = () => {
       const jwt = data.token;
       const role = data.role;
       const userId = data.userId || username;
-      const userName = data.userName;
-      const currentSemester = data.currentSemester || '2025-SPRING'; // default semester
+      const name = data.name;
 
       if (!jwt) {
         setErrors({ password: 'Invalid username or password.' });
@@ -67,14 +64,11 @@ const Login: React.FC = () => {
         return;
       }
 
-      // store token and user info
       localStorage.setItem('jwt', jwt);
       localStorage.setItem('userId', userId);
       localStorage.setItem('userRole', role);
-      localStorage.setItem('userName', userName);
-      localStorage.setItem('currentSemester', currentSemester);
+      if (name) localStorage.setItem('userName', name);
 
-      // choose landing page by role
       let home = '/login';
       switch (role) {
         case 'ROLE_TA':
@@ -136,6 +130,9 @@ const Login: React.FC = () => {
             </div>
 
             <button type="submit" className={styles.button}>Log In</button>
+            <p className={styles.forgotLink}>
+              <Link to="/forgot-password">Forgot my password?</Link>
+            </p>
           </form>
         </div>
       </div>
