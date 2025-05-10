@@ -19,4 +19,6 @@ public interface PreferTasToCourseRepo extends JpaRepository<PreferTasToCourse, 
     Optional<List<PreferTasToCourse>> findByReceiver_Name(String depName);
 
     Optional<List<PreferTasToCourse>> findBySender_Id(Long instrId);
+
+    List<PreferTasToCourse> findByReceiver_NameAndIsPendingTrueAndIsApprovedFalseAndIsRejectedFalse(String deptName);
 }

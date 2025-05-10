@@ -240,10 +240,41 @@ public class RequestController {
     public ResponseEntity<Boolean> rejectWorkloadRequest(@PathVariable Long instrId, @RequestBody Long requestId) {
         return new ResponseEntity<>(workLoadServ.rejectRequest(instrId, requestId),HttpStatus.ACCEPTED);
     }
+    
+    @GetMapping("/instr/{instrId}/receivedAll")
+    public ResponseEntity<List<RequestDto>> getAllReceivedRequestsOfTheInstructor(@PathVariable Long instrId){
+      return new ResponseEntity<>(reqServ.getReceivedRequestsOfTheInstructor(instrId), HttpStatus.OK);
+    }
+
+    @GetMapping("/ta/{taId}/receivedAll")
+    public ResponseEntity<List<RequestDto>> getAllReceivedRequestsOfTheTa(
+            @PathVariable Long taId) {
+        return ResponseEntity.ok(
+            reqServ.getReceivedRequestsOfTheTa(taId)
+        );
+    }
+
+    // ——— Dean’s Office ———
+    @GetMapping("/deanoffice/{deanOfficeId}/receivedAll")
+    public ResponseEntity<List<RequestDto>> getAllReceivedRequestsOfTheDeanOffice(
+            @PathVariable Long deanOfficeId) {
+        return ResponseEntity.ok(
+            reqServ.getReceivedRequestsOfTheDeanOffice(deanOfficeId)
+        );
+    }
+
+    // ——— Department ———
+    @GetMapping("/department/{deptName}/receivedAll")
+    public ResponseEntity<List<RequestDto>> getAllReceivedRequestsOfTheDepartment(
+            @PathVariable String deptName) {
+        return ResponseEntity.ok(
+            reqServ.getReceivedRequestsOfTheDepartment(deptName)
+        );
+    }
 
     @GetMapping("/{user_id}/receivedReqs")
     public ResponseEntity<List<RequestDto>> getReceivedRequests(@PathVariable Long user_id) {
-       return new ResponseEntity<>(reqServ.getReceivedRequestsOfTheUser(user_id), HttpStatus.ACCEPTED);
+      return new ResponseEntity<>(reqServ.getReceivedRequestsOfTheUser(user_id), HttpStatus.ACCEPTED);
     }
 }
 /*

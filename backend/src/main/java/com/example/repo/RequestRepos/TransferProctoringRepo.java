@@ -1,6 +1,7 @@
 package com.example.repo.RequestRepos;
 
 import java.util.Collection;
+import java.util.List;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
@@ -31,4 +32,6 @@ public interface TransferProctoringRepo extends JpaRepository<TransferProctoring
         @Param("taId")    Long taId,
         @Param("examIds") Collection<Integer> examIds
     );
+
+    List<TransferProctoring> findByReceiver_IdAndIsPendingTrueAndIsApprovedFalseAndIsRejectedFalse(Long taId);
 }

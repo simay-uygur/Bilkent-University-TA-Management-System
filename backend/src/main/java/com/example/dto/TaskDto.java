@@ -23,7 +23,6 @@ import com.example.entity.General.Event;
 public class TaskDto {
     private int taskId;
     private String type;
-
     /**
      * List of TAs assigned to this task.
      */

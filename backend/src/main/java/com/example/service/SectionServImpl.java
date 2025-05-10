@@ -31,6 +31,7 @@ import com.example.entity.General.Student;
 import com.example.entity.General.Term;
 import com.example.entity.Tasks.Task;
 import com.example.mapper.TaskMapper;
+import com.example.repo.CourseOfferingRepo;
 import com.example.repo.CourseRepo;
 import com.example.repo.SectionRepo;
 import com.example.repo.StudentRepo;
@@ -54,6 +55,7 @@ public class SectionServImpl implements SectionServ {
     private final TARepo taRepo;
     private final TaskMapper taskMapper;
     private final SectionRepo sectionRepo;
+    private final CourseOfferingRepo offRepo;
     @Override
     @Transactional
     public boolean unassignTA(Long taId, String sectionCode) {
@@ -353,10 +355,18 @@ public class SectionServImpl implements SectionServ {
                                 .noneMatch(stu -> stu.getStudentId().equals(s.getStudentId()))) {
                             section.getRegisteredStudents().add(s);
                         }
+                        if (off.getRegisteredStudents().stream()
+                                .noneMatch(stu -> stu.getStudentId().equals(s.getStudentId()))) {
+                            off.getRegisteredStudents().add(s);
+                        }
                     } else if (taRepo.existsById(personId)) {
                         TA t = taService.getTAByIdTa(personId);
                         if (section.getRegisteredTas().stream().noneMatch(ta -> ta.getId().equals(t.getId()))) {
                             section.getRegisteredTas().add(t);
+                        }
+                        if (off.getRegisteredTas().stream()
+                                .noneMatch(ta -> ta.getId().equals(t.getId()))) {
+                            off.getRegisteredTas().add(t);
                         }
                     } else {
                         throw new IllegalArgumentException(
@@ -364,6 +374,10 @@ public class SectionServImpl implements SectionServ {
                     }
 
                     successful.add(section);
+
+                    // Persist BOTH sides immediately:
+                    repo.save(section);
+                    offeringService.save(off);
 
                 } catch (Exception ex) {
                     failed.add(new FailedRowInfo(
@@ -377,6 +391,7 @@ public class SectionServImpl implements SectionServ {
         if (!successful.isEmpty()) {
             repo.saveAll(successful);
             repo.flush();
+            offRepo.flush();
         }
 
         return Map.of(
@@ -386,106 +401,6 @@ public class SectionServImpl implements SectionServ {
         );
     }
 
-//    //@Transactional
-//    @Override
-//    public Map<String,Object> importSectionsAndInstructorsExcelWithCoordinators(MultipartFile file) throws IOException {
-//        List<Section> successful = new ArrayList<>();
-//        List<FailedRowInfo> failed  = new ArrayList<>();
-//
-//        try (Workbook wb = new XSSFWorkbook(file.getInputStream())) {
-//            Sheet sheet = wb.getSheetAt(0);
-//
-//            for (Row row : sheet) {
-//                if (row.getRowNum() == 0) continue;  // header
-//
-//                // 1) parse Term enum
-//                String termStr = getStringCellValue(row.getCell(4)).toUpperCase();
-//                Term termEnum;
-//                try {
-//                    termEnum = Term.valueOf(termStr);
-//                } catch (IllegalArgumentException ex) {
-//                    failed.add(new FailedRowInfo(
-//                            row.getRowNum(),
-//                            "InvalidTerm: must be SPRING, SUMMER, or FALL; found '" + termStr + "'"
-//                    ));
-//                    continue;
-//                }
-//
-//                try {
-//                    // 2) read core fields
-//                    String deptCode  = getStringCellValue(row.getCell(0)).toUpperCase();
-//                    int    courseNo  = (int) row.getCell(1).getNumericCellValue();
-//                    int    sectionNo = (int) row.getCell(2).getNumericCellValue();
-//                    int    year      = (int) row.getCell(3).getNumericCellValue();
-//                    long   staffId   = (long) row.getCell(5).getNumericCellValue();
-//                    int    isCoord   = (int) row.getCell(6).getNumericCellValue();  // NEW COLUMN
-//
-//                    // 3) semester lookup
-//                    Semester sem = semesterService
-//                            .findByYearAndTerm(year, termEnum.name())
-//                            .orElseThrow(() -> new IllegalArgumentException("Semester not found: " + year + " " + termEnum));
-//
-//                    // 4) course lookup
-//                    String fullCode = deptCode + "-" + courseNo;
-//                    Course course = courseRepo
-//                            .findByCourseCodeIgnoreCase(fullCode)
-//                            .orElseThrow(() -> new IllegalArgumentException("Course not found: " + fullCode));
-//
-//                    // 5) offering lookup (or create)
-//                    CourseOffering off = offeringService
-//                            .getByCourseAndSemester((long) course.getCourseId(), sem.getId())
-//                            .orElseGet(() -> {
-//                                CourseOffering nf = new CourseOffering();
-//                                nf.setCourse(course);
-//                                nf.setSemester(sem);
-//                                return offeringService.create(nf);
-//                            });
-//
-//                    // 6) instructor lookup
-//                    Instructor instr = instructorService.getById(staffId);
-//
-//                    // 7) build Section
-//                    String sectionCode = String.format("%s-%d-%d-%s",
-//                            fullCode, sectionNo, year, termEnum.name());
-//
-//                    if (repo.existsBySectionCodeEqualsIgnoreCase(sectionCode)) {
-//                        throw new IllegalArgumentException("Section with code '" + sectionCode + "' already exists.");
-//                    }
-//
-//                    Section sec = new Section();
-//                    sec.setSectionCode(sectionCode);
-//                    sec.setOffering(off);
-//                    sec.setInstructor(instr);
-//
-//                    // 8) if isCoordinator == 1, set the offering’s coordinator
-//                    if (isCoord == 1) {
-//                        off.setCoordinator(instr);
-//                    }
-//
-//                    successful.add(sec);
-//
-//                } catch (Exception e) {
-//                    failed.add(new FailedRowInfo(
-//                            row.getRowNum(),
-//                            e.getClass().getSimpleName() + ": " + e.getMessage()
-//                    ));
-//                }
-//            }
-//        }
-//
-//        if (!successful.isEmpty()) {
-//            repo.saveAll(successful);
-//            repo.flush();  // so that any changes to offerings (coordinator) are persisted
-//        }
-//
-//        Map<String,Object> result = new HashMap<>();
-//        result.put("successCount", successful.size());
-//        result.put("failedCount",  failed.size());
-//        result.put("failedRows",   failed);
-//        return result;
-//    }
-
-    //@Transactional
     @Override
     public Map<String,Object> importSectionsAndInstructorsExcelWithCoordinators(MultipartFile file) throws IOException {
         List<Section> successful = new ArrayList<>();
@@ -643,226 +558,6 @@ public class SectionServImpl implements SectionServ {
         //offering.setAssignedTas(offering.getAssignedTas());
         return true;
     }
-    
-
-
-// old codes
-//    @Override
-//    @Transactional
-//    public Map<String,Object> importFromExcel(MultipartFile file) throws IOException {
-//        List<Section> successful = new ArrayList<>();
-//        List<FailedRowInfo> failed  = new ArrayList<>();
-//
-//        try (Workbook wb = new XSSFWorkbook(file.getInputStream())) {
-//            Sheet sheet = wb.getSheetAt(0);
-//            for (Row row : sheet) {
-//                if (row.getRowNum() == 0) continue;  // header
-//
-//                try {
-//                    String deptCode = row.getCell(0).getStringCellValue().trim();
-//                    int    courseNo = (int) row.getCell(1).getNumericCellValue();
-//                    int    sectionNo= (int) row.getCell(2).getNumericCellValue();
-//                    int    year     = (int) row.getCell(3).getNumericCellValue();
-//                    String termStr  = row.getCell(4).getStringCellValue().trim().toUpperCase();
-//                    long   staffId  = (long) row.getCell(5).getNumericCellValue();
-//
-//                    // 1) semester
-//                    Semester sem = semesterService
-//                            .findByYearAndTerm(year, termStr)
-//                            .orElseThrow(() -> new IllegalArgumentException(
-//                                    "Semester not found: " + year + " " + termStr));
-//                    // assume deptCode = "CS", courseNo = "319"
-//                    String fullCode = deptCode.toUpperCase() + "-" + courseNo;
-//                    // e.g. "CS‑319"
-//                    Course course = courseRepo
-//                            .findByCourseCodeIgnoreCase(fullCode)
-//                            .orElseThrow(() -> new IllegalArgumentException(
-//                                    "Course not found: " + fullCode
-//                            ));
-//                    // 3) offering
-//                    CourseOffering off = offeringService
-//                            .getByCourseAndSemester((long) course.getCourseId(), sem.getId())
-//                            .orElseGet(() -> {
-//                                // build a brand‑new offering for this course + semester
-//                                CourseOffering newOff = new CourseOffering();
-//                                newOff.setCourse(course);
-//                                newOff.setSemester(sem);
-//                                // this will persist it (and because of your unique constraint
-//                                // on (course,semester) it won't duplicate if another thread snuck one
-//                                // in between)
-//                                return offeringService.create(newOff);
-//                            });
-//                    // 4) instructor
-//                    Instructor instr = instructorService.getById(staffId);
-//
-//                    // 5) build section
-//
-//                    String sectionCode = course.getCourseCode() + "-" + sectionNo;
-//                    try {
-//                        // Check if section exists - this should be in its own transaction
-//                        if (repo.existsBySectionCodeEqualsIgnoreCase(sectionCode)) {
-//                            failed.add(new FailedRowInfo(
-//                                    row.getRowNum(),
-//                                    "DuplicateKeyException: Section with code '" + sectionCode + "' already exists."
-//                            ));
-//                            continue; // Skip to next row
-//                        }
-//
-//                        Section sec = new Section();
-//                        sec.setSectionCode(sectionCode);
-//                        sec.setOffering(off);
-//                        sec.setInstructor(instr);
-//
-//                        // Save immediately - don't collect for batch saving
-//                        Section saved = repo.save(sec);
-//                        repo.flush(); // Force immediate commit
-//                        successful.add(saved);
-//
-//                    } catch (Exception e) {
-//                        // Catch duplicate key exceptions that might occur anyway
-//                        failed.add(new FailedRowInfo(
-//                                row.getRowNum(),
-//                                "Database error: " + e.getMessage()
-//                        ));
-//                    }
-//
-//                } catch (Exception e) {
-//                    failed.add(new FailedRowInfo(
-//                            row.getRowNum(),
-//                            e.getClass().getSimpleName() + ": " + e.getMessage()
-//                    ));
-//                }
-//            }
-//        }
-//
-//// Check if section already exists
-///* if (repo.existsBySectionCodeEqualsIgnoreCase(sectionCode)) {
-//    throw new IllegalArgumentException("Section with code '" + sectionCode + "' already exists.");
-//}
-//
-//                    Section sec = new Section();
-//                    sec.setSectionCode(course.getCourseCode() + "-" + sectionNo);
-//                    sec.setOffering(off);
-//                    sec.setInstructor(instr);
-//
-//                    successful.add(sec);
-//
-//                } catch (Exception e) {
-//                    failed.add(new FailedRowInfo(
-//                            row.getRowNum(),
-//                            e.getClass().getSimpleName() + ": " + e.getMessage()
-//                    ));
-//                }
-//            }
-//        }
-//
-//        if (!successful.isEmpty()) {
-//            repo.saveAll(successful);
-//            repo.flush();
-//        } */
-//
-//        Map<String,Object> result = new HashMap<>();
-//        result.put("successCount", successful.size());
-//        result.put("failedCount",  failed.size());
-//        result.put("failedRows",   failed);
-//        return result;
-//    }
-
-
-
-
-//@Transactional
-// for importing staff (instructors) with related sections and creates
-//    @Override
-//    public Map<String,Object> importSectionStudentsFromExcel(MultipartFile file) throws IOException {
-//        List<Section> successful = new ArrayList<>();
-//        List<FailedRowInfo> failed    = new ArrayList<>();
-//
-//        try (Workbook wb = new XSSFWorkbook(file.getInputStream())) {
-//            Sheet sheet = wb.getSheetAt(0);
-//            for (Row row : sheet) {
-//                if (row.getRowNum() == 0) continue; // skip header
-//
-//                try {
-//                    long   personId  = getLongCellValue(row.getCell(0));
-//                    String deptCode  = getStringCellValue(row.getCell(1)).toUpperCase();
-//                    int    courseNo  = (int) getNumericCellValue(row.getCell(2));
-//                    int    sectionNo = (int) getNumericCellValue(row.getCell(3));
-//                    int    year      = (int) getNumericCellValue(row.getCell(4));
-//                    String termStr   = getStringCellValue(row.getCell(5)).toUpperCase();
-////                    long   personId  = (long) row.getCell(0).getNumericCellValue();
-////                    String deptCode  = row.getCell(1).getStringCellValue().trim().toUpperCase();
-////                    int    courseNo  = (int) row.getCell(2).getNumericCellValue();
-////                    int    sectionNo = (int) row.getCell(3).getNumericCellValue();
-////                    int    year      = (int) row.getCell(4).getNumericCellValue();
-////                    String termStr   = row.getCell(5).getStringCellValue().trim().toUpperCase();
-//
-//                    // 1) Semester
-//                    Semester sem = semesterService
-//                            .findByYearAndTerm(year, termStr)
-//                            .orElseThrow(() -> new IllegalArgumentException(
-//                                    "Semester not found: "+year+" "+termStr));
-//
-//                    // 2) Course
-//                    String fullCode = deptCode + "-" + courseNo;
-//                    Course course = courseRepo
-//                            .findByCourseCodeIgnoreCase(fullCode)
-//                            .orElseThrow(() -> new IllegalArgumentException(
-//                                    "Course not found: "+fullCode));
-//
-//                    // 3) Offering (find or create)
-//                    CourseOffering off = offeringService
-//                            .getByCourseAndSemester((long) course.getCourseId(), sem.getId())
-//                            .orElseGet(() -> {
-//                                CourseOffering nf = new CourseOffering();
-//                                nf.setCourse(course);
-//                                nf.setSemester(sem);
-//                                return offeringService.create(nf);
-//                            });
-//
-//                    // 4) Section (must already exist)
-//                    String secCode = fullCode + "-" + sectionNo;
-//                    Section section = repo
-//                            .findBySectionCodeIgnoreCase(secCode)
-//                            .orElseThrow(() -> new IllegalArgumentException(
-//                                    "Section not found: "+secCode));
-//
-//                    // 5) Attach person as Student or TA
-//                    if (studentRepo.existsById(personId)) {
-//                        Student s = studentService.getStudentById(personId);
-//                        section.getRegisteredStudents().add(s);
-//
-//                    } else if (taRepo.existsById(personId)) {
-//                      /*   TA ta = taService.getTAById(personId);
-//                        section.getRegisteredTas().add(ta); */
-//
-//                    } else {
-//                        throw new IllegalArgumentException(
-//                                "No student or TA with id: " + personId);
-//                    }
-//
-//                    successful.add(section);
-//
-//                } catch (Exception ex) {
-//                    failed.add(new FailedRowInfo(
-//                            row.getRowNum(),
-//                            ex.getClass().getSimpleName()+": "+ex.getMessage()
-//                    ));
-//                }
-//            }
-//        }
-//
-//        if (!successful.isEmpty()) {
-//            repo.saveAll(successful);
-//            repo.flush();
-//        }
-//
-//        return Map.of(
-//                "successCount", successful.size(),
-//                "failedCount",  failed.size(),
-//                "failedRows",   failed
-//        );
-//    }
 
     private long getLongCellValue(Cell cell) {
         return (long) getNumericCellValue(cell);
