@@ -4,6 +4,7 @@ import BackBut from '../../components/Buttons/BackBut';
 import ConPop from '../../components/PopUp/ConPop';
 import styles from './CourseTA.module.css';
 import axios from 'axios';
+import LoadingPage from '../CommonPages/LoadingPage';
 
 interface TaDto {
   id: number;
@@ -67,7 +68,7 @@ const CourseTA: React.FC = () => {
   }, []);
 
   if (loadingReq) {
-    return <div>Loading requests…</div>;
+    return <LoadingPage/>;
   }
   if (reqError) {
     return <div className={styles.error}>{reqError}</div>;

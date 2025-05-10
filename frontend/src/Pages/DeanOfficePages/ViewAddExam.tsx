@@ -5,6 +5,7 @@ import BackBut from '../../components/Buttons/BackBut';
 import ConPop from '../../components/PopUp/ConPop';
 import ErrPopUp from '../../components/PopUp/ErrPopUp';
 import styles from './ViewAddExam.module.css';
+import axios from 'axios';
 
 export interface Exam {
   id: string;
@@ -74,18 +75,39 @@ const ViewAddExam: React.FC = () => {
       setShowError(true);
     } else {
       setShowConfirm(true);
+
     }
   };
 
   const handleExam = () => {
-    navigate("/deans-office/add-exam");
+    navigate("/deans-office/add-exams");
   };
 
-  const handleConfirmAdd = () => {
-    // TODO: implement actual add-exam logic here
-    console.log('Approved adding exams from file:', selectedFile);
-    setShowConfirm(false);
-    setSelectedFile(null);
+  const handleConfirmAdd = async () => {
+    if (!selectedFile) return;
+  
+    const formData = new FormData();
+    formData.append('file', selectedFile);
+  
+    try {
+      const response = await axios.post<Map<string, any>>(
+        '/api/upload/exams',
+        formData,
+        {
+          headers: {
+            'Content-Type': 'multipart/form-data'
+          }
+        }
+      );
+      console.log('Import result:', response.data);
+      // TODO: show success (toast, popup) or update UI based on response
+    } catch (err) {
+      console.error('Failed to import exams', err);
+      // TODO: set an error state and show ErrPopUp if you want
+    } finally {
+      setShowConfirm(false);
+      setSelectedFile(null);
+    }
   };
 
   return (
@@ -139,7 +161,7 @@ const ViewAddExam: React.FC = () => {
         <div className={styles.actions}>
           <input
             type="file"
-            accept=".csv"
+            accept=".xlsx"
             onChange={e => setSelectedFile(e.target.files?.[0] || null)}
             className={styles.fileInput}
           />

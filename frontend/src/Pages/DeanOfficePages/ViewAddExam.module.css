@@ -89,7 +89,9 @@
     box-shadow: 0 4px 12px rgba(0,0,0,0.2);
   }
   
-  .nav{
+  .nav {
+    display: block;
+    margin: 1.5rem auto;      /* centers the button */
     background-color: #3b82f6;
     color: white;
     border: none;
@@ -98,6 +100,4 @@
     cursor: pointer;
     font-size: 1rem;
     transition: background-color 0.2s, box-shadow 0.2s;
-    justify-content: center;
-    align-items: center;
   }
