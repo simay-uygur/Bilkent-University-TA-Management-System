@@ -110,8 +110,8 @@ public class TA_controller {
         Date date = new Date().currenDate() ;
         return new ResponseEntity<>(serv.getWeeklyScheduleForTA(ta, date), HttpStatus.OK);
     }
-    @GetMapping("api/ta/{taId}/assignedExams")
-    public ResponseEntity<List<ExamDto>> getMethodName(@PathVariable Long taId) {
+    @GetMapping("/api/ta/{taId}/assignedExams")
+    public ResponseEntity<List<ExamDto>> getAssignedExamsOfTa(@PathVariable Long taId) {
         return new ResponseEntity<>(serv.getAssignedExamsOfTa(taId), HttpStatus.OK);
     }
 
