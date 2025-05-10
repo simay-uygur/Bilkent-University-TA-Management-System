@@ -6,7 +6,8 @@ import java.util.Map;
 
 import com.example.dto.ExamDto;
 import com.example.service.ExamServ;
-import org.springframework.http.ResponseEntity;
+import com.lowagie.text.DocumentException;
+import org.springframework.http.*;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -101,5 +102,33 @@ public class InstructorController {
         return ResponseEntity.ok(exams);
     }
 
+
+    /**
+     * 2️⃣ Export that specific exam as PDF
+     */
+    @GetMapping("/{instructorId}/courses/{courseCode}/exams/{examId}/export/pdf")
+    public ResponseEntity<byte[]> exportCourseExamPdf(
+            @PathVariable Integer instructorId,
+            @PathVariable String  courseCode,
+            @PathVariable Integer examId
+    ) throws DocumentException, IOException {
+
+        instructorServ.validateInstructorCourseAndExam(
+                instructorId, courseCode, examId
+        );
+
+
+        byte[] pdf = examServ.exportExamToPdfOnlyId(examId);
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_PDF);
+        headers.setContentDisposition(
+                ContentDisposition.attachment()
+                        .filename("course_" + courseCode +
+                                "_exam_" + examId + ".pdf")
+                        .build()
+        );
+        return new ResponseEntity<>(pdf, headers, HttpStatus.OK);
+    }
 
 }

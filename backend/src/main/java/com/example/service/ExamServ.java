@@ -19,5 +19,8 @@ public interface ExamServ {
 
     byte[] exportExamToPdf(String facultyCode, Integer examId) throws IOException;
 
+
+    byte[] exportExamToPdfOnlyId(Integer examId) throws IOException;
+
     List<ExamDto> getExamsByCourseCode(String courseCode);
 }

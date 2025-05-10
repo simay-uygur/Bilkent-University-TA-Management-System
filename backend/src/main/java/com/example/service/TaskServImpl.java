@@ -443,8 +443,6 @@ public class TaskServImpl implements TaskServ {
         t.setStatus(TaskState.ACTIVE);
     }
 
-
-
     private void mark_completed(Task t) {
         t.setStatus(TaskState.COMPLETED);
     }

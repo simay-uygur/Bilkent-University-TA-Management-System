@@ -6,10 +6,15 @@ import com.example.ExcelHelpers.FailedRowInfo;
 import com.example.dto.InstructorDto;
 import com.example.entity.Actors.Instructor;
 
+import com.example.entity.Courses.CourseOffering;
 import com.example.entity.Courses.Department;
+import com.example.entity.Courses.Section;
+import com.example.entity.Exams.Exam;
 import com.example.mapper.InstructorMapper;
 import com.example.repo.DepartmentRepo;
+import com.example.repo.ExamRepo;
 import com.example.repo.InstructorRepo;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.apache.poi.ss.usermodel.*;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -30,6 +35,8 @@ public class InstructorServImpl implements InstructorServ {
     private final PasswordEncoder encoder;
     private final DepartmentRepo departmentRepo;
     private final InstructorMapper instructorMapper;
+    private final CourseOfferingServ courseOfferingServ;
+    private final ExamRepo examRepo;
 
     @Override
     public InstructorDto getInstructorById(Long id) {
@@ -164,7 +171,7 @@ public class InstructorServImpl implements InstructorServ {
     @Override
     public Instructor updateInstructor(Long id, Instructor instructor) {
         Instructor existingInstructor = instructorRepo.findById(id)
-            .orElseThrow(() -> new RuntimeException("Instructor with id " + id + " not found."));
+                .orElseThrow(() -> new RuntimeException("Instructor with id " + id + " not found."));
 
         existingInstructor.setName(instructor.getName());
         existingInstructor.setSurname(instructor.getSurname());
@@ -207,83 +214,47 @@ public class InstructorServImpl implements InstructorServ {
         List<Instructor> instructors = instructorRepo.findByDepartmentName(departmentName)
                 .orElseThrow(() -> new RuntimeException("Department not found: " + departmentName));
 
-      return instructors.stream()
+        return instructors.stream()
                 .map(instructorMapper::toDto)
                 .collect(Collectors.toList());
-    //return instructorMapper.toDtoList(instructors);
+        //return instructorMapper.toDtoList(instructors);
+    }
+
+    @Override
+    public void validateInstructorCourseAndExam(
+            Integer instructorId,
+            String courseCode,
+            Integer examId
+    ) {
+        // — 1) load instructor
+        Instructor inst = instructorRepo.findById(instructorId.longValue())
+                .orElseThrow(() ->
+                        new EntityNotFoundException("Instructor not found: " + instructorId));
+
+        // — 2) current offering for that course
+        CourseOffering offering = courseOfferingServ.getCurrentOffering(courseCode);
+        boolean isFound = false;
+        for (Section section : offering.getSections()) {
+            if (section.getInstructor().getId().equals(inst.getId())) {
+                isFound = true;
+                return;
+            }
+        }
+
+        throw new EntityNotFoundException(
+                "Instructor " + instructorId +
+                        " does not teach course " + courseCode);
+
+        //        if (!offering.getInstructor().getId().equals(inst.getId())) {
+//            throw new EntityNotFoundException(
+//                    "Instructor " + instructorId +
+//                            " does not teach course " + courseCode);
+//        }
+
+        // — 3) make sure the exam belongs to *that* offering
+    }
+
+
+
 }
 
-}
-
-
-//
-//    @Override
-//    public Map<String, Object> importInstructorsFromExcel(MultipartFile file) throws IOException {
-//        List<Instructor> successfulInstructors = new ArrayList<>();
-//        List<FailedRowInfo> failedRows = new ArrayList<>();
-//
-//        try (InputStream inputStream = file.getInputStream(); Workbook workbook = WorkbookFactory.create(inputStream)) {
-//            Sheet sheet = workbook.getSheetAt(0);
-//
-//            for (Row row : sheet) {
-//                if (row.getRowNum() == 0) continue; // Skip header row
-//
-//                try {
-//                    long staffId = (long) row.getCell(0).getNumericCellValue();
-//                    String firstName = row.getCell(1).getStringCellValue().trim();
-//                    String lastName = row.getCell(2).getStringCellValue().trim();
-//                    String email = row.getCell(3).getStringCellValue().trim();
-//                    String departmentCode = row.getCell(4).getStringCellValue().trim();
-//                    int inFacultyFlag = (int) row.getCell(5).getNumericCellValue(); // 1 = in faculty, 0 = office staff
-//                    int inactiveFlag = (int) row.getCell(6).getNumericCellValue(); // 0 = active, 1 = inactive
-//                    boolean isActive = (inactiveFlag == 0);
-//
-//                    // Only create Instructor if inFaculty = 1
-//                    if (inFacultyFlag == 1) {
-//                        Optional<Instructor> optionalInstructor = repo.findById(staffId); // id must be unique for each staff
-//
-//                        Instructor instructor = optionalInstructor.map(existing -> {
-//                            existing.setName(firstName);
-//                            existing.setSurname(lastName);
-//                            existing.setWebmail(email);
-//                            existing.setIsActive(isActive);
-//                            existing.setDeleted(false); // Just in case
-//                            return existing;
-//                        }).orElseGet(() -> {
-//                            Instructor newInstructor = new Instructor();
-//                            newInstructor.setId(staffId);
-//                            newInstructor.setName(firstName);
-//                            newInstructor.setSurname(lastName);
-//                            newInstructor.setWebmail(email);
-//                            newInstructor.setIsActive(isActive);
-//                            newInstructor.setRole(Role.INSTRUCTOR);
-//                            newInstructor.setPassword(encoder.encode("default123"));
-//                            return newInstructor;
-//                        });
-//
-//                        successfulInstructors.add(instructor);
-//                    }
-//                    // else -> If inFaculty == 0, later DepartmentOffice object will be created elsewhere
-//
-//                } catch (Exception e) {
-//                    StringBuilder rawData = new StringBuilder();
-//                    row.forEach(cell -> rawData.append(cell.toString()).append(" | "));
-//                    failedRows.add(new FailedRowInfo(
-//                            row.getRowNum(),
-//                            e.getClass().getSimpleName() + ": " + e.getMessage()
-//                    ));
-//                }
-//            }
-//        }
-//
-//        if (!successfulInstructors.isEmpty()) {
-//            repo.saveAll(successfulInstructors);
-//            repo.flush();
-//        }
-//
-//        Map<String, Object> result = new HashMap<>();
-//        result.put("successCount", successfulInstructors.size());
-//        result.put("failedCount", failedRows.size());
-//        result.put("failedRows", failedRows);
-//        return result;
-//    }
