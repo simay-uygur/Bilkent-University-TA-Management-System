@@ -81,8 +81,11 @@ public class LeaveServImpl implements LeaveServ{
 
     @Override
     public void rejectLeaveRequest(Long requestId, Long approverId) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'rejectLeaveRequest'");
+        Leave req = leaveRepo.findById(requestId).orElseThrow(() -> new GeneralExc("There is no such leave request."));
+        req.setApproved(false);
+        req.setRejected(true);
+        req.setPending(false);
+        leaveRepo.save(req);
     }
 
     @Override
