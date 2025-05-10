@@ -1,29 +1,23 @@
 package com.example.service;
 
-import com.example.dto.CourseDto;
-import com.example.dto.CourseOfferingDto;
-import com.example.dto.DeanOfficeDto;
-import com.example.dto.FacultyCourseOfferingsDto;
+import com.example.dto.*;
 import com.example.entity.Actors.DeanOffice;
 import com.example.entity.Actors.Role;
 import com.example.entity.Courses.Course;
 import com.example.entity.Courses.CourseOffering;
 import com.example.entity.Courses.Department;
+import com.example.entity.Exams.Exam;
 import com.example.entity.General.Faculty;
 import com.example.entity.General.Term;
 import com.example.mapper.CourseMapper;
 import com.example.mapper.CourseOfferingMapper;
 import com.example.mapper.DeanOfficeMapper;
-import com.example.repo.CourseOfferingRepo;
-import com.example.repo.CourseRepo;
-import com.example.repo.DeanOfficeRepo;
-import com.example.repo.FacultyRepo;
+import com.example.repo.*;
 import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import java.time.Month;
-import com.example.entity.General.Term;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -40,6 +34,7 @@ public class DeanOfficeServImpl implements DeanOfficeServ {
     private final CourseMapper courseMapper;
     private final CourseRepo courseRepo;
     private final CourseOfferingMapper courseOfferingMapper;
+    private final ExamRepo examRepo;
     
 
     @Override
@@ -132,5 +127,65 @@ public class DeanOfficeServImpl implements DeanOfficeServ {
         };
     }
 
+    @Transactional(readOnly = true)
+    @Override
+    public List<ExamDto> getAllExamsForFaculty(String facultyCode) {
+        // 1) fetch faculty → departments
+        Faculty faculty = facultyRepo.findById(facultyCode)
+                .orElseThrow(() -> new IllegalArgumentException("Faculty not found: " + facultyCode));
+        List<Department> depts = faculty.getDepartments();
+
+        // 2) determine current term & year
+        LocalDate now  = LocalDate.now();
+        Term      term = determineTerm(now.getMonth());
+        int       year = now.getYear();
+
+        // 3) load this term’s offerings in those departments
+        List<CourseOffering> offerings = courseOfferingRepo
+                .findByCourse_DepartmentInAndSemester_YearAndSemester_Term(depts, year, term);
+
+        // 4) flatten out every Exam on each offering
+        return offerings.stream()
+                .flatMap(offering -> offering.getExams().stream())
+                .map(exam -> {
+                    // reuse your ExamDto constructor:
+                    List<String> rooms = exam.getExamRooms().stream()
+                            .map(er -> er.getExamRoom().getClassroomId())
+                            .collect(Collectors.toList());
+
+                    return new ExamDto(
+                            exam.getDuration(),
+                            exam.getCourseOffering().getCourse().getCourseCode(),
+                            exam.getDescription(),
+                            rooms,
+                            exam.getRequiredTAs(),
+                            exam.getWorkload()
+                    );
+                })
+                .toList();
+    }
+
+
+    @Transactional(readOnly = true)
+    @Override
+    public ExamDto getExamDetails(Integer examId) {
+        Exam exam = examRepo.findById(examId)
+                .orElseThrow(() -> new IllegalArgumentException("Exam not found: " + examId));
+
+        // map room‐codes
+        List<String> rooms = exam.getExamRooms()
+                .stream()
+                .map(er -> er.getExamRoom().getClassroomId())
+                .collect(Collectors.toList());
+
+        return new ExamDto(
+                exam.getDuration(),
+                exam.getCourseOffering().getCourse().getCourseCode(),
+                exam.getDescription(),
+                rooms,
+                exam.getRequiredTAs(),
+                exam.getWorkload()
+        );
+    }
 
 }

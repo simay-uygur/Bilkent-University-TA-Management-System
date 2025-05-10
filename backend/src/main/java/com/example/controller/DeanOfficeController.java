@@ -1,6 +1,7 @@
 package com.example.controller;
 
 import com.example.dto.DeanOfficeDto;
+import com.example.dto.ExamDto;
 import com.example.dto.FacultyCourseOfferingsDto;
 import com.example.entity.Actors.DeanOffice;
 import com.example.mapper.DeanOfficeMapper;
@@ -57,6 +58,31 @@ public class DeanOfficeController {
         return ResponseEntity.ok(dto);
     }
 
+//    @GetMapping("/{facultyCode}/getCoursesBySemester")
+//    public ResponseEntity<FacultyCourseOfferingsDto> getCoursesBySemester(
+//            @PathVariable String facultyCode,
+//            @RequestParam int semester) {
+//
+//    }
+
+    // GET /api/v1/dean-offices/{facultyCode}/exams
+    @GetMapping("/{facultyCode}/exams")
+    public ResponseEntity<List<ExamDto>> getAllExamsForFaculty(
+            @PathVariable String facultyCode
+    ) {
+        List<ExamDto> exams = deanOfficeServ.getAllExamsForFaculty(facultyCode);
+        return ResponseEntity.ok(exams);
+    }
+
+    @GetMapping("/{facultyCode}/exams/{examId}")
+    public ResponseEntity<ExamDto> getExamDetail(
+            @PathVariable String facultyCode,
+            @PathVariable Integer examId
+    ) {
+        // (optionally verify that exam belongs to facultyCode)
+        ExamDto dto = deanOfficeServ.getExamDetails(examId);
+        return ResponseEntity.ok(dto);
+    }
 }
 
 /*
