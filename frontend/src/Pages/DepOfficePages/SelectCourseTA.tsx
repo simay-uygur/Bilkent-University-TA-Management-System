@@ -225,7 +225,7 @@ const SelectCourseTA: React.FC = () => {
   return (
     <div className={styles.pageWrapper}>
       <header className={styles.header}>
-        <BackBut to="/department-office/ta-requests" />
+        <BackBut to="/department-office/assign-course" />
         <h1 className={styles.title}>{courseData.courseName}</h1>
         <div className={styles.stats}>
           <span>Needed: {needed}</span>
@@ -313,15 +313,15 @@ const SelectCourseTA: React.FC = () => {
           message={`Confirm assignment of ${assigned.length} TAs to ${courseData.courseName}?`}
           onConfirm={async () => {
             try {
-              // 1. Approve the request first
-              await axios.put(`/api/request/${requestId}/approve`);
+             /*  // 1. Approve the request first
+              await axios.put(`/api/request/${requestId}/approve`); */
               
               // 2. Send assignments to backend
               for (const ta of assigned) {
                 await axios.post(`/api/sections/${sectionCode}/tas/${ta.id}`);
               }
               
-              navigate('/department-office/ta-requests');
+              navigate('/department-office/assign-course');
             } catch (err) {
               console.error('Error assigning TAs:', err);
               alert('Failed to assign TAs. Please try again.');

@@ -111,18 +111,50 @@ const ManageWorkload: React.FC = () => {
   };
 
   // ——— Delete all ———
-  const deleteAllTasks = async () => {
-    try {
-      const res = await fetch(
-        `/api/sections/section/${sectionCode}/task`,
-        { method: 'DELETE' }
-      );
-      if (!res.ok) throw new Error();
-      setTasks([]);
-    } catch {
-      showError('Failed to delete all tasks.');
+  // Delete all tasks by iterating through them
+const deleteAllTasks = async () => {
+  try {
+    // Show loading indication
+    setErrorPopup({ message: "Deleting tasks...", onConfirm: () => setErrorPopup(null) });
+    
+    // Create a copy of tasks to avoid mutation during deletion
+    const tasksToDelete = [...tasks];
+    let failedCount = 0;
+    
+    // Delete each task individually
+    for (const task of tasksToDelete) {
+      try {
+        // Use the same deletion endpoint as single task deletion
+        const res = await fetch(
+          `/api/sections/section/${sectionCode}/task/${task.taskId}`,
+          { method: 'DELETE' }
+        );
+        
+        if (!res.ok) {
+          failedCount++;
+          console.error(`Failed to delete task ${task.taskId}, status: ${res.status}`);
+        }
+      } catch (err) {
+        failedCount++;
+        console.error(`Error deleting task ${task.taskId}:`, err);
+      }
     }
-  };
+    
+    // Clear error popup
+    setErrorPopup(null);
+    
+    // Reload tasks to get fresh state
+    await loadTasks();
+    
+    // Show results
+    if (failedCount > 0) {
+      showError(`Failed to delete ${failedCount} task(s). Please try again.`);
+    }
+  } catch (err) {
+    console.error('Error in delete all operation:', err);
+    showError('Failed to delete all tasks.');
+  }
+};
 
   // ——— Open modals ———
   const openAdd = () => {
