@@ -81,6 +81,7 @@ public class SwapServImpl implements SwapServ{
         if(taskServ.hasDutyOrLessonOrExam(receiver, req.getSendersExam().getDuration())){
             throw new GeneralExc("TA was assigned to another task");
         }*/
+
         int senderWorkload = sender.getTotalWorkload();
         int receiverWorkload = receiver.getTotalWorkload();
         sender.setTotalWorkload(senderWorkload - senderExamWorkload + receiverExamWorkload);
@@ -108,8 +109,11 @@ public class SwapServImpl implements SwapServ{
     @Override
     @Transactional
     public void rejectSwapRequest(Long requestId, Long receiverId) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'rejectSwapRequest'");
+        Swap req = swapRepo.findById(requestId).orElseThrow(() -> new GeneralExc("There is no such swap request with id "+ requestId));
+        req.setApproved(false);
+        req.setRejected(true);
+        req.setPending(false);
+        swapRepo.save(req);
     }
 
     @Override

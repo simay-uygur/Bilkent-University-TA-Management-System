@@ -28,6 +28,7 @@ import com.example.exception.GeneralExc;
 import com.example.exception.NoPersistExc;
 import com.example.exception.taExc.TaNotFoundExc;
 import com.example.exception.taskExc.TaskNotFoundExc;
+import com.example.mapper.TaMapper;
 import com.example.mapper.TaskMapper;
 import com.example.repo.RequestRepos.WorkLoadRepo;
 import com.example.repo.SectionRepo;
@@ -55,7 +56,7 @@ public class TaskServImpl implements TaskServ {
     private final WorkLoadRepo workLoadRepo;
     private final CourseOfferingServ courseOfferingServ;
     private final RequestServ reqServ;
-
+    private final TaMapper taMapper;
     @Override
     public TaskDto createTask(TaskDto taskDto, String sectionCode) {
         if (taskDto == null) {
@@ -163,7 +164,7 @@ public class TaskServImpl implements TaskServ {
         List<TaTask> task_list = task.getTasList() ;
         for (TaTask t : task_list){
             if (Objects.equals(t.getTaOwner().getId(), ta_id))
-                return t.getTaOwner() ;
+                return t.getTaOwner();
         }
         throw new GeneralExc("TA with ID " + ta_id + " not found for task with ID " + task_id);
     }
@@ -194,6 +195,7 @@ public class TaskServImpl implements TaskServ {
     }
 
     @Override
+    @Transactional
     public List<TaDto> assignTasToTask(List<Long> tas, int taskId, int sectionNum, String courseCode, Long instrId){
         Task task = taskRepo.findById(taskId).orElseThrow(() -> new TaskNotFoundExc(taskId));
         unassignTas(taskId, instrId);
@@ -201,6 +203,7 @@ public class TaskServImpl implements TaskServ {
             TA ta = taRepo.findById(taId).orElseThrow(() -> new TaNotFoundExc(taId));
             assignTA(task, ta, instrId);
         }
+        taskRepo.saveAndFlush(task);
         return getTAsByTaskId(taskId);
     }
 
@@ -216,40 +219,47 @@ public class TaskServImpl implements TaskServ {
             throw new GeneralExc("TA has a duty or lesson or exam on the same duration as the task");
         
         task.assignTo(ta);
-        taskRepo.save(task);
+        taskRepo.saveAndFlush(task);
         reqServ.deleteAllReceivedAndSendedSwapAndTransferRequestsBySomeTime(ta, task.getDuration());
         return true;
     }
 
     @Override
     @Transactional
-    public boolean unassignTas(int task_id, Long instr_id){
-        Task task = taskRepo.findById(task_id).orElseThrow(() -> new GeneralExc("Task with ID " + task_id + " not found."));
-        for(TaTask taTask : task.getTasList()){
+    public boolean unassignTas(int task_id, Long instr_id) {
+        Task task = taskRepo.findById(task_id)
+            .orElseThrow(() -> new GeneralExc("Task with ID " + task_id + " not found."));
+
+        // Take a copy of the current TaTask links
+        List<TaTask> snapshot = new ArrayList<>( task.getTasList() );
+
+        // Iterate the copy; each call will remove from the real tasList
+        for (TaTask taTask : snapshot) {
             unassignTA(task, taTask.getTaOwner(), instr_id);
         }
+
+        // Persist the removals
+        taskRepo.saveAndFlush(task);
         return true;
     }
+
     @Override
     @Transactional
     public boolean unassignTA(Task task, TA ta, Long instr_id) {
+        int taskId = task.getTaskId();
+        TaTask link = taTaskRepo.findByTaskIdAndTaId(taskId, ta.getId())
+            .orElseThrow(() -> new GeneralExc(
+                "TA with id " + ta.getId() +
+                " is not assigned to task " + taskId));
 
-        /*TaTask link = taTaskRepo.findByTaskIdAndTaId(task_id, ta.getId()).
-        orElseThrow(() -> new GeneralExc("TA with id " + ta.getId() + " is not assigned to the task with id " + task.getTaskId()));
-        
-        task.getTasList().remove(link);   
-        ta.getTaTasks().remove(link);   
-        task.removeTA();                 
-        taTaskRepo.delete(link);  */
-        /*link.setTask(null);
-        taskRepo.saveAndFlush(task); 
-        link.setTaOwner(null);*/
-        task.removeTA();
-        taTaskRepo.deleteByTaskAndTa(task.getTaskId(), ta.getId());
+        // Remove the join from both sides
+        task.getTasList().remove(link);
+        ta.getTaTasks().remove(link);
+        task.removeTA();           // decrement your counter
+        taTaskRepo.delete(link);   // delete the row
 
         return true;
     }
-
     @Override
     public List<TaDto> getTAsByTaskId(int task_id) {
         Optional<Task> taskOptional = taskRepo.findById(task_id);
@@ -257,7 +267,7 @@ public class TaskServImpl implements TaskServ {
             throw new TaskNotFoundExc(task_id);
         }
 
-        Task task = (Task) taskOptional.get();
+        Task task = taskOptional.get();
         
         List<TaDto> tas_list = new ArrayList<>();
         for (TaTask t : task.getTasList()) {
@@ -273,7 +283,6 @@ public class TaskServImpl implements TaskServ {
             taDto.setName(ta.getName());
             taDto.setSurname(ta.getSurname());
             tas_list.add(taDto);
-            //taDto.se
         }
         return tas_list;
     }
@@ -461,7 +470,7 @@ public class TaskServImpl implements TaskServ {
     @Override
     public boolean hasDutyOrLessonOrExam(TA ta, Event duration) {
         for (TaTask taTask : ta.getTaTasks()) {
-            if (taTask.getTask().getDuration().has(duration)) {
+            if (taTask.getTask().getDuration().has(duration) && !taTask.getTask().getStatus().equals(TaskState.DELETED)) {
                 return true;
             }
         }

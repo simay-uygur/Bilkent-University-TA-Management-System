@@ -1,15 +1,13 @@
 package com.example.repo.RequestRepos;
 
 import java.util.Collection;
-import java.util.List;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-import com.example.entity.General.Date;
-import com.example.entity.Requests.RequestType;
-import com.example.entity.Requests.Swap;
 import com.example.entity.Requests.TransferProctoring;
 
 import jakarta.transaction.Transactional;
@@ -18,37 +16,19 @@ import jakarta.transaction.Transactional;
 public interface TransferProctoringRepo extends JpaRepository<TransferProctoring, Long> {
     boolean existsBySenderIdAndReceiverId(Long senderId, Long receiverId);
     boolean existsBySenderIdAndReceiverIdAndExamExamIdAndIsRejected(Long id, Long recId, int examId, boolean isRejected);
-    List<TransferProctoring> findAllByReceiverIdAndSentTimeBetweenAndRequestTypeInAndIsPendingTrue(
-        Long receiverId,
-        Date from,
-        Date to,
-        Collection<RequestType> types
-    );
-    List<TransferProctoring> findAllBySenderIdAndSentTimeBetweenAndRequestTypeInAndIsPendingTrue(
-        Long receiverId,
-        Date from,
-        Date to,
-        Collection<RequestType> types
-    );
-
-    @Modifying
+    
+    @Modifying(clearAutomatically = true)
     @Transactional
-    int deleteByReceiverIdAndSentTimeBetweenAndRequestTypeInAndIsPendingTrue(
-        Long receiverId,
-        Date start,
-        Date end,
-        Collection<RequestType> types
-    );
-
-    /**
-     * Same for swaps *sent* by the user.
-     */
-    @Modifying
-    @Transactional
-    int deleteBySenderIdAndSentTimeBetweenAndRequestTypeInAndIsPendingTrue(
-        Long senderId,
-        Date start,
-        Date end,
-        Collection<RequestType> types
+    @Query("""
+    DELETE FROM Swap s
+    WHERE s.isPending = true
+        AND ( s.sendersExam.examId   IN :examIds
+            OR s.receiversExam.examId IN :examIds )
+        AND ( s.sender.id   = :taId
+            OR s.receiver.id = :taId )
+    """)
+    int deleteAllSwapsForTaAndExamIds(
+        @Param("taId")    Long taId,
+        @Param("examIds") Collection<Integer> examIds
     );
 }

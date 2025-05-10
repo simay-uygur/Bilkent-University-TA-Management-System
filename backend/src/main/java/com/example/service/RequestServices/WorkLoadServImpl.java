@@ -16,6 +16,9 @@ import com.example.exception.GeneralExc;
 import com.example.exception.UserNotFoundExc;
 import com.example.exception.taExc.TaNotFoundExc;
 import com.example.repo.RequestRepos.WorkLoadRepo;
+
+import jakarta.transaction.Transactional;
+
 import com.example.repo.InstructorRepo;
 import com.example.repo.TARepo;
 import com.example.repo.TaTaskRepo;
@@ -92,4 +95,28 @@ public class WorkLoadServImpl implements WorkLoadServ {
         throw new UnsupportedOperationException("Unimplemented method 'getAllWorkLoadBySenderIdAndReceiverId'");
     }
     
+    @Override
+    @Transactional
+    public boolean approveRequest(Long instrId, Long requestId){
+        WorkLoad req = workLoadRepo.findById(requestId).orElseThrow(() -> new GeneralExc("No such request found!"));
+        TA sender = req.getSender();
+        sender.increaseWorkload(req.getTask().getWorkload());
+        taRepo.save(sender);
+        req.setApproved(true);
+        req.setRejected(false);
+        req.setPending(false);
+        workLoadRepo.save(req);
+        return true;
+    }
+
+    @Override
+    @Transactional
+    public boolean rejectRequest(Long instrId, Long requestId){
+        WorkLoad req = workLoadRepo.findById(requestId).orElseThrow(() -> new GeneralExc("No such request found!"));
+        req.setApproved(false);
+        req.setRejected(true);
+        req.setPending(false);
+        workLoadRepo.save(req);
+        return true;
+    }
 }

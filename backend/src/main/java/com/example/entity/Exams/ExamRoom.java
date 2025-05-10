@@ -66,6 +66,15 @@ public class ExamRoom {
     public String getExamRoomCode() {
         return examRoom != null ? examRoom.getClassroomId() : null;
     }
+
+    @ManyToMany(fetch = FetchType.LAZY,
+                cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    @JoinTable(
+      name               = "examroom_ta",
+      joinColumns        = @JoinColumn(name = "examroom_id"),
+      inverseJoinColumns = @JoinColumn(name = "ta_id")
+    )
+    private List<TA> assignedTas = new ArrayList<>();
 }
 
 

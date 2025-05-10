@@ -5,6 +5,8 @@ import java.util.List;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import com.example.entity.General.Date;
@@ -16,11 +18,13 @@ import jakarta.transaction.Transactional;
 @Repository
 public interface SwapRepo extends JpaRepository<Swap, Long>{
     boolean existsBySenderIdAndReceiverId(Long senderId, Long receiverId);
+
     boolean existsBySender_IdAndReceiver_IdAndSendersExam_ExamIdAndReceiversExam_ExamIdAndIsRejectedFalse(
             Long    senderId,
             Long    receiverId,
             Integer senderExamId,
-            Integer receiverExamId);
+            Integer receiverExamId
+    );
     List<Swap> findAllByReceiverIdAndSentTimeBetweenAndRequestTypeInAndIsPendingTrue(
         Long receiverId,
         Date from,
@@ -34,24 +38,19 @@ public interface SwapRepo extends JpaRepository<Swap, Long>{
         Collection<RequestType> types
     );
 
-    @Modifying
+    @Modifying(clearAutomatically = true)
     @Transactional
-    int deleteByReceiverIdAndSentTimeBetweenAndRequestTypeInAndIsPendingTrue(
-        Long receiverId,
-        Date start,
-        Date end,
-        Collection<RequestType> types
+    @Query("""
+    DELETE FROM Swap s
+    WHERE s.isPending = true
+        AND ( s.sendersExam.examId   IN :examIds
+            OR s.receiversExam.examId IN :examIds )
+        AND ( s.sender.id   = :taId
+            OR s.receiver.id = :taId )
+    """)
+    int deleteAllSwapsForTaAndExamIds(
+        @Param("taId")    Long taId,
+        @Param("examIds") Collection<Integer> examIds
     );
 
-    /**
-     * Same for swaps *sent* by the user.
-     */
-    @Modifying
-    @Transactional
-    int deleteBySenderIdAndSentTimeBetweenAndRequestTypeInAndIsPendingTrue(
-        Long senderId,
-        Date start,
-        Date end,
-        Collection<RequestType> types
-    );
 }
