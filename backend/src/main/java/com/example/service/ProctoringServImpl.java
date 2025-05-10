@@ -76,7 +76,10 @@ public class ProctoringServImpl implements ProctoringServ{
                 if (lesson.getDay() != examDow) {
                     continue; // different weekday → no conflict
                 }
-                if (timeOverlap(lesson.getDuration(), examDuration)) {
+                /*if (timeOverlap(lesson.getDuration(), examDuration)) {
+                    return true;
+                }*/
+                if(examDuration.hasLesson(getDay(lesson.getDay()), examDuration)){
                     return true;
                 }
             }
@@ -85,13 +88,34 @@ public class ProctoringServImpl implements ProctoringServ{
         return false;
     }
 
-    private boolean timeOverlap(Event a, Event b) {
+    private int getDay(DayOfWeek day){
+        switch(day) {
+            case MONDAY:
+                return 1;
+            case TUESDAY:
+                return 2;
+            case WEDNESDAY:
+                return 3;
+            case THURSDAY:
+                return 4;
+            case FRIDAY:
+                return 5;
+            case SATURDAY:
+                return 6;
+            case SUNDAY:
+                return 7;
+            default:
+                throw new IllegalArgumentException("Invalid day: " + day);
+        }
+    }
+
+    /*private boolean timeOverlap(Event a, Event b) {
         int aStart = a.getStart().getHour() * 60 + a.getStart().getMinute();
         int aEnd   = a.getFinish().getHour() * 60 + a.getFinish().getMinute();
         int bStart = b.getStart().getHour() * 60 + b.getStart().getMinute();
         int bEnd   = b.getFinish().getHour() * 60 + b.getFinish().getMinute();
         return aStart < bEnd && bStart < aEnd;
-    }
+    }*/
 
 //    private boolean hasAnyDutiesOrLessons(TA ta, Event examDuration) {
 //        // Check if the TA has any duties or lessons that conflict with the exam duration

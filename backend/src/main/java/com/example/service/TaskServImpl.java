@@ -498,7 +498,7 @@ public class TaskServImpl implements TaskServ {
                 if (lesson.getDay() != currentDow) {
                     continue; // different weekday → no conflict
                 }
-                if (timeOverlap(lesson.getDuration(), duration)) {
+                if(duration.hasLesson(getDay(lesson.getDay()), duration)){
                     return true;
                 }
             }
@@ -509,6 +509,27 @@ public class TaskServImpl implements TaskServ {
             }
         }
         return false;
+    }
+
+    private int getDay(DayOfWeek day){
+        switch(day) {
+            case MONDAY:
+                return 1;
+            case TUESDAY:
+                return 2;
+            case WEDNESDAY:
+                return 3;
+            case THURSDAY:
+                return 4;
+            case FRIDAY:
+                return 5;
+            case SATURDAY:
+                return 6;
+            case SUNDAY:
+                return 7;
+            default:
+                throw new IllegalArgumentException("Invalid day: " + day);
+        }
     }
 
     private boolean timeOverlap(Event a, Event b) {
