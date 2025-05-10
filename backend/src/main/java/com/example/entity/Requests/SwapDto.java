@@ -1,7 +1,6 @@
 package com.example.entity.Requests;
 
 import com.example.dto.RequestDto;
-import com.example.entity.General.Event;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -11,6 +10,8 @@ import lombok.EqualsAndHashCode;
 public class SwapDto extends RequestDto {
     private Long senderId;
     private Long receiverId;
-    private String examName;
-    private int examId;
+    private String senderExamName;
+    private String receiverExamName;
+    private int senderExamId;
+    private int receiverExamId;
 }

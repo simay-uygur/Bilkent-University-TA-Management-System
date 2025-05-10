@@ -41,9 +41,6 @@ public class ExamRoom {
     @JoinColumn(name = "classroom_id", nullable = false)
     private ClassRoom examRoom;      // FK kept in the same table (no name override needed)
 
-    @Column(name = "isApproved", nullable = false)
-    private boolean approved = false;
-
     @ManyToMany(fetch = FetchType.LAZY,
             cascade = { CascadeType.PERSIST, CascadeType.MERGE })
     @JoinTable(

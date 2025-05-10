@@ -7,5 +7,5 @@ public class StudentMiniDto {
     private Long id;
     private String name;
     private String surname;
-    private Boolean isTa;
+    private Boolean isTa = false;
 }
