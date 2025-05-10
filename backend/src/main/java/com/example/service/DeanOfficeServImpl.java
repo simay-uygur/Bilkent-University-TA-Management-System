@@ -87,7 +87,27 @@ public class DeanOfficeServImpl implements DeanOfficeServ {
         DeanOffice deanOffice = deanOfficeMapper.toEntity(deanOfficeDto, faculty);
         return deanOfficeRepo.save(deanOffice);
     }
+    @Override
+    public FacultyCourseDto getFacultynormalCourseData(String facultyCode){
+          Faculty faculty = facultyRepo.findById(facultyCode)
+                .orElseThrow(() -> new IllegalArgumentException("Faculty not found: " + facultyCode));
+        List<Department> depts = faculty.getDepartments();
 
+        // 2) figure out “current” term & year
+        LocalDate now = LocalDate.now();
+        Term   term = determineTerm(now.getMonth());
+        int    year = now.getYear();
+
+
+        // 4) fetch all courses in those same departments (no term-filter here)
+        List<Course> courses = courseRepo.findByDepartmentIn(depts);
+        List<CourseDto> courseDtos = courses.stream()
+                .map(courseMapper::toDto)
+                .collect(Collectors.toList());
+
+        return new FacultyCourseDto(courseDtos);
+    }
+    
     @Override
     @Transactional(readOnly = true)
     public FacultyCourseOfferingsDto getFacultyCourseData(String facultyCode) {
