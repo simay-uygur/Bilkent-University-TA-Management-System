@@ -106,6 +106,472 @@ const SelectCourseTA: React.FC = () => {
         console.log("Unpreferred TAs:", [...unpreferredTaIds]);
         
         // 5. Map all department TAs and mark their preference status
+       const processedTAs = allDepartmentTAs.map((ta: any) => {
+  const taIdString = ta.id.toString();
+  
+  // Check if this TA is in either preference list
+  let preference = 'normal';
+  if (preferredTaIds.has(taIdString)) {
+    preference = 'preferred';
+    console.log(`TA ${ta.name} ${ta.surname} (${taIdString}) is preferred`);
+  } else if (unpreferredTaIds.has(taIdString)) {
+    preference = 'unpreferred';
+    console.log(`TA ${ta.name} ${ta.surname} (${taIdString}) is unpreferred`);
+  }
+  
+  // Normalize the academicLevel to match our union type
+  let level: 'BS' | 'MS' | 'PhD';
+  if (ta.academicLevel === 'PHD') {
+    level = 'PhD';
+  } else if (ta.academicLevel === 'MSC') {
+    level = 'MS';
+  } else {
+    level = 'BS'; // Default to BS for any other value
+  }
+  
+  return {
+    id: taIdString,
+    name: `${ta.name} ${ta.surname}`,
+    level: level,
+    workload: ta.totalWorkload || 0,
+    hasAdjacentExam: false,
+    preference: preference as 'preferred' | 'unpreferred' | 'normal'
+  };
+});
+        
+        // 6. Update course data with preferences and needed count
+        setCourseData({
+          id: sectionCode,
+          courseName: formatSectionName(sectionCode),
+          needed: requestData.taNeeded || 3,
+          assignedTAs: [],
+          potentialTAs: processedTAs
+        });
+        
+        // 7. Fetch already assigned TAs for this section
+        try {
+          const assignedResponse = await axios.get(`/api/ta/sectionCode/${sectionCode}`);
+          const assignedTAs = assignedResponse.data;
+          
+          // Find these TAs in our processed list and mark them as assigned
+          if (Array.isArray(assignedTAs) && assignedTAs.length > 0) {
+            // Map assigned TAs to our format
+            // Fix the mapping of TA levels to ensure they match the union type
+const alreadyAssigned = assignedTAs.map(ta => {
+  const taIdString = ta.id.toString();
+  let preference = 'normal';
+  if (preferredTaIds.has(taIdString)) {
+    preference = 'preferred';
+  } else if (unpreferredTaIds.has(taIdString)) {
+    preference = 'unpreferred';
+  }
+  
+  // Normalize the academicLevel to match our union type
+  let level: 'BS' | 'MS' | 'PhD';
+  if (ta.academicLevel === 'PHD') {
+    level = 'PhD';
+  } else if (ta.academicLevel === 'MSC') {
+    level = 'MS';
+  } else {
+    level = 'BS'; // Default to BS for any other value
+  }
+  
+  return {
+    id: taIdString,
+    name: `${ta.name} ${ta.surname}`,
+    level: level,
+    workload: ta.totalWorkload || 0,
+    hasAdjacentExam: false,
+    preference: preference as 'preferred' | 'unpreferred' | 'normal'
+  };
+});
+            
+            // Set these as already assigned
+            setAssigned(alreadyAssigned);
+            
+            // Remove them from potential
+            const remainingPotential = processedTAs.filter((ta: { id: any; }) => 
+              !alreadyAssigned.some(assigned => assigned.id === ta.id)
+            );
+            setPotential(remainingPotential);
+          } else {
+            setPotential(processedTAs);
+          }
+        } catch (err) {
+          console.warn("Could not fetch assigned TAs:", err);
+          setPotential(processedTAs);
+        }
+        
+        setLoading(false);
+      } catch (err) {
+        console.error('Error fetching data:', err);
+        setError('Failed to load data. Please try again.');
+        setLoading(false);
+      }
+    };
+    
+    fetchData();
+  }, [requestId]);
+
+  // State for assigned TAs
+  const [assigned, setAssigned] = useState<TA[]>([]);
+  const [potential, setPotential] = useState<TA[]>([]);
+  
+  // Update potentials when course data changes
+  useEffect(() => {
+    if (courseData.potentialTAs.length > 0 && potential.length === 0) {
+      setPotential(courseData.potentialTAs);
+    }
+  }, [courseData.potentialTAs, potential.length]);
+
+  const needed = courseData.needed;
+  const leftCount = Math.max(0, needed - assigned.length);
+  
+  const [confirmAssign, setConfirmAssign] = useState(false);
+  const [showUnprefConfirm, setShowUnprefConfirm] = useState(false);
+  const [selectedUnpref, setSelectedUnpref] = useState<TA | null>(null);
+  const [unassignConfirm, setUnassignConfirm] = useState<TA | null>(null);
+  
+  // Functions to assign/unassign TAs
+  const assignTA = (ta: TA) => {
+    setAssigned(prev => [...prev, ta]);
+    setPotential(prev => prev.filter(p => p.id !== ta.id));
+  };
+  
+  const unassignTA = (ta: TA) => {
+    setAssigned(prev => prev.filter(p => p.id !== ta.id));
+    setPotential(prev => [...prev, ta]);
+  };
+  
+  // Function to handle unassigning an already assigned TA
+  const handleUnassignTA = async (ta: TA) => {
+    setUnassignConfirm(ta);
+  };
+  
+  const confirmUnassignTA = async (ta: TA) => {
+    const sectionCode = requestData?.sectionCode;
+    if (!sectionCode) return;
+    
+    try {
+      // First remove from UI
+      unassignTA(ta);
+      
+      // Then make API call to unassign
+      await axios.post(`/api/sections/${sectionCode}/tas/${ta.id}/unassign`);
+      console.log(`Successfully unassigned TA ${ta.id} from section ${sectionCode}`);
+    } catch (err) {
+      console.error('Error unassigning TA:', err);
+      // If API call fails, restore the TA to assigned list
+      assignTA(ta);
+      alert('Failed to unassign TA. Please try again.');
+    } finally {
+      setUnassignConfirm(null);
+    }
+  };
+  
+  const toggleSelect = (ta: TA) => {
+    if (assigned.some(a => a.id === ta.id)) {
+      handleUnassignTA(ta);
+    } else {
+      if (ta.preference === 'unpreferred') {
+        setSelectedUnpref(ta);
+        setShowUnprefConfirm(true);
+      } else if (assigned.length < needed) {
+        assignTA(ta);
+      }
+    }
+  };
+  
+  const handleUnprefConfirm = () => {
+    if (selectedUnpref) {
+      assignTA(selectedUnpref);
+      setSelectedUnpref(null);
+    }
+    setShowUnprefConfirm(false);
+  };
+  
+  // Sort TAs by preference first, then workload
+  const sortedPotential = useMemo(() => {
+    return [...potential].sort((a, b) => {
+      // First by preference
+      const prefOrder = { 'preferred': 0, 'normal': 1, 'unpreferred': 2 };
+      const prefDiff = prefOrder[a.preference] - prefOrder[b.preference];
+      
+      if (prefDiff !== 0) return prefDiff;
+      
+      // Then by workload
+      return a.workload - b.workload;
+    });
+  }, [potential]);
+  
+  if (loading) {
+    return <LoadingPage />;
+  }
+  
+  if (error) {
+    return <div className={styles.error}>{error}</div>;
+  }
+
+  const sectionCode = requestData?.sectionCode || '';
+
+  return (
+    <div className={styles.pageWrapper}>
+      <header className={styles.header}>
+        <BackBut to="/department-office/assign-course" />
+        <h1 className={styles.title}>{courseData.courseName}</h1>
+        <div className={styles.stats}>
+          <span>Needed: {needed}</span>
+          <span>Left: {leftCount}</span>
+          <span>Request ID: {requestId}</span>
+        </div>
+      </header>
+
+      <table className={styles.table}>
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Level</th>
+            <th>Workload</th>
+            <th>Preference</th>
+          </tr>
+        </thead>
+        <tbody>
+          {sortedPotential.map(ta => {
+            const prefClass = 
+              ta.preference === 'preferred'   ? styles.preferredRow :
+              ta.preference === 'unpreferred' ? styles.unpreferredRow : '';
+            
+            return (
+              <tr
+                key={ta.id}
+                onClick={() => toggleSelect(ta)}
+                className={`${styles.rowBase} ${prefClass}`}
+              >
+                <td>{ta.name}</td>
+                <td>{ta.level}</td>
+                <td>{ta.workload}</td>
+                <td>
+                  {ta.preference === 'preferred' ? '⭐ Preferred' :
+                   ta.preference === 'unpreferred' ? '⚠️ Unpreferred' : 'Normal'}
+                </td>
+              </tr>
+            );
+          })}
+        </tbody>
+      </table>
+
+      <section className={styles.selectedSection}>
+        <h2>Assigned TAs ({assigned.length}/{needed})</h2>
+        <ul className={styles.selectedList}>
+          {assigned.map(ta => {
+            const itemClass =
+              ta.preference === 'preferred'   ? styles.preferredItem :
+              ta.preference === 'unpreferred' ? styles.unpreferredItem :
+                                              styles.normalItem;
+            return (
+              <li key={ta.id} className={itemClass}>
+                {ta.name} {ta.preference === 'preferred' ? '⭐' : 
+                         ta.preference === 'unpreferred' ? '⚠️' : ''}
+                <button
+                  type="button"
+                  className={styles.unassignButton}
+                  onClick={(e) => {
+                    e.stopPropagation(); // Prevent the li onClick from firing
+                    handleUnassignTA(ta);
+                  }}
+                  title="Unassign TA"
+                >
+                  ×
+                </button>
+              </li>
+            );
+          })}
+        </ul>
+      </section>
+
+      <div className={styles.actions}>
+        <button 
+          className={styles.confirmButton} 
+          onClick={() => setConfirmAssign(true)}
+          disabled={assigned.length === 0}
+        >
+          Confirm Assignment
+        </button>
+      </div>
+
+      {showUnprefConfirm && selectedUnpref && (
+        <ConPop
+          message="This TA is unpreferred by the instructor. Are you sure you want to assign them?"
+          onConfirm={handleUnprefConfirm}
+          onCancel={() => setShowUnprefConfirm(false)}
+        />
+      )}
+
+      {unassignConfirm && (
+        <ConPop
+          message={`Are you sure you want to unassign ${unassignConfirm.name} from this section?`}
+          onConfirm={() => confirmUnassignTA(unassignConfirm)}
+          onCancel={() => setUnassignConfirm(null)}
+        />
+      )}
+
+     {confirmAssign && (
+  <ConPop
+    message={`Confirm assignment of ${assigned.length} TAs to ${courseData.courseName}?`}
+    onConfirm={async () => {
+      try {
+        // Track successful and failed assignments
+        let successCount = 0;
+        let failureCount = 0;
+        
+        // Process each TA assignment one by one
+        for (const ta of assigned) {
+          try {
+            // Send assignment request for this TA
+            await axios.post(`/api/sections/${sectionCode}/tas/${ta.id}`);
+            successCount++;
+          } catch (err: any) {
+            console.error(`Error assigning TA ${ta.name} (${ta.id}):`, err);
+            // Check if this is already assigned error
+            if (err.response?.status === 409) {
+              // Already assigned, count as success
+              successCount++;
+            } else {
+              failureCount++;
+            }
+          }
+        }
+        
+        // Show summary if there were failures
+        if (failureCount > 0) {
+          alert(`Assigned ${successCount} TAs successfully. ${failureCount} assignments failed.`);
+        }
+        
+        // Navigate back regardless of failures
+        navigate('/department-office/assign-course');
+      } catch (err) {
+        console.error('Unexpected error during TA assignment:', err);
+        alert('Failed to complete TA assignments. Please try again.');
+      } finally {
+        setConfirmAssign(false);
+      }
+    }}
+    onCancel={() => setConfirmAssign(false)}
+  />
+)}
+    </div>
+  );
+};
+
+export default SelectCourseTA;
+/* import React, { useState, useEffect, useMemo } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
+import BackBut from '../../components/Buttons/BackBut';
+import ConPop from '../../components/PopUp/ConPop';
+import styles from './SelectCourseTA.module.css';
+import axios from 'axios';
+import LoadingPage from '../CommonPages/LoadingPage';
+
+export interface TA {
+  id: string;
+  name: string;
+  level: 'BS' | 'MS' | 'PhD';
+  workload: number;
+  hasAdjacentExam: boolean;
+  preference: 'preferred' | 'unpreferred' | 'normal';
+}
+
+interface Course {
+  id: string;
+  courseName: string;
+  needed: number;
+  assignedTAs: TA[];
+  potentialTAs: TA[];
+  tasLeft?: number;
+}
+
+interface PreferTasRequest {
+  requestId: number;
+  sectionCode: string;
+  courseCode: string;
+  taNeeded: number;
+  preferredTas: Array<{id: number; name: string; surname: string}>;
+  nonPreferredTas: Array<{id: number; name: string; surname: string}>;
+}
+
+const SelectCourseTA: React.FC = () => {
+  const navigate = useNavigate();
+  // Now using requestId as the URL parameter
+  const { requestId } = useParams<{ requestId: string }>();
+  
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [requestData, setRequestData] = useState<PreferTasRequest | null>(null);
+  const [courseData, setCourseData] = useState<Course>({
+    id: '',
+    courseName: '',
+    needed: 3, // Default value
+    assignedTAs: [],
+    potentialTAs: [],
+  });
+  
+  // Parse from section code: e.g. "CS-464-1-2025-FALL" → "CS-464 Section 1 (FALL 2025)"
+  function formatSectionName(code: string): string {
+    const parts = code.split('-');
+    if (parts.length >= 5) {
+      return `${parts[0]}-${parts[1]} Section ${parts[2]} (${parts[4]} ${parts[3]})`;
+    }
+    return code;
+  }
+  
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setLoading(true);
+        
+        if (!requestId) {
+          setError('Missing request ID');
+          setLoading(false);
+          return;
+        }
+        
+        // 1. First get the request data to get sectionCode and preferences
+        const requestResponse = await axios.get(`/api/request/preferTas/${requestId}`);
+        const requestData = requestResponse.data;
+        setRequestData(requestData);
+        
+        const sectionCode = requestData.sectionCode;
+        if (!sectionCode) {
+          setError('Request does not contain a valid section code');
+          setLoading(false);
+          return;
+        }
+        
+        // 2. Get department code from section code (CS-464-1-2025-FALL → CS)
+        const departmentCode = sectionCode.split('-')[0];
+        if (!departmentCode) {
+          setError('Invalid section code format');
+          setLoading(false);
+          return;
+        }
+        
+        // 3. Get all TAs from this department
+        const tasResponse = await axios.get(`/api/ta/department/${departmentCode}`);
+        const allDepartmentTAs = tasResponse.data;
+        
+        // 4. Create lookup sets for preferred/unpreferred TA IDs
+        const preferredTaIds = new Set(
+          requestData.preferredTas?.map((ta: any) => ta.id.toString()) || []
+        );
+        
+        const unpreferredTaIds = new Set(
+          requestData.nonPreferredTas?.map((ta: any) => ta.id.toString()) || []
+        );
+        
+        console.log("Preferred TAs:", [...preferredTaIds]);
+        console.log("Unpreferred TAs:", [...unpreferredTaIds]);
+        
+        // 5. Map all department TAs and mark their preference status
         const processedTAs = allDepartmentTAs.map((ta: any) => {
           const taIdString = ta.id.toString();
           
@@ -313,8 +779,8 @@ const SelectCourseTA: React.FC = () => {
           message={`Confirm assignment of ${assigned.length} TAs to ${courseData.courseName}?`}
           onConfirm={async () => {
             try {
-             /*  // 1. Approve the request first
-              await axios.put(`/api/request/${requestId}/approve`); */
+              // 1. Approve the request first
+              // await axios.put(`/api/request/${requestId}/approve`); 
               
               // 2. Send assignments to backend
               for (const ta of assigned) {
@@ -336,7 +802,7 @@ const SelectCourseTA: React.FC = () => {
   );
 };
 
-export default SelectCourseTA;
+export default SelectCourseTA; */
 /* import React, { useState, useEffect, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import BackBut from '../../components/Buttons/BackBut';

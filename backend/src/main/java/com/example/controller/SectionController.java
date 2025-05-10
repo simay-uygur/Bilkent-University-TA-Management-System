@@ -117,6 +117,16 @@ public class SectionController {
             return ResponseEntity.ok().build();
         });
     }
+    @PostMapping("/{sectionCode}/tas/{taId}/unassign")
+    public CompletableFuture<ResponseEntity<Void>> UnassignTaToSection(
+            @PathVariable String sectionCode,
+            @PathVariable Long taId
+    ) {
+        return CompletableFuture.supplyAsync(() -> {
+            sectionServ.unassignTA(taId, sectionCode);
+            return ResponseEntity.ok().build();
+        });
+    }
 //
 //    @PostMapping("/{sectionCode}/tasWithDtos/{taId}")
 //    public CompletableFuture<ResponseEntity<Void>> assignTaToSectionWithDtos()

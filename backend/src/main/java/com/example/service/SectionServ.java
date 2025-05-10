@@ -33,4 +33,5 @@ public interface SectionServ {
     boolean assignTA(Long taId, String sectionCode);
     //List<SectionDto> getByDepartment(String deptName);
     List<TaskDto> getTasks(String sectionCode);
+    boolean unassignTA(Long taId, String sectionCode);
 }

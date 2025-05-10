@@ -54,7 +54,31 @@ public class SectionServImpl implements SectionServ {
     private final TARepo taRepo;
     private final TaskMapper taskMapper;
     private final SectionRepo sectionRepo;
+    @Override
+    @Transactional
+    public boolean unassignTA(Long taId, String sectionCode) {
+        Section section = sectionRepo
+                .findBySectionCodeIgnoreCase(sectionCode)
+                .orElseThrow(() -> new IllegalArgumentException("Section not found: " + sectionCode));
 
+        TA ta = taService.getTAByIdTa(taId);
+
+        if (!section.getAssignedTas().contains(ta)) {
+            throw new IllegalStateException(
+                    "TA " + taId + " is not assigned to section " + sectionCode);
+        }
+
+        section.getAssignedTas().remove(ta);
+        sectionRepo.save(section);
+
+        CourseOffering offering = section.getOffering();
+        if (offering.getAssignedTas().contains(ta)) {
+            offering.getAssignedTas().remove(ta);
+            System.out.println("offering.getAssignedTas() = " + offering.getAssignedTas());
+        }
+        
+        return true;
+    }
     @Override
     public List<TaskDto> getTasks(String courseCode) {
         Section section = repo.findBySectionCodeIgnoreCase(courseCode)
