@@ -62,14 +62,27 @@ export const AddExam: React.FC = () => {
     if (!userId) return;
     // fetch dean-office then courses
     axios.get<{ facultyCode: string }>(
-      `http://localhost:8080/api/v1/dean-offices/${userId}`
+      `/api/v1/dean-offices/${userId}`
     )
-    .then(res => axios.get<string[]>(
-      `http://localhost:8080/api/v1/dean-offices/${res.data.facultyCode}/getCourses`
-    ))
-    .then(res => setCourses(res.data))
-    .catch(err => console.error(err));
-  }, []);
+    .then(res => axios.get(
+    `/api/v1/dean-offices/${res.data.facultyCode}/getCourses`
+  ))
+  .then(res => {
+    // Extract course codes from the response
+    if (res.data && res.data.courses) {
+      // Map the courses array to get just the course codes
+      const courseCodes = res.data.courses.map((course: any) => course.courseCode);
+      setCourses(courseCodes);
+    } else {
+      console.error('Unexpected API response format:', res.data);
+      setCourses([]);
+    }
+  })
+  .catch(err => {
+    console.error('Error fetching courses:', err);
+    setCourses([]);
+  });
+}, []);
 
   const parseDateInfo = (d: string, t: string): DateInfo => {
     const [year, month, day] = d.split('-').map(Number);
@@ -84,7 +97,7 @@ export const AddExam: React.FC = () => {
       finish: parseDateInfo(date, endTime),
     };
     axios.post<SlotInfoResponse[]>(
-      `http://localhost:8080/api/v1/offerings/${courseCode}/exam/slot-info`,
+      `/api/v1/offerings/${courseCode}/exam/slot-info`,
       payload
     )
     .then(res => {
@@ -112,7 +125,7 @@ export const AddExam: React.FC = () => {
       workload,
     };
     axios.post(
-      `http://localhost:8080/api/v1/offerings/${courseCode}/add-exam`,
+      `/api/v1/offerings/${courseCode}/add-exam`,
       body
     )
     .then(() => navigate('/deans-office/view-add-exams'))

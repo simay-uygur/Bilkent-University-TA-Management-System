@@ -1,0 +1,78 @@
+/* src/pages/TaDetailedPage.module.css */
+.pageWrapper {
+  padding: 2rem;
+}
+.backButton {
+  background: none;
+  border: none;
+  color: #0066cc;
+  cursor: pointer;
+  margin-bottom: 1rem;
+  font-size: 1rem;
+}
+.heading {
+  font-size: 2rem;
+  margin-bottom: 0.5rem;
+}
+.subheading {
+  margin-bottom: 1.5rem;
+  color: #555;
+}
+.card {
+  background: #fff;
+  padding: 1.5rem;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  margin-bottom: 2rem;
+}
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 1rem;
+}
+.table th,
+.table td {
+  padding: 0.75rem;
+  border-bottom: 1px solid #ddd;
+  text-align: left;
+}
+.tableHeading {
+  margin: 0;
+}
+.actionButton {
+  background: #e74c3c;
+  color: #fff;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  cursor: pointer;
+}
+.actionButton:hover {
+  background: #c0392b;
+}
+.formGroup {
+  display: flex;
+  margin-top: 1rem;
+}
+.input {
+  flex: 1;
+  padding: 0.5rem;
+  margin-right: 0.5rem;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+.button {
+  padding: 0.5rem 1rem;
+  background: #2ecc71;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+.button:hover {
+  background: #27ae60;
+}
+.error {
+  color: red;
+  padding: 1rem;
+}

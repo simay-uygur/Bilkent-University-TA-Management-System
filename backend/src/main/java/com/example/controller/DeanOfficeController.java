@@ -15,6 +15,7 @@ import com.example.dto.DeanOfficeDto;
 import com.example.dto.ExamDto;
 import com.example.dto.ExamExportDto;
 import com.example.dto.FacultyCourseOfferingsDto;
+import com.example.dto.FacultyCourseDto;
 import com.example.entity.Actors.DeanOffice;
 import com.example.mapper.DeanOfficeMapper;
 import com.example.service.DeanOfficeServ;
@@ -65,11 +66,12 @@ public class DeanOfficeController {
     }
 
     @GetMapping("/{facultyCode}/getCourses")
-    public ResponseEntity<FacultyCourseOfferingsDto> getCourses(
+    public ResponseEntity<FacultyCourseDto> getCourses(
             @PathVariable String facultyCode) {
 
-        FacultyCourseOfferingsDto dto =
-                deanOfficeServ.getFacultyCourseData(facultyCode);
+        /* FacultyCourseOfferingsDto dto =
+                deanOfficeServ.getFacultyCourseData(facultyCode); */
+                FacultyCourseDto dto = deanOfficeServ.getFacultynormalCourseData(facultyCode);
 
         return ResponseEntity.ok(dto);
     }

@@ -3,6 +3,7 @@ package com.example.service;
 
 import com.example.dto.DeanOfficeDto;
 import com.example.dto.ExamDto;
+import com.example.dto.FacultyCourseDto;
 import com.example.dto.FacultyCourseOfferingsDto;
 import com.example.entity.Actors.DeanOffice;
 import org.springframework.transaction.annotation.Transactional;
@@ -23,4 +24,5 @@ public interface DeanOfficeServ {
 
     @Transactional(readOnly = true)
     ExamDto getExamDetails(Integer examId);
+    FacultyCourseDto getFacultynormalCourseData(String facultyCode);
 }

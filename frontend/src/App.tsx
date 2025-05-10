@@ -41,6 +41,7 @@ import ProctorCourseSelectionOut from './Pages/DeanOfficePages/ProctorCourseSele
 import ProctorTASelectionOut from './Pages/DeanOfficePages/ProctorTASelectionOut';
 import ForgotPassword from './Pages/CommonPages/ForgotPassword';
 import AddExam from './Pages/DeanOfficePages/AddExam';
+import DepartmentOfficeTaDetails from './Pages/DepOfficePages/DepartmentOfficeTaDetails';
 
 const App: React.FC = () => (
   <BrowserRouter>
@@ -81,6 +82,7 @@ const App: React.FC = () => (
           <Route index element={<DepartmentOffice />} />
           <Route path="/department-office/course/:courseCode" element={<CourseDetails />} />
           <Route path="/department-office/instructor/:id" element={<InstructorDetails />} />
+          <Route path="/department-office/ta/:id" element={<DepartmentOfficeTaDetails />} />
           <Route path="/department-office/assign-course/:requestId" element={<SelectCourseTA/>} />
           <Route path="/department-office/assign-course" element={<CourseTA />} />
           <Route path="/department-office/assign-proctor/:examID" element={<AssignProctorTA />} />
