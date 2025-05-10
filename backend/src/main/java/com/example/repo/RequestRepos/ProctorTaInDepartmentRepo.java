@@ -23,4 +23,7 @@ public interface ProctorTaInDepartmentRepo extends JpaRepository<ProctorTaInDepa
     List<ProctorTaInDepartment> findAllBySender_IdAndIsPendingTrue(
         Long senderId
     );
+
+    List<ProctorTaInDepartment> 
+      findByReceiver_NameAndIsPendingTrueAndIsApprovedFalseAndIsRejectedFalse(String departmentName);
 }

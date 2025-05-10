@@ -44,7 +44,7 @@ public class ScheduleServImpl implements ScheduleServ {
 
     @FunctionalInterface
     private interface Splitter {
-        void split(LocalDateTime start, LocalDateTime end, ScheduleItemType type, String classroom, String code, Long refId);
+        void split(Date start, Date end, ScheduleItemType type, String classroom, String code, Long refId);
     }
     // Implement the methods defined in the ScheduleServ interface here
     // For example:
@@ -68,17 +68,41 @@ public class ScheduleServImpl implements ScheduleServ {
     }
     
     @Override
-    public List<ScheduleItemDto> getWeeklySchedule(TA ta, LocalDateTime weekStart){
+    @Transactional
+    public List<ScheduleItemDto> getWeeklySchedule(Long taId, LocalDateTime weekStart){
+        TA ta = taRepo.findById(taId)
+                      .orElseThrow(() -> new TaNotFoundExc(taId));
         List<ScheduleItemDto> schedule = new ArrayList<>();
-        Splitter splitter = (LocalDateTime start, LocalDateTime end,
-                             ScheduleItemType type, String classroom, String code, Long refId) -> {
-            long totalMinutes = Duration.between(start, end).toMinutes();
+        Splitter splitter = (Date start, Date end,
+                            ScheduleItemType type, String classroom, String code, Long refId) -> {
+            if (start.getHour()   == null || start.getMinute() == null ||
+                end .getHour()   == null || end .getMinute()   == null) {
+                return;  // incomplete time → skip
+            }
+                    
+            // 1) total minutes since midnight
+            int startTotal = start.getHour() * 60 + start.getMinute();
+            int endTotal   = end.getHour() * 60 + end.getMinute();
+            int totalMinutes = endTotal - startTotal;
+            if (totalMinutes <= 0) {
+                return;  // no positive duration → skip
+            }
+                    
+                            // 2) how many 50-min slots?
             int segments = (int) Math.ceil(totalMinutes / 50.0);
             for (int i = 0; i < segments; i++) {
-                LocalDateTime segStart = start.plusMinutes(i * 50);
-                int slotIdx = computeSlotIndex(segStart);
+                int segStartTotal = startTotal + i * 50;
+                int slotIdx = 1 + ((segStartTotal - (8 * 60 + 30)) / 50);
                 ScheduleItemDto dto = new ScheduleItemDto();
-                dto.setDate(segStart.toLocalDate());
+                if (start.getYear() != null &&
+                start.getMonth()!= null &&
+                start.getDay()  != null) {
+                dto.setDate(LocalDate.of(
+                    start.getYear(),
+                    start.getMonth(),
+                    start.getDay()
+                ));
+            }
                 dto.setSlotIndex(slotIdx);
                 dto.setType(type);
                 dto.setReferenceId(refId);
@@ -94,7 +118,9 @@ public class ScheduleServImpl implements ScheduleServ {
         List<Lesson> lessons = lessonRepo.findBySection_AssignedTas_Id(ta.getId());
         for (Lesson l : lessons) {
             var dur = l.getDuration();
-            splitter.split(dur.getStart().toLocalDateTime(), dur.getFinish().toLocalDateTime(),
+            dur.setStart(setDay(dur.getStart(), l.getDay()));
+            dur.setFinish(setDay(dur.getStart(), l.getDay()));
+            splitter.split(dur.getStart(), dur.getFinish(),
                            ScheduleItemType.LESSON,
                            l.getLessonRoom().getClassroomId(),
                            l.getSection().getSectionCode(),
@@ -106,7 +132,7 @@ public class ScheduleServImpl implements ScheduleServ {
         for (TaTask tt : tasks) {
             var t = tt.getTask();
             var dur = t.getDuration();
-            splitter.split(dur.getStart().toLocalDateTime(), dur.getFinish().toLocalDateTime(),
+            splitter.split(dur.getStart(), dur.getFinish(),
                            ScheduleItemType.TASK,
                            t.getRoom().getClassroomId(),
                            t.getSection().getSectionCode(),
@@ -117,7 +143,7 @@ public class ScheduleServImpl implements ScheduleServ {
         for (ExamRoom er : ta.getExamRooms()) {
             var dur = er.getExam().getDuration();
             ClassRoom room = er.getExamRoom();
-            splitter.split(dur.getStart().toLocalDateTime(), dur.getFinish().toLocalDateTime(),
+            splitter.split(dur.getStart(), dur.getFinish(),
                            ScheduleItemType.PROCTORING,
                            room == null ? "" : room.getClassroomId(),
                            er.getExam().getCourseOffering().getCourse().getCourseCode(),
@@ -131,6 +157,108 @@ public class ScheduleServImpl implements ScheduleServ {
         return schedule;
     }
     
+    /*@Override
+    @Transactional
+    public List<ScheduleItemDto> getWeeklySchedule(TA ta, LocalDateTime weekStart) {
+        List<ScheduleItemDto> schedule = new ArrayList<>();
+        LocalDate weekStartDate = weekStart.toLocalDate();
+
+        // 1) First handle LESSONS specially
+        List<Lesson> lessons = lessonRepo.findBySection_AssignedTas_Id(ta.getId());
+        for (Lesson lesson : lessons) {
+            // compute the actual LocalDate for this lesson in the given week
+            java.time.DayOfWeek javaDayOfWeek =
+                java.time.DayOfWeek.valueOf(lesson.getDay().name());
+            LocalDate lessonDate =
+                weekStartDate.with(TemporalAdjusters.nextOrSame(javaDayOfWeek));
+
+            // then split by time exactly as before, but force dto.date = lessonDate
+            Event dur = lesson.getDuration();
+            int startTotal = dur.getStart().getHour() * 60 + dur.getStart().getMinute();
+            int endTotal   = dur.getFinish().getHour() * 60 + dur.getFinish().getMinute();
+            int totalMins  = endTotal - startTotal;
+            if (totalMins <= 0) continue;
+
+            int segments = (int)Math.ceil(totalMins / 50.0);
+            for (int i = 0; i < segments; i++) {
+                int segStart = startTotal + i * 50;
+                int slotIdx  = 1 + ((segStart - (8*60 + 30)) / 50);
+
+                ScheduleItemDto dto = new ScheduleItemDto();
+                dto.setDate(lessonDate);
+                dto.setSlotIndex(slotIdx);
+                dto.setType(ScheduleItemType.LESSON);
+                dto.setReferenceId(lesson.getLessonId());
+                if (i == 0) {
+                    dto.setClassroom(lesson.getLessonRoom().getClassroomId());
+                    dto.setCode(lesson.getSection().getSectionCode());
+                }
+                schedule.add(dto);
+            }
+        }
+
+        // 2) Then TASKS (use embedded Date’s year/month/day)
+        for (TaTask tt : taTaskRepo.findAllByTaId(ta.getId())) {
+            Event dur = tt.getTask().getDuration();
+            addSegments(schedule, dur, ScheduleItemType.TASK,
+                tt.getTask().getRoom().getClassroomId(),
+                tt.getTask().getSection().getSectionCode(),
+                (long)tt.getTask().getTaskId());
+        }
+
+        // 3) And PROCOTORINGS the same way
+        for (ExamRoom er : ta.getExamRooms()) {
+            Event dur = er.getExam().getDuration();
+            String roomId = er.getExamRoom()!=null
+                ? er.getExamRoom().getClassroomId() : "";
+            addSegments(schedule, dur, ScheduleItemType.PROCTORING,
+                roomId,
+                er.getExam().getCourseOffering().getCourse().getCourseCode(),
+                (long)er.getExamRoomId());
+        }
+
+        // 4) Finally sort and return
+        schedule.sort(Comparator
+            .comparing(ScheduleItemDto::getDate)
+            .thenComparingInt(ScheduleItemDto::getSlotIndex));
+        return schedule;
+    }
+
+    /** helper to split any Event into 50-min slots, using the embedded Event’s date */
+    private void addSegments(List<ScheduleItemDto> out,
+                            Event dur,
+                            ScheduleItemType type,
+                            String classroom,
+                            String code,
+                            Long refId) {
+        int startTotal = dur.getStart().getHour() * 60 + dur.getStart().getMinute();
+        int endTotal   = dur.getFinish().getHour() * 60 + dur.getFinish().getMinute();
+        int totalMins  = endTotal - startTotal;
+        if (totalMins <= 0) return;
+
+        int segments = (int)Math.ceil(totalMins / 50.0);
+        for (int i = 0; i < segments; i++) {
+            int segStart = startTotal + i * 50;
+            int slotIdx  = 1 + ((segStart - (8*60 + 30)) / 50);
+
+            ScheduleItemDto dto = new ScheduleItemDto();
+            // use the actual date fields from the embedded Event
+            dto.setDate(LocalDate.of(
+                dur.getStart().getYear(),
+                dur.getStart().getMonth(),
+                dur.getStart().getDay()
+            ));
+            dto.setSlotIndex(slotIdx);
+            dto.setType(type);
+            dto.setReferenceId(refId);
+            if (i == 0) {
+                dto.setClassroom(classroom);
+                dto.setCode(code);
+            }
+            out.add(dto);
+        }
+    }
+
 
     private int computeSlotIndex(LocalDateTime dt) {
             // minutes since 8:30
@@ -142,111 +270,18 @@ public class ScheduleServImpl implements ScheduleServ {
         return parts[0] +"-"+ parts[1] +"-"+ parts[2];
     }
     
+    private Date setDay(Date date, com.example.entity.General.DayOfWeek day){
+        switch (day) {
+            case MONDAY :  {date.setDay(1);break;}
+            case TUESDAY : {date.setDay(2);break;}
+            case WEDNESDAY :{date.setDay(3);break;}
+            case THURSDAY :{date.setDay(4);break;}
+            case FRIDAY :{date.setDay(5);break;}
+            case SATURDAY :{date.setDay(6);break;}
+            case SUNDAY :{date.setDay(7);break;}
+            default:
+                throw new AssertionError();
+        }
+        return date;
+    }
 }
-    /*
-    // Example method to build the weekly schedule for a TA.
-    @Override
-    public Schedule getWeeklyScheduleForTA(TA ta, Date anyCustomDate) {
-        // Compute the week start (Monday) using the utility method in Schedule
-        String weekStartStr = Schedule.computeWeekStart(anyCustomDate);
-        Schedule schedule = new Schedule(weekStartStr);
-
-        // Retrieve tasks and daily works (this should be done via repository/service calls).
-        List<Task> tasks = fetchTasksForTA(ta.getId(), weekStartStr);
-
-        DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-
-        // Process each Task from the TA's task lists.
-        for (Task task : tasks) {
-            // Obtain the Event from the task, which contains the start Date.
-            Event event = task.getDuration();
-
-            // Convert the custom Date to a LocalDate in order to build the day key.
-            LocalDate startDate = LocalDate.of(
-                    event.getStart().getYear(),
-                    event.getStart().getMonth(),
-                    event.getStart().getDay()
-            );
-
-            String key = startDate.format(dtf);// in format "yyyy-MM-dd"
-            String title = task.getTaskType().toString() ;
-            ScheduleItem item = new ScheduleItem(title, event, ScheduleItemType.TASK, task.getTaskId(),key);
-            if (!schedule.getScheduleItems().contains(item)) {
-                schedule.addScheduleItem(item);
-            }
-        }
-
-        for (Section sec : ta.getSectionsAsStudent()) {
-            // Obtain the Event from the lesson, which contains the start Date.
-            for (Lesson lesson : sec.getLessons()){
-                Event event = lesson.getDuration();
-                LocalDate startDate = LocalDate.of(
-                    event.getStart().getYear(),
-                    event.getStart().getMonth(),
-                    event.getStart().getDay()
-                );
-                String key = startDate.format(dtf);// in format "yyyy-MM-dd"
-                String title = sec.getSectionCode();
-                ScheduleItem item = new ScheduleItem(title, event, ScheduleItemType.LESSON, Math.toIntExact(sec.getSectionId()),key);
-                if (!schedule.getScheduleItems().contains(item)) {
-                    schedule.addScheduleItem(item);
-                } 
-            }
-        }
-
-        return schedule;
-    }
-
-    
-
-    // Stub methods to represent data fetching. Replace these with actual repository calls.
-    private List<Task> fetchTasksForTA(Long taId, String startDate) {
-        //List<TaTask> TaTasks = taTaskRepo.findAllPendingTasksByTaId(taId);
-        List<TaTask> TaTasks = taTaskRepo.findAllByTaId(taId);
-        List<Task> tasks_list = new ArrayList<>();
-        for (TaTask TaTask : TaTasks) {
-            Task task = TaTask.getTask();
-            if (task != null && task.getStartDate().compareTo(startDate) >= 0) {
-                tasks_list.add(task);
-            }
-        }
-        // Combine both lists into a single list of tasks.
-        return tasks_list;
-    }
-
-    private List<Lesson> fetchLessonsForTA(TA ta) {
-        // Retrieve daily duties assigned to the TA.
-        return List.of();
-    }
-
-    private List<Task> fetchTasksOnDateForTA(Long taId, String date) {
-        Optional<TA> ta = taRepo.findById(taId) ;
-        if (ta.isEmpty()) {
-            throw new TaNotFoundExc(taId);
-        }
-
-        TA ta_obj = ta.get() ;
-        List<Task> tasks_list = new ArrayList<>();
-        for (TaTask TaTask : ta_obj.getTaTasks()) {
-            Task task = TaTask.getTask();
-            if (task != null && task.getStartDate().equals(date)) {
-                tasks_list.add(task);
-            }
-        }
-        return tasks_list;
-    }
-
-    @Override
-    public List<ScheduleItem> getDaySchedule(TA ta, String date) {
-        // Fetch the schedule for the specified day.
-        List<ScheduleItem> scheduleItems = new ArrayList<>();
-        List<Task> tasks = fetchTasksOnDateForTA(ta.getId(), date);
-        for(Task task : tasks) {
-            Event event = task.getDuration();
-            ScheduleItem item = new ScheduleItem(task.getTaskType().toString() + " Task", event, ScheduleItemType.TASK, task.getTaskId(), date);
-            scheduleItems.add(item);
-        }
-        return scheduleItems;
-    }
-    */
-

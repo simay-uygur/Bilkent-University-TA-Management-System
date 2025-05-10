@@ -168,7 +168,8 @@ public class CourseOfferingServImpl implements CourseOfferingServ {
     }
 
     /** Map month → academic term */
-    private Term determineTerm(Month month) {
+    @Override
+    public Term determineTerm(Month month) {
         switch (month) {
             // February → June  = SPRING
             case FEBRUARY:
@@ -641,5 +642,14 @@ public class CourseOfferingServImpl implements CourseOfferingServ {
         return CompletableFuture.completedFuture(
                 new ExamSlotInfoDto(totalStudents, available)
         );
+    }
+
+    @Override
+    public boolean save(CourseOffering off){
+        LocalDate today = LocalDate.now();
+        if(repo.existsByCourse_CourseCodeAndSemester_YearAndSemester_Term(off.getCourse().getCourseCode(), off.getSemester().getId(), determineTerm(today.getMonth())))
+            throw new GeneralExc("Such offering already exists");
+        repo.save(off);
+        return repo.existsById(off.getId());
     }
 }

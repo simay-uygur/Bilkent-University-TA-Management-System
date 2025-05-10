@@ -57,7 +57,7 @@ public class ProctoringServImpl implements ProctoringServ{
         return CompletableFuture.completedFuture(availableTas);
     }
     
-    private boolean hasAnyDutiesOrLessons(TA ta, Event examDuration) {
+    public boolean hasAnyDutiesOrLessons(TA ta, Event examDuration) {
         // Check if the TA has any duties or lessons that conflict with the exam duration
         for (TaTask task : ta.getTaTasks()) {
             if (task.getTask().getDuration().has(examDuration)) {

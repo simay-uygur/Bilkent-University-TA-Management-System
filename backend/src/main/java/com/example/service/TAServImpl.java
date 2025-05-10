@@ -220,11 +220,8 @@ public class TAServImpl implements TAServ {
     }
 
     @Override
-    public List<ScheduleItemDto> getWeeklyScheduleForTA(TA ta, Date anyCustomDate) {
-        if (ta == null) {
-            throw new TaNotFoundExc(-1L);
-        }
-        return scheduleServ.getWeeklySchedule(ta, anyCustomDate.toLocalDateTime());
+    public List<ScheduleItemDto> getWeeklyScheduleForTA(Long id, Date anyCustomDate) {
+        return scheduleServ.getWeeklySchedule(id, anyCustomDate.toLocalDateTime());
     }
 
 

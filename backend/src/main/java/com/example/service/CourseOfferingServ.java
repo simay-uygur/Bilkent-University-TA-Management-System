@@ -2,6 +2,7 @@
 package com.example.service;
 
 import java.io.IOException;
+import java.time.Month;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -14,6 +15,7 @@ import com.example.dto.ExamDto;
 import com.example.dto.ExamSlotInfoDto;
 import com.example.entity.Courses.CourseOffering;
 import com.example.entity.Courses.Section;
+import com.example.entity.General.Term;
 import com.example.exception.GeneralExc;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.transaction.annotation.Transactional;
@@ -46,7 +48,8 @@ public interface CourseOfferingServ {
     Map<String,Object> importExamsFromExcel(MultipartFile file) throws IOException;
 
     CompletableFuture<ExamSlotInfoDto> getExamSlotInfo(String courseCode, EventDto duration);
-
+    boolean save(CourseOffering off);
+    Term determineTerm(Month month);
 }
 
 

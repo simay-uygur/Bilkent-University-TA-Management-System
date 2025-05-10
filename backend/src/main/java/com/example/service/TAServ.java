@@ -29,7 +29,7 @@ public interface TAServ {
     boolean assignTask(Task task, Long id);
     boolean deleteTaskById(int task_id, Long ta_id);
     boolean restoreTAById(Long id);
-    List<ScheduleItemDto> getWeeklyScheduleForTA(TA ta, Date anyCustomDate);
+    List<ScheduleItemDto> getWeeklyScheduleForTA(Long id, Date anyCustomDate);
     Map<String, Object> importTAsFromExcel(MultipartFile file) throws IOException;
     List<TaDto> getTAsByDepartment(String deptName);
     List<ExamDto> getAssignedExamsOfTa(Long taId);

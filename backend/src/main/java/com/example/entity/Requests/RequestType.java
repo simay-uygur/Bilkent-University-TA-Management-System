@@ -2,12 +2,11 @@ package com.example.entity.Requests;
 
 public enum RequestType {
     Swap,
-    SwapEnable,
     Leave,
     TransferProctoring,
     ProctTaFromFaculties,
     ProctTaFromFaculty,
-    ProctorTaInFaculty,
-    PreferTasToCourse,
-    WorkLoad
+    ProctorTaInFaculty,    // 
+    PreferTasToCourse,     // instructor to dean office 
+    WorkLoad               // ta -> to instr
 }
