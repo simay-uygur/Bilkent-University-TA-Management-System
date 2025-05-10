@@ -18,7 +18,6 @@ import lombok.NoArgsConstructor;
 public class TaskDto {
     private int id;
     private String type;
-
     /**
      * List of TAs assigned to this task.
      */

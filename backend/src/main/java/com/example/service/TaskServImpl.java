@@ -17,7 +17,9 @@ import com.example.entity.Actors.TA;
 import com.example.entity.Courses.Lesson;
 import com.example.entity.Courses.Section;
 import com.example.entity.Exams.Exam;
+import com.example.entity.General.ClassRoom;
 import com.example.entity.General.Date;
+import com.example.entity.General.DayOfWeek;
 import com.example.entity.General.Event;
 import com.example.entity.Requests.RequestType;
 import com.example.entity.Requests.WorkLoadDto;
@@ -30,6 +32,7 @@ import com.example.exception.taExc.TaNotFoundExc;
 import com.example.exception.taskExc.TaskNotFoundExc;
 import com.example.mapper.TaMapper;
 import com.example.mapper.TaskMapper;
+import com.example.repo.ClassRoomRepo;
 import com.example.repo.RequestRepos.WorkLoadRepo;
 import com.example.repo.SectionRepo;
 import com.example.repo.TARepo;
@@ -57,6 +60,7 @@ public class TaskServImpl implements TaskServ {
     private final CourseOfferingServ courseOfferingServ;
     private final RequestServ reqServ;
     private final TaMapper taMapper;
+    private final ClassRoomRepo roomRepo;
     @Override
     public TaskDto createTask(TaskDto taskDto, String sectionCode) {
         if (taskDto == null) {
@@ -203,7 +207,7 @@ public class TaskServImpl implements TaskServ {
             TA ta = taRepo.findById(taId).orElseThrow(() -> new TaNotFoundExc(taId));
             assignTA(task, ta, instrId);
         }
-        taskRepo.saveAndFlush(task);
+        //taskRepo.saveAndFlush(task);
         return getTAsByTaskId(taskId);
     }
 
@@ -287,64 +291,7 @@ public class TaskServImpl implements TaskServ {
         return tas_list;
     }
 
-    /*@Override
-    public boolean approveTask(int task_id) {
-        Optional<Task> taskOptional = taskRepo.findById(task_id);
-        if (taskOptional.isEmpty()) {
-            throw new TaskNotFoundExc(task_id);
-        }
-        Task task = taskOptional.get();
-        approve(task);
-        taskRepo.saveAndFlush(task);
-
-        Task t = taskRepo.findById(task_id)
-                .orElseThrow(() -> new TaskNotFoundExc(task_id));
-        if (!t.getStatus().equals(TaskState.APPROVED)) {
-            throw new NoPersistExc("Approval");
-        }
-    
-        return true;
-    }*/
-
-    /*@Override
-    public boolean rejectTask(int task_id) {
-        Optional<Task> taskOptional = taskRepo.findById(task_id);
-        if (taskOptional.isEmpty()) {
-            throw new TaskNotFoundExc(task_id);
-        }
-        Task task = taskOptional.get();
-        reject(task);
-        taskRepo.saveAndFlush(task);
-
-        Task t = taskRepo.findById(task_id)
-                .orElseThrow(() -> new TaskNotFoundExc(task_id));
-        if (!t.getStatus().equals(TaskState.REJECTED)) {
-            throw new NoPersistExc("Rejection");
-        }
-    
-        return true;
-    }*/
-
-    /*@Override
-    public boolean checkAndUpdateStatusTask(Task task) {
-        if (task == null) {
-            throw new GeneralExc("Task not found!");
-        }
-        
-        TaskState newStatus = task.isTaskActive() ? TaskState.PENDING : TaskState.NORESPOND;
-        if (task.getStatus() != newStatus) {
-            if (task.isTaskActive()) {
-                mark_pending(task);
-            } else {
-                mark_not_responded(task);
-                task.setTimePassed(true);
-            }
-            taskRepo.saveAndFlush(task);
-            return true;
-        }
-        return false;
-    }*/
-
+  
     public boolean checkAndUpdateStatusTask(Task task) {
         if (task == null) {
             throw new GeneralExc("Task not found!");
@@ -404,24 +351,6 @@ public class TaskServImpl implements TaskServ {
         return taskRepo.findDeletedTasks();
     }
 
-    /*private void mark_approved(Task t) {
-        t.setStatus(TaskState.APPROVED);
-        //Undone
-    }
-
-    private void approve(Task t){
-        mark_approved(t);
-    }
-
-    private void mark_rejected(Task t) {
-        t.setStatus(TaskState.REJECTED);
-        //Undone
-    }
-
-    private void reject(Task t){
-        mark_rejected(t);
-    }*/
-
     private void mark_not_active(Task t) {
         t.setStatus(TaskState.NOT_ACTIVE);
     }
@@ -470,13 +399,20 @@ public class TaskServImpl implements TaskServ {
     @Override
     public boolean hasDutyOrLessonOrExam(TA ta, Event duration) {
         for (TaTask taTask : ta.getTaTasks()) {
+            Task task = taTask.getTask();
+            if (task == null) {
+                continue;                      // no Task → skip
+            }
+            if (task.getStatus() == TaskState.DELETED) {
+                continue;                      // ignore deleted tasks
+            }
             if (taTask.getTask().getDuration().has(duration) && !taTask.getTask().getStatus().equals(TaskState.DELETED)) {
                 return true;
             }
         }
         for (Section section : ta.getSectionsAsStudent()){
             for (Lesson lesson : section.getLessons()) {
-                if (lesson.getDuration().has(duration)) {
+                if (duration.hasLesson(getDay(lesson.getDay()), lesson.getDuration())) {
                     return true;
                 }
             }
@@ -487,5 +423,27 @@ public class TaskServImpl implements TaskServ {
             }
         }
         return false;
+    }
+
+    private int getDay(DayOfWeek day){
+        switch(day) {
+            // Add cases here
+            case MONDAY:
+                return 1;
+            case TUESDAY:
+                return 2;
+            case WEDNESDAY:
+                return 3;
+            case THURSDAY:
+                return 4;
+            case FRIDAY:
+                return 5;
+            case SATURDAY:
+                return 6;
+            case SUNDAY:
+                return 7;
+            default:
+                throw new IllegalArgumentException("Invalid day: " + day);
+        }
     }
 }
