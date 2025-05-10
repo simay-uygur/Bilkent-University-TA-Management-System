@@ -2,14 +2,18 @@ package com.example.controller;
 
 import com.example.dto.DeanOfficeDto;
 import com.example.dto.ExamDto;
+import com.example.dto.ExamExportDto;
 import com.example.dto.FacultyCourseOfferingsDto;
 import com.example.entity.Actors.DeanOffice;
 import com.example.mapper.DeanOfficeMapper;
 import com.example.service.DeanOfficeServ;
+import com.example.service.ExamServ;
+import com.lowagie.text.DocumentException;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
 import java.util.List;
 
 @RestController
@@ -19,6 +23,7 @@ public class DeanOfficeController {
 
     private final DeanOfficeServ deanOfficeServ;
     private final DeanOfficeMapper deanOfficeMapper;
+    private final ExamServ examServ;
 
 //    @PostMapping("/{facultyCode}")
 //    public DeanOfficeDto create(@RequestBody DeanOfficeDto deanOfficeDto,
@@ -82,6 +87,24 @@ public class DeanOfficeController {
         // (optionally verify that exam belongs to facultyCode)
         ExamDto dto = deanOfficeServ.getExamDetails(examId);
         return ResponseEntity.ok(dto);
+    }
+
+    @GetMapping("/{facultyCode}/exams/{examId}/export/pdf")
+    public ResponseEntity<byte[]> exportExamPdf(
+            @PathVariable String facultyCode,
+            @PathVariable Integer examId
+    ) throws DocumentException, IOException {
+        byte[] pdf = examServ.exportExamToPdf(facultyCode, examId);
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_PDF);
+        headers.setContentDisposition(
+                ContentDisposition.attachment()
+                        .filename("exam_" + examId + ".pdf")
+                        .build()
+        );
+
+        return new ResponseEntity<>(pdf, headers, HttpStatus.OK);
     }
 }
 

@@ -413,40 +413,112 @@ public class CourseOfferingServImpl implements CourseOfferingServ {
         return list;
     }
 
-    private List<ExamRoom> findAndAssignToTheExamRooms(List<String> examRoomsDto, List<StudentMiniDto> students, Exam exam) {
+    private List<ExamRoom> findAndAssignToTheExamRooms(
+            List<String> examRoomsDto,
+            List<StudentMiniDto> students,
+            Exam exam
+    ) {
         List<ExamRoom> examRooms = new ArrayList<>();
-        int c = 0 ;
-        for (String code : examRoomsDto){
+        int studentIndex = 0;  // ← global pointer
+
+        for (String code : examRoomsDto) {
+            // 1) lookup & availability check
+            ClassRoom classRoom = classRoomRepo
+                    .findClassRoomByClassroomId(code)
+                    .orElseThrow(() -> new GeneralExc("Classroom not found: " + code));
+            for (ExamRoom er : classRoom.getExamRooms()) {
+                if (er.getExam().getDuration().has(exam.getDuration())) {
+                    throw new GeneralExc(
+                            "Classroom " + code + " already assigned at " + exam.getDuration()
+                    );
+                }
+            }
+
+            // 2) build this room
             ExamRoom examRoom = new ExamRoom();
             examRoom.setExam(exam);
-            ClassRoom classRoom = classRoomRepo.findClassRoomByClassroomId(code)
-                    .orElseThrow(() -> new GeneralExc("Classroom not found: " + code));
-            for (ExamRoom examroom : classRoom.getExamRooms()) {
-                if (examroom.getExam().getDuration().has(exam.getDuration())) {
-                    throw new GeneralExc("Classroom " + code + " already assigned to an exam for that time " + exam.getDuration());
-                }
-            }
-            for(int i = 0; i < classRoom.getExamCapacity() && i < students.size(); i++) {
-                final int index = i; 
-                final StudentMiniDto currentStudent = students.get(index);
-                if (students.get(index).getIsTa()) {
-                    TA ta = taRepo.findById(currentStudent.getId()).orElseThrow(() -> new GeneralExc("TA not found: " + currentStudent.getId()));
+            int capacity = classRoom.getExamCapacity();
+
+            // 3) fill up to `capacity`, advancing studentIndex each time
+            while (studentIndex < students.size()
+                    && (examRoom.getStudentsList().size()
+                    + examRoom.getTasAsStudentsList().size()) < capacity
+            ) {
+                StudentMiniDto sm = students.get(studentIndex++);
+                if (Boolean.TRUE.equals(sm.getIsTa())) {
+                    TA ta = taRepo.findById(sm.getId())
+                            .orElseThrow(() -> new GeneralExc("TA not found: " + sm.getId()));
                     examRoom.getTasAsStudentsList().add(ta);
+                } else {
+                    Student st = studentRepo.findById(sm.getId())
+                            .orElseThrow(() -> new GeneralExc("Student not found: " + sm.getId()));
+                    examRoom.getStudentsList().add(st);
                 }
-                else{
-                    Student student = studentRepo.findById(students.get(index).getId()).orElseThrow(() -> new GeneralExc("Student not found: " + students.get(index).getId()));
-                    examRoom.getStudentsList().add(student);
-                }
-                c++;
             }
+
             examRoom.setExamRoom(classRoom);
             examRooms.add(examRoom);
-            if (c == students.size()) {
-                return examRooms;
-            }
+
+            // if we’ve assigned everyone, stop
+            if (studentIndex >= students.size()) break;
         }
+
         return examRooms;
     }
+
+//
+//    private List<ExamRoom> findAndAssignToTheExamRooms(
+//            List<String> examRoomsDto,
+//            List<StudentMiniDto> students,
+//            Exam exam
+//    ) {
+//        List<ExamRoom> examRooms = new ArrayList<>();
+//        int studentIndex = 0;  // ← global pointer
+//
+//        for (String code : examRoomsDto) {
+//            // 1) lookup & availability check
+//            ClassRoom classRoom = classRoomRepo
+//                    .findClassRoomByClassroomId(code)
+//                    .orElseThrow(() -> new GeneralExc("Classroom not found: " + code));
+//            for (ExamRoom er : classRoom.getExamRooms()) {
+//                if (er.getExam().getDuration().has(exam.getDuration())) {
+//                    throw new GeneralExc(
+//                            "Classroom " + code + " already assigned at " + exam.getDuration()
+//                    );
+//                }
+//            }
+//
+//            // 2) build this room
+//            ExamRoom examRoom = new ExamRoom();
+//            examRoom.setExam(exam);
+//            int capacity = classRoom.getExamCapacity();
+//
+//            // 3) fill up to `capacity`, advancing studentIndex each time
+//            while (studentIndex < students.size()
+//                    && (examRoom.getStudentsList().size()
+//                    + examRoom.getTasAsStudentsList().size()) < capacity
+//            ) {
+//                StudentMiniDto sm = students.get(studentIndex++);
+//                if (Boolean.TRUE.equals(sm.getIsTa())) {
+//                    TA ta = taRepo.findById(sm.getId())
+//                            .orElseThrow(() -> new GeneralExc("TA not found: " + sm.getId()));
+//                    examRoom.getTasAsStudentsList().add(ta);
+//                } else {
+//                    Student st = studentRepo.findById(sm.getId())
+//                            .orElseThrow(() -> new GeneralExc("Student not found: " + sm.getId()));
+//                    examRoom.getStudentsList().add(st);
+//                }
+//            }
+//
+//            examRoom.setExamRoom(classRoom);
+//            examRooms.add(examRoom);
+//
+//            // if we’ve assigned everyone, stop
+//            if (studentIndex >= students.size()) break;
+//        }
+//
+//        return examRooms;
+//    }
 
     @Transactional
     @Async("setExecutor")
