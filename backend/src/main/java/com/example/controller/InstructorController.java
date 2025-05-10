@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
+import com.example.dto.ExamDto;
+import com.example.service.ExamServ;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -29,6 +31,8 @@ import lombok.RequiredArgsConstructor;
 public class InstructorController {
     private final InstructorServ instructorServ;
     private final InstructorMapper instructorMapper;
+    private final ExamServ examServ;
+
     @PostMapping("/upload")
     public ResponseEntity<Map<String, Object>> uploadInstructors(@RequestParam("file") MultipartFile file) throws IOException {
         return ResponseEntity.ok(instructorServ.importInstructorsFromExcel(file));
@@ -84,5 +88,18 @@ public class InstructorController {
         List<InstructorDto> dtos = instructorServ.getInstructorsByDepartment(deptName);
         return ResponseEntity.ok(dtos);
     }
+
+    //get all exams by course code
+    @GetMapping("/{courseCode}/exams")
+    public ResponseEntity<List<ExamDto>> getByCourseCode(
+            @PathVariable String courseCode
+    ) {
+        List<ExamDto> exams = examServ.getExamsByCourseCode(courseCode);
+        if (exams.isEmpty()) {
+            return ResponseEntity.noContent().build();
+        }
+        return ResponseEntity.ok(exams);
+    }
+
 
 }

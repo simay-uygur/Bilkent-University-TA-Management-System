@@ -154,6 +154,7 @@ public class DeanOfficeServImpl implements DeanOfficeServ {
                             .collect(Collectors.toList());
 
                     return new ExamDto(
+                            exam.getExamId(),
                             exam.getDuration(),
                             exam.getCourseOffering().getCourse().getCourseCode(),
                             exam.getDescription(),

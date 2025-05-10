@@ -17,7 +17,6 @@ import com.example.entity.General.ClassRoom;
 import com.example.entity.General.Date;
 import com.example.entity.General.Event;
 import com.example.repo.ClassRoomRepo;
-import com.lowagie.text.Cell;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
@@ -297,5 +296,33 @@ public class ExamServImpl implements ExamServ{
         }
     }
 
+    @Override
+    // @Transactional(readOnly = true)
+    public List<ExamDto> getExamsByCourseCode(String courseCode) {
+        // 1) find the “current” offering for this course
+        CourseOffering offering = courseOfferingServ.getCurrentOffering(courseCode);
 
+        // 2) fetch only that offering’s exams
+        return examRepo.findByCourseOffering(offering)
+                .stream()
+                .map(this::toDto)
+                .toList();
+    }
+
+    private ExamDto toDto(Exam exam) {
+        ExamDto dto = new ExamDto();
+        dto.setExamId(exam.getExamId());
+        dto.setCourseCode(exam.getCourseOffering().getCourse().getCourseCode());
+        dto.setDuration(exam.getDuration());
+        dto.setType(exam.getDescription());
+        dto.setWorkload(exam.getWorkload());
+        dto.setRequiredTas(exam.getRequiredTAs());
+        // room codes
+        dto.setExamRooms(
+                exam.getExamRooms().stream()
+                        .map(er -> er.getExamRoom().getClassroomId())
+                        .toList()
+        );
+        return dto;
+    }
 }
