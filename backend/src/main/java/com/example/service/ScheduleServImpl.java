@@ -44,7 +44,7 @@ public class ScheduleServImpl implements ScheduleServ {
 
     @FunctionalInterface
     private interface Splitter {
-        void split(LocalDateTime start, LocalDateTime end, ScheduleItemType type, String classroom, String code, Long refId);
+        void split(Date start, Date end, ScheduleItemType type, String classroom, String code, Long refId);
     }
     // Implement the methods defined in the ScheduleServ interface here
     // For example:
@@ -70,15 +70,36 @@ public class ScheduleServImpl implements ScheduleServ {
     @Override
     public List<ScheduleItemDto> getWeeklySchedule(TA ta, LocalDateTime weekStart){
         List<ScheduleItemDto> schedule = new ArrayList<>();
-        Splitter splitter = (LocalDateTime start, LocalDateTime end,
+        Splitter splitter = (Date start, Date end,
                              ScheduleItemType type, String classroom, String code, Long refId) -> {
-            long totalMinutes = Duration.between(start, end).toMinutes();
+            if (start.getHour()   == null || start.getMinute() == null ||
+                end .getHour()   == null || end .getMinute()   == null) {
+                return;  // incomplete time → skip
+            }
+                    
+                            // 1) total minutes since midnight
+            int startTotal = start.getHour() * 60 + start.getMinute();
+            int endTotal   = end.getHour() * 60 + end.getMinute();
+            int totalMinutes = endTotal - startTotal;
+            if (totalMinutes <= 0) {
+                return;  // no positive duration → skip
+            }
+                    
+                            // 2) how many 50-min slots?
             int segments = (int) Math.ceil(totalMinutes / 50.0);
             for (int i = 0; i < segments; i++) {
-                LocalDateTime segStart = start.plusMinutes(i * 50);
-                int slotIdx = computeSlotIndex(segStart);
+                int segStartTotal = startTotal + i * 50;
+                int slotIdx = 1 + ((segStartTotal - (8 * 60 + 30)) / 50);
                 ScheduleItemDto dto = new ScheduleItemDto();
-                dto.setDate(segStart.toLocalDate());
+                if (start.getYear() != null &&
+                start.getMonth()!= null &&
+                start.getDay()  != null) {
+                dto.setDate(LocalDate.of(
+                    start.getYear(),
+                    start.getMonth(),
+                    start.getDay()
+                ));
+            }
                 dto.setSlotIndex(slotIdx);
                 dto.setType(type);
                 dto.setReferenceId(refId);
@@ -94,7 +115,7 @@ public class ScheduleServImpl implements ScheduleServ {
         List<Lesson> lessons = lessonRepo.findBySection_AssignedTas_Id(ta.getId());
         for (Lesson l : lessons) {
             var dur = l.getDuration();
-            splitter.split(dur.getStart().toLocalDateTime(), dur.getFinish().toLocalDateTime(),
+            splitter.split(dur.getStart(), dur.getFinish(),
                            ScheduleItemType.LESSON,
                            l.getLessonRoom().getClassroomId(),
                            l.getSection().getSectionCode(),
@@ -106,7 +127,7 @@ public class ScheduleServImpl implements ScheduleServ {
         for (TaTask tt : tasks) {
             var t = tt.getTask();
             var dur = t.getDuration();
-            splitter.split(dur.getStart().toLocalDateTime(), dur.getFinish().toLocalDateTime(),
+            splitter.split(dur.getStart(), dur.getFinish(),
                            ScheduleItemType.TASK,
                            t.getRoom().getClassroomId(),
                            t.getSection().getSectionCode(),
@@ -117,7 +138,7 @@ public class ScheduleServImpl implements ScheduleServ {
         for (ExamRoom er : ta.getExamRooms()) {
             var dur = er.getExam().getDuration();
             ClassRoom room = er.getExamRoom();
-            splitter.split(dur.getStart().toLocalDateTime(), dur.getFinish().toLocalDateTime(),
+            splitter.split(dur.getStart(), dur.getFinish(),
                            ScheduleItemType.PROCTORING,
                            room == null ? "" : room.getClassroomId(),
                            er.getExam().getCourseOffering().getCourse().getCourseCode(),

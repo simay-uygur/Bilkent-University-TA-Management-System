@@ -1,73 +1,117 @@
 // src/pages/ViewAddExam/ViewAddExam.tsx
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import BackBut from '../../components/Buttons/BackBut';
 import ConPop from '../../components/PopUp/ConPop';
 import ErrPopUp from '../../components/PopUp/ErrPopUp';
 import styles from './ViewAddExam.module.css';
 import axios from 'axios';
+import { format } from 'date-fns';
 
 export interface Exam {
-  id: string;
-  courseName: string;
-  examType: 'Midterm' | 'Final';
-  date: string;
-  startTime: string;
-  endTime: string;
-  neededTAs?: number;
-  filledTAs?: number;
-  classroom: string;
+  id: number;
+  courseCode: string;
+  examType: string;
+  date: string;       // yyyy-MM-dd
+  startTime: string;  // HH:mm
+  endTime: string;    // HH:mm
+  neededTAs: number;
+  filledTAs: number;  // default 0
+  classroom: string;  // first room in array
 }
-
-const sampleExams: Exam[] = [
-  {
-    id: 'e1',
-    courseName: 'CS101 – Intro to Programming',
-    examType: 'Midterm',
-    date: '2025-06-01',
-    startTime: '10:00',
-    endTime: '12:00',
-    neededTAs: 5,
-    filledTAs: 2,
-    classroom: 'A-101',
-  },
-  {
-    id: 'e2',
-    courseName: 'MATH201 – Calculus II',
-    examType: 'Final',
-    date: '2025-06-05',
-    startTime: '14:00',
-    endTime: '16:00',
-    neededTAs: 4,
-    filledTAs: 4,
-    classroom: 'A-101',
-  },
-  {
-    id: 'e3',
-    courseName: 'PHY301 – Physics III',
-    examType: 'Midterm',
-    date: '2025-06-10',
-    startTime: '09:00',
-    endTime: '11:00',
-    neededTAs: 3,
-    filledTAs: 1,
-    classroom: 'A-101',
-  },
-];
 
 const ViewAddExam: React.FC = () => {
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState('');
+  const [exams, setExams] = useState<Exam[]>([]);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [showConfirm, setShowConfirm] = useState(false);
   const [showError, setShowError] = useState(false);
 
+useEffect(() => {
+    const userId = localStorage.getItem('userId');
+    if (!userId) return;
+    // fetch dean-office then courses
+    axios.get<{ facultyCode: string }>(
+      `http://localhost:8080/api/v1/dean-offices/${userId}`
+    )
+  }, []);
+
+  // 1) Fetch on mount
+  useEffect(() => {
+    const userId = localStorage.getItem('userId');
+    if (!userId) return;
+  
+    const fetchExams = async () => {
+      try {
+        // 1) get facultyCode from dean-office
+        const deanRes = await axios.get<{ facultyCode: string }>(
+          `http://localhost:8080/api/v1/dean-offices/${userId}`
+        );
+        const facultyCode = deanRes.data.facultyCode;
+        if (!facultyCode) {
+          console.error('No facultyCode returned from /dean-offices');
+          return;
+        }
+  
+        // 2) get exams for that facultyCode
+        const examsRes = await axios.get<
+          {
+            examId: number;
+            duration: {
+              start: { year: number; month: number; day: number; hour: number; minute: number };
+              finish: { year: number; month: number; day: number; hour: number; minute: number };
+            };
+            courseCode: string;
+            type: string;
+            examRooms: string[];
+            requiredTas: number;
+          }[]
+        >(
+          `http://localhost:8080/api/v1/dean-offices/${facultyCode}/exams`
+        );
+  
+        // 3) map into your UI model
+        const mapped: Exam[] = examsRes.data.map(e => {
+          const { start, finish } = e.duration;
+          const dateObj = new Date(start.year, start.month - 1, start.day);
+          const startObj = new Date(
+            start.year, start.month - 1, start.day,
+            start.hour, start.minute
+          );
+          const endObj = new Date(
+            finish.year, finish.month - 1, finish.day,
+            finish.hour, finish.minute
+          );
+          return {
+            id: e.examId,
+            courseCode: e.courseCode,
+            examType: e.type,
+            date: format(dateObj, 'yyyy-MM-dd'),
+            startTime: format(startObj, 'HH:mm'),
+            endTime: format(endObj, 'HH:mm'),
+            neededTAs: e.requiredTas,
+            filledTAs: 0,
+            classroom: e.examRooms[0] ?? '',
+          };
+        });
+  
+        setExams(mapped);
+      } catch (err) {
+        console.error('Failed to load exams', err);
+      }
+    };
+  
+    fetchExams();
+  }, []);
+
+  // 2) Filter by search term
   const filtered = useMemo(
     () =>
-      sampleExams.filter(e =>
-        e.courseName.toLowerCase().includes(searchTerm.toLowerCase())
+      exams.filter(e =>
+        e.courseCode.toLowerCase().includes(searchTerm.toLowerCase())
       ),
-    [searchTerm]
+    [exams, searchTerm]
   );
 
   const handleAddExams = () => {
@@ -75,35 +119,28 @@ const ViewAddExam: React.FC = () => {
       setShowError(true);
     } else {
       setShowConfirm(true);
-
     }
   };
 
   const handleExam = () => {
-    navigate("/deans-office/add-exams");
+    navigate('/deans-office/add-exams');
   };
 
   const handleConfirmAdd = async () => {
     if (!selectedFile) return;
-  
     const formData = new FormData();
     formData.append('file', selectedFile);
-  
+
     try {
-      const response = await axios.post<Map<string, any>>(
+      await axios.post<Map<string, any>>(
         '/api/upload/exams',
         formData,
-        {
-          headers: {
-            'Content-Type': 'multipart/form-data'
-          }
-        }
+        { headers: { 'Content-Type': 'multipart/form-data' } }
       );
-      console.log('Import result:', response.data);
-      // TODO: show success (toast, popup) or update UI based on response
+      // reload after successful import
+      window.location.reload();
     } catch (err) {
       console.error('Failed to import exams', err);
-      // TODO: set an error state and show ErrPopUp if you want
     } finally {
       setShowConfirm(false);
       setSelectedFile(null);
@@ -112,7 +149,6 @@ const ViewAddExam: React.FC = () => {
 
   return (
     <div className={styles.pageWrapper}>
-
       <div className={styles.headerRow}>
         <BackBut to="/department-office" />
         <h1 className={styles.title}>Exams</h1>
@@ -121,7 +157,7 @@ const ViewAddExam: React.FC = () => {
       <div className={styles.container}>
         <input
           type="text"
-          placeholder="Search exams by name…"
+          placeholder="Search exams by code…"
           value={searchTerm}
           onChange={e => setSearchTerm(e.target.value)}
           className={styles.searchBar}
@@ -130,7 +166,7 @@ const ViewAddExam: React.FC = () => {
         <table className={styles.table}>
           <thead>
             <tr>
-              <th>Course Name</th>
+              <th>Course Code</th>
               <th>Exam Type</th>
               <th>Date</th>
               <th>Start</th>
@@ -144,7 +180,7 @@ const ViewAddExam: React.FC = () => {
           <tbody>
             {filtered.map(exam => (
               <tr key={exam.id}>
-                <td>{exam.courseName}</td>
+                <td>{exam.courseCode}</td>
                 <td>{exam.examType}</td>
                 <td>{exam.date}</td>
                 <td>{exam.startTime}</td>
@@ -152,7 +188,7 @@ const ViewAddExam: React.FC = () => {
                 <td>{exam.classroom}</td>
                 <td>{exam.neededTAs}</td>
                 <td>{exam.filledTAs}</td>
-                <td>{exam.neededTAs-exam.filledTAs}</td>
+                <td>{exam.neededTAs - exam.filledTAs}</td>
               </tr>
             ))}
           </tbody>
@@ -168,8 +204,6 @@ const ViewAddExam: React.FC = () => {
           <button onClick={handleAddExams} className={styles.addButton}>
             Add Exams by File
           </button>
-        </div>
-        <div>
           <button onClick={handleExam} className={styles.nav}>
             Add Exam
           </button>
