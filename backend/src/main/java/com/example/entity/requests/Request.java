@@ -38,7 +38,7 @@ import lombok.Setter;
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "type")
 @JsonSubTypes({
     @JsonSubTypes.Type(value = Leave.class, name = "Leave"),
-    @JsonSubTypes.Type(value = ProctorTaInDepartment.class, name = "ProctorTaInFaculty"),
+    @JsonSubTypes.Type(value = ProctorTaInDepartment.class, name = "ProctorTaInDepartment"),
     @JsonSubTypes.Type(value = ProctorTaFromFaculties.class, name = "ProctorTaFromFaculties"),
     @JsonSubTypes.Type(value = Swap.class, name = "Swap"),
     @JsonSubTypes.Type(value = WorkLoad.class, name = "Workload"),

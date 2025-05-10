@@ -171,7 +171,7 @@ public class RequestMapper {
         ProctorTaInDepartmentDto dto = new ProctorTaInDepartmentDto();
         copyBase(e, dto);
         dto.setDescription(e.getExam().getDescription());
-        dto.setDepName(e.getReceiver().getName());
+        dto.setReceiverName(e.getReceiver().getName());
         dto.setInstrId(e.getSender().getId());
         dto.setExamId(e.getExam().getExamId());
         dto.setExamName(e.getExam().getDescription());

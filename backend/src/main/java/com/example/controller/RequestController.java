@@ -211,14 +211,23 @@ public class RequestController {
         return new ResponseEntity<>(exists ? HttpStatus.CREATED : HttpStatus.BAD_REQUEST);
     }
 
-    @PostMapping("/proctor-in-faculty")
+    @PostMapping("/proctor-in-department/{instrId}")
     public ResponseEntity<Void> sendProctorTaInDepartment(
             @PathVariable Long instrId,
             @RequestBody ProctorTaInDepartmentDto dto
     ) {
         proctorTaInDepartmentServ.createProctorTaInDepartmentRequest(dto, instrId);
-        boolean exists = inDepRepo.existsBySender_IdAndReceiver_NameAndExam_ExamIdAndIsRejected(instrId, dto.getReceiverName(), dto.getExamId(), false);
-        return new ResponseEntity<>(exists ? HttpStatus.CREATED : HttpStatus.BAD_REQUEST);
+        boolean exists = inDepRepo
+        .existsBySender_IdAndReceiver_NameAndExam_ExamIdAndIsRejected(
+            instrId,                     // the pathVariable
+            dto.getReceiverName(),       // your DTO’s getter
+            dto.getExamId(),
+            false
+          );
+
+        return new ResponseEntity<>(
+            exists ? HttpStatus.CREATED : HttpStatus.BAD_REQUEST
+        );
     }
 
     @PostMapping("/ta/{taId}/request/workload")
