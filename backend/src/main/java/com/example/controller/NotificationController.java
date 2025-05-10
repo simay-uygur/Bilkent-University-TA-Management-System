@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.dto.NotificationRequest;
+import com.example.service.MailService;
 import com.example.service.NotificationService;
 
 import lombok.RequiredArgsConstructor;
@@ -20,6 +21,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class NotificationController {
     private final NotificationService notificationService;
+    private final MailService mailservice;
     /**
      * Creates a new notification.
      *

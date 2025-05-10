@@ -21,7 +21,7 @@ public class MailService {
      */
     public void sendMail(String to, String subject, String text) {
         SimpleMailMessage message = new SimpleMailMessage();
-        message.setFrom("tamanagementsystembilkent@gmail.com"); // Buraya kendi Gmail adresini yaz
+        message.setFrom("tamanagementsystembilkent@gmail.com"); 
         message.setTo(to);
         message.setSubject(subject);
         message.setText(text);
