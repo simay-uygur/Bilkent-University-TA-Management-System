@@ -15,6 +15,7 @@ import com.example.entity.Actors.TA;
 import com.example.entity.Courses.Lesson;
 import com.example.entity.Courses.Section;
 import com.example.entity.Exams.Exam;
+import com.example.entity.General.DayOfWeek;
 import com.example.entity.General.Event;
 import com.example.entity.Tasks.TaTask;
 import com.example.repo.ExamRepo;

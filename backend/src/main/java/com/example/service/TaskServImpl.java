@@ -132,6 +132,11 @@ public class TaskServImpl implements TaskServ {
         if (taskDto == null) {
             throw new GeneralExc("Task cannot be null!");
         }
+        if (taskDto.getType().equals("Grading")){
+            taskDto.getDuration().setStart(new Date().currenDate());
+        }
+        if (taskDto.getDuration().getStart().isAfter(taskDto.getDuration().getFinish()))
+            throw new GeneralExc("Wrong duration! Start time can not be after the finish time.");
         Section section = sectionRepo.findBySectionCodeIgnoreCase(sectionCode)
                 .orElseThrow(() -> new GeneralExc("Section not found!"));
         Task task = new Task(section, taskDto.getDuration(),taskDto.getDescription(), taskDto.getType(), 0);
@@ -286,7 +291,7 @@ public class TaskServImpl implements TaskServ {
             throw new GeneralExc("TA is already assigned to this task");
         }
 
-        if (hasDutyOrLessonOrExam(ta, task.getDuration()))
+        if (hasDutyOrLessonOrExam(ta, task.getDuration()) && !task.getTaskType().toString().equals("Grading"))
             throw new GeneralExc("TA has a duty or lesson or exam on the same duration as the task");
 
         task.assignTo(ta);
