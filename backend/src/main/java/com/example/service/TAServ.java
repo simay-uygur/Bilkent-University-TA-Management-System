@@ -32,7 +32,7 @@ public interface TAServ {
     List<ScheduleItemDto> getWeeklyScheduleForTA(TA ta, Date anyCustomDate);
     Map<String, Object> importTAsFromExcel(MultipartFile file) throws IOException;
     List<TaDto> getTAsByDepartment(String deptName);
-        public List<ScheduleItem> getScheduleOfTheDay(TA ta, String date);
+       // public List<ScheduleItem> getScheduleOfTheDay(TA ta, String date);
     List<ExamDto> getAssignedExamsOfTa(Long taId);
     public List<TaDto> getTAsBySectionCode(String sectionCode);
 }
