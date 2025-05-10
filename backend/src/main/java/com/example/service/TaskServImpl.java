@@ -17,7 +17,6 @@ import com.example.entity.Actors.TA;
 import com.example.entity.Courses.Lesson;
 import com.example.entity.Courses.Section;
 import com.example.entity.Exams.Exam;
-import com.example.entity.General.ClassRoom;
 import com.example.entity.General.Date;
 import com.example.entity.General.DayOfWeek;
 import com.example.entity.General.Event;
@@ -66,8 +65,13 @@ public class TaskServImpl implements TaskServ {
         if (taskDto == null) {
             throw new GeneralExc("Task cannot be null!");
         }
+        if (taskDto.getType().equals("Grading")){
+            taskDto.getDuration().setStart(new Date().currenDate());
+        }
+        if (taskDto.getDuration().getStart().isAfter(taskDto.getDuration().getFinish()))
+            throw new GeneralExc("Wrong duration! Start time can not be after the finish time.");
         Section section = sectionRepo.findBySectionCodeIgnoreCase(sectionCode)
-                .orElseThrow(() -> new GeneralExc("Section not found!"));
+        .orElseThrow(() -> new GeneralExc("Section not found!"));
         Task task = new Task(section, taskDto.getDuration(), taskDto.getType(), 0);
         checkAndUpdateStatusTask(task);
         Task newTask = taskRepo.save(task);
@@ -219,7 +223,7 @@ public class TaskServImpl implements TaskServ {
             throw new GeneralExc("TA is already assigned to this task");
         }
         
-        if (hasDutyOrLessonOrExam(ta, task.getDuration()))
+        if (hasDutyOrLessonOrExam(ta, task.getDuration()) && !task.getTaskType().toString().equals("Grading"))
             throw new GeneralExc("TA has a duty or lesson or exam on the same duration as the task");
         
         task.assignTo(ta);

@@ -14,6 +14,7 @@ import com.example.entity.Actors.TA;
 import com.example.entity.Courses.Lesson;
 import com.example.entity.Courses.Section;
 import com.example.entity.Exams.Exam;
+import com.example.entity.General.DayOfWeek;
 import com.example.entity.General.Event;
 import com.example.entity.Tasks.TaTask;
 import com.example.repo.ExamRepo;
@@ -66,12 +67,34 @@ public class ProctoringServImpl implements ProctoringServ{
         }
         for (Section section : ta.getSectionsAsStudent()) {
             for (Lesson lesson : section.getLessons()) {
-                if (lesson.getDuration().has(examDuration)) {
+                if (examDuration.hasLesson(getDay(lesson.getDay()), lesson.getDuration())) {
                     return true;
                 }
             }
         }
         return false;
+    }
+
+    private int getDay(DayOfWeek day){
+        switch(day) {
+            // Add cases here
+            case MONDAY:
+                return 1;
+            case TUESDAY:
+                return 2;
+            case WEDNESDAY:
+                return 3;
+            case THURSDAY:
+                return 4;
+            case FRIDAY:
+                return 5;
+            case SATURDAY:
+                return 6;
+            case SUNDAY:
+                return 7;
+            default:
+                throw new IllegalArgumentException("Invalid day: " + day);
+        }
     }
 
     private boolean hasProctoringDayBeforeOrAfter(TA ta, Event examDuration) {

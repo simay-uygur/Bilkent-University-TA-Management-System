@@ -158,12 +158,10 @@ public class Task_controller {
     public CompletableFuture<ResponseEntity<List<TaDto>>> findAvailableTasToAssignToTask(@PathVariable String course_code, @PathVariable String section_code, @PathVariable int task_id, @PathVariable Long instr_id) {
         return taskServ.getTasToAssignToTask(course_code, section_code, task_id, instr_id).thenApply(taList -> {
             if (taList == null || taList.isEmpty()) {
-                // nothing found → 400 with empty body (or you could do 204 NO_CONTENT)
                 return ResponseEntity
                     .badRequest()
                     .body(Collections.emptyList());
             }
-            // success → 201 CREATED with the list of TaDto
             return ResponseEntity
                     .status(HttpStatus.CREATED)
                     .body(taList);

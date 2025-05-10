@@ -12,6 +12,8 @@ import org.springframework.stereotype.Repository;
 import com.example.entity.General.Date;
 import com.example.entity.Tasks.TaTask;
 import com.example.entity.Tasks.Task;
+import com.example.entity.Tasks.TaskState;
+import com.example.entity.Tasks.TaskType;
 
 import jakarta.transaction.Transactional;
 
@@ -135,4 +137,10 @@ public interface TaTaskRepo extends JpaRepository<TaTask, Integer> {
       void deleteByTaskAndTa(@Param("taskId") int taskId,
                             @Param("taId")   Long  taId);
       void deleteAllByTaskTaskId(Long taskId);
+
+      List<TaTask> findAllByTaOwner_IdAndTask_TaskTypeAndTask_StatusIn(
+        Long taId,
+        TaskType taskType,
+        List<TaskState> allowedStates
+    );
 }

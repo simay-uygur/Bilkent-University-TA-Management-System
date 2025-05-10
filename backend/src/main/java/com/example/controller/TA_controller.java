@@ -1,6 +1,8 @@
 package com.example.controller;
 
+import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -11,12 +13,12 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.example.dto.ExamDto;
 import com.example.dto.TaDto;
 import com.example.dto.TaTaskDto;
-import com.example.entity.Actors.TA;
 import com.example.entity.General.Date;
 import com.example.entity.Schedule.ScheduleItemDto;
+import com.example.entity.Tasks.TaGradingDto;
+import com.example.entity.Tasks.TaProctorDto;
 import com.example.entity.Tasks.Task;
 import com.example.exception.GeneralExc;
 import com.example.exception.UserNotFoundExc;
@@ -26,6 +28,7 @@ import com.example.service.TAServ;
 import com.example.service.TaskServ;
 
 import lombok.RequiredArgsConstructor;
+
 
 
 @RestController
@@ -123,11 +126,37 @@ public class TA_controller {
     }*/
 
     @GetMapping("api/ta/{taId}/assignedExams")
-    public ResponseEntity<List<ExamDto>> getMethodName(@PathVariable Long taId) {
-        return new ResponseEntity<>(serv.getAssignedExamsOfTa(taId), HttpStatus.OK);
+    public CompletableFuture<ResponseEntity<List<TaProctorDto>>> getProctoringExams(@PathVariable Long taId) {
+        return serv.getAssignedExamsOfTa(taId).thenApply(proctoringList -> {
+            if (proctoringList == null || proctoringList.isEmpty()) {
+                // nothing found → 400 with empty body (or you could do 204 NO_CONTENT)
+                return ResponseEntity
+                    .badRequest()
+                    .body(Collections.emptyList());
+            }
+            // success → 201 CREATED with the list of TaDto
+            return ResponseEntity
+                    .status(HttpStatus.CREATED)
+                    .body(proctoringList);
+        });
+    }
+
+    @GetMapping("api/ta/{taId}/tasks/grading")
+    public CompletableFuture<ResponseEntity<List<TaGradingDto>>> getGradingOfTheTa(@PathVariable Long taId) {
+        return serv.getGradingsOfTheTa(taId).thenApply(gradingList -> {
+            if (gradingList == null || gradingList.isEmpty()) {
+                // nothing found → 400 with empty body (or you could do 204 NO_CONTENT)
+                return ResponseEntity
+                    .badRequest()
+                    .body(Collections.emptyList());
+            }
+            // success → 201 CREATED with the list of TaDto
+            return ResponseEntity
+                    .status(HttpStatus.CREATED)
+                    .body(gradingList);
+        });
     }
     
-
 }
 /*{
   "task_type" : "Lab",
