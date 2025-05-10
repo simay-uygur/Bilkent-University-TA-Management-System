@@ -80,6 +80,28 @@ public class Event {
         return true;
     }
 
+    public boolean hasLesson(int lessonDay, Event event){
+        int eventDay = event.getStart().getDay();
+        if (eventDay != lessonDay) {
+            return false;
+        }
+
+        // 2) compute “minutes since midnight” for lesson start/end
+        Date ls = this.getStart();
+        Date lf = this.getFinish();
+        int lessonStart = ls.getHour() * 60 + ls.getMinute();
+        int lessonEnd   = lf.getHour() * 60 + lf.getMinute();
+
+        // 3) compute “minutes since midnight” for event start/end
+        Date es = event.getStart();
+        Date ef = event.getFinish();
+        int eventStart = es.getHour() * 60 + es.getMinute();
+        int eventEnd   = ef.getHour() * 60 + ef.getMinute();
+
+        // 4) intervals [eventStart,eventEnd) and [lessonStart,lessonEnd) overlap?
+        return eventStart < lessonEnd && eventEnd > lessonStart;
+    }
+
     @Override
     public String toString(){
         return "Start at: " + start.toString() + "\nFinish at: " + finish.toString();

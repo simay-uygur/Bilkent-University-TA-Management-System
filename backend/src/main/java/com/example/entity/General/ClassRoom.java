@@ -48,9 +48,6 @@ public class ClassRoom {
     )
     private List<Lesson> lessons = new ArrayList<>();
 
-    @OneToOne(mappedBy = "room", fetch = FetchType.LAZY)
-    private Task task;
-
     public boolean isFree(Event event){
         for (Lesson lesson : lessons){
             if (lesson.getDuration().has(event))

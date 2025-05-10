@@ -52,5 +52,5 @@ public interface SwapRepo extends JpaRepository<Swap, Long>{
         @Param("taId")    Long taId,
         @Param("examIds") Collection<Integer> examIds
     );
-
+    List<Swap> findByReceiver_IdAndIsPendingTrueAndIsApprovedFalseAndIsRejectedFalse(Long taId);
 }

@@ -87,4 +87,10 @@ Optional<CourseOffering>findByCourseCode(@Param("code") String code);
             int year,
             Term term
     );
+
+    boolean existsByCourse_CourseCodeAndSemester_YearAndSemester_Term(
+        String courseCode,
+        Long semesterYear,
+        Term term
+    );
 }

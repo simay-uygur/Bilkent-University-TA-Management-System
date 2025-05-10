@@ -24,4 +24,5 @@ public interface LessonRepo extends JpaRepository<Lesson, Long> {
     // only case-insensitive on the String property; day is an enum so no IgnoreCase on it
     List<Lesson> findByLessonRoom_ClassroomIdEqualsIgnoreCaseAndDay(String classroomId, DayOfWeek day);
     List<Lesson> findBySection_AssignedTas_Id(Long taId);
+    List<Lesson> findBySection_RegisteredTas_Id(Long taId);
 }

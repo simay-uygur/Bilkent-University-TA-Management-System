@@ -9,6 +9,9 @@ import com.example.dto.RequestDto;
 import com.example.dto.TaskDto;
 import com.example.entity.Requests.Leave;
 import com.example.entity.Requests.LeaveDTO;
+import com.example.entity.Requests.PreferTasToCourse;
+import com.example.entity.Requests.PreferTasToCourseDto;
+import com.example.entity.Requests.PreferTasToCourseDto.TaInfo;
 import com.example.entity.Requests.ProctorTaFromFaculties;
 import com.example.entity.Requests.ProctorTaFromFacultiesDto;
 import com.example.entity.Requests.ProctorTaFromOtherFaculty;
@@ -60,7 +63,8 @@ public class RequestMapper {
             return toDto((ProctorTaFromOtherFaculty) r);
         } else if (r instanceof ProctorTaInDepartment) {
             return toDto((ProctorTaInDepartment) r);
-        }
+        } else if (r instanceof PreferTasToCourse)
+            return toDto((PreferTasToCourse) r);
         throw new IllegalArgumentException("Unknown Request type: " + r.getClass());
     }
 
@@ -173,6 +177,46 @@ public class RequestMapper {
         dto.setExamName(e.getExam().getDescription());
         dto.setRequiredTas(e.getRequiredTas());
         dto.setTasLeft(e.getTasLeft());
+        return dto;
+    }
+
+    private PreferTasToCourseDto toDto(PreferTasToCourse e){
+        PreferTasToCourseDto dto = new PreferTasToCourseDto();
+        dto.setDescription(e.getDescription());
+        dto.setRequestType(e.getRequestType());
+        dto.setRequestId(e.getRequestId());
+        dto.setSentTime(e.getSentTime());
+        dto.setSenderName(e.getSender().getName() +" "+ e.getSender().getSurname());
+        dto.setInstructorId(e.getSender().getId());
+        dto.setReceiverName(e.getReceiver().getName());
+        dto.setSectionId(e.getSection().getSectionId());
+        dto.setSectionCode(e.getSection().getSectionCode());
+        dto.setTaNeeded(e.getTaNeeded());
+        dto.setAmountOfAssignedTas(e.getAmountOfAssignedTas());
+        String[] parts = e.getSection().getSectionCode().split("-");
+        dto.setCourseCode(parts[0] +"-"+ parts[1]);
+        dto.setPreferredTas(e.getPreferredTas().stream()
+            .map(t -> {
+                TaInfo ti = new TaInfo();
+                ti.setId(t.getId());
+                ti.setName(t.getName());
+                ti.setSurname(t.getSurname());
+                return ti;
+            })
+            .collect(Collectors.toList())
+        );
+
+        dto.setNonPreferredTas(e.getNonPreferredTas().stream()
+            .map(t -> {
+                TaInfo ti = new TaInfo();
+                ti.setId(t.getId());
+                ti.setName(t.getName());
+                ti.setSurname(t.getSurname());
+                return ti;
+            })
+            .collect(Collectors.toList())
+        );
+
         return dto;
     }
 

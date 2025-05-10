@@ -39,6 +39,8 @@ public class TA_controller {
 
     private final TaskRepo taskRepo;
 
+    
+
 
     @GetMapping("/api/ta/all")
     public List<TaDto> getAllTAs() 
@@ -106,9 +108,8 @@ public class TA_controller {
 
     @GetMapping("/api/ta/{id}/schedule")
     public ResponseEntity<List<ScheduleItemDto>> getWeeklyScheduleForTA(@PathVariable Long id) {
-        TA ta = serv.getTAByIdEntity(id);
         Date date = new Date().currenDate() ;
-        return new ResponseEntity<>(serv.getWeeklyScheduleForTA(ta, date), HttpStatus.OK);
+        return new ResponseEntity<>(serv.getWeeklyScheduleForTA(id, date), HttpStatus.OK);
     }
     @GetMapping("/api/ta/{taId}/assignedExams")
     public ResponseEntity<List<ExamDto>> getAssignedExamsOfTa(@PathVariable Long taId) {

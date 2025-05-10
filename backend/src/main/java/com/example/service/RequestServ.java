@@ -14,4 +14,8 @@ public interface RequestServ {
     public boolean createRequest(Request req);
     public void checkLeaveRequests();
     public void deleteAllReceivedAndSendedSwapAndTransferRequestsBySomeTime(User u, Event duration);
+    public List<RequestDto> getReceivedRequestsOfTheTa(Long taId);
+    public List<RequestDto> getReceivedRequestsOfTheInstructor(Long taId);
+    public List<RequestDto> getReceivedRequestsOfTheDeanOffice(Long taId);
+    public List<RequestDto> getReceivedRequestsOfTheDepartment(String depName);
 }

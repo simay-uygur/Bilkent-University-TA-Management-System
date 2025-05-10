@@ -10,4 +10,6 @@ import com.example.entity.Requests.ProctorTaFromOtherFaculty;
 @Repository
 public interface ProctorTaFromOtherFacultyRepo extends JpaRepository<ProctorTaFromOtherFaculty, Integer>{
     //List<ProctorTaFromOtherFaculty> findAllByReceiverIdAndIsPendingTrue()
+    List<ProctorTaFromOtherFaculty> 
+        findByReceiver_IdAndIsPendingTrueAndIsApprovedFalseAndIsRejectedFalse(Long deanOfficeId);
 }

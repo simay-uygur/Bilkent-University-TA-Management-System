@@ -87,14 +87,6 @@ public class Task {
 
     @OneToMany(mappedBy = "task", cascade = CascadeType.ALL,  orphanRemoval = true   )
     private List<WorkLoad> workloadList = new ArrayList<>();
-
-    @OneToOne(fetch = FetchType.LAZY, 
-              cascade = {CascadeType.PERSIST, CascadeType.MERGE})
-    @JoinColumn(
-        name = "classroom_id",          
-        referencedColumnName = "classroom_id" 
-    )
-    private ClassRoom room;
     /* ─── helper methods ─────────────────────────── */
 
     /** true if the task’s Event says it is currently ongoing */
