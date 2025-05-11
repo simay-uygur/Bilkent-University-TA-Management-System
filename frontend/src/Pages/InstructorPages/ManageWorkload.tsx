@@ -289,31 +289,113 @@ const ManageWorkload: React.FC = () => {
       </div>
 
       {modalOpen && (
-        <div className={styles.modalOverlay}>
-          <div className={styles.modal}>
-            <h2>{isEdit ? 'Edit Task' : 'Add Task'}</h2>
-            <form>
-              {/* form fields unchanged */}
-              <div className={styles.fieldRow}>
-                <label htmlFor="type">Type</label>
-                <select id="type" name="type" value={currentType} onChange={handleChange}>
-                  <option value="Lab">Lab</option>
-                  <option value="Recitation">Recitation</option>
-                  <option value="Grading">Grading</option>
-                </select>
-              </div>
-              {/* …other fields… */}
-              <div className={styles.buttonsRow}>
-                <button type="button" onClick={() => setConfirm({ action: 'save' })}>
-                  {isEdit ? 'Update' : 'Save'}
-                </button>
-                <button type="button" onClick={() => setModalOpen(false)}>Cancel</button>
-              </div>
-            </form>
-          </div>
+  <div className={styles.modalOverlay}>
+    <div className={styles.modal}>
+      <h2>{isEdit ? 'Edit Task' : 'Add Task'}</h2>
+      <form>
+        <div className={styles.fieldRow}>
+          <label htmlFor="type">Type</label>
+          <select
+            id="type"
+            name="type"
+            value={currentType}
+            onChange={handleChange}
+          >
+            <option value="Lab">Lab</option>
+            <option value="Recitation">Recitation</option>
+            <option value="Grading">Grading</option>
+          </select>
         </div>
-      )}
 
+        <div className={styles.fieldRow}>
+          <label htmlFor="description">Description</label>
+          <input
+            id="description"
+            name="description"
+            type="text"
+            value={currentDescription}
+            onChange={handleChange}
+          />
+        </div>
+
+        <div className={styles.fieldRow}>
+          <label htmlFor="date">Date</label>
+          <input
+            id="date"
+            name="date"
+            type="date"
+            value={currentDate}
+            onChange={handleChange}
+          />
+        </div>
+
+        {currentType !== 'Grading' ? (
+          <>
+            <div className={styles.fieldRow}>
+              <label htmlFor="startTime">Start Time</label>
+              <select
+                id="startTime"
+                name="startTime"
+                value={currentStartTime}
+                onChange={handleChange}
+              >
+                {startTimes.map((t, i) => (
+                  <option key={t} value={i + 1}>
+                    {t}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div className={styles.fieldRow}>
+              <label htmlFor="endTime">End Time</label>
+              <select
+                id="endTime"
+                name="endTime"
+                value={currentEndTime}
+                onChange={handleChange}
+              >
+                {endTimes.map((t, i) => (
+                  <option key={t} value={i + 1}>
+                    {t}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </>
+        ) : (
+          <div className={styles.fieldRow}>
+            <label htmlFor="gradingEndTime">Grading Ends At</label>
+            <select
+              id="gradingEndTime"
+              name="gradingEndTime"
+              value={currentGradingEndTime}
+              onChange={handleChange}
+            >
+              {endTimes.map(t => (
+                <option key={t} value={t}>
+                  {t}
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
+
+        <div className={styles.buttonsRow}>
+          <button
+            type="button"
+            onClick={() => setConfirm({ action: 'save' })}
+          >
+            {isEdit ? 'Update' : 'Save'}
+          </button>
+          <button type="button" onClick={() => setModalOpen(false)}>
+            Cancel
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+)}
       {confirm?.action === 'delete' && (
         <ConPop
           message="Delete this task?"
