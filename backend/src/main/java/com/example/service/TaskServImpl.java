@@ -9,6 +9,7 @@ import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
 import com.example.entity.General.DayOfWeek;
+import com.example.util.TaAvailabilityChecker;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -61,6 +62,8 @@ public class TaskServImpl implements TaskServ {
     private final CourseOfferingServ courseOfferingServ;
     private final RequestServ reqServ;
     private final TaMapper taMapper;
+    private final TaAvailabilityChecker availabilityChecker;
+
     @Override
     public boolean unassignTasToTaskByTheirId(String sectionCode, int taskId, List<Long> taIds){
         Task task = taskRepo.findById(taskId)
@@ -132,6 +135,11 @@ public class TaskServImpl implements TaskServ {
         if (taskDto == null) {
             throw new GeneralExc("Task cannot be null!");
         }
+        if (taskDto.getType().equals("Grading")){
+            taskDto.getDuration().setStart(new Date().currenDate());
+        }
+        if (taskDto.getDuration().getStart().isAfter(taskDto.getDuration().getFinish()))
+            throw new GeneralExc("Wrong duration! Start time can not be after the finish time.");
         Section section = sectionRepo.findBySectionCodeIgnoreCase(sectionCode)
                 .orElseThrow(() -> new GeneralExc("Section not found!"));
         Task task = new Task(section, taskDto.getDuration(),taskDto.getDescription(), taskDto.getType(), 0);
@@ -286,7 +294,7 @@ public class TaskServImpl implements TaskServ {
             throw new GeneralExc("TA is already assigned to this task");
         }
 
-        if (hasDutyOrLessonOrExam(ta, task.getDuration()))
+        if (hasDutyOrLessonOrExam(ta, task.getDuration()) && !task.getTaskType().toString().equals("Grading"))
             throw new GeneralExc("TA has a duty or lesson or exam on the same duration as the task");
 
         task.assignTo(ta);
@@ -483,7 +491,7 @@ public class TaskServImpl implements TaskServ {
     @Override
     public boolean hasDutyOrLessonOrExam(TA ta, Event duration) {
         LocalDate currentDate = duration.getStart().toLocalDate();
-        DayOfWeek currentDow  = DayOfWeek.valueOf(currentDate.getDayOfWeek().name());
+       // DayOfWeek currentDow  = DayOfWeek.valueOf(currentDate.getDayOfWeek().name());
 
         for (TaTask taTask : ta.getTaTasks()) {
             if (taTask.getTask().getDuration().has(duration) && !taTask.getTask().getStatus().equals(TaskState.DELETED)) {
@@ -491,16 +499,11 @@ public class TaskServImpl implements TaskServ {
             }
         }
         // 3) for each lesson, first match day‐of‐week, then time‐of‐day
-        for (Section section : ta.getSectionsAsStudent()) {
-            for (Lesson lesson : section.getLessons()) {
-                if (lesson.getDay() != currentDow) {
-                    continue; // different weekday → no conflict
-                }
-                if(duration.hasLesson(getDay(lesson.getDay()), duration)){
-                    return true;
-                }
-            }
+        boolean hasOverlappingLesson = availabilityChecker.hasOverlappingLesson(ta, duration);
+        if (hasOverlappingLesson) {
+            return true;
         }
+
         for (Exam exam : ta.getExams()){
             if (exam.getDuration().has(duration)) {
                 return true;
@@ -537,6 +540,9 @@ public class TaskServImpl implements TaskServ {
         int bEnd   = b.getFinish().getHour() * 60 + b.getFinish().getMinute();
         return aStart < bEnd && bStart < aEnd;
     }
+
+
+
 }
 /*                if (duration.hasLesson(getDay(lesson.getDay()), lesson.getDuration())) {
                     return true;

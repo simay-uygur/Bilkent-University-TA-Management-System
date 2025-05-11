@@ -12,6 +12,8 @@ import org.springframework.stereotype.Repository;
 import com.example.entity.General.Date;
 import com.example.entity.Tasks.TaTask;
 import com.example.entity.Tasks.Task;
+import com.example.entity.Tasks.TaskState;
+import com.example.entity.Tasks.TaskType;
 
 import jakarta.transaction.Transactional;
 
@@ -134,15 +136,16 @@ public interface TaTaskRepo extends JpaRepository<TaTask, Integer> {
       @Query("DELETE FROM TaTask t WHERE t.task.taskId = :taskId AND t.taOwner.id = :taId")
       void deleteByTaskAndTa(@Param("taskId") int taskId,
                             @Param("taId")   Long  taId);
-    
- 
-    
-    @Modifying
-    @Query("DELETE FROM TaTask tt WHERE tt.task.taskId = :taskId")
-    void deleteAllByTaskId(@Param("taskId") int taskId);
+      void deleteAllByTaskTaskId(Long taskId);
+      @Modifying
+      @Query("DELETE FROM TaTask tt WHERE tt.task.taskId = :taskId")
+      void deleteAllByTaskId(@Param("taskId") int taskId);
 
-    void deleteAllByTaskTaskId(long id);
-    
-    // Your other methods
+      void deleteAllByTaskTaskId(long id);
+
+      List<TaTask> findAllByTaOwner_IdAndTask_TaskTypeAndTask_StatusIn(
+        Long taId,
+        TaskType taskType,
+        List<TaskState> allowedStates
+    );
 }
-
