@@ -17,6 +17,7 @@ import com.example.dto.DepartmentDto;
 import com.example.entity.Courses.Department;
 import com.example.mapper.DepartmentMapper;
 import com.example.repo.DepartmentRepo;
+import com.example.service.ExamServ;
 
 import lombok.RequiredArgsConstructor;
 
@@ -27,7 +28,7 @@ public class DepartmentController {
 
     private final DepartmentRepo departmentRepo;
     private final DepartmentMapper   departmentMapper;
-
+    private final ExamServ examService;
     @GetMapping
     public ResponseEntity<List<DepartmentDto>> getAllDepartments() {
         List<DepartmentDto> dtos = departmentRepo.findAll().stream()
@@ -45,7 +46,11 @@ public class DepartmentController {
         Department saved = departmentRepo.save(entity);
         return ResponseEntity.ok(departmentMapper.toDto(saved));
     }
+/* @GetMapping("/{examid}")
+    public ResponseEntity<String> addExam(@PathVariable Long examid) {
 
+        return examService.getById(examid);
+    } */
     @PutMapping("/{code}")
     public ResponseEntity<DepartmentDto> updateDepartment(
             @PathVariable("code") String code,
