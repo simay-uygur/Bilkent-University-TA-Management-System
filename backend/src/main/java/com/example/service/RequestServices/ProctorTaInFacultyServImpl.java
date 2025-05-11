@@ -51,6 +51,7 @@ public class ProctorTaInFacultyServImpl implements ProctorTaInFacultyServ{
         facReq.setExam(depReq.getExam());
         facReq.setRequiredTas(depReq.getRequiredTas());
         facReq.setTasLeft(depReq.getTasLeft());
+        facReq.setCourseCode(depReq.getCourseCode());
         facReq.setExam( depReq.getExam() );
         facReq.setDescription( depReq.getDescription());
         LocalDateTime now = LocalDateTime.now();

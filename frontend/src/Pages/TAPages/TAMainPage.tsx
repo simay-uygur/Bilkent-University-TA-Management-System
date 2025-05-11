@@ -6,7 +6,7 @@ import styles from './TAMainPage.module.css';
 interface ScheduleEntry {
   date: string;           // ISO date string
   slotIndex: number;      // 1..12
-  type: 'Lab' | 'Lesson' | 'Recitation' ;
+  type: string;
   classroom: string | null;
   code: string | null;
   referenceId: number;
@@ -34,20 +34,19 @@ const TAMainPage: React.FC = () => {
   }, []);
 
   const renderCell = (day: number, hour: number) => {
-    // JS getDay: 0=Sunday,1=Monday... map to 1-7
     const matched = entries.filter(e => {
       const jsDay = new Date(e.date).getDay();
       const entryDay = jsDay === 0 ? 7 : jsDay;
       return entryDay === day && e.slotIndex === hour;
-    });
+    }).filter(e => e.type !== 'Grading');
+  
     if (!matched.length) return null;
-
+  
     return matched.map((e, i) => (
-      <div key={i} className={styles[e.type.toLowerCase()]}>        
-        <strong>{e.type === 'LESSON' ? 'Lesson' : 'Task'}</strong><br />
+      <div key={i} className={styles[e.type.toLowerCase()]}>
+        <strong>{e.type}</strong><br />
         Code: {e.code || '-'}<br />
         Room: {e.classroom || '-'}<br />
-        Ref ID: {e.referenceId}
       </div>
     ));
   };

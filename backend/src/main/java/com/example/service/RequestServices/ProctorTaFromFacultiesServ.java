@@ -11,4 +11,5 @@ public interface ProctorTaFromFacultiesServ {
     public ProctorTaFromFaculties getProctorTaFromFacultiesRequestById(Long requestId, Long userId);
     public void updateProctorTaFromFacultiesRequest(ProctorTaFromFacultiesDto dto, Long requestId, Long userId);
     public void deleteProctorTaFromFacultiesRequest(Long requestId, Long userId);
+    //public List<ProctorTaFromFacultiesDto> getReceivedRequestsOfTheFaculty(Long deanOffice);
 }

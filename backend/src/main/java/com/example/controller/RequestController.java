@@ -25,6 +25,18 @@ import com.example.dto.RequestDto;
 import com.example.dto.SwapOptionDto;
 import com.example.dto.TAAssignmentRequest;
 import com.example.entity.Actors.Instructor;
+import com.example.entity.Requests.LeaveDTO;
+import com.example.entity.Requests.PreferTasToCourseDto;
+import com.example.entity.Requests.ProctorTaFromFacultiesDto;
+import com.example.entity.Requests.ProctorTaFromOtherFacultyDto;
+import com.example.entity.Requests.ProctorTaInDepartmentDto;
+import com.example.entity.Requests.ProctorTaInFacultyDto;
+import com.example.entity.Requests.Request;
+import com.example.entity.Requests.SwapDto;
+import com.example.entity.Requests.TransferCandidateDto;
+import com.example.entity.Requests.TransferProctoringDto;
+import com.example.entity.Requests.WorkLoad;
+import com.example.entity.Requests.WorkLoadDto;
 import com.example.exception.UserNotFoundExc;
 import com.example.mapper.RequestMapper;
 import com.example.mapper.Requests.PreferTasToCourseMapper;
@@ -36,6 +48,13 @@ import com.example.repo.RequestRepos.SwapRepo;
 import com.example.repo.RequestRepos.TransferProctoringRepo;
 import com.example.repo.RequestRepos.WorkLoadRepo;
 import com.example.service.RequestServ;
+import com.example.service.RequestServices.LeaveServ;
+import com.example.service.RequestServices.PreferTasToCourseServ;
+import com.example.service.RequestServices.ProctorTaFromFacultiesServ;
+import com.example.service.RequestServices.ProctorTaInDepartmentServ;
+import com.example.service.RequestServices.SwapServ;
+import com.example.service.RequestServices.TransferProctoringServ;
+import com.example.service.RequestServices.WorkLoadServ;
 
 import lombok.RequiredArgsConstructor;
 
@@ -62,8 +81,12 @@ public class RequestController {
     private final PreferTasToCourseMapper preferTasToCourseMapper;
     private final PreferTasToCourseServ preferTasToCourseServ;
     private final RequestServ reqServ;
+
+    private final RequestServ requestService;
+
     private final InstructorRepo insRepo;
     private final RequestMapper requestMapper;
+
     private final PreferTasToCourseServ prefService;
     private final ProctorTaInFacultyServ proctorServ;
 
@@ -106,7 +129,7 @@ public class RequestController {
     @GetMapping("/request/{reqId}")
     public ResponseEntity<RequestDto> getRequestById(
             @PathVariable Long reqId) {
-        Request request = reqServ.getRequestById(reqId);
+        Request request = requestService.getRequestById(reqId);
         return ResponseEntity.ok(requestMapper.toDto(request));
     }
     @GetMapping("/request/preferTas/{reqId}")
@@ -176,6 +199,11 @@ public class RequestController {
       return new ResponseEntity<>(swapServ.acceptSwapRequest(swapId, taId),HttpStatus.OK);
     }
 
+    @PutMapping("ta/{approverId}/departmentproctor/{reqID}/approve")
+    public void finishTAInDepRequest(@PathVariable Long reqId,@PathVariable String approverId) {
+      proctorTaInDepartmentServ.approveProctorTaInDepartmentRequest(reqId, approverId);
+    }
+
     @PostMapping("/transfer-proctoring")
     public ResponseEntity<Void> sendTransferProctoring(
             @PathVariable Long taId,
@@ -237,14 +265,14 @@ public class RequestController {
     
     @GetMapping("/instr/{instrId}/receivedAll")
     public ResponseEntity<List<RequestDto>> getAllReceivedRequestsOfTheInstructor(@PathVariable Long instrId){
-      return new ResponseEntity<>(reqServ.getReceivedRequestsOfTheInstructor(instrId), HttpStatus.OK);
+      return new ResponseEntity<>(requestService.getReceivedRequestsOfTheInstructor(instrId), HttpStatus.OK);
     }
 
     @GetMapping("/ta/{taId}/receivedAll")
     public ResponseEntity<List<RequestDto>> getAllReceivedRequestsOfTheTa(
             @PathVariable Long taId) {
         return ResponseEntity.ok(
-            reqServ.getReceivedRequestsOfTheTa(taId)
+          requestService.getReceivedRequestsOfTheTa(taId)
         );
     }
 
@@ -253,7 +281,7 @@ public class RequestController {
     public ResponseEntity<List<RequestDto>> getAllReceivedRequestsOfTheDeanOffice(
             @PathVariable Long deanOfficeId) {
         return ResponseEntity.ok(
-            reqServ.getReceivedRequestsOfTheDeanOffice(deanOfficeId)
+           requestService.getReceivedRequestsOfTheDeanOffice(deanOfficeId)
         );
     }
 
@@ -262,14 +290,14 @@ public class RequestController {
     public ResponseEntity<List<RequestDto>> getAllReceivedRequestsOfTheDepartment(
             @PathVariable String deptName) {
         return ResponseEntity.ok(
-            reqServ.getReceivedRequestsOfTheDepartment(deptName)
+          requestService.getReceivedRequestsOfTheDepartment(deptName)
         );
     }
 
 
     @GetMapping("/{user_id}/receivedReqs")
     public ResponseEntity<List<RequestDto>> getReceivedRequests(@PathVariable Long user_id) {
-      return new ResponseEntity<>(reqServ.getReceivedRequestsOfTheUser(user_id), HttpStatus.ACCEPTED);
+      return new ResponseEntity<>(requestService.getReceivedRequestsOfTheUser(user_id), HttpStatus.ACCEPTED);
     }
 
     @GetMapping("/ta/{taId}/exam/{examId}/swap/getAvailableTas")
@@ -306,6 +334,62 @@ public class RequestController {
                 .body(dto);
     }
     
+
+    // 1) DeanOffice: Proctor‐in‐Faculty
+    @GetMapping("/deanOffice/{deanId}/proctor-in-faculty")
+    public List<ProctorTaInFacultyDto> getReceivedProctorTaInFaculty(
+            @PathVariable("deanId") Long deanId) {
+        return requestService.getReceivedProctoTaInFacultyOfTheDean(deanId);
+    }
+
+    // 2) DeanOffice: Proctor‐from‐Other‐Faculty
+    @GetMapping("/deanOffice/{deanId}/proctor-from-other-faculty")
+    public List<ProctorTaFromOtherFacultyDto> getReceivedProctorTaFromOtherFaculty(
+            @PathVariable("deanId") Long deanId) {
+        return requestService.getReceivedProctorTaFromOtherFacOfTheDean(deanId);
+    }
+
+    // 3) Instructor: Workload requests
+    @GetMapping("/instructors/{instrId}/workload-requests")
+    public List<WorkLoadDto> getReceivedWorkloadRequestsOfTheInstructor(
+            @PathVariable("instrId") Long instructorId) {
+        return requestService.getReceivedWorkLoadRequestsOfTheInstr(instructorId);
+    }
+
+    // 4) TA: Transfer‐proctoring requests
+    @GetMapping("/ta/{taId}/transfer-proctoring-requests")
+    public List<TransferProctoringDto> getReceivedTransferProctoringOfTheTa(
+            @PathVariable("taId") Long taId) {
+        return requestService.getReceivedProctoringRequestsOfTheTa(taId);
+    }
+
+    // 5) TA: Swap‐proctoring requests
+    @GetMapping("/ta/{taId}/swap-proctoring-requests")
+    public List<SwapDto> getReceivedSwapProctoringOfTheTa(
+            @PathVariable("taId") Long taId) {
+        return requestService.getReceivedSwapProctoringRequestsOfTheTa(taId);
+    }
+
+    // 6) Department: Proctor‐in‐Department requests
+    @GetMapping("/departments/{depName}/proctor-in-department-requests")
+    public List<ProctorTaInDepartmentDto> getReceivedProctorInDeptRequests(
+            @PathVariable("depName") String depName) {
+        return requestService.getReceivedProctorInDepRequestsOfTheDep(depName);
+    }
+
+    // 7) Department: Prefer‐TAs‐to‐Course requests
+    @GetMapping("/departments/{depName}/prefer-tas-to-course-requests")
+    public List<PreferTasToCourseDto> getReceivedPreferTasToCourseRequests(
+            @PathVariable("depName") String depName) {
+        return requestService.getReceivedPreferTasToCourseRequestsOfTheDep(depName);
+    }
+
+    // 8) Department: Leave requests
+    @GetMapping("/departments/{depName}/leave-requests")
+    public List<LeaveDTO> getReceivedLeaveRequestsOfTheDep(
+            @PathVariable("depName") String depName) {
+        return requestService.getReceivedLeaveRequestsOfTheDep(depName);
+    }
 }
 /*
 Leave Request

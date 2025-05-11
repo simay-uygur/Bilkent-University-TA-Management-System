@@ -109,7 +109,7 @@ public class PreferTasToCourseServImpl implements PreferTasToCourseServ{
         CourseOffering off = offeringServ.getCurrentOffering(courseCode);
         Course course = off.getCourse();
         Department dept = course.getDepartment();
-
+        
         if (prefRepo.existsBySender_IdAndSection_SectionIdAndReceiver_Name(instrId, section.getSectionId(), dept.getName())) {
             throw new GeneralExc(
                 "A request by instructor " + instrId +
@@ -129,7 +129,7 @@ public class PreferTasToCourseServImpl implements PreferTasToCourseServ{
         req.setSection(section);
         req.setTaNeeded(taNeeded);
         req.setAmountOfAssignedTas(0);
-
+        req.setCourseCode(courseCode);
         List<TA> preferred = taRepo.findAllById(preferredReqs);
         if (preferred.size() != preferredReqs.size()) {
             throw new GeneralExc("Some preferred TAs not found");

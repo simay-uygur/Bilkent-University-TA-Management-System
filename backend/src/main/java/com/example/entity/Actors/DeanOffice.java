@@ -8,6 +8,7 @@ import java.util.List;
 import com.example.entity.General.Faculty;
 import com.example.entity.Requests.ProctorTaFromFaculties;
 import com.example.entity.Requests.ProctorTaFromOtherFaculty;
+import com.example.entity.Requests.ProctorTaInFaculty;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
 import jakarta.persistence.CascadeType;
@@ -53,4 +54,12 @@ public class DeanOffice extends User {
 
     @OneToMany(mappedBy = "receiver",fetch= FetchType.LAZY, cascade= CascadeType.ALL)
     private List<ProctorTaFromOtherFaculty> receivedFromFacsRequests = new ArrayList<>();
+
+    @OneToMany(
+        mappedBy = "receiver",
+        fetch = FetchType.LAZY,
+        cascade = CascadeType.ALL,
+        orphanRemoval = true
+    )
+    private List<ProctorTaInFaculty> receivedFromDepartmentsRequests = new ArrayList<>();
 }

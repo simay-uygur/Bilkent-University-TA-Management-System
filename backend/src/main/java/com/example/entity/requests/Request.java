@@ -69,6 +69,9 @@ public class Request {
     @Column(name = "sent_time", unique = false)
     private Date sentTime;
 
+    @Column(name = "course_code")
+    private String courseCode;
+
     /*@ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "sender_id")
     //@JsonBackReference

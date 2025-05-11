@@ -35,6 +35,9 @@ public class ProctorTaInFaculty extends Request{
     @Column(name = "tas_left")
     private int tasLeft;
 
+    @Column(name = "instr_id")
+    private Long instrId;
+
     public boolean addTa(TA ta){
         if (exam.incr()){
             exam.getAssignedTas().add(ta);

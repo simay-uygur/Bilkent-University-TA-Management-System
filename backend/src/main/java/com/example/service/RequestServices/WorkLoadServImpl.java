@@ -52,6 +52,7 @@ public class WorkLoadServImpl implements WorkLoadServ {
         workloadReq.setTask(taTask.getTask());
         workloadReq.setSender(ta);
         workloadReq.setReceiver(instr);
+        workloadReq.setCourseCode(dto.getCourseCode());
         ta.getSendedWorkLoadRequests().add(workloadReq);
         instr.getReceivedWorkloadRequests().add(workloadReq);
         log.info("WorkLoad Request Creation","TA with id: "+senderId+" has sent WorkLoad Request for the task with id: "+dto.getTaskId()+" to Instructor with id: "+dto.getReceiverId());

@@ -54,6 +54,7 @@ public class TransferProctoringServImpl implements TransferProctoringServ {
         req.setSender(sender);
         req.setReceiver(receiver);
         req.setExam(exam);
+        req.setCourseCode(dto.getCourseCode());
         log.info("Transfer Proctoring Request Creation","TA with id: " + senderId +" wants to transfer his proctoring duty to another TA with id: " + dto.getReceiverId());
         transferRepo.save(req);
     }
