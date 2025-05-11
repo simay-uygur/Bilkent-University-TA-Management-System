@@ -11,6 +11,7 @@ import com.example.entity.Actors.TA;
 import com.example.entity.Actors.User;
 import com.example.exception.GeneralExc;
 import com.example.exception.UserExistsExc;
+import com.example.exception.UserNotFoundExc;
 import com.example.repo.TARepo;
 import com.example.repo.UserRepo;
 
@@ -83,6 +84,17 @@ public class UserServImpl implements UserServ{
     @Override
     public User getUserByEmail(String email) {
         return repo.findUserByWebmail(email).orElse(null);
+    }
+    @Override
+    public boolean changePasswordById(String password, Long userId) {
+        User user = repo.findById(userId)
+        .orElseThrow(() -> new UserNotFoundExc(userId));
+
+        String hashed = encoder.encode(password);
+        user.setPassword(hashed);
+        repo.save(user);
+
+        return true;
     }
     
 }

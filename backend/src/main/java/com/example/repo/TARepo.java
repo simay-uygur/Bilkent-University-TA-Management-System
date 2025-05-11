@@ -18,6 +18,7 @@ public interface TARepo extends JpaRepository<TA, Long> { // TA is the entity an
     @Query("SELECT t FROM TA t WHERE t.isDeleted = false")
     List<TA> findAllTAs(); // fixed query
 
+    List<TA> findAllByDepartment(String department);
     /*@Query("SELECT pt FROM PublicTask pt " +
            "JOIN pt.tas_list tas " +
            "WHERE tas.id = :taId AND pt.status = 'PENDING'")
