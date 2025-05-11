@@ -5,6 +5,8 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
+import com.example.entity.Requests.*;
+import com.example.service.RequestServices.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;            
 import org.springframework.http.ResponseEntity;
@@ -80,12 +82,15 @@ public class RequestController {
     private final PreferTasToCourseMapper preferTasToCourseMapper;
     private final PreferTasToCourseServ preferTasToCourseServ;
     private final ProctorTaInFacultyServ proctorTaInFacultyServ;
+    private final RequestServ reqServ;
+
     private final RequestServ requestService;
 
     private final InstructorRepo insRepo;
     private final RequestMapper requestMapper;
 
     private final PreferTasToCourseServ prefService;
+    private final ProctorTaInFacultyServ proctorServ;
 
     // Get all requests sent to a department
     @GetMapping("/department/{depName}/preferTas")
@@ -109,7 +114,7 @@ public class RequestController {
     @PostMapping(
         path = "/instructor/{instrId}/section/{sectionCode}/preferTas"
     )
-    public ResponseEntity<Void> createReferTasRequest(
+    public ResponseEntity<Void> createPreferTasRequest(
             @RequestBody TAAssignmentRequest dto,
             @PathVariable Long instrId,
             @PathVariable String sectionCode) {
@@ -194,6 +199,11 @@ public class RequestController {
     @PutMapping("ta/{taId}/swap/{swapId}/approve")
     public ResponseEntity<Boolean> approveSwapRequest(@PathVariable Long swapId, @PathVariable Long taId) {
       return new ResponseEntity<>(swapServ.acceptSwapRequest(swapId, taId),HttpStatus.OK);
+    }
+
+    @PutMapping("ta/{approverId}/departmentproctor/{reqID}/approve")
+    public void finishTAInDepRequest(@PathVariable Long reqId,@PathVariable String approverId) {
+      proctorTaInDepartmentServ.approveProctorTaInDepartmentRequest(reqId, approverId);
     }
 
     @PostMapping("/transfer-proctoring")
@@ -318,6 +328,19 @@ public class RequestController {
           }
       });
     }
+
+
+    //to try the
+    @PostMapping("/proctor-ta-in-department/{depReqId}/escalate")
+    public ResponseEntity<ProctorTaInFacultyDto> escalate(
+            @PathVariable Long depReqId
+    ) {
+        ProctorTaInFacultyDto dto = proctorServ.escalateToFaculty(depReqId);
+        return ResponseEntity
+                .status(HttpStatus.CREATED)  // or .ok() if you prefer 200
+                .body(dto);
+    }
+    
 
     // 1) DeanOffice: Proctor‐in‐Faculty
     @GetMapping("/deanOffice/{deanId}/proctor-in-faculty")
