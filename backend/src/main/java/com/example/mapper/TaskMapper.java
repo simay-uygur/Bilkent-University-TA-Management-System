@@ -40,9 +40,9 @@ public class TaskMapper {
         // you may need to add a description field to Task if you actually have one
         dto.setDescription(task.getDescription()); // example
         dto.setDuration(task.getDuration());
-        dto.setStatus(task.getStatus().name());
+        dto.setStatus(task.getStatus().toString());
         dto.setTaskId(task.getTaskId());
-    
+        dto.setWorkload(task.getWorkload());
         return dto;
     }
 

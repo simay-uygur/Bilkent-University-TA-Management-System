@@ -6,17 +6,23 @@ import com.example.entity.Courses.Department;
 import com.example.entity.Exams.Exam;
 
 import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
+import lombok.Data;
 
+@Data
+@Entity
+@Table(name = "proctor_ta_in_faculty_requests")
 public class ProctorTaInFaculty extends Request{
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "deans_id", referencedColumnName = "id")
     private DeanOffice receiver;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "name", referencedColumnName = "name")
+    @JoinColumn(name = "sender_dep", referencedColumnName = "name")
     private Department sender;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -29,7 +35,7 @@ public class ProctorTaInFaculty extends Request{
     @Column(name = "tas_left")
     private int tasLeft;
 
-        public boolean addTa(TA ta){
+    public boolean addTa(TA ta){
         if (exam.incr()){
             exam.getAssignedTas().add(ta);
             tasLeft--;

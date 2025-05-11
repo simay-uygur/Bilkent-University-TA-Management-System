@@ -1,21 +1,25 @@
 package com.example.service.RequestServices;
 
+import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.stream.Collectors;
+
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import com.example.entity.Actors.Role;
 import com.example.entity.Actors.TA;
-import com.example.entity.Actors.User;
 import com.example.entity.Exams.Exam;
 import com.example.entity.General.Date;
-import com.example.entity.Requests.Swap;
+import com.example.entity.General.Event;
+import com.example.entity.Requests.TransferCandidateDto;
 import com.example.entity.Requests.TransferProctoring;
 import com.example.entity.Requests.TransferProctoringDto;
 import com.example.exception.GeneralExc;
 import com.example.exception.UserNotFoundExc;
 import com.example.repo.ExamRepo;
-import com.example.repo.TARepo;
 import com.example.repo.RequestRepos.TransferProctoringRepo;
+import com.example.repo.TARepo;
 import com.example.repo.UserRepo;
 
 import lombok.RequiredArgsConstructor;
@@ -103,5 +107,36 @@ public class TransferProctoringServImpl implements TransferProctoringServ {
         req.setRejected(true);
         req.setPending(false);
         transferRepo.save(req);
+    }
+
+    @Async("setExecutor")
+    @Override
+    @Transactional(readOnly = true)
+    public CompletableFuture<List<TransferCandidateDto>> findTransferCandidates(Long senderId, int examId) {
+        TA sender = taRepo.findById(senderId)
+                        .orElseThrow(() -> new IllegalArgumentException("No such sender TA"));
+        Exam exam = examRepo.findById(examId)
+                            .orElseThrow(() -> new IllegalArgumentException("No such exam"));
+        Event window = exam.getDuration();  
+
+        return CompletableFuture.completedFuture(taRepo.findByDepartment(sender.getDepartment()).stream()
+
+        .filter(candidate -> !candidate.getId().equals(senderId))
+
+        .filter(candidate ->
+            candidate.getExams().stream()
+                    .noneMatch(e -> e.getDuration().has(window))
+        )
+
+        .filter(candidate ->
+            candidate.getTaTasks().stream()
+                    .map(tt -> tt.getTask().getDuration())
+                    .noneMatch(d -> d.has(window))
+        )
+        .map(c -> new TransferCandidateDto(
+            c.getId(),
+            c.getName() + " " + c.getSurname()
+        ))
+        .collect(Collectors.toList()));
     }
 }
