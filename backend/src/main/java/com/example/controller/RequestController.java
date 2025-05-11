@@ -329,19 +329,6 @@ public class RequestController {
       });
     }
 
-
-    //to try the
-    @PostMapping("/proctor-ta-in-department/{depReqId}/escalate")
-    public ResponseEntity<ProctorTaInFacultyDto> escalate(
-            @PathVariable Long depReqId
-    ) {
-        ProctorTaInFacultyDto dto = proctorServ.escalateToFaculty(depReqId);
-        return ResponseEntity
-                .status(HttpStatus.CREATED)  // or .ok() if you prefer 200
-                .body(dto);
-    }
-    
-
     // 1) DeanOffice: Proctor‐in‐Faculty
     @GetMapping("/deanOffice/{deanId}/proctor-in-faculty")
     public List<ProctorTaInFacultyDto> getReceivedProctorTaInFaculty(
