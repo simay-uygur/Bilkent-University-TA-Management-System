@@ -14,9 +14,13 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.dto.DepartmentDto;
+import com.example.dto.ExamDto;
 import com.example.entity.Courses.Department;
+import com.example.entity.Exams.Exam;
 import com.example.mapper.DepartmentMapper;
+import com.example.mapper.ExamMapper;
 import com.example.repo.DepartmentRepo;
+import com.example.repo.ExamRepo;
 import com.example.service.ExamServ;
 
 import lombok.RequiredArgsConstructor;
@@ -28,7 +32,8 @@ public class DepartmentController {
 
     private final DepartmentRepo departmentRepo;
     private final DepartmentMapper   departmentMapper;
-    private final ExamServ examService;
+    private final ExamRepo  examRepo;
+    private final ExamMapper   examMapper;
     @GetMapping
     public ResponseEntity<List<DepartmentDto>> getAllDepartments() {
         List<DepartmentDto> dtos = departmentRepo.findAll().stream()
@@ -46,11 +51,17 @@ public class DepartmentController {
         Department saved = departmentRepo.save(entity);
         return ResponseEntity.ok(departmentMapper.toDto(saved));
     }
-/* @GetMapping("/{examid}")
-    public ResponseEntity<String> addExam(@PathVariable Long examid) {
+@GetMapping("/exam/{examid}")
+    public ResponseEntity<ExamDto> findExam(@PathVariable int examid) {
 
-        return examService.getById(examid);
-    } */
+        Exam exam = examRepo.findById(examid).orElse(null);
+        if (exam == null) {
+            return ResponseEntity.notFound().build();
+        }
+        ExamDto examDto = examMapper.toDto(exam);
+        return ResponseEntity.ok(examDto);
+
+    }
     @PutMapping("/{code}")
     public ResponseEntity<DepartmentDto> updateDepartment(
             @PathVariable("code") String code,
