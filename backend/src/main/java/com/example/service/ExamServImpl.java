@@ -318,7 +318,7 @@ public class ExamServImpl implements ExamServ{
                 ));
                 document.add(Chunk.NEWLINE);
 
-                PdfPTable table = new PdfPTable(4); // ID, Name, Surname, TA?
+                PdfPTable table = new PdfPTable(3); // ID, Name, Surname, TA?
                 table.setWidthPercentage(100);
                 table.addCell("ID");
                 table.addCell("Name");

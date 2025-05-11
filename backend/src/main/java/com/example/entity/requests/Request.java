@@ -72,18 +72,6 @@ public class Request {
     @Column(name = "course_code")
     private String courseCode;
 
-    /*@ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "sender_id")
-    //@JsonBackReference
-      @JsonIgnoreProperties("sended_requests") // Break recursion
-    private User sender;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "receiver_id")
-    @JsonIgnoreProperties("received_requests") // Break recursion
-    //@JsonBackReference
-    private User receiver;*/
-
     @Column(name = "description", unique = false, nullable = true)
     private String description;
 }

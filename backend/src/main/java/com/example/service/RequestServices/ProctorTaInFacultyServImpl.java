@@ -1,5 +1,6 @@
 package com.example.service.RequestServices;
 
+import com.example.entity.General.Date;
 import org.springframework.stereotype.Service;
 
 import com.example.entity.Actors.DeanOffice;
@@ -12,9 +13,12 @@ import com.example.repo.DepartmentRepo;
 import com.example.repo.RequestRepos.ProctorTaInDepartmentRepo;
 import com.example.repo.RequestRepos.ProctorTaInFacultyRepo;
 import com.example.service.LogService;
+import com.example.service.NotificationService;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+
+import java.time.LocalDateTime;
 
 @Service
 @RequiredArgsConstructor
@@ -23,9 +27,10 @@ public class ProctorTaInFacultyServImpl implements ProctorTaInFacultyServ{
     private final ProctorTaInFacultyRepo     facRepo;
     private final DepartmentRepo             departmentRepo;   // if needed
     private final LogService log;
+    private final NotificationService notServ;
     @Transactional
     @Override
-    public ProctorTaInFacultyDto escalateToFaculty(Long depReqId) {
+    public boolean escalateToFaculty(Long depReqId) {
 
         // 1) fetch the department-level request
         ProctorTaInDepartment depReq = depRepo.findById(depReqId)
@@ -49,11 +54,26 @@ public class ProctorTaInFacultyServImpl implements ProctorTaInFacultyServ{
         facReq.setRequiredTas(depReq.getRequiredTas());
         facReq.setTasLeft(depReq.getTasLeft());
         facReq.setCourseCode(depReq.getCourseCode());
+        facReq.setExam( depReq.getExam() );
+        facReq.setDescription( depReq.getDescription());
+        LocalDateTime now = LocalDateTime.now();
+        Date time = new Date();
+        time.setYear(now.getYear());
+        time.setMonth(now.getMonthValue());
+        time.setDay(now.getDayOfMonth());
+        time.setHour(now.getHour());
+        time.setMinute(now.getMinute());
+        facReq.setSentTime(time);
+        //facReq.setApproved(false);
+
+
+
         facRepo.save(facReq);   // persists & assigns ID
 
         depRepo.save(depReq);
+        notServ.notifyCreation(facReq);
         log.info("Proctor Ta in Department Request with id: "+depReqId+" is Transferred to the Faculty", "");
-        return toDto(facReq);
+        return true;
     }
 
     private ProctorTaInFacultyDto toDto(ProctorTaInFaculty facReq) {
@@ -74,6 +94,7 @@ public class ProctorTaInFacultyServImpl implements ProctorTaInFacultyServ{
         req.setPending(false);
         log.info("Proctor TAs In Faculty Request Finish","Proctor TAs in Faculty Request with id: " +reqId+ " is finished by " + " DeanOffice member with id: " + approverId);
         facRepo.save(req);
+        notServ.notifyApproval(req);
         return true;
     }
 
@@ -85,6 +106,7 @@ public class ProctorTaInFacultyServImpl implements ProctorTaInFacultyServ{
         req.setPending(false);
         log.info("Proctor TAs In Faculty Request Finish","Proctor TAs in Faculty Request with id: " +reqId+ " is finished by " + " DeanOffice member with id: " + rejecterId);
         facRepo.save(req);
+        notServ.notifyRejection(req);
         return true;
     }
 }

@@ -8,11 +8,8 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
 
-import org.apache.coyote.BadRequestException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.mail.SimpleMailMessage;
-import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -22,12 +19,13 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.entity.Actors.User;
 import com.example.entity.General.Term;
+import com.example.exception.GeneralExc;
 import com.example.exception.IncorrectWebMailException;
 import com.example.exception.UserExistsExc;
 import com.example.exception.UserNotFoundExc;
@@ -35,22 +33,17 @@ import com.example.repo.UserRepo;
 import com.example.security.JwtResponse;
 import com.example.security.JwtTokenProvider;
 import com.example.security.PasswordResetToken;
+import com.example.security.PasswordResetTokenRepo;
 import com.example.security.SignInRequest;
 import com.example.security.UserDetailsImpl;
 import com.example.security.UserDetailsServiceImpl;
+import com.example.service.LogService;
+import com.example.service.MailService;
 import com.example.service.UserServ;
 
 import jakarta.validation.Valid;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
-// better to use different controllers for each role, because the logic for each role is different
-
-import org.springframework.web.bind.annotation.PutMapping;
-
-import com.example.exception.GeneralExc;
-import com.example.security.PasswordResetTokenRepo;
-import com.example.service.LogService;
-import com.example.service.MailService;
 
 @RestController
 @RequiredArgsConstructor
@@ -195,12 +188,12 @@ public class AuthController {
         prt.setExpiresAt(expires);
         tokenRepo.save(prt);
 
-        String link = "https://your.app/reset-password?token=" + token;
+        /*String link = "https://your.app/reset-password?token=" + token;
         mailService.sendMail(
             u.getWebmail(),
             "Password Reset Link",
             "Click here to reset (valid 3 h):\n\n" + link
-        );
+        );*/
 
         return ResponseEntity.noContent().build();
     }

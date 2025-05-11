@@ -5,6 +5,8 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
+import com.example.entity.Requests.*;
+import com.example.service.RequestServices.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;            
 import org.springframework.http.ResponseEntity;
@@ -50,6 +52,7 @@ import com.example.service.RequestServices.LeaveServ;
 import com.example.service.RequestServices.PreferTasToCourseServ;
 import com.example.service.RequestServices.ProctorTaFromFacultiesServ;
 import com.example.service.RequestServices.ProctorTaInDepartmentServ;
+import com.example.service.RequestServices.ProctorTaInFacultyServ;
 import com.example.service.RequestServices.SwapServ;
 import com.example.service.RequestServices.TransferProctoringServ;
 import com.example.service.RequestServices.WorkLoadServ;
@@ -78,6 +81,8 @@ public class RequestController {
     private final WorkLoadRepo workLoadRepo;
     private final PreferTasToCourseMapper preferTasToCourseMapper;
     private final PreferTasToCourseServ preferTasToCourseServ;
+    private final ProctorTaInFacultyServ proctorTaInFacultyServ;
+    private final RequestServ reqServ;
 
     private final RequestServ requestService;
 
@@ -85,6 +90,7 @@ public class RequestController {
     private final RequestMapper requestMapper;
 
     private final PreferTasToCourseServ prefService;
+    private final ProctorTaInFacultyServ proctorServ;
 
     // Get all requests sent to a department
     @GetMapping("/department/{depName}/preferTas")
@@ -108,7 +114,7 @@ public class RequestController {
     @PostMapping(
         path = "/instructor/{instrId}/section/{sectionCode}/preferTas"
     )
-    public ResponseEntity<Void> createReferTasRequest(
+    public ResponseEntity<Void> createPreferTasRequest(
             @RequestBody TAAssignmentRequest dto,
             @PathVariable Long instrId,
             @PathVariable String sectionCode) {
@@ -216,6 +222,11 @@ public class RequestController {
         transferProctoringServ.createTransferProctoringReq(dto, taId);
         boolean exists = transferRepo.existsBySenderIdAndReceiverIdAndExamExamIdAndIsRejected(taId, dto.getReceiverId(), dto.getExamId(), false);
         return new ResponseEntity<>(exists ? HttpStatus.CREATED : HttpStatus.BAD_REQUEST);
+    }
+
+    @PostMapping("/department/taInDepRequest/{req_id}")
+    public ResponseEntity<Boolean> sendProctorTaInFacultyRequest(@PathVariable Long req_id){
+      return new ResponseEntity<>(proctorTaInFacultyServ.escalateToFaculty(req_id), HttpStatus.ACCEPTED);
     }
 
     @PostMapping("/proctor-from-faculties") //Deans to Deans
