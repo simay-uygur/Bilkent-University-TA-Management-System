@@ -4,7 +4,7 @@
   flex-direction: column;
   gap: 2rem;
   padding: 2rem;
-  background: #d2e9ff;
+  background: #f0faff;
 }
 
 .card {
@@ -43,4 +43,342 @@
   margin-top: 1.5rem;
   display: flex;
   justify-content: flex-end;
+}
+.container {
+  padding: 24px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.headerRow {
+  display: flex;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.title {
+  margin-left: 16px;
+  font-size: 24px;
+  font-weight: 600;
+}
+
+.mainContainer {
+  margin-top: 24px;
+}
+
+.errorBanner {
+  padding: 16px;
+  background-color: #f8d7da;
+  border: 1px solid #f5c6cb;
+  border-radius: 8px;
+  color: #721c24;
+  margin-bottom: 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.successBanner {
+  padding: 16px;
+  background-color: #d4edda;
+  border: 1px solid #c3e6cb;
+  border-radius: 8px;
+  color: #155724;
+  margin-bottom: 24px;
+  text-align: center;
+  animation: fadeOut 3s forwards;
+  animation-delay: 2s;
+}
+
+.retryButton {
+  padding: 8px 16px;
+  background-color: #dc3545;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 500;
+}
+
+.retryButton:hover {
+  background-color: #c82333;
+}
+
+@keyframes fadeOut {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}
+/* Container for all exam cards */
+.container {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+  gap: 28px;
+  width: 100%;
+  padding: 20px 0;
+}
+
+/* No exams message */
+.noExams {
+  background: linear-gradient(to bottom, #ffffff, #f7f9fc);
+  border-radius: 12px;
+  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.05);
+  padding: 60px 40px;
+  text-align: center;
+  grid-column: 1 / -1;
+  margin: 40px auto;
+  max-width: 500px;
+}
+
+.noExams p {
+  color: #5c6b7a;
+  font-size: 18px;
+  margin: 0;
+  font-weight: 500;
+}
+
+/* Exam card styling */
+.examCard {
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+  transition: all 0.3s ease;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.examCard:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.12);
+}
+
+/* Header styling with gradient */
+.cardHeader {
+  background: linear-gradient(135deg, #4b79a1, #283e51);
+  color: white;
+  padding: 20px;
+  position: relative;
+}
+
+.cardHeader h3 {
+  margin: 0 0 8px 0;
+  font-size: 22px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+
+.courseCode {
+  display: inline-block;
+  background-color: rgba(255, 255, 255, 0.2);
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+/* Exam details styling */
+.examDetails {
+  padding: 20px;
+  background-color: #f8f9ff;
+  border-bottom: 1px solid #eaecf3;
+}
+
+.examInfo {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+  font-size: 16px;
+}
+
+.examInfo:last-child {
+  margin-bottom: 0;
+}
+
+.infoLabel {
+  font-weight: 600;
+  color: #495057;
+  min-width: 60px;
+}
+
+/* Room list text */
+.roomList {
+  color: #4a5568;
+  flex: 1;
+  text-align: right;
+  word-break: break-word;
+}
+
+/* Input group styling */
+.inputGroup {
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.inputRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.label {
+  font-weight: 600;
+  color: #2d3748;
+  font-size: 16px;
+  display: block;
+  margin-bottom: 8px;
+}
+
+.inputNumber {
+  width: 100px;
+  padding: 12px;
+  border: 2px solid #e2e8f0;
+  border-radius: 8px;
+  font-size: 16px;
+  text-align: center;
+  color: #1a202c;
+  background: #f8fafc;
+  transition: all 0.2s ease;
+}
+
+.inputNumber:focus {
+  border-color: #4b79a1;
+  background: #fff;
+  box-shadow: 0 0 0 3px rgba(75, 121, 161, 0.2);
+  outline: none;
+}
+
+.inputNumber:disabled {
+  background-color: #edf2f7;
+  color: #a0aec0;
+  cursor: not-allowed;
+}
+
+/* Textarea styling */
+.textareaContainer {
+  width: 100%;
+}
+
+.descriptionInput {
+  width: 100%;
+  padding: 12px;
+  border: 2px solid #e2e8f0;
+  border-radius: 8px;
+  font-size: 15px;
+  color: #1a202c;
+  background: #f8fafc;
+  transition: all 0.2s ease;
+  resize: vertical;
+  min-height: 80px;
+  font-family: inherit;
+}
+
+.descriptionInput:focus {
+  border-color: #4b79a1;
+  background: #fff;
+  box-shadow: 0 0 0 3px rgba(75, 121, 161, 0.2);
+  outline: none;
+}
+
+.descriptionInput:disabled {
+  background-color: #edf2f7;
+  color: #a0aec0;
+  cursor: not-allowed;
+}
+
+/* Submit button styling */
+.submitButton {
+  width: 100%;
+  padding: 14px;
+  border: none;
+  border-radius: 8px;
+  background: linear-gradient(to right, #33a574, #2a8c62);
+  color: white;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  margin-top: 10px;
+  letter-spacing: 0.5px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 50px;
+  box-shadow: 0 4px 12px rgba(42, 140, 98, 0.2);
+}
+
+.submitButton:hover:not(:disabled) {
+  background: linear-gradient(to right, #2a8c62, #1f6949);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(42, 140, 98, 0.3);
+}
+
+.submitButton:active:not(:disabled) {
+  transform: translateY(1px);
+  box-shadow: 0 2px 8px rgba(42, 140, 98, 0.3);
+}
+
+.submitButton:disabled {
+  background: linear-gradient(to right, #9fd4be, #a8d7c5);
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+/* Responsive styles */
+@media (max-width: 768px) {
+  .container {
+    grid-template-columns: 1fr;
+    padding: 10px;
+    gap: 20px;
+  }
+  
+  .examCard {
+    margin-bottom: 0;
+  }
+  
+  .cardHeader h3 {
+    font-size: 20px;
+  }
+  
+  .examInfo {
+    font-size: 14px;
+  }
+  
+  .inputGroup {
+    padding: 16px;
+  }
+  
+  .inputRow {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+  
+  .inputNumber {
+    width: 100%;
+  }
+  
+  .submitButton {
+    height: 46px;
+    font-size: 15px;
+  }
+}
+
+/* Animation for loading state */
+@keyframes pulse {
+  0% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.6;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+.submitButton:disabled {
+  animation: pulse 2s infinite ease-in-out;
 }

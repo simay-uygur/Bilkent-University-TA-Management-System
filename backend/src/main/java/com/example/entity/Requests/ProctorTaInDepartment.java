@@ -15,10 +15,14 @@ import lombok.Data;
 
 @Data
 @Entity
-@Table(name = "proctor_ta_in_faculty_requests")
+@Table(name = "proctor_ta_in_department_requests")
 public class ProctorTaInDepartment extends Request{
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "name", referencedColumnName = "name")
+    @JoinColumn(
+        name = "receiver_department_name",   // the FK column in this table
+        referencedColumnName = "name",       // the PK of Department
+        nullable = false
+    )
     private Department receiver;
 
     @ManyToOne(fetch= FetchType.LAZY)

@@ -53,6 +53,11 @@ public class CourseOfferingController {
                 .map(mapper::toDto)
                 .collect(Collectors.toList());
     }
+    @GetMapping("/term/{term}/year/{year}")
+    public List<CourseOfferingDto> listByTermAndYear(@PathVariable String term, @PathVariable int year) {
+        return service.getByTermAndYear(term, year);
+               
+    }
 
     @GetMapping("/{id}")
     public ResponseEntity<CourseOfferingDto> get(@PathVariable Long id) {
@@ -63,6 +68,7 @@ public class CourseOfferingController {
         }
         return new ResponseEntity<>(dto, HttpStatus.FOUND);
     }
+    
     @GetMapping("/courseCode/{code}")
     public ResponseEntity<List<CourseOfferingDto>> get(@PathVariable String code) {
         //return mapper.toDto(service.getById(id));
@@ -131,7 +137,8 @@ public class CourseOfferingController {
             @RequestBody ExamDto dto
     ) {
         return service
-                .createExamWithClassRoomGiven(dto, courseCode)
+                //.createExamWithClassRoomGiven(dto, courseCode)
+                .createExam(dto, courseCode) //try another
                 .thenApply(success -> {
                     // if you want to return the new exam’s id you could switch to returning a body
                     return ResponseEntity

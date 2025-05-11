@@ -12,15 +12,17 @@ import com.example.entity.Actors.User;
 
 public class UserDetailsImpl implements UserDetails {
     private Long id;
+    private String userName;
     private String webmail;
     private String password;
     private boolean enabled;  
     private Collection<? extends GrantedAuthority> authorities;
 
-    public UserDetailsImpl(Long id, String webmail, String password,
+    public UserDetailsImpl(Long id, String webmail, String password, String userName,
                            Collection<? extends GrantedAuthority> authorities) {
         this.id = id;
         this.webmail = webmail;
+        this.userName = userName;
         this.password = password;
         this.authorities = authorities;
     }
@@ -32,6 +34,7 @@ public class UserDetailsImpl implements UserDetails {
             user.getId(),
             user.getWebmail(),
             user.getPassword(),
+            user.getName() + " " + user.getSurname(),
             Collections.singletonList(authority)
         );
     }
@@ -41,6 +44,7 @@ public class UserDetailsImpl implements UserDetails {
     }
     @Override public String getPassword() { return password; }
     @Override public String getUsername() { return webmail; }
+    public String getName() { return userName; }
     @Override public boolean isAccountNonExpired() { return true; }
     @Override public boolean isAccountNonLocked() { return true; }
     @Override public boolean isCredentialsNonExpired() { return true; }

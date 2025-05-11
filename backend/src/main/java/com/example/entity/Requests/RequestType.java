@@ -6,6 +6,7 @@ public enum RequestType {
     TransferProctoring,
     ProctTaFromFaculties,
     ProctTaFromFaculty,
+    ProctorTaInDepartment,
     ProctorTaInFaculty,    // 
     PreferTasToCourse,     // instructor to dean office 
     WorkLoad               // ta -> to instr

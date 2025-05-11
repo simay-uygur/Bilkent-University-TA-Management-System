@@ -16,7 +16,7 @@ public class NotificationService {
 
     private final NotificationRepos notificationRepos;
     private final LogService log; 
-
+    private final MailService mailService;
     /**
      * Creates and saves a new notification for the given receiver.
      *
@@ -37,7 +37,7 @@ public class NotificationService {
         );
         log.info("NotificationService", "Notification created for: " + receiverName); 
         notificationRepos.save(notification);
-        //mailService.sendMail(receiverName, title, text);
+        mailService.sendMail(receiverName, title, text);
         return notification;
     }
 

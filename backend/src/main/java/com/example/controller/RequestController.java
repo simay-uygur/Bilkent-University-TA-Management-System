@@ -14,23 +14,28 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.example.dto.RequestDto;
+import com.example.dto.SwapOptionDto;
 import com.example.dto.TAAssignmentRequest;
 import com.example.entity.Actors.Instructor;
 import com.example.entity.Requests.LeaveDTO;
 import com.example.entity.Requests.PreferTasToCourseDto;
 import com.example.entity.Requests.ProctorTaFromFacultiesDto;
 import com.example.entity.Requests.ProctorTaInDepartmentDto;
+import com.example.entity.Requests.Request;
 import com.example.entity.Requests.SwapDto;
+import com.example.entity.Requests.TransferCandidateDto;
 import com.example.entity.Requests.TransferProctoringDto;
 import com.example.entity.Requests.WorkLoad;
 import com.example.entity.Requests.WorkLoadDto;
 import com.example.exception.UserNotFoundExc;
 import com.example.mapper.RequestMapper;
+import com.example.mapper.Requests.PreferTasToCourseMapper;
 import com.example.repo.InstructorRepo;
 import com.example.repo.RequestRepos.LeaveRepo;
 import com.example.repo.RequestRepos.ProctorTaFromFacultiesRepo;
@@ -51,6 +56,7 @@ import lombok.RequiredArgsConstructor;
 
 
 
+
 @RestController
 @RequestMapping("/api")
 @RequiredArgsConstructor
@@ -68,6 +74,8 @@ public class RequestController {
     private final TransferProctoringRepo transferRepo;
     private final WorkLoadServ workLoadServ;
     private final WorkLoadRepo workLoadRepo;
+    private final PreferTasToCourseMapper preferTasToCourseMapper;
+    private final PreferTasToCourseServ preferTasToCourseServ;
 
     private final RequestServ reqServ;
 
@@ -98,7 +106,7 @@ public class RequestController {
     @PostMapping(
         path = "/instructor/{instrId}/section/{sectionCode}/preferTas"
     )
-    public ResponseEntity<Void> createRequest(
+    public ResponseEntity<Void> createReferTasRequest(
             @RequestBody TAAssignmentRequest dto,
             @PathVariable Long instrId,
             @PathVariable String sectionCode) {
@@ -111,6 +119,22 @@ public class RequestController {
       @RequestBody PreferTasToCourseDto dto){
         prefService.createRequest(dto.getPreferredTas(), dto.getNonPreferredTas(), dto.getTaNeeded(), instrId, sectionCode);
     }*/
+    // Get all requests sent to a department
+    @GetMapping("/request/{reqId}")
+    public ResponseEntity<RequestDto> getRequestById(
+            @PathVariable Long reqId) {
+        Request request = reqServ.getRequestById(reqId);
+        return ResponseEntity.ok(requestMapper.toDto(request));
+    }
+    @GetMapping("/request/preferTas/{reqId}")
+    public ResponseEntity<PreferTasToCourseDto> getPreferTasRequestById(
+            @PathVariable Long reqId) {
+        return ResponseEntity.ok((prefService.getRequestById(reqId)));
+    }
+    public String getMethodName(@RequestParam String param) {
+        return new String();
+    }
+    
     @PostMapping(
         path = "/ta/{taId}/request/leave",
         consumes = MediaType.MULTIPART_FORM_DATA_VALUE   // ← **must** declare this
@@ -179,7 +203,7 @@ public class RequestController {
         return new ResponseEntity<>(exists ? HttpStatus.CREATED : HttpStatus.BAD_REQUEST);
     }
 
-    @PostMapping("/proctor-from-faculties")
+    @PostMapping("/proctor-from-faculties") //Deans to Deans
     public ResponseEntity<Void> sendProctorTaFromFaculties(
             @PathVariable Long taId,
             @RequestBody ProctorTaFromFacultiesDto dto
@@ -189,14 +213,23 @@ public class RequestController {
         return new ResponseEntity<>(exists ? HttpStatus.CREATED : HttpStatus.BAD_REQUEST);
     }
 
-    @PostMapping("/proctor-in-faculty")
+    @PostMapping("/proctor-in-faculty-department/{instrId}") // Ins to Department
     public ResponseEntity<Void> sendProctorTaInDepartment(
             @PathVariable Long instrId,
             @RequestBody ProctorTaInDepartmentDto dto
     ) {
         proctorTaInDepartmentServ.createProctorTaInDepartmentRequest(dto, instrId);
-        boolean exists = inDepRepo.existsBySender_IdAndReceiver_NameAndExam_ExamIdAndIsRejected(instrId, dto.getReceiverName(), dto.getExamId(), false);
-        return new ResponseEntity<>(exists ? HttpStatus.CREATED : HttpStatus.BAD_REQUEST);
+        boolean exists = inDepRepo
+        .existsBySender_IdAndReceiver_NameAndExam_ExamIdAndIsRejected(
+            instrId,                     // the pathVariable
+            dto.getReceiverName(),       // your DTO’s getter
+            dto.getExamId(),
+            false
+          );
+
+        return new ResponseEntity<>(
+            exists ? HttpStatus.CREATED : HttpStatus.BAD_REQUEST
+        );
     }
 
     @PostMapping("/ta/{taId}/request/workload")
@@ -254,6 +287,30 @@ public class RequestController {
     public ResponseEntity<List<RequestDto>> getReceivedRequests(@PathVariable Long user_id) {
       return new ResponseEntity<>(reqServ.getReceivedRequestsOfTheUser(user_id), HttpStatus.ACCEPTED);
     }
+
+    @GetMapping("/ta/{taId}/exam/{examId}/swap/getAvailableTas")
+    public CompletableFuture<ResponseEntity<List<SwapOptionDto>>> getAvailableTasForSwapping(@PathVariable Long taId, @PathVariable int examId) {
+        return swapServ.findSwapCandidates(taId, examId).thenApply(tasList -> {
+            if (tasList != null) {
+              return ResponseEntity.ok(tasList);
+            } else {
+                return ResponseEntity.notFound().build();
+            }
+        });
+    }
+
+    @GetMapping("/ta/{taId}/exam/{examId}/transfer/getAvailableTas")
+    public CompletableFuture<ResponseEntity<List<TransferCandidateDto>>> getAvailableTasForTransferring(@PathVariable Long taId, @PathVariable int examId) {
+      return transferProctoringServ.findTransferCandidates(taId, examId).thenApply(tasList -> {
+          if (tasList != null) {
+            return ResponseEntity.ok(tasList);
+          } else {
+              return ResponseEntity.notFound().build();
+          }
+      });
+    }
+    
+    
 }
 /*
 Leave Request

@@ -149,6 +149,18 @@ public interface TARepo extends JpaRepository<TA, Long> { // TA is the entity an
        WHERE  t.department = :deptName
        """)
     List<TA> findByDepartment(String deptName);
+  
+    List<TA> findBySectionsAsStudent_SectionCode(String sectionCode);
+
+    /* @Query("""
+       SELECT DISTINCT t
+       FROM   TA  t
+              JOIN     t.offeringsAsHelper o
+              LEFT JOIN FETCH t.sectionsAsStudent
+              LEFT JOIN FETCH t.sectionsAsHelper
+       WHERE  o.section.sectionCode = :sectionCode
+       """)
+    List<TA> findByOfferingsAsHelper_Section_SectionCode(String sectionCode); */
 
     @Query("""
     SELECT ta

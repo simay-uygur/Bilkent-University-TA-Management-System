@@ -7,6 +7,7 @@ import java.util.concurrent.CompletableFuture;
 
 import org.springframework.web.multipart.MultipartFile;
 
+import com.example.dto.SectionDto;
 import com.example.dto.TaDto;
 import com.example.dto.TaTaskDto;
 import com.example.entity.Actors.TA;
@@ -32,6 +33,10 @@ public interface TAServ {
     List<ScheduleItemDto> getWeeklyScheduleForTA(Long id, Date anyCustomDate);
     Map<String, Object> importTAsFromExcel(MultipartFile file) throws IOException;
     List<TaDto> getTAsByDepartment(String deptName);
+
     CompletableFuture<List<TaProctorDto>> getAssignedExamsOfTa(Long taId);
     CompletableFuture<List<TaGradingDto>> getGradingsOfTheTa(Long taId);
+    public List<TaDto> getTAsBySectionCode(String sectionCode);
+    List<SectionDto> getTASections(Long id);
+    List<TaTaskDto> getTATasks(Long id);
 }

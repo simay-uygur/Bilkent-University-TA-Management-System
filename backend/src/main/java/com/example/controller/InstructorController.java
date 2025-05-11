@@ -4,7 +4,10 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
-import org.springframework.http.ResponseEntity;
+import com.example.dto.ExamDto;
+import com.example.service.ExamServ;
+import com.lowagie.text.DocumentException;
+import org.springframework.http.*;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -29,6 +32,8 @@ import lombok.RequiredArgsConstructor;
 public class InstructorController {
     private final InstructorServ instructorServ;
     private final InstructorMapper instructorMapper;
+    private final ExamServ examServ;
+
     @PostMapping("/upload")
     public ResponseEntity<Map<String, Object>> uploadInstructors(@RequestParam("file") MultipartFile file) throws IOException {
         return ResponseEntity.ok(instructorServ.importInstructorsFromExcel(file));
@@ -83,6 +88,44 @@ public class InstructorController {
     ) {
         List<InstructorDto> dtos = instructorServ.getInstructorsByDepartment(deptName);
         return ResponseEntity.ok(dtos);
+    }
+
+    //get all exams by course code
+    @GetMapping("/{courseCode}/exams")
+    public ResponseEntity<List<ExamDto>> getByCourseCode(
+            @PathVariable String courseCode
+    ) {
+        List<ExamDto> exams = examServ.getExamsByCourseCode(courseCode);
+        if (exams.isEmpty()) {
+            return ResponseEntity.noContent().build();
+        }
+        return ResponseEntity.ok(exams);
+    }
+
+
+    @GetMapping("/{instructorId}/courses/{courseCode}/exams/{examId}/export/pdf")
+    public ResponseEntity<byte[]> exportCourseExamPdf(
+            @PathVariable Integer instructorId,
+            @PathVariable String  courseCode,
+            @PathVariable Integer examId
+    ) throws DocumentException, IOException {
+
+        instructorServ.validateInstructorCourseAndExam(
+                instructorId, courseCode, examId
+        );
+
+
+        byte[] pdf = examServ.exportExamToPdfOnlyId(examId);
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_PDF);
+        headers.setContentDisposition(
+                ContentDisposition.attachment()
+                        .filename("course_" + courseCode +
+                                "_exam_" + examId + ".pdf")
+                        .build()
+        );
+        return new ResponseEntity<>(pdf, headers, HttpStatus.OK);
     }
 
 }

@@ -119,7 +119,7 @@ public class ScheduleServImpl implements ScheduleServ {
         int total    = endMin - startMin;
         if (total <= 0) return out;
 
-        int segments = (int)Math.ceil(total / 50.0);
+        int segments = (int)Math.ceil(total / 60.0);
         for (int i = 0; i < segments; i++) {
             int seg = startMin + i * 50;
             int slot = 1 + ((seg - (8*60 + 30)) / 50);

@@ -1,0 +1,79 @@
+/* src/pages/SetWorkload/SetWorkload.module.css */
+.pageWrapper {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    background: #f0faff;
+  }
+  
+  .headerRow {
+    display: flex;
+    align-items: center;
+    padding: 1.5rem;
+    background: #f0faff;
+  }
+  
+  .title {
+    flex: 1;
+    text-align: center;
+    font-size: 1.75rem;
+    color: #150063;
+  }
+  
+  .card {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: start;
+    padding: 2rem 0;
+  }
+  
+  .formContainer {
+    background: #fff;
+    padding: 3rem;
+    border-radius: 10px;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.1);
+    width: 700px;
+    max-width: 90%;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+  
+  .fieldRow {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  
+  .fieldRow label {
+    font-weight: 500;
+    font-size: 1.1rem;
+  }
+  
+  .fieldRow input {
+    width: 100px;
+    padding: 0.6rem;
+    font-size: 1rem;
+    border: 1px solid #cbd5e1;
+    border-radius: 4px;
+  }
+  
+  .buttonsRow {
+    display: flex;
+    align-items: center;
+    justify-content: center;   /* center horizontally */
+    gap: 1.5rem;
+    margin-top: 1rem;
+  }
+  
+  .cancelBtn {
+    background: #ef4444;
+    color: white;
+    border: none;
+    padding: 0.8rem 1.4rem;
+    border-radius: 6px;
+    font-size: 1rem;
+    cursor: pointer;
+  }
+  

@@ -3,6 +3,7 @@ package com.example.repo;
 import java.util.List;
 import java.util.Optional;
 
+import com.example.entity.Courses.CourseOffering;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -38,4 +39,8 @@ public interface ExamRepo extends JpaRepository<Exam, Integer>{
         @Param("from") Date from,
         @Param("to")   Date to
     );
+
+    List<Exam> findByCourseOffering_Course_CourseCode(String courseCode);
+
+    List<Exam> findByCourseOffering(CourseOffering offering);
 }

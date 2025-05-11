@@ -137,6 +137,11 @@ public interface TaTaskRepo extends JpaRepository<TaTask, Integer> {
       void deleteByTaskAndTa(@Param("taskId") int taskId,
                             @Param("taId")   Long  taId);
       void deleteAllByTaskTaskId(Long taskId);
+      @Modifying
+      @Query("DELETE FROM TaTask tt WHERE tt.task.taskId = :taskId")
+      void deleteAllByTaskId(@Param("taskId") int taskId);
+
+      void deleteAllByTaskTaskId(long id);
 
       List<TaTask> findAllByTaOwner_IdAndTask_TaskTypeAndTask_StatusIn(
         Long taId,

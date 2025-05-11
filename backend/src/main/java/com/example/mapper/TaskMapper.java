@@ -29,7 +29,7 @@ public class TaskMapper {
         }
         TaskDto dto = new TaskDto();
         // map enum to its name
-        dto.setId(task.getTaskId());
+        dto.setTaskId(task.getTaskId());
         dto.setType(task.getTaskType().name());
         // map list of TaTask → list of TaDto
         dto.setTas(
@@ -38,9 +38,11 @@ public class TaskMapper {
                 .collect(Collectors.toList())
         );
         // you may need to add a description field to Task if you actually have one
-        dto.setDescription(task.getSection().getSectionCode()); // example
+        dto.setDescription(task.getDescription()); // example
         dto.setDuration(task.getDuration());
-        dto.setStatus(task.getStatus().name());
+        dto.setStatus(task.getStatus().toString());
+        dto.setTaskId(task.getTaskId());
+        dto.setWorkload(task.getWorkload());
         return dto;
     }
 
@@ -57,6 +59,7 @@ public class TaskMapper {
         task.setTaskType(TaskType.valueOf(dto.getType()));
         task.setDuration(dto.getDuration());
         task.setStatus(TaskState.valueOf(dto.getStatus()));
+        task.setTaskId(dto.getTaskId());
         // workload, amountOfTas, section, tasList, etc. should be set elsewhere
         return task;
     }

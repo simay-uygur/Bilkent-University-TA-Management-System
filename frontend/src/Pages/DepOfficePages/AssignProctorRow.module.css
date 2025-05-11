@@ -1,11 +1,105 @@
-/* src/components/AssignProctorRow.module.css */
+.row {
+  transition: background-color 0.2s ease;
+}
+
+.row:hover {
+  background-color: rgba(0, 0, 0, 0.03);
+}
+
+.completed {
+  background-color: #f0f8f0;
+}
+
+.incomplete {
+  background-color: #fff;
+}
+
+.tick {
+  color: #2ecc71;
+  margin-right: 6px;
+  vertical-align: middle;
+}
+
+.actions {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-start;
+  flex-wrap: wrap;
+}
+
+.btn {
+  padding: 6px 10px;
+  border-radius: 4px;
+  font-weight: 500;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: none;
+  white-space: nowrap;
+}
+
+.btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.btn:active:not(:disabled) {
+  transform: translateY(1px);
+  box-shadow: none;
+}
+
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  background-color: #e0e0e0;
+  color: #888;
+}
+
+.assignBtn {
+  background-color: #3498db;
+  color: white;
+}
+
+.assignBtn:hover:not(:disabled) {
+  background-color: #2980b9;
+}
+
+.demandBtn {
+  background-color: #f39c12;
+  color: white;
+}
+
+.demandBtn:hover:not(:disabled) {
+  background-color: #e67e22;
+}
+
+.finishBtn {
+  background-color: #2ecc71;
+  color: white;
+}
+
+.finishBtn:hover:not(:disabled) {
+  background-color: #27ae60;
+}
+
+@media (max-width: 768px) {
+  .actions {
+    flex-direction: column;
+  }
+  
+  .btn {
+    width: 100%;
+    padding: 8px;
+  }
+}
+/* /* src/components/AssignProctorRow.module.css 
 
 .row {
   transition: background-color 0.2s;
-  cursor: pointer;              /* show pointer on hover */
+  cursor: pointer;              /
 }
 
-/* change nothing about your completed/incomplete colors, but add: */
+// change nothing about your completed/incomplete colors, but add: 
 .row:hover {
   background-color: rgba(0, 0, 0, 0.05);
 }
@@ -44,18 +138,19 @@
 
 .autoBtn {
   background-color: #1a7ee9;
-  border: 1px solid #000000;   /* added missing space */
+  border: 1px solid #000000;   
   color: white;
 }
 
 .manualBtn {
   background-color: #f14343;
-  border: 1px solid #000000;   /* added missing space */
+  border: 1px solid #000000;   
   color: white;
 }
 
 .demandBtn {
   background-color: #007bff;
-  border: 1px solid #000000;   /* added missing space */
+  border: 1px solid #000000;  
   color: white;
 }
+ */

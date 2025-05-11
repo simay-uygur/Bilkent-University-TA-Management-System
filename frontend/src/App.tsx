@@ -1,112 +1,123 @@
 // src/App.tsx
 import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-//import ProtectedRoute from './Pages/ProtectedRoute';
+import ProtectedRoute from './Pages/ProtectedRoute';
 
 import TALayout            from './components/Layouts/TALayout';
 import InstructorLayout    from './components/Layouts/InstructorLayout';
 import DepartmentLayout    from './components/Layouts/DepartmentLayout';
 import DeansLayout         from './components/Layouts/DeansLayout';
-
 import DeansDepartmentDetailPage from './Pages/DeanOfficePages/DeansDepartmentDetailPage';
 //import DeansOffice            from './Pages/DeanOfficePages/DeansOffice';
 import DepartmentOffice from './Pages/DepOfficePages/DepartmentOffice';
-
 import CourseDetails  from './Pages/DepOfficePages/DepartmentCourseDetails';
 import InstructorDetails from './Pages/DepOfficePages/DepartmentInsturctorDetails';
-
 import Login               from './Pages/CommonPages/Login';
 import TAMainPage from './Pages/TAPages/TAMainPage';
 import Notification from './Pages/CommonPages/Notification';
 import InstructorMainPage from './Pages/InstructorPages/InstructorMainPage';
 import MakeLeaveRequest from './Pages/TAPages/MakeLeaveRequest';
 import TAMonthlySchedulePage from './Pages/TAPages/TAMonthlySchedulePage';
-import TAViewProctoringPage from './Pages/TAPages/TAViewProctoringPage';
+import TAViewProctoringGradingPage from './Pages/TAPages/TAViewProctoringGradingPage';
 import Settings from './Pages/CommonPages/Settings';
 import CourseTARequest from './Pages/InstructorPages/CourseTARequest';
 import AssignTATask from './Pages/InstructorPages/AssignTATask';
-import ViewAddExam from './Pages/DepOfficePages/ViewAddExam';
-import SelectTACourse from './Pages/DepOfficePages/SelectTACourse';
-import AssignTACourse from './Pages/DepOfficePages/AssignTACourse';
-import AssignTAProctor from './Pages/DepOfficePages/AssignTAProctor';
+import ViewAddExam from './Pages/DeanOfficePages/ViewAddExam';
+import SelectCourseTA from './Pages/DepOfficePages/SelectCourseTA';
 import AssignProctor from './Pages/DepOfficePages/AssignProctor';
 import ManageWorkload from './Pages/InstructorPages/ManageWorkload';
 import ExamProctorPage from './Pages/InstructorPages/ExamProctorPage';
 import AdminMainPage from './Pages/AdminPages/AdminMainPage';
 import AdminLayout from './components/Layouts/AdminLayout';
 import ViewLogs from './Pages/AdminPages/ViewLogs';
-import ProctorTASelection from './Pages/DeanOfficePages/ProctorTASelection';
-import ProctorCourseSelection from './Pages/DeanOfficePages/ProctorCourseSelection';
+import ProctorCourseSelectionIn from './Pages/DeanOfficePages/ProctorCourseSelectionIn';
+
+import DeansOffice from './Pages/DeanOfficePages/DeansOffice';
+import AssignProctorTA from './Pages/DepOfficePages/AssignProctorTA';
+import CourseTA from './Pages/DepOfficePages/CourseTA';
+import SetWorkload from './Pages/DepOfficePages/SetWorkload';
+import ProctorTASelectionIn from './Pages/DeanOfficePages/ProctorTASelectionIn';
+import ProctorCourseSelectionOut from './Pages/DeanOfficePages/ProctorCourseSelectionOut';
+import ProctorTASelectionOut from './Pages/DeanOfficePages/ProctorTASelectionOut';
+import ForgotPassword from './Pages/CommonPages/ForgotPassword';
+import AddExam from './Pages/DeanOfficePages/AddExam';
+import DepartmentOfficeTaDetails from './Pages/DepOfficePages/DepartmentOfficeTaDetails';
 
 const App: React.FC = () => (
   <BrowserRouter>
     <Routes>
-
+    
       {/* Public */}
       <Route path="/login" element={<Login />} />
+      <Route path="/forgot-password" element={<ForgotPassword />} />
       {/* TA Area (requires ROLE_TA) */}
-      {/*<Route element={<ProtectedRoute requiredRole="ROLE_TA" />}>*/}
+      <Route element={<ProtectedRoute requiredRole="ROLE_TA" />}>
         <Route path="/ta" element={<TALayout />}>
           <Route index element={<TAMainPage />} />
           <Route path="/ta/leave-request" element={<MakeLeaveRequest />} />
           <Route path="/ta/monthly-schedule" element={<TAMonthlySchedulePage />} />
-          <Route path="/ta/view-proctoring" element={<TAViewProctoringPage />} />
+          <Route path="/ta/view-proctoring" element={<TAViewProctoringGradingPage />} />
           <Route path="/ta/settings" element={<Settings />} />
           <Route path="/ta/notification" element={<Notification />} />
         </Route>
-      {/*</Route>*/}
+      </Route>
 
       {/* Instructor Area (requires ROLE_INSTRUCTOR) */}
-      {/*<Route element={<ProtectedRoute requiredRole="ROLE_INSTRUCTOR" />}>*/}
+      <Route element={<ProtectedRoute requiredRole="ROLE_INSTRUCTOR" />}>
         <Route path="/instructor" element={<InstructorLayout />}>
           <Route index element={<InstructorMainPage />} />
           <Route path="/instructor/exam-proctor-request/:courseID" element={<ExamProctorPage />} />
           <Route path="/instructor/exam-printing/:courseID" element={<ExamProctorPage />} />
-          <Route path="/instructor/assign-course/:courseID/:courseSec" element={<CourseTARequest />} />
-          <Route path="/instructor/workload/:courseID/:courseSec" element={<ManageWorkload />} />
-          <Route path="/instructor/workload/:courseID/:courseSec/:taskID" element={<AssignTATask />} />
+          <Route path="/instructor/assign-course/:sectionCode" element={<CourseTARequest />} />
+          <Route path="/instructor/workload/:sectionCode" element={<ManageWorkload />} />
+          <Route path="/instructor/workload/:sectionCode/:taskId" element={<AssignTATask />} />
           <Route path="/instructor/settings" element={<Settings />} />
           <Route path="/instructor/notification" element={<Notification />} />
         </Route>
-      {/*</Route>*/}
+      </Route>
 
       {/* Department Office Area (requires ROLE_DEPARTMENT) */}
-      {/*<Route element={<ProtectedRoute requiredRole="ROLE_DEPARTMENT_STAFF" />}>*/}
+      <Route element={<ProtectedRoute requiredRole="ROLE_DEPARTMENT_STAFF" />}>
         <Route path="/department-office" element={<DepartmentLayout />}>
           <Route index element={<DepartmentOffice />} />
-          <Route path="/department-office/:courseCode" element={<CourseDetails />} />
+          <Route path="/department-office/course/:courseCode" element={<CourseDetails />} />
           <Route path="/department-office/instructor/:id" element={<InstructorDetails />} />
-          <Route path="/department-office/assign-course/:courseID/:courseSec" element={<SelectTACourse/>} />
-          <Route path="/department-office/assign-course" element={<AssignTACourse />} />
-          <Route path="/department-office/assign-proctor/:examID" element={<AssignTAProctor />} />
+          <Route path="/department-office/ta/:id" element={<DepartmentOfficeTaDetails />} />
+          <Route path="/department-office/assign-course/:requestId" element={<SelectCourseTA/>} />
+          <Route path="/department-office/assign-course" element={<CourseTA />} />
+          <Route path="/department-office/assign-proctor/:examID" element={<AssignProctorTA />} />
           <Route path="/department-office/assign-proctor" element={<AssignProctor />} />
           <Route path="/department-office/settings" element={<Settings />} />
+          <Route path="/department-office/set-workload" element={<SetWorkload />} />
           <Route path="/department-office/notification" element={<Notification />} />
         </Route>
-      {/*</Route>*/}
+      </Route>
 
       {/* Dean’s Office Area (requires ROLE_DEAN) */}
-      {/*<Route element={<ProtectedRoute requiredRole="ROLE_DEANS_OFFICE" />}>*/}
+      <Route element={<ProtectedRoute requiredRole="ROLE_DEANS_OFFICE" />}>
         <Route path="/deans-office" element={<DeansLayout />}>
-          {/*<Route index element={<DeansOffice />} />*/}
-          <Route path= "/deans-office/proctor"  element={<ProctorCourseSelection />} />
+          <Route index element={<DeansOffice />} />
+          <Route path= "/deans-office/proctor-in"  element={<ProctorCourseSelectionIn />} />
+          <Route path= "/deans-office/proctor-out"  element={<ProctorCourseSelectionOut />} />
           <Route path="/deans-office/department/:dept" element={<DeansDepartmentDetailPage />}/>
           <Route path="/deans-office/settings" element={<Settings />} />
           <Route path="/deans-office/notification" element={<Notification />} />
-          <Route path="/deans-office/proctor/:examID" element={<ProctorTASelection />} />
+          <Route path="/deans-office/proctor-in/:examID" element={<ProctorTASelectionIn />} />
+          <Route path= "/deans-office/proctor-out/:examID"  element={<ProctorTASelectionOut />} />
           <Route path="/deans-office/view-add-exams" element={<ViewAddExam />} />
+          <Route path="/deans-office/add-exams" element={<AddExam />} />
         </Route>
-      {/*</Route>*/}
+      </Route>
 
       {/* Admin's Pages */}
-      {/*<Route element={<ProtectedRoute requiredRole="ROLE_ADMIN" />}>*/}
+      {/* <Route element={<ProtectedRoute requiredRole="ROLE_ADMIN" />}> */}
         <Route path="/admin" element={<AdminLayout />}>
           <Route index element={<AdminMainPage />} />
           <Route path= "/admin/view-logs"  element={<ViewLogs />} />
           <Route path="/admin/settings" element={<Settings />} />
           <Route path="/admin/notification" element={<Notification />} />
         </Route>
-      {/*</Route>*/}
+      {/* </Route> */}
 
       {/* Fallback */}
       <Route path="*" element={<Navigate to="/login" replace />} />

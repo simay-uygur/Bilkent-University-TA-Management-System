@@ -1,0 +1,31 @@
+.filters {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1rem;
+    align-items: center;
+  }
+  
+  .search {
+    flex: 1;
+  }
+  
+  .table th, .table td {
+    padding: 0.5rem;
+    text-align: left;
+  }
+  
+  .selectedRow {
+    background: #e6f7ff;
+  }
+  
+  .selectedSection {
+    margin-top: 1.5rem;
+  }
+  
+  /* src/pages/AssignTA/FacultyFilter.module.css */
+  .dropdown {
+    padding: 0.4rem 0.6rem;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+  }
+  

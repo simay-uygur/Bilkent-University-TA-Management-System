@@ -70,6 +70,13 @@ Optional<CourseOffering>findByCourseCode(@Param("code") String code);
 
     Optional<CourseOffering> findByCourse_CourseCode(String courseCode);
 
+    @Query("""
+  SELECT co
+    FROM CourseOffering co
+   WHERE co.semester.term = :term
+     AND co.semester.year = :year
+""")
+    Optional<List<CourseOffering>> findBySemester_TermAndSemester_Year(String term, int year);
     List<CourseOffering>
     findByCourse_Department_Faculty_CodeAndSemester_YearAndSemester_Term(
             String facultyCode, int year, Term term);
@@ -86,4 +93,12 @@ Optional<CourseOffering>findByCourseCode(@Param("code") String code);
         Long semesterYear,
         Term term
     );
+
+    List<CourseOffering> findByCourse_Department_NameAndSemester_YearAndSemester_Term(
+            String deptName,
+            int year,
+            Term term
+    );
+
+   // List<CourseOffering> findCourseOfferingsByDepartmentCodeAndSemesterYearAndSemesterTerm(String departmentCode, int semesterYear, Term term);
 }

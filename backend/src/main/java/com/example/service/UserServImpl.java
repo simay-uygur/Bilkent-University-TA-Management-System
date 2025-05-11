@@ -3,7 +3,6 @@ package com.example.service;
 import java.util.List;
 import java.util.Optional;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -11,6 +10,7 @@ import com.example.entity.Actors.TA;
 import com.example.entity.Actors.User;
 import com.example.exception.GeneralExc;
 import com.example.exception.UserExistsExc;
+import com.example.exception.UserNotFoundExc;
 import com.example.exception.UserNotFoundExc;
 import com.example.repo.TARepo;
 import com.example.repo.UserRepo;

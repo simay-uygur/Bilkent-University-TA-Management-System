@@ -1,17 +1,100 @@
-/* src/pages/AssignProctor/AssignProctorListPage.module.css */
+.pageWrapper {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.headerRow {
+  display: flex;
+  align-items: center;
+  margin-bottom: 30px;
+}
+
+.title {
+  margin-left: 20px;
+  font-size: 24px;
+  color: #333;
+}
+
+.container {
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  overflow-x: auto;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.headings th {
+  background-color: #f5f7fa;
+  color: #333;
+  font-weight: 600;
+  text-align: left;
+  padding: 16px;
+  border-bottom: 2px solid #e1e5eb;
+}
+
+.headings th:last-child {
+  text-align: center;
+}
+
+.noExams {
+  padding: 60px;
+  text-align: center;
+  color: #667788;
+}
+
+.errorContainer {
+  padding: 40px;
+  text-align: center;
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.retryButton {
+  background-color: #3498db;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 8px 16px;
+  cursor: pointer;
+  font-weight: 500;
+  margin-top: 16px;
+}
+
+.retryButton:hover {
+  background-color: #2980b9;
+}
+
+@media (max-width: 1024px) {
+  .container {
+    margin: 0 -20px;
+    border-radius: 0;
+  }
+  
+  .table {
+    min-width: 900px; /* Ensure table is scrollable on small screens */
+  }
+}
+/* /* src/pages/AssignProctor/AssignProctorListPage.module.css *
 
 .pageWrapper {
     display: flex;
     flex-direction: column;
     min-height: 100vh;
-    background: #d2e9ff;
+    background: #f0faff;
   }
   
   .headerRow {
     display: flex;
     align-items: center;
     padding: 16px;
-    background: #d2e9ff;
+    background: #f0faff;
   }
 
   .container {
@@ -118,4 +201,4 @@
 .modal p,
 .centeredText {
   text-align: center;
-}
+} */

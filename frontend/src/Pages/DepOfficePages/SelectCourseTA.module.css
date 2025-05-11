@@ -1,7 +1,7 @@
 /* src/pages/AssignTA/SelectTACourse.module.css */
 
 .pageWrapper {
-  background: #d2e9ff;
+  background: #f0faff;
   min-height: 100vh;
   padding: 1rem;
 }
@@ -137,4 +137,35 @@
 .confirmButton:hover {
   background-color: #2563eb;
   box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+}
+.rowBase {
+  transition: background 0.2s;
+  /* …your existing base row styles… */
+}
+.assignedRow {
+  outline: 2px solid var(--accent);
+}
+.preferredRow {
+  background-color: #e6ffe6;   /* light green */
+}
+.unpreferredRow {
+  background-color: #ffe6e6;   /* light red */
+}
+/* normal rows get no extra background */
+
+.unassignButton {
+  background: transparent;
+  border: none;
+  color: #f44336;
+  font-size: 16px;
+  cursor: pointer;
+  margin-left: 8px;
+  padding: 4px 8px;
+  line-height: 1;
+  border-radius: 50%;
+}
+
+.unassignButton:hover {
+  background-color: rgba(244, 67, 54, 0.1);
+  color: #d32f2f;
 }

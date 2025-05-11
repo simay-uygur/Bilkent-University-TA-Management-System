@@ -412,19 +412,21 @@ const TAMonthlySchedulePage: React.FC = () => {
               </select>
             </div>
             <div className={styles.formGroup}>
-              <label>Select Task:</label>
+              <label>Select Proctoring:</label>
               <select
                 value={selectedProctoringTask}
                 onChange={e => setSelectedProctoringTask(e.target.value)}
                 disabled={!selectedTA}
               >
-                <option value="">Select Task</option>
+                <option value="">Select Proctoring</option>
                 {selectedTA &&
                   proctoringTasks
                     .find(t => t.courseId === selectedTaskId)
                     ?.TASwap?.find(ta => ta.id === selectedTA)
                     ?.availableProctoring.map((t, i) => (
-                      <option key={i} value={t.courseId}>{t.course}</option>
+                      <option key={i} value={t.courseId}>
+                        {`${t.day}.${t.month}.${t.year} ${t.startTime}-${t.finishTime} – ${t.course}`}
+                      </option>
                     ))}
               </select>
             </div>

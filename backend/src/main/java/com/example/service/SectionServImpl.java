@@ -57,6 +57,40 @@ public class SectionServImpl implements SectionServ {
     private final SectionRepo sectionRepo;
     private final CourseOfferingRepo offRepo;
     @Override
+    @Transactional
+    public boolean unassignTA(Long taId, String sectionCode) {
+        Section section = sectionRepo
+                .findBySectionCodeIgnoreCase(sectionCode)
+                .orElseThrow(() -> new IllegalArgumentException("Section not found: " + sectionCode));
+
+        TA ta = taService.getTAByIdTa(taId);
+
+        if (!section.getAssignedTas().contains(ta)) {
+            throw new IllegalStateException(
+                    "TA " + taId + " is not assigned to section " + sectionCode);
+        }
+
+        section.getAssignedTas().remove(ta);
+        sectionRepo.save(section);
+
+        CourseOffering offering = section.getOffering();
+        if (offering.getAssignedTas().contains(ta)) {
+            offering.getAssignedTas().remove(ta);
+            System.out.println("offering.getAssignedTas() = " + offering.getAssignedTas());
+        }
+        
+        return true;
+    }
+    @Override
+    public List<TaskDto> getTasks(String courseCode) {
+        Section section = repo.findBySectionCodeIgnoreCase(courseCode)
+                .orElseThrow(() -> new IllegalArgumentException("Section not found: " + courseCode));
+        List<Task> tasks = section.getTasks();
+        return tasks.stream()
+                .map(taskMapper::toDto)
+                .toList();
+    }
+    @Override
     public Section create(Section section) {
         // 1) sectionCode must be supplied in the right format
         String code = section.getSectionCode();
@@ -513,6 +547,15 @@ public class SectionServImpl implements SectionServ {
 
         section.getAssignedTas().add(ta); // hope it makes that
         sectionRepo.save(section);
+
+        CourseOffering offering = section.getOffering();
+        if ( !offering.getAssignedTas().contains(ta) ) {
+
+            offering.getAssignedTas().add(ta);
+            System.out.println("offering.getAssignedTas() = " + offering.getAssignedTas());
+        }
+        
+        //offering.setAssignedTas(offering.getAssignedTas());
         return true;
     }
 
