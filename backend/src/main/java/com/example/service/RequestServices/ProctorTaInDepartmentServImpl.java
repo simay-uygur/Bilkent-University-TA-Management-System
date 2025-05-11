@@ -52,6 +52,9 @@ public class ProctorTaInDepartmentServImpl implements ProctorTaInDepartmentServ{
         req.setReceiver(receiver);
         req.setExam(exam);
 
+        req.setRequiredTas(dto.getRequiredTas());
+        req.setTasLeft(dto.getTasLeft());
+
         proctorTaInFacultyRepo.save(req);
     }
 

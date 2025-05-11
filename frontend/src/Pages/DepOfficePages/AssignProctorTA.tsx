@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
-import axios from 'axios';
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
+import axios from 'axios';
 import BackBut from '../../components/Buttons/BackBut';
 import GreenBut from '../../components/Buttons/GreenBut';
 import ErrPopUp from '../../components/PopUp/ErrPopUp';
@@ -8,24 +8,7 @@ import ConPop from '../../components/PopUp/ConPop';
 import LoadingPage from '../CommonPages/LoadingPage';
 import styles from './AssignProctorTA.module.css';
 
-export interface TA {
-  id: string | number;
-  name: string;
-  level: string;
-  workload: number;
-  hasAdjacentExam: boolean;
-  type?: 'Full-time' | 'Part-time'; // Making this optional as it's not in API
-}
-
-interface AvailableTA {
-  workload: number;
-  hasAdjacentExam: boolean;
-  taId: number;
-  name: string;
-  surname: string;
-  academicLevel: string;
-}
-
+// --- API DTOs
 interface ProctorRequestInfo {
   requestId: number;
   examId: number;
@@ -37,18 +20,31 @@ interface ProctorRequestInfo {
   assignedTas: TA[];
 }
 
-const CAPACITY = {
-  fullCap: 20,
-  partCap: 10,
-};
+interface AvailableTA {
+  taId: number;
+  name: string;
+  surname: string;
+  academicLevel: string;
+  workload: number;
+  hasAdjacentExam: boolean;
+}
+
+// --- UI models
+export interface TA {
+  id: string | number;
+  name: string;
+  level: string;
+  workload: number;
+  hasAdjacentExam: boolean;
+}
 
 const AssignProctorTA: React.FC = () => {
   const navigate = useNavigate();
   const { examID } = useParams<{ examID: string }>();
   const [searchParams] = useSearchParams();
   const requestId = searchParams.get('request');
-  
-  // State declarations
+
+  // Global state
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [examData, setExamData] = useState<ProctorRequestInfo | null>(null);
@@ -56,301 +52,192 @@ const AssignProctorTA: React.FC = () => {
   const [potential, setPotential] = useState<TA[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
-  const [savingChanges, setSavingChanges] = useState(false);
+  const [saving, setSaving] = useState(false);
 
-  // For exit and save confirmations
+  // Confirm dialogs
   const [showExitConfirm, setShowExitConfirm] = useState(false);
   const [showSaveConfirm, setShowSaveConfirm] = useState(false);
 
-  // Track initial assigned IDs
-  const initialAssigned = useRef<(string | number)[]>([]);
+  // Track initial assigned list to detect unsaved changes
+  const initialAssigned = useRef<(string|number)[]>([]);
 
-  // Fetch exam and TA data
+
+  // Fetch exam info and available TAs
   useEffect(() => {
     const fetchData = async () => {
+      if (!requestId || !examID) {
+        setError('Missing request or exam ID');
+        setLoading(false);
+        return;
+      }
+
       try {
         setLoading(true);
-        
-        if (!examID) {
-          throw new Error("Exam ID is missing");
-        }
-        
-        // Fetching basic exam info based on the request ID
-        // This might need to be adjusted based on your actual API
-        const examInfoResponse = await axios.get<ProctorRequestInfo>(
-          `/api/proctor-request/${requestId}`
-        ).catch(() => {
-          // Fallback to using a mock response for development
-          return {
-            data: {
-              requestId: parseInt(requestId || '0'),
-              examId: parseInt(examID),
-              examName: "Midterm",
-              courseName: "Data Structures",
-              courseCode: "CS-464",
-              requiredTas: 3,
-              tasLeft: 3,
-              assignedTas: []
-            }
-          };
-        });
-        
-        // Set exam data
-        const examInfo = examInfoResponse.data;
-        setExamData(examInfo);
-        
-        // Now fetch available TAs
-        const taResponse = await axios.get<AvailableTA[]>(
-          `/api/course/${examInfo.courseCode}/proctoring/exam/${examInfo.examId}`
+        // --- fetch request info ---
+        const reqResp = await axios.get<ProctorRequestInfo>(
+            `/api/request/${requestId}`
         );
-        
-        // Transform TAs into the format our component uses
-        const transformedTAs: TA[] = taResponse.data.map(ta => ({
-          id: ta.taId,
-          name: `${ta.name} ${ta.surname}`,
-          level: ta.academicLevel,
-          workload: ta.workload,
-          hasAdjacentExam: ta.hasAdjacentExam,
-          // We don't have type in the API, setting a default value
-          type: 'Full-time' // Default assumption
+        const info = reqResp.data;
+        setExamData(info);
+
+        // --- transform assigned TAs ---
+        setAssigned(info.assignedTas);
+        initialAssigned.current = info.assignedTas.map(t => t.id);
+
+        // --- fetch available TAs ---
+
+        const taResp = await axios.get<AvailableTA[]>(
+            `/api/course/${info.courseCode}/proctoring/exam/${info.examId}`
+        );
+        const allTAs: TA[] = taResp.data.map(t => ({
+          id: t.taId,
+          name: `${t.name} ${t.surname}`,
+          level: t.academicLevel,
+          workload: t.workload,
+          hasAdjacentExam: t.hasAdjacentExam,
         }));
-        
-        // Set assigned TAs
-        if (examInfo.assignedTas && examInfo.assignedTas.length > 0) {
-          setAssigned(examInfo.assignedTas);
-          initialAssigned.current = examInfo.assignedTas.map(ta => ta.id);
-          
-          // Filter out already assigned TAs from potential TAs
-          const assignedIds = new Set(examInfo.assignedTas.map(ta => ta.id));
-          setPotential(transformedTAs.filter(ta => !assignedIds.has(ta.id)));
-        } else {
-          // No TAs assigned yet
-          setPotential(transformedTAs);
-        }
-      } catch (err) {
-        console.error("Failed to fetch exam data:", err);
-        setError("Failed to load exam data. Please try again later.");
+
+        // filter out already assigned
+        const assignedSet = new Set(info.assignedTas.map(t => t.id));
+        setPotential(allTAs.filter(t => !assignedSet.has(t.id)));
+      } catch (err: any) {
+        console.error('Failed to load data', err);
       } finally {
         setLoading(false);
       }
     };
-
     fetchData();
-  }, [examID, requestId]);
+  }, [requestId, examID]);
 
-  // Handle no exam data scenario
+  const filtered = useMemo(() =>
+          potential
+              .filter(t => t.name.toLowerCase().includes(searchTerm.toLowerCase()))
+              .sort((a,b)=>a.workload - b.workload)
+      , [potential, searchTerm]);
+
+  // if fetch complete but no data
   if (!loading && !examData) {
     return (
-      <div className={styles.pageWrapper}>
-        <p className={styles.notFound}>Exam not found.</p>
-        <button 
-          className={styles.retryButton} 
-          onClick={() => navigate('/department-office/assign-proctor')}
-        >
-          Return to Assignments
-        </button>
-      </div>
+        <div className={styles.pageWrapper}>
+          <p>Exam not found.</p>
+          <button onClick={() => navigate('/department-office/assign-proctor')}>Back</button>
+        </div>
     );
   }
 
   const leftCount = examData ? Math.max(0, examData.requiredTas - assigned.length) : 0;
 
-  const toggleSelect = (ta: TA) => {
-    if (assigned.some(a => a.id === ta.id)) {
+  const toggle = (ta: TA) => {
+    if (assigned.find(a => a.id === ta.id)) {
       setAssigned(a => a.filter(x => x.id !== ta.id));
       setPotential(p => [...p, ta]);
-    } else if (!examData || assigned.length < examData.requiredTas) {
+    } else if (examData && assigned.length < examData.requiredTas) {
       setAssigned(a => [...a, ta]);
       setPotential(p => p.filter(x => x.id !== ta.id));
     } else {
-      setErrorMsg(`Cannot select more than ${examData?.requiredTas} TAs.`);
+      setErrorMsg(`Cannot assign more than ${examData?.requiredTas} TAs.`);
     }
   };
 
-  const filtered = useMemo(() => {
-    return potential
-      .filter(t => t.name.toLowerCase().includes(searchTerm.toLowerCase()))
-      .sort((a, b) => a.workload - b.workload);
-  }, [potential, searchTerm]);
-
-  const handleBackClick = () => {
-    const curr = assigned.map(t => t.id).sort().join();
+  // navigation guards
+  const handleBack = () => {
+    const curr = assigned.map(t=>t.id).sort().join();
     const init = initialAssigned.current.sort().join();
-    if (curr !== init) {
-      setShowExitConfirm(true);
-    } else {
-      navigate('/department-office/assign-proctor');
-    }
+    if (curr !== init) setShowExitConfirm(true);
+    else navigate('/department-office/assign-proctor');
   };
+  const confirmExit = () => navigate('/department-office/assign-proctor');
 
-  const onConfirmExit = () => {
-    setShowExitConfirm(false);
-    navigate('/department-office/assign-proctor');
-  };
-
-  const onCancelExit = () => {
-    setShowExitConfirm(false);
-  };
-
-  const handleSaveClick = () => {
-    setShowSaveConfirm(true);
-  };
-
-  const onConfirmSave = async () => {
+  // save assignments
+  const handleSave = () => setShowSaveConfirm(true);
+  const confirmSave = async () => {
+    if (!requestId || !examData) return;
     try {
-      setSavingChanges(true);
-      
-      // Extract just the IDs of assigned TAs
-      const assignedTaIds = assigned.map(ta => ta.id);
-      
-      // Make API call to update assigned TAs
+      setSaving(true);
       await axios.post(`/api/proctor-request/${requestId}/assign-tas`, {
-        examId: examData?.examId,
-        taIds: assignedTaIds
+        examId: examData.examId,
+        taIds: assigned.map(t=>t.id)
       });
-      
-      // Update the initial assigned reference
-      initialAssigned.current = assignedTaIds;
+      initialAssigned.current = assigned.map(t=>t.id);
+      setErrorMsg('Assignments saved');
       setShowSaveConfirm(false);
-      
-      // Show success message
-      setErrorMsg("TAs have been successfully assigned!");
-      
-      // Navigate back after a delay
-      setTimeout(() => {
-        navigate('/department-office/assign-proctor');
-      }, 1500);
-    } catch (err) {
-      console.error("Failed to save TA assignments:", err);
-      setErrorMsg("Failed to save changes. Please try again.");
+      setTimeout(() => navigate('/department-office/assign-proctor'), 1000);
+    } catch (e) {
+      console.error('Save failed', e);
+      setErrorMsg('Save failed, try again');
     } finally {
-      setSavingChanges(false);
+      setSaving(false);
     }
   };
 
-  const onCancelSave = () => {
-    setShowSaveConfirm(false);
-  };
-
-  if (loading) {
-    return <LoadingPage />;
-  }
-
-  if (error) {
-    return (
-      <div className={styles.pageWrapper}>
-        <p className={styles.errorMessage}>{error}</p>
-        <button 
-          className={styles.retryButton} 
-          onClick={() => window.location.reload()}
-        >
-          Retry
-        </button>
-      </div>
-    );
-  }
+  if (loading) return <LoadingPage />;
+  if (error) return <div className={styles.error}>{error}</div>;
 
   return (
-    <div className={styles.pageWrapper}>
-      <div className={styles.header}>
-        <BackBut onClick={handleBackClick} />
-        <h1 className={styles.title}>
-          {examData?.courseName} - {examData?.examName}
-        </h1>
-        <div className={styles.stats}>
-          <span>Needed: {examData?.requiredTas}</span>
-          <span>Left: {leftCount}</span>
+      <div className={styles.pageWrapper}>
+        <div className={styles.header}>
+          <BackBut onClick={handleBack} />
+          <h1>{examData!.courseName} – {examData!.examName}</h1>
+          <div>Needed: {examData!.requiredTas}  Left: {leftCount}</div>
         </div>
-      </div>
 
-      <div className={styles.search}>
         <input
-          type="text"
-          placeholder="Search by name…"
-          value={searchTerm}
-          onChange={e => setSearchTerm(e.target.value)}
+            className={styles.search}
+            placeholder="Search TAs…"
+            value={searchTerm}
+            onChange={e=>setSearchTerm(e.target.value)}
         />
-      </div>
 
-      <table className={styles.table}>
-        <thead>
-          <tr>
-            <th>Name</th>
-            <th>Level</th>
-            <th>Workload</th>
-            <th>Adjacent Exam</th>
-            {/* <th>Type</th> Removed as it's not in API */}
-          </tr>
-        </thead>
-        <tbody>
+        <table className={styles.table}>
+          <thead><tr>
+            <th>Name</th><th>Level</th><th>Workload</th><th>Adjacent?</th>
+          </tr></thead>
+          <tbody>
           {filtered.map(ta => (
-            <tr
-              key={ta.id}
-              className={`${styles.taRow} ${assigned.some(a => a.id === ta.id) ? styles.selectedRow : ''}`}
-              onClick={() => toggleSelect(ta)}
-            >
-              <td>{ta.name}</td>
-              <td>{ta.level}</td>
-              <td>{ta.workload}</td>
-              <td>{ta.hasAdjacentExam ? 'Yes' : 'No'}</td>
-              {/* <td>{ta.type}</td> Removed as it's not in API */}
-            </tr>
+              <tr key={ta.id}
+                  className={assigned.find(a=>a.id===ta.id)?styles.selected:''}
+                  onClick={()=>toggle(ta)}>
+                <td>{ta.name}</td>
+                <td>{ta.level}</td>
+                <td>{ta.workload}</td>
+                <td>{ta.hasAdjacentExam?'Yes':'No'}</td>
+              </tr>
           ))}
-          {filtered.length === 0 && (
-            <tr>
-              <td colSpan={4} className={styles.noResults}>
-                No TAs found matching your search.
-              </td>
-            </tr>
-          )}
-        </tbody>
-      </table>
+          {!filtered.length && <tr><td colSpan={4}>No matching TAs</td></tr>}
+          </tbody>
+        </table>
 
-      <div className={styles.selectedSection}>
-        <h2>Assigned TAs ({assigned.length})</h2>
-        <ul className={styles.selectedList}>
-          {assigned.map(ta => (
-            <li key={ta.id} onClick={() => toggleSelect(ta)}>
-              {ta.name} <span className={styles.removeIcon}>×</span>
-            </li>
-          ))}
-          {assigned.length === 0 && (
-            <li className={styles.noAssigned}>No TAs assigned yet</li>
-          )}
-        </ul>
+        <div className={styles.selectedSection}>
+          <h2>Assigned ({assigned.length})</h2>
+          <ul>
+            {assigned.map(ta=>(
+                <li key={ta.id} onClick={()=>toggle(ta)}>
+                  {ta.name} ×
+                </li>
+            ))}
+          </ul>
+        </div>
+
+        <GreenBut text="Save Changes" onClick={handleSave} />
+
+        {errorMsg && <ErrPopUp message={errorMsg} onConfirm={()=>setErrorMsg(null)} />}
+
+        {showExitConfirm && (
+            <ConPop
+                message="Unsaved changes will be lost. Continue?"
+                onConfirm={confirmExit}
+                onCancel={()=>setShowExitConfirm(false)}
+            />
+        )}
+
+        {showSaveConfirm && (
+            <ConPop
+                message="Save TA assignments?"
+                onConfirm={confirmSave}
+                onCancel={()=>setShowSaveConfirm(false)}
+            />
+        )}
       </div>
-
-      <div className={styles.actions}>
-        <GreenBut 
-          text={savingChanges ? "Saving..." : "Save Changes"} 
-          onClick={handleSaveClick}
-          disabled={savingChanges}
-        />
-      </div>
-
-      <div className={styles.info}>
-        Full Time Workload Capacity: {CAPACITY.fullCap} <br />
-        Part Time Workload Capacity: {CAPACITY.partCap} <br />
-      </div>
-
-      {errorMsg && <ErrPopUp message={errorMsg} onConfirm={() => setErrorMsg(null)} />}
-
-      {showSaveConfirm && (
-        <ConPop
-          message="Do you want to save the changes you made to TA assignments?"
-          onConfirm={onConfirmSave}
-          onCancel={onCancelSave}
-        />
-      )}
-
-      {showExitConfirm && (
-        <ConPop
-          message="You have unsaved changes. Are you sure you want to leave?"
-          onConfirm={onConfirmExit}
-          onCancel={onCancelExit}
-        />
-      )}
-    </div>
   );
 };
 

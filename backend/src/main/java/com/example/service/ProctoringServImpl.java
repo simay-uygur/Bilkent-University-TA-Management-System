@@ -33,7 +33,7 @@ public class ProctoringServImpl implements ProctoringServ{
     private final CourseOfferingServ courseOfferingServ;
     private final ExamRepo examRepo;
     private final TARepo taRepo;
-    TaAvailabilityChecker availabilityChecker;
+    private final TaAvailabilityChecker availabilityChecker;
     @Override
     @Async("setExecutor")
     public CompletableFuture<List<ProctoringDto>> getProctoringInfo(Integer examId, String courseCode) {
