@@ -177,20 +177,50 @@ interface CourseInfo {
         });
         
         // Create promises for fetching course info
-        const coursePromises = Array.from(courseCodes).map(courseCode => 
-          axios.get<CourseInfo>(`/api/course/${courseCode}`)
-            .then(res => ({
-              courseCode,
-              courseInfo: res.data
-            }))
-            .catch(err => {
-              console.error(`Failed to fetch course info for ${courseCode}:`, err);
-              return {
-                courseCode,
-                courseInfo: null
-              };
-            })
-        );
+       // Update the part that creates promises for fetching course info:
+// Update the part that creates promises for fetching course info:
+const coursePromises = Array.from(courseCodes).map(courseCode => 
+  axios.get<CourseInfo>(`/api/course/${courseCode}`, {
+    // Configure axios to handle 302 response codes
+    validateStatus: function (status) {
+      return (status >= 200 && status < 300) || status === 302; // Accept 2xx and 302 status codes
+    }
+  })
+    .then(res => {
+      // If we got a 302 response, don't use fallback data
+      if (res.status === 302) {
+        console.log(`Received 302 for course ${courseCode}, using original data from the response`);
+        
+        // Try to extract data from the response if available
+        if (res.data) {
+          return {
+            courseCode,
+            courseInfo: res.data
+          };
+        }
+        
+        // If no data in response, return null to indicate we should use the exam's original data
+        return {
+          courseCode,
+          courseInfo: null
+        };
+      }
+      
+      // Normal success response
+      return {
+        courseCode,
+        courseInfo: res.data
+      };
+    })
+    .catch(err => {
+      // This will only trigger for network errors or status codes not in validateStatus
+      console.error(`Failed to fetch course info for ${courseCode}:`, err);
+      return {
+        courseCode,
+        courseInfo: null // Return null instead of fallback data
+      };
+    })
+);
         
         // Wait for all TA and course info promises to resolve
         const [tasResults, courseResults] = await Promise.all([
@@ -204,40 +234,41 @@ interface CourseInfo {
           tasByExamId[result.examId] = result.tas;
         });
         
-        const courseInfoMap: Record<string, CourseInfo> = {};
-        courseResults.forEach(result => {
-          if (result.courseInfo) {
-            courseInfoMap[result.courseCode] = result.courseInfo;
-          }
-        });
+        const courseInfoMap: Record<string, CourseInfo | null> = {};
+courseResults.forEach(result => {
+  courseInfoMap[result.courseCode] = result.courseInfo;
+});
         
-        // Store course info in state
-        setCourseInfo(courseInfoMap);
-        
-        // Now update the exams with course names and TAs
-        const examsList: Exam[] = tempExams.map(exam => {
-          // Get course info
-          const course = courseInfoMap[exam.courseId];
+        setCourseInfo(courseInfoMap as Record<string, CourseInfo>);
+
+// Now update the exams with course names and TAs
+const examsList: Exam[] = tempExams.map(exam => {
+  // Get course info - might be null if we got a 302
+  const course = courseInfoMap[exam.courseId];
+  
+  // Get available TAs for this exam
+  const availableTAs = tasByExamId[exam.examId || 0] || [];
+  
+  // Transform available TAs to the format expected by AssignProctorRow
+  const potentialTAs: TA[] = availableTAs.map(ta => ({
+    id: ta.taId,
+    name: `${ta.name} ${ta.surname}`,
+    level: ta.academicLevel,
+    workload: ta.workload,
+    hasAdjacentExam: ta.hasAdjacentExam,
+    wantedState: 'None' // Default state
+  }));
+  
           
-          // Get available TAs for this exam
-          const availableTAs = tasByExamId[exam.examId || 0] || [];
-          
-          // Transform available TAs to the format expected by AssignProctorRow
-          const potentialTAs: TA[] = availableTAs.map(ta => ({
-            id: ta.taId,
-            name: `${ta.name} ${ta.surname}`,
-            level: ta.academicLevel,
-            workload: ta.workload,
-            hasAdjacentExam: ta.hasAdjacentExam,
-            wantedState: 'None' // Default state
-          }));
-          
-          return {
-            ...exam,
-            courseName: course ? course.courseName : exam.courseName,
-            potentialTAs: potentialTAs
-          };
-        });
+            return {
+    ...exam,
+    // Only update courseName if we have valid course data
+    courseName: course ? course.courseName : exam.courseName,
+    // Only update level if we have valid course data
+    level: course && course.courseAcademicStatus ? course.courseAcademicStatus : exam.level,
+    potentialTAs: potentialTAs
+  };
+});
         
         setExams(examsList);
       } catch (err) {
@@ -261,7 +292,7 @@ interface CourseInfo {
     }
     
     // Navigate to the assignment details page with exam and request IDs
-    navigate(`/department-office/assign-proctor/${exam.examId}`);
+    navigate(`/department-office/assign-proctor/${exam.examId}/${exam.requestId}`);
   };
 
   const handleFinish = (id: string) => {

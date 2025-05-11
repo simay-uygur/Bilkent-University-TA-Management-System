@@ -62,7 +62,7 @@ public class ScheduleServImpl implements ScheduleServ {
                                lessonDate.getYear(), s.getHour(), s.getMinute()),
                       new Date(lessonDate.getDayOfMonth(), lessonDate.getMonthValue(),
                                lessonDate.getYear(), f.getHour(), f.getMinute()),
-                      ScheduleItemType.LESSON,
+                      "Lesson",
                       l.getLessonRoom().getClassroomId(),
                       l.getSection().getSectionCode(),
                       l.getLessonId());
@@ -76,7 +76,7 @@ public class ScheduleServImpl implements ScheduleServ {
             Event dur = tt.getTask().getDuration();
             schedule = split(schedule,
                   dur.getStart(), dur.getFinish(),
-                  ScheduleItemType.TASK,
+                  tt.getTask().getTaskType().toString(),
                   "-",
                   tt.getTask().getSection().getSectionCode(),
                   (long) tt.getTask().getTaskId());
@@ -92,7 +92,7 @@ public class ScheduleServImpl implements ScheduleServ {
                           : "";
                           schedule = split(schedule,
                   dur.getStart(), dur.getFinish(),
-                  ScheduleItemType.PROCTORING,
+                "Proctoring",
                   roomId,
                   er.getExam().getCourseOffering().getCourse().getCourseCode(),
                   (long) er.getExamRoomId());
@@ -108,7 +108,7 @@ public class ScheduleServImpl implements ScheduleServ {
 
     private List<ScheduleItemDto> split(List<ScheduleItemDto> out,
                        Date start, Date end,
-                       ScheduleItemType type,
+                       String type,
                        String classroom, String code,
                        Long refId) {
         if (start.getHour() == null || start.getMinute() == null ||
