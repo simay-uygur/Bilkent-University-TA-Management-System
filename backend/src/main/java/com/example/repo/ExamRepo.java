@@ -1,8 +1,10 @@
 package com.example.repo;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
+import com.example.dto.ExamRoomDto;
 import com.example.entity.Courses.CourseOffering;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -43,4 +45,15 @@ public interface ExamRepo extends JpaRepository<Exam, Integer>{
     List<Exam> findByCourseOffering_Course_CourseCode(String courseCode);
 
     List<Exam> findByCourseOffering(CourseOffering offering);
+
+    @Query
+    ("""
+        SELECT e
+        FROM Exam e
+        JOIN e.courseOffering co
+        WHERE co.course.courseCode = :courseCode
+        AND e.duration.start >= :from
+        AND e.duration.finish <= :to
+    """)
+    Exam findByCourseOfferingAndExamId(CourseOffering offering, Integer examId);
 }

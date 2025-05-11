@@ -1,5 +1,5 @@
 import React from 'react';
-import { Check } from 'lucide-react';
+import { Check, Trash2 } from 'lucide-react';
 import styles from './AssignProctorRow.module.css';
 
 // Import or redefine the TA and Exam interfaces to match AssignProctor.tsx
@@ -27,6 +27,7 @@ export interface Exam {
   potentialTAs: TA[];
   requestId?: number;
   examId?: number;
+  examRooms?: string[];
 }
 
 interface AssignProctorRowProps {
@@ -34,6 +35,7 @@ interface AssignProctorRowProps {
   onAuto: (id: string) => void;
   onFinish: (id: string) => void;
   onDemand: (id: string) => void;
+  onDelete: (id: string) => void; // New prop for delete functionality
 }
 
 const AssignProctorRow: React.FC<AssignProctorRowProps> = ({
@@ -41,12 +43,10 @@ const AssignProctorRow: React.FC<AssignProctorRowProps> = ({
   onAuto,
   onFinish,
   onDemand,
+  onDelete, // Destructure the new prop
 }) => {
   const completed = exam.tasLeft === 0;
 
-  // Log props for debugging
-  console.log(`Rendering row for exam ${exam.id}: ${exam.courseName}`);
-  
   return (
     <tr
       className={`
@@ -95,6 +95,15 @@ const AssignProctorRow: React.FC<AssignProctorRowProps> = ({
           disabled={exam.needed > 0 && exam.assignedTAs.length === 0}
         >
           Finish Assignment
+        </button>
+        <button
+          className={`${styles.btn} ${styles.deleteBtn}`}
+          onClick={() => {
+            console.log(`Delete button clicked for exam ${exam.id}`);
+            onDelete(exam.id);
+          }}
+        >
+          <Trash2 size={16} /> Delete
         </button>
       </td>
     </tr>

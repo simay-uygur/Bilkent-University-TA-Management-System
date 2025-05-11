@@ -1,5 +1,290 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
+import BackBut from '../../components/Buttons/BackBut';
+import ConPop from '../../components/PopUp/ConPop';
+import ErrPopUp from '../../components/PopUp/ErrPopUp';
+import LoadingPage from '../CommonPages/LoadingPage';
+import styles from './CourseTA.module.css';
+
+interface TaDto {
+  id: number;
+  name: string;
+  surname: string;
+}
+
+interface PreferTasRequest {
+  requestId: number;
+  requestType: string;
+  description: string;
+  senderName: string;
+  receiverName: string;
+  sentTime: {
+    day: number; month: number; year: number;
+    hour: number; minute: number;
+  };
+  instructorId: number;
+  courseCode: string;
+  sectionId: number;
+  sectionCode: string;
+  taNeeded: number;
+  amountOfAssignedTas: number;
+  preferredTas: TaDto[];
+  nonPreferredTas: TaDto[];
+  rejected: boolean;
+  approved: boolean;
+  pending: boolean;
+}
+
+interface CourseInfo {
+  courseId: number;
+  courseCode: string;
+  courseName: string;
+  courseAcademicStatus: string;
+  department: string;
+  prereqs: string[];
+}
+
+// Helper to extract section number from e.g. "CS-464-1-2025-FALL"
+const extractSectionNumber = (code: string): string => {
+  const parts = code.split('-');
+  return parts[2] || '';
+};
+
+const CourseTA: React.FC = () => {
+  const navigate = useNavigate();
+
+  // State for requests
+  const [requests, setRequests] = useState<PreferTasRequest[]>([]);
+  const [loadingReq, setLoadingReq] = useState(false);
+  const [reqError, setReqError] = useState<string | null>(null);
+
+  // State for course names lookup
+  const [courseNames, setCourseNames] = useState<Record<string, string>>({});
+  const [loadingCourseNames, setLoadingCourseNames] = useState(false);
+
+  // State for assigned TA counts per section
+  const [sectionTACounts, setSectionTACounts] = useState<Record<string, number>>({});
+  const [loadingCounts, setLoadingCounts] = useState(false);
+
+  // State for finish-confirm popup
+  const [confirmFinish, setConfirmFinish] = useState<PreferTasRequest | null>(null);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
+
+  // Fetch preference requests on mount
+  useEffect(() => {
+    const deptCode = localStorage.getItem('departmentCode') || '';
+    setLoadingReq(true);
+    axios
+      .get<PreferTasRequest[]>(`/api/department/${deptCode}/preferTas`)
+      .then(res => setRequests(res.data))
+      .catch(err => {
+        console.error(err);
+        setReqError('Failed to load TA-preference requests');
+      })
+      .finally(() => setLoadingReq(false));
+  }, []);
+
+  // Fetch course names for unique course codes
+  useEffect(() => {
+    if (requests.length === 0) return;
+    const uniqueCourses = Array.from(new Set(requests.map(r => r.courseCode)));
+    setLoadingCourseNames(true);
+    const promises = uniqueCourses.map(code =>
+      axios
+        .get<CourseInfo>(`/api/course/${code}`, {
+          validateStatus: status => status >= 200 && status < 400
+        })
+        .then(res => ({ courseCode: code, courseName: res.data.courseName }))
+        .catch(() => ({ courseCode: code, courseName: code }))
+    );
+    Promise.all(promises)
+      .then(results => {
+        const map: Record<string, string> = {};
+        results.forEach(r => (map[r.courseCode] = r.courseName));
+        setCourseNames(map);
+      })
+      .finally(() => setLoadingCourseNames(false));
+  }, [requests]);
+
+  // Fetch assigned TA counts per section
+  useEffect(() => {
+    if (requests.length === 0) return;
+    setLoadingCounts(true);
+    const promises = requests.map(r =>
+      axios
+        .get(`/api/ta/sectionCode/${r.sectionCode}`)
+        .then(res => ({
+          sectionCode: r.sectionCode,
+          assignedTACount: Array.isArray(res.data) ? res.data.length : 0
+        }))
+        .catch(() => ({ sectionCode: r.sectionCode, assignedTACount: 0 }))
+    );
+    Promise.all(promises)
+      .then(results => {
+        const map: Record<string, number> = {};
+        results.forEach(r => (map[r.sectionCode] = r.assignedTACount));
+        setSectionTACounts(map);
+      })
+      .finally(() => setLoadingCounts(false));
+  }, [requests]);
+
+  const handleFinishAssignment = (req: PreferTasRequest) => {
+    setConfirmFinish(req);
+  };
+
+  const confirmApprove = () => {
+    if (!confirmFinish) return;
+    const approverId = localStorage.getItem('userId');
+    if (!approverId) {
+      setErrorMsg('User not authenticated.');
+      setConfirmFinish(null);
+      return;
+    }
+
+    axios
+      .put(
+        `/api/ta/prefertas/${confirmFinish.requestId}/approve`
+      )
+      .then(() => {
+        setRequests(prev =>
+          prev.map(r =>
+            r.requestId === confirmFinish.requestId
+              ? { ...r, approved: true, pending: false }
+              : r
+          )
+        );
+      })
+      .catch(err => {
+        console.error(err);
+        setErrorMsg('Failed to finish assignment. Please try again.');
+      })
+      .finally(() => setConfirmFinish(null));
+  };
+
+  if (loadingReq) return <LoadingPage />;
+  if (reqError)
+    return <div className={styles.errorContainer}>{reqError}</div>;
+
+  return (
+    <div className={styles.pageWrapper}>
+      <div className={styles.headerRow}>
+        <BackBut to="/department-office" />
+        <h1 className={styles.title}>Assign TAs to Course</h1>
+      </div>
+
+      <div className={styles.container}>
+        <table className={styles.table}>
+          <thead className={styles.headings}>
+            <tr>
+              <th>Course Name</th>
+              <th>Section</th>
+              <th>Course ID</th>
+              <th>Needed TAs</th>
+              <th>Preferred</th>
+              <th>Non-Preferred</th>
+              <th>Assigned</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {requests.map(r => {
+              const courseName =
+                courseNames[r.courseCode] ||
+                (loadingCourseNames ? `${r.courseCode}…` : r.courseCode);
+              const sectionNum = extractSectionNumber(r.sectionCode);
+              const assignedCount = sectionTACounts[r.sectionCode] || 0;
+              const allAssigned = assignedCount >= r.taNeeded;
+
+              return (
+                <tr
+                  key={r.requestId}
+                  className={
+                    allAssigned
+                      ? styles.completedRow
+                      : styles.incompleteRow
+                  }
+                >
+                  <td>{courseName}</td>
+                  <td>{sectionNum}</td>
+                  <td>{r.courseCode}</td>
+                  <td>{r.taNeeded}</td>
+                  <td>
+                    {r.preferredTas.length > 0
+                      ? r.preferredTas
+                          .map(t => `${t.name} ${t.surname}`)
+                          .join(', ')
+                      : 'None'}
+                  </td>
+                  <td>
+                    {r.nonPreferredTas.length > 0
+                      ? r.nonPreferredTas
+                          .map(t => `${t.name} ${t.surname}`)
+                          .join(', ')
+                      : 'None'}
+                  </td>
+                  <td>
+                    {assignedCount}/{r.taNeeded}{' '}
+                    {loadingCounts && '…'}
+                  </td>
+                  <td>
+                    {r.pending
+                      ? 'Pending'
+                      : r.approved
+                      ? 'Approved'
+                      : 'Rejected'}
+                  </td>
+                  <td className={styles.actionsCell}>
+                    <button
+                      className={styles.assignBtn}
+                      onClick={() =>
+                        navigate(
+                          `/department-office/assign-course/${r.requestId}`
+                        )
+                      }
+                      disabled={allAssigned}
+                    >
+                      {allAssigned ? 'TAs Complete' : 'Assign TA'}
+                    </button>
+                    <button
+                      className={styles.finishBtn}
+                      onClick={() => handleFinishAssignment(r)}
+                      disabled={!allAssigned}
+                    >
+                      Finish Assignment
+                    </button>
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
+
+      {confirmFinish && (
+        <ConPop
+          message={`Mark TA assignment for ${confirmFinish.courseCode} Section ${extractSectionNumber(
+            confirmFinish.sectionCode
+          )} as complete?`}
+          onConfirm={confirmApprove}
+          onCancel={() => setConfirmFinish(null)}
+        />
+      )}
+
+      {errorMsg && (
+        <ErrPopUp
+          message={errorMsg}
+          onConfirm={() => setErrorMsg(null)}
+        />
+      )}
+    </div>
+  );
+};
+
+export default CourseTA;
+/* import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import BackBut from '../../components/Buttons/BackBut';
 import ConPop from '../../components/PopUp/ConPop';
 import styles from './CourseTA.module.css';
@@ -214,7 +499,7 @@ useEffect(() => {
     .finally(() => {
       setLoadingCounts(false);
     });
-}, [requests]); */
+}, [requests]); 
 const [confirmFinish, setConfirmFinish] = useState<PreferTasRequest | null>(null);
 
 const handleFinishAssignment = (request: PreferTasRequest) => {
@@ -313,7 +598,7 @@ const handleFinishAssignment = (request: PreferTasRequest) => {
             : 'None'}
         </td>
         <td>
-          {/* Add this new column */}
+          
           {assignedCount} / {r.taNeeded} {loadingCounts && '...'}
         </td>
         <td>
@@ -368,7 +653,7 @@ const handleFinishAssignment = (request: PreferTasRequest) => {
   );
 };
 
-export default CourseTA;
+export default CourseTA; */
 
 
 /* import React, { useState, useEffect } from 'react';

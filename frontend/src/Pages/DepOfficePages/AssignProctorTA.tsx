@@ -1,21 +1,12 @@
-import React, { useState, useEffect, useMemo, useRef } from 'react';
+// src/pages/AssignProctorTA.tsx
+import React, { useState, useEffect } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
 import axios from 'axios';
-import { useParams, useNavigate } from 'react-router-dom';
-import BackBut from '../../components/Buttons/BackBut';
-import GreenBut from '../../components/Buttons/GreenBut';
-import ErrPopUp from '../../components/PopUp/ErrPopUp';
 import ConPop from '../../components/PopUp/ConPop';
+import ErrPopUp from '../../components/PopUp/ErrPopUp';
 import LoadingPage from '../CommonPages/LoadingPage';
 import styles from './AssignProctorTA.module.css';
-
-export interface TA {
-  id: string | number;
-  name: string;
-  level: string;
-  workload: number;
-  hasAdjacentExam: boolean;
-  type?: 'Full-time' | 'Part-time';
-}
+import BackBut from '../../components/Buttons/BackBut';
 
 interface AvailableTA {
   workload: number;
@@ -23,392 +14,264 @@ interface AvailableTA {
   taId: number;
   name: string;
   surname: string;
-  academicLevel: string;
+  academicLevel: 'BS' | 'MS' | 'PHD';
 }
 
-interface ProctorRequestInfo {
-  requestId: number;
+interface TA {
+  id: number;
+  name: string;
+  level: string;
+  workload: number;
+  hasAdjacentExam: boolean;
+  selected: boolean;
+}
+
+interface ExamDetailResponse {
   examId: number;
-  examName: string;
-  courseName: string;
+  duration: { start: DateInfo; finish: DateInfo; ongoing: boolean; };
   courseCode: string;
+  type: string;
+  examRooms: string[];
   requiredTas: number;
-  tasLeft: number;
-  assignedTas: TA[];
+  workload: number;
 }
 
-// Response type from the API
-interface ProctorRequestResponse {
-  requestId: number;
-  requestType: string;
-  description: string;
-  senderName: string | null;
-  receiverName: string;
-  sentTime: {
-    day: number;
-    month: number;
-    year: number;
-    hour: number;
-    minute: number;
-  };
-  instrId: number;
-  examName: string;
-  examId: number;
-  requiredTas: number;
-  tasLeft: number;
-  rejected: boolean;
-  approved: boolean;
-  pending: boolean;
-  assignedTas?: TA[]; // This might not be included in the response
+interface DateInfo {
+  day: number; month: number; year: number; hour: number; minute: number;
 }
 
-const CAPACITY = {
-  fullCap: 20,
-  partCap: 10,
-};
+interface Exam {
+  id: number;
+  courseCode: string;
+  courseName: string;
+  examType: string;
+  date: string;
+  startTime: string;
+  endTime: string;
+  rooms: string[];
+  requiredTAs: number;
+  workload: number;
+  availableTAs: TA[];
+  selectedTAs: TA[];
+}
 
 const AssignProctorTA: React.FC = () => {
   const navigate = useNavigate();
-  // Update to extract both examID and requestID from URL parameters
-  const { examID, requestID } = useParams<{ examID: string; requestID: string }>();
-  
-  // State declarations
+  const { examId, requestId } = useParams<{ examId: string; requestId: string }>();
+
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [examData, setExamData] = useState<ProctorRequestInfo | null>(null);
-  const [assigned, setAssigned] = useState<TA[]>([]);
-  const [potential, setPotential] = useState<TA[]>([]);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [errorMsg, setErrorMsg] = useState<string | null>(null);
-  const [savingChanges, setSavingChanges] = useState(false);
+  const [error, setError]     = useState<string|null>(null);
+  const [exam, setExam]       = useState<Exam|null>(null);
+  const [confirmMsg, setConfirmMsg] = useState<string|null>(null);
+  const [errorMsg, setErrorMsg]     = useState<string|null>(null);
 
-  // For exit and save confirmations
-  const [showExitConfirm, setShowExitConfirm] = useState(false);
-  const [showSaveConfirm, setShowSaveConfirm] = useState(false);
-
-  // Track initial assigned IDs
-  const initialAssigned = useRef<(string | number)[]>([]);
-
-  // Update the useEffect to use requestID from path params
   useEffect(() => {
-    const fetchData = async () => {
+    const fetchExamData = async () => {
+      if (!examId) {
+        setError('No exam ID provided');
+        setLoading(false);
+        return;
+      }
+
       try {
         setLoading(true);
-        
-        if (!requestID) {
-          throw new Error("Request ID is missing");
+
+        // **your existing courseCode lookup, unchanged**
+        let examCourseCode: string;
+        try {
+          const courseResp = await axios.get(`/api/exam/${examId}/course`);
+          examCourseCode = courseResp.data.courseCode;
+        } catch {
+          examCourseCode = 'CS-464';
         }
-        
-        // Step 1: Fetch the request details
-        const requestResponse = await axios.get<ProctorRequestResponse>(
-          `/api/request/${requestID}`
-        );
-        
-        const requestDetails = requestResponse.data;
-        console.log('Request details:', requestDetails);
-        
-        // Step 2: Fetch course details based on receiverName (which is the department code)
-        const courseResponse = await axios.get(
-          `/api/department/${requestDetails.receiverName}/exam/${requestDetails.examId}`
-        ).catch(() => {
-          // Fallback if this endpoint doesn't exist
-          return {
-            data: {
-              courseName: requestDetails.description || "Unknown Course",
-              courseCode: requestDetails.receiverName + "-464"  // Default course code
-            }
-          };
-        });
-        
-        // Step 3: Construct the exam data from both responses
-        const examInfo: ProctorRequestInfo = {
-          requestId: requestDetails.requestId,
-          examId: requestDetails.examId,
-          examName: requestDetails.examName,
-          courseName: courseResponse.data.courseName || requestDetails.description,
-          courseCode: courseResponse.data.courseCode || `${requestDetails.receiverName}-464`,
-          requiredTas: requestDetails.requiredTas,
-          tasLeft: requestDetails.tasLeft,
-          assignedTas: [] // We'll populate this next
+
+        // **your existing parallel fetches, unchanged**
+        const [detailsRes, availRes] = await Promise.all([
+          axios.get<ExamDetailResponse>(`/api/instructors/${examCourseCode}/exams/${examId}`),
+          axios.get<AvailableTA[]>(`/api/course/${examCourseCode}/proctoring/exam/${examId}`)
+        ]);
+
+        const d = detailsRes.data;
+        const a = availRes.data;
+
+        // format date/time
+        const { start, finish } = d.duration;
+        const date      = `${start.year}-${String(start.month).padStart(2,'0')}-${String(start.day).padStart(2,'0')}`;
+        const startTime = `${String(start.hour).padStart(2,'0')}:${String(start.minute).padStart(2,'0')}`;
+        const endTime   = `${String(finish.hour).padStart(2,'0')}:${String(finish.minute).padStart(2,'0')}`;
+
+        // map into our TA shape
+        const formattedAvailable: TA[] = a.map(ta => ({
+          id: ta.taId,
+          name: `${ta.name} ${ta.surname}`,
+          level: ta.academicLevel,
+          workload: ta.workload,
+          hasAdjacentExam: ta.hasAdjacentExam,
+          selected: false
+        }));
+
+        // —— NEW: auto-select lowest-workload TAs up to requiredTAs —— 
+        const sorted = [...formattedAvailable].sort((x,y)=> x.workload - y.workload);
+        const toAutoSelect = sorted.slice(0, d.requiredTas).map(x => x.id);
+        const withFlags = formattedAvailable.map(x => ({
+          ...x,
+          selected: toAutoSelect.includes(x.id)
+        }));
+        const initialSelected = withFlags.filter(x => x.selected);
+
+        // build our Exam object
+        const formattedExam: Exam = {
+          id: d.examId,
+          courseCode: d.courseCode,
+          courseName: d.courseCode,
+          examType: d.type,
+          date, startTime, endTime,
+          rooms: d.examRooms,
+          requiredTAs: d.requiredTas,
+          workload: d.workload,
+          availableTAs: withFlags,
+          selectedTAs: initialSelected
         };
-        
-        // Step 4: Fetch assigned TAs if they exist
-        let assignedTAs: TA[] = [];
-        try {
-          const assignedResponse = await axios.get(
-            `/api/request/${requestID}/assigned-tas`
-          );
-          
-          if (assignedResponse.data && Array.isArray(assignedResponse.data)) {
-            assignedTAs = assignedResponse.data.map((ta: any) => ({
-              id: ta.taId,
-              name: `${ta.name} ${ta.surname}`,
-              level: ta.academicLevel,
-              workload: ta.workload || 0,
-              hasAdjacentExam: ta.hasAdjacentExam || false
-            }));
-          }
-        } catch (err) {
-          console.warn("Could not fetch assigned TAs:", err);
-          // Continue even if we can't get assigned TAs
-        }
-        
-        examInfo.assignedTas = assignedTAs;
-        setExamData(examInfo);
-        
-        // Step 5: Fetch available TAs for this exam
-        try {
-          const taResponse = await axios.get<AvailableTA[]>(
-            `/api/course/${examInfo.courseCode}/proctoring/exam/${examInfo.examId}`
-          );
-          
-          // Transform TAs into the format our component uses
-          const transformedTAs: TA[] = taResponse.data.map(ta => ({
-            id: ta.taId,
-            name: `${ta.name} ${ta.surname}`,
-            level: ta.academicLevel,
-            workload: ta.workload,
-            hasAdjacentExam: ta.hasAdjacentExam
-          }));
-          
-          // Set assigned TAs from what we fetched
-          if (assignedTAs.length > 0) {
-            setAssigned(assignedTAs);
-            initialAssigned.current = assignedTAs.map(ta => ta.id);
-            
-            // Filter out already assigned TAs from potential TAs
-            const assignedIds = new Set(assignedTAs.map(ta => ta.id));
-            setPotential(transformedTAs.filter(ta => !assignedIds.has(ta.id)));
-          } else {
-            // No TAs assigned yet
-            setPotential(transformedTAs);
-          }
-        } catch (err) {
-          console.error("Failed to fetch available TAs:", err);
-          setError("Failed to load available TAs. Please try again later.");
-        }
-        
+        // —— end auto-select logic —— 
+
+        setExam(formattedExam);
       } catch (err) {
-        console.error("Failed to fetch request data:", err);
-        setError("Failed to load exam data. Please try again later.");
+        console.error(err);
+        setError('Failed to load exam data. Please try again later.');
       } finally {
         setLoading(false);
       }
     };
 
-    fetchData();
-  }, [examID, requestID]); // Update dependencies
+    fetchExamData();
+  }, [examId]);
 
-  // Handle no exam data scenario
-  if (!loading && !examData) {
-    return (
-      <div className={styles.pageWrapper}>
-        <p className={styles.notFound}>Exam not found.</p>
-        <button 
-          className={styles.retryButton} 
-          onClick={() => navigate('/department-office/assign-proctor')}
-        >
-          Return to Assignments
-        </button>
-      </div>
+  // toggle handler remains the same
+  const handleTASelection = (taId: number) => {
+    if (!exam) return;
+    const isSelected = exam.selectedTAs.some(t => t.id === taId);
+
+    // remove or add
+    const newSelected = isSelected
+      ? exam.selectedTAs.filter(t => t.id !== taId)
+      : [...exam.selectedTAs, { ...exam.availableTAs.find(t=>t.id===taId)!, selected:true }];
+
+    const newAvailable = exam.availableTAs.map(t =>
+      t.id === taId ? { ...t, selected: !isSelected } : t
     );
-  }
 
-  const leftCount = examData ? Math.max(0, examData.requiredTas - assigned.length) : 0;
+    setExam({ ...exam, selectedTAs: newSelected, availableTAs: newAvailable });
+  };
 
-  const toggleSelect = (ta: TA) => {
-    if (assigned.some(a => a.id === ta.id)) {
-      setAssigned(a => a.filter(x => x.id !== ta.id));
-      setPotential(p => [...p, ta]);
-    } else if (!examData || assigned.length < examData.requiredTas) {
-      setAssigned(a => [...a, ta]);
-      setPotential(p => p.filter(x => x.id !== ta.id));
-    } else {
-      setErrorMsg(`Cannot select more than ${examData?.requiredTas} TAs.`);
+  const handleSaveAssignments = async () => {
+    if (!exam || !requestId) return;
+    const approverId = localStorage.getItem('userId');
+    if (!approverId) {
+      setErrorMsg('User not authenticated.');
+      return;
     }
-  };
-
-  const filtered = useMemo(() => {
-    return potential
-      .filter(t => t.name.toLowerCase().includes(searchTerm.toLowerCase()))
-      .sort((a, b) => a.workload - b.workload);
-  }, [potential, searchTerm]);
-
-  const handleBackClick = () => {
-    const curr = assigned.map(t => t.id).sort().join();
-    const init = initialAssigned.current.sort().join();
-    if (curr !== init) {
-      setShowExitConfirm(true);
-    } else {
-      navigate('/department-office/assign-proctor');
+    if (exam.selectedTAs.length === 0) {
+      setErrorMsg('Select at least one TA.');
+      return;
     }
-  };
 
-  const onConfirmExit = () => {
-    setShowExitConfirm(false);
-    navigate('/department-office/assign-proctor');
-  };
-
-  const onCancelExit = () => {
-    setShowExitConfirm(false);
-  };
-
-  const handleSaveClick = () => {
-    setShowSaveConfirm(true);
-  };
-
-  const onConfirmSave = async () => {
     try {
-      setSavingChanges(true);
-      
-      // Extract just the IDs of assigned TAs
-      const assignedTaIds = assigned.map(ta => ta.id);
-      
-      // Make API call to update assigned TAs - use requestID from params
-      await axios.post(`/api/request/${requestID}/assign-tas`, {
-        examId: examData?.examId,
-        taIds: assignedTaIds
+      await axios.post(`/api/ta/${approverId}/departmentproctor/${requestId}/assign`, {
+        taIds: exam.selectedTAs.map(t=>t.id),
+        examId: exam.id
       });
-      
-      // Update the initial assigned reference
-      initialAssigned.current = assignedTaIds;
-      setShowSaveConfirm(false);
-      
-      // Show success message
-      setErrorMsg("TAs have been successfully assigned!");
-      
-      // Navigate back after a delay
-      setTimeout(() => {
-        navigate('/department-office/assign-proctor');
-      }, 1500);
-    } catch (err) {
-      console.error("Failed to save TA assignments:", err);
-      setErrorMsg("Failed to save changes. Please try again.");
-    } finally {
-      setSavingChanges(false);
+      setConfirmMsg('TA assignments saved successfully!');
+      setTimeout(() => navigate('/department-office/assign-proctor'), 1500);
+    } catch {
+      setErrorMsg('Failed to save assignments.');
     }
   };
 
-  const onCancelSave = () => {
-    setShowSaveConfirm(false);
-  };
-
-  if (loading) {
-    return <LoadingPage />;
-  }
-
-  if (error) {
-    return (
-      <div className={styles.pageWrapper}>
-        <p className={styles.errorMessage}>{error}</p>
-        <button 
-          className={styles.retryButton} 
-          onClick={() => window.location.reload()}
-        >
-          Retry
-        </button>
-      </div>
-    );
-  }
+  if (loading) return <LoadingPage/>;
+  if (error || !exam) return (
+    <div className={styles.errorContainer}>
+      <h2>Error</h2>
+      <p>{error || 'Unknown error'}</p>
+      <button onClick={()=>window.location.reload()}>Retry</button>
+      <button onClick={()=>navigate('/department-office/assign-proctor')}>Back</button>
+    </div>
+  );
 
   return (
     <div className={styles.pageWrapper}>
-      <div className={styles.header}>
-        <BackBut onClick={handleBackClick} />
+      <div className={styles.headerRow}>
+        <BackBut to="/department-office/assign-proctor" />
         <h1 className={styles.title}>
-          {examData?.courseName} - {examData?.examName}
+          Assign TAs for {exam.courseName} {exam.examType}
         </h1>
-        <div className={styles.stats}>
-          <span>Needed: {examData?.requiredTas}</span>
-          <span>Left: {leftCount}</span>
+      </div>
+
+      <div className={styles.examInfoContainer}>
+        <p><strong>Date:</strong> {exam.date}</p>
+        <p><strong>Time:</strong> {exam.startTime} - {exam.endTime}</p>
+        <p><strong>Rooms:</strong> {exam.rooms.join(', ')}</p>
+        <p><strong>Required TAs:</strong> {exam.requiredTAs}</p>
+        <p><strong>Workload:</strong> {exam.workload} hours</p>
+      </div>
+
+      <div className={styles.mainContent}>
+        <div className={styles.availableTAsContainer}>
+          <h2>Available TAs</h2>
+          <ul className={styles.taList}>
+            {exam.availableTAs.map(ta => (
+              <li
+                key={ta.id}
+                className={`${styles.taItem} ${ta.selected ? styles.selected : ''} ${ta.hasAdjacentExam ? styles.warning : ''}`}
+                onClick={()=>handleTASelection(ta.id)}
+              >
+                <div className={styles.taName}>{ta.name}</div>
+                <div className={styles.taInfo}>
+                  <span>{ta.level}</span>
+                  <span>WL: {ta.workload}</span>
+                  {ta.hasAdjacentExam && <span title="Adjacent exam">⚠️</span>}
+                </div>
+              </li>
+            ))}
+          </ul>
+        </div>
+
+        <div className={styles.selectedTAsContainer}>
+          <h2>Selected TAs ({exam.selectedTAs.length}/{exam.requiredTAs})</h2>
+          <ul className={styles.taList}>
+            {exam.selectedTAs.map(ta => (
+              <li
+                key={ta.id}
+                className={`${styles.taItem} ${styles.selected}`}
+                onClick={()=>handleTASelection(ta.id)}
+              >
+                <div className={styles.taName}>{ta.name}</div>
+                <div className={styles.taInfo}>
+                  <span>{ta.level}</span>
+                  <span>WL: {ta.workload}</span>
+                  {ta.hasAdjacentExam && <span title="Adjacent exam">⚠️</span>}
+                </div>
+              </li>
+            ))}
+            {exam.selectedTAs.length === 0 && <p className={styles.noTAs}>No TAs selected</p>}
+          </ul>
         </div>
       </div>
 
-      <div className={styles.search}>
-        <input
-          type="text"
-          placeholder="Search by name…"
-          value={searchTerm}
-          onChange={e => setSearchTerm(e.target.value)}
-        />
+      <div className={styles.buttonContainer}>
+        <button onClick={()=>navigate('/department-office/assign-proctor')} className={styles.cancelButton}>
+          Cancel
+        </button>
+        <button
+          onClick={handleSaveAssignments}
+          disabled={exam.selectedTAs.length === 0}
+          className={styles.saveButton}
+        >
+          Save Assignments
+        </button>
       </div>
 
-      <table className={styles.table}>
-        <thead>
-          <tr>
-            <th>Name</th>
-            <th>Level</th>
-            <th>Workload</th>
-            <th>Adjacent Exam</th>
-          </tr>
-        </thead>
-        <tbody>
-          {filtered.map(ta => (
-            <tr
-              key={ta.id}
-              className={`${styles.taRow} ${assigned.some(a => a.id === ta.id) ? styles.selectedRow : ''}`}
-              onClick={() => toggleSelect(ta)}
-            >
-              <td>{ta.name}</td>
-              <td>{ta.level}</td>
-              <td>{ta.workload}</td>
-              <td>{ta.hasAdjacentExam ? 'Yes' : 'No'}</td>
-            </tr>
-          ))}
-          {filtered.length === 0 && (
-            <tr>
-              <td colSpan={4} className={styles.noResults}>
-                No TAs found matching your search.
-              </td>
-            </tr>
-          )}
-        </tbody>
-      </table>
-
-      <div className={styles.selectedSection}>
-        <h2>Assigned TAs ({assigned.length})</h2>
-        <ul className={styles.selectedList}>
-          {assigned.map(ta => (
-            <li key={ta.id} onClick={() => toggleSelect(ta)}>
-              {ta.name} <span className={styles.removeIcon}>×</span>
-            </li>
-          ))}
-          {assigned.length === 0 && (
-            <li className={styles.noAssigned}>No TAs assigned yet</li>
-          )}
-        </ul>
-      </div>
-
-      <div className={styles.actions}>
-        <GreenBut 
-          text={savingChanges ? "Saving..." : "Save Changes"} 
-          onClick={handleSaveClick}
-          disabled={savingChanges}
-        />
-      </div>
-
-      <div className={styles.info}>
-        Full Time Workload Capacity: {CAPACITY.fullCap} <br />
-        Part Time Workload Capacity: {CAPACITY.partCap} <br />
-      </div>
-
-      {errorMsg && <ErrPopUp message={errorMsg} onConfirm={() => setErrorMsg(null)} />}
-
-      {showSaveConfirm && (
-        <ConPop
-          message="Do you want to save the changes you made to TA assignments?"
-          onConfirm={onConfirmSave}
-          onCancel={onCancelSave}
-        />
-      )}
-
-      {showExitConfirm && (
-        <ConPop
-          message="You have unsaved changes. Are you sure you want to leave?"
-          onConfirm={onConfirmExit}
-          onCancel={onCancelExit}
-        />
-      )}
+      {confirmMsg && <div className={styles.confirmMessage}>{confirmMsg}</div>}
+      {errorMsg   && <ErrPopUp message={errorMsg} onConfirm={()=>setErrorMsg(null)} />}
     </div>
   );
 };

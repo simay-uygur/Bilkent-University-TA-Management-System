@@ -34,7 +34,7 @@ const AdminMainPage: React.FC = () => {
 
   return (
     <div>
-      <AdminNavBar />
+      
       <div className={styles.container}>
       <BulkUpload
         label="Upload Students/TAs"

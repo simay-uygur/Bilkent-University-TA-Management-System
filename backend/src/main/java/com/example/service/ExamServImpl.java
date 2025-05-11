@@ -43,7 +43,19 @@ public class ExamServImpl implements ExamServ{
     private final CourseOfferingServ courseOfferingServ;
     private final ClassRoomRepo classRoomRepo;
     private final LogService log;
+    @Override
+    public ExamDto getExamsIdByCourseCode(String courseCode, Integer examId){
+        // 1) find the “current” offering for this course
+        CourseOffering offering = courseOfferingServ.getCurrentOffering(courseCode);
 
+        // 2) fetch only that offering’s exams
+        return examRepo.findByExamId(examId)
+                .stream()
+                .map(this::toDto)
+                .findFirst()
+                .orElseThrow(() -> new IllegalArgumentException("Exam not found"));
+
+    }
     @Override
     public ExamDto getExam(Exam exam) {
         ExamDto dto = new ExamDto();

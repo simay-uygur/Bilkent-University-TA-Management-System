@@ -40,6 +40,8 @@ interface ProctorRequest {
 
 interface ProctorTaRequestDto {
   receiverName: string;
+
+   courseCode: string
   instrId: number;
   examId: number;
   examName: string;
@@ -49,6 +51,8 @@ interface ProctorTaRequestDto {
 
   requestType: string;
   description: string;
+
+
   
 }
 
@@ -136,6 +140,8 @@ const handleConfirm = async () => {
     // Ensure all fields have proper values, especially IDs
     const requestDto: ProctorTaRequestDto = {
       receiverName: depName,
+
+       courseCode: exam.courseCode,
       instrId: instrId,
       examId: exam.examId,
       examName: exam.type,
@@ -145,6 +151,8 @@ const handleConfirm = async () => {
 
       requestType: requestType,
       description: `Request for ${confirmRequest.requiredTas} TAs to proctor ${exam.courseCode} ${exam.type} exam on ${formattedDate} at ${formattedTime}. Rooms: ${exam.examRooms.join(', ')}.`,
+
+     
       
     };
     
