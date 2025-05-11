@@ -9,6 +9,7 @@ import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
 import com.example.entity.General.DayOfWeek;
+import com.example.util.TaAvailabilityChecker;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -61,6 +62,8 @@ public class TaskServImpl implements TaskServ {
     private final CourseOfferingServ courseOfferingServ;
     private final RequestServ reqServ;
     private final TaMapper taMapper;
+    private final TaAvailabilityChecker availabilityChecker;
+
     @Override
     public boolean unassignTasToTaskByTheirId(String sectionCode, int taskId, List<Long> taIds){
         Task task = taskRepo.findById(taskId)
@@ -488,7 +491,7 @@ public class TaskServImpl implements TaskServ {
     @Override
     public boolean hasDutyOrLessonOrExam(TA ta, Event duration) {
         LocalDate currentDate = duration.getStart().toLocalDate();
-        DayOfWeek currentDow  = DayOfWeek.valueOf(currentDate.getDayOfWeek().name());
+       // DayOfWeek currentDow  = DayOfWeek.valueOf(currentDate.getDayOfWeek().name());
 
         for (TaTask taTask : ta.getTaTasks()) {
             if (taTask.getTask().getDuration().has(duration) && !taTask.getTask().getStatus().equals(TaskState.DELETED)) {
@@ -496,16 +499,11 @@ public class TaskServImpl implements TaskServ {
             }
         }
         // 3) for each lesson, first match day‐of‐week, then time‐of‐day
-        for (Section section : ta.getSectionsAsStudent()) {
-            for (Lesson lesson : section.getLessons()) {
-                if (lesson.getDay() != currentDow) {
-                    continue; // different weekday → no conflict
-                }
-                if(duration.hasLesson(getDay(lesson.getDay()), duration)){
-                    return true;
-                }
-            }
+        boolean hasOverlappingLesson = availabilityChecker.hasOverlappingLesson(ta, duration);
+        if (hasOverlappingLesson) {
+            return true;
         }
+
         for (Exam exam : ta.getExams()){
             if (exam.getDuration().has(duration)) {
                 return true;
@@ -542,6 +540,9 @@ public class TaskServImpl implements TaskServ {
         int bEnd   = b.getFinish().getHour() * 60 + b.getFinish().getMinute();
         return aStart < bEnd && bStart < aEnd;
     }
+
+
+
 }
 /*                if (duration.hasLesson(getDay(lesson.getDay()), lesson.getDuration())) {
                     return true;
