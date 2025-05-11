@@ -46,6 +46,7 @@ public class LeaveServImpl implements LeaveServ{
 
         Leave leaveRequest = new Leave();
         Date sent_time = new Date().currenDate();
+        leaveRequest.setCourseCode(dto.getCourseCode());
         leaveRequest.setSentTime(sent_time);
         leaveRequest.setRequestType(dto.getRequestType());
         leaveRequest.setDescription(dto.getDescription());

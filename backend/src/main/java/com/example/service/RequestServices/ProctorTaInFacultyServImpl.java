@@ -48,7 +48,7 @@ public class ProctorTaInFacultyServImpl implements ProctorTaInFacultyServ{
         facReq.setExam(depReq.getExam());
         facReq.setRequiredTas(depReq.getRequiredTas());
         facReq.setTasLeft(depReq.getTasLeft());
-
+        facReq.setCourseCode(depReq.getCourseCode());
         facRepo.save(facReq);   // persists & assigns ID
 
         depRepo.save(depReq);

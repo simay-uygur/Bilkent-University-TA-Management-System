@@ -63,6 +63,7 @@ public class SwapServImpl implements SwapServ{
         req.setSentTime(new Date().currenDate());
         req.setSender(sender);
         req.setReceiver(receiver);
+        req.setCourseCode(dto.getCourseCode());
         //req.setExam(exam);
         log.info("Swap Request Creation","TA with id: " + senderId +" wants to swap proctoring with the another TA with id: " + dto.getReceiverId());
         swapRepo.saveAndFlush(req);
