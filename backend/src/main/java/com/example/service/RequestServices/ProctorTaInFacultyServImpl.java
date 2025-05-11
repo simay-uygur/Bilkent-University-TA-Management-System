@@ -1,5 +1,6 @@
 package com.example.service.RequestServices;
 
+import com.example.entity.General.Date;
 import org.springframework.stereotype.Service;
 
 import com.example.entity.Actors.DeanOffice;
@@ -15,6 +16,8 @@ import com.example.service.LogService;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+
+import java.time.LocalDateTime;
 
 @Service
 @RequiredArgsConstructor
@@ -48,10 +51,23 @@ public class ProctorTaInFacultyServImpl implements ProctorTaInFacultyServ{
         facReq.setExam(depReq.getExam());
         facReq.setRequiredTas(depReq.getRequiredTas());
         facReq.setTasLeft(depReq.getTasLeft());
+        facReq.setExam( depReq.getExam() );
+        facReq.setDescription( depReq.getDescription());
+        LocalDateTime now = LocalDateTime.now();
+        Date time = new Date();
+        time.setYear(now.getYear());
+        time.setMonth(now.getMonthValue());
+        time.setDay(now.getDayOfMonth());
+        time.setHour(now.getHour());
+        time.setMinute(now.getMinute());
+        facReq.setSentTime(time);
+        //facReq.setApproved(false);
+
+
 
         facRepo.save(facReq);   // persists & assigns ID
 
-        depRepo.save(depReq);
+        depRepo.delete(depReq); // delete from the department
         log.info("Proctor Ta in Department Request with id: "+depReqId+" is Transferred to the Faculty", "");
         return toDto(facReq);
     }

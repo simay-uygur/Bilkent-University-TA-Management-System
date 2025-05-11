@@ -5,6 +5,8 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
+import com.example.entity.Requests.*;
+import com.example.service.RequestServices.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;            
 import org.springframework.http.ResponseEntity;
@@ -23,16 +25,6 @@ import com.example.dto.RequestDto;
 import com.example.dto.SwapOptionDto;
 import com.example.dto.TAAssignmentRequest;
 import com.example.entity.Actors.Instructor;
-import com.example.entity.Requests.LeaveDTO;
-import com.example.entity.Requests.PreferTasToCourseDto;
-import com.example.entity.Requests.ProctorTaFromFacultiesDto;
-import com.example.entity.Requests.ProctorTaInDepartmentDto;
-import com.example.entity.Requests.Request;
-import com.example.entity.Requests.SwapDto;
-import com.example.entity.Requests.TransferCandidateDto;
-import com.example.entity.Requests.TransferProctoringDto;
-import com.example.entity.Requests.WorkLoad;
-import com.example.entity.Requests.WorkLoadDto;
 import com.example.exception.UserNotFoundExc;
 import com.example.mapper.RequestMapper;
 import com.example.mapper.Requests.PreferTasToCourseMapper;
@@ -44,13 +36,6 @@ import com.example.repo.RequestRepos.SwapRepo;
 import com.example.repo.RequestRepos.TransferProctoringRepo;
 import com.example.repo.RequestRepos.WorkLoadRepo;
 import com.example.service.RequestServ;
-import com.example.service.RequestServices.LeaveServ;
-import com.example.service.RequestServices.PreferTasToCourseServ;
-import com.example.service.RequestServices.ProctorTaFromFacultiesServ;
-import com.example.service.RequestServices.ProctorTaInDepartmentServ;
-import com.example.service.RequestServices.SwapServ;
-import com.example.service.RequestServices.TransferProctoringServ;
-import com.example.service.RequestServices.WorkLoadServ;
 
 import lombok.RequiredArgsConstructor;
 
@@ -76,13 +61,11 @@ public class RequestController {
     private final WorkLoadRepo workLoadRepo;
     private final PreferTasToCourseMapper preferTasToCourseMapper;
     private final PreferTasToCourseServ preferTasToCourseServ;
-
     private final RequestServ reqServ;
-
     private final InstructorRepo insRepo;
     private final RequestMapper requestMapper;
-
     private final PreferTasToCourseServ prefService;
+    private final ProctorTaInFacultyServ proctorServ;
 
     // Get all requests sent to a department
     @GetMapping("/department/{depName}/preferTas")
@@ -106,7 +89,7 @@ public class RequestController {
     @PostMapping(
         path = "/instructor/{instrId}/section/{sectionCode}/preferTas"
     )
-    public ResponseEntity<Void> createReferTasRequest(
+    public ResponseEntity<Void> createPreferTasRequest(
             @RequestBody TAAssignmentRequest dto,
             @PathVariable Long instrId,
             @PathVariable String sectionCode) {
@@ -310,7 +293,18 @@ public class RequestController {
           }
       });
     }
-    
+
+
+    //to try the
+    @PostMapping("/proctor-ta-in-department/{depReqId}/escalate")
+    public ResponseEntity<ProctorTaInFacultyDto> escalate(
+            @PathVariable Long depReqId
+    ) {
+        ProctorTaInFacultyDto dto = proctorServ.escalateToFaculty(depReqId);
+        return ResponseEntity
+                .status(HttpStatus.CREATED)  // or .ok() if you prefer 200
+                .body(dto);
+    }
     
 }
 /*
