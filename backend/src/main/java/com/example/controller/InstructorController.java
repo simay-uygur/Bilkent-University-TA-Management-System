@@ -103,9 +103,6 @@ public class InstructorController {
     }
 
 
-    /**
-     * 2️⃣ Export that specific exam as PDF
-     */
     @GetMapping("/{instructorId}/courses/{courseCode}/exams/{examId}/export/pdf")
     public ResponseEntity<byte[]> exportCourseExamPdf(
             @PathVariable Integer instructorId,

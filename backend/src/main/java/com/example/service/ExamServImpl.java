@@ -313,15 +313,15 @@ public class ExamServImpl implements ExamServ{
                 table.addCell("ID");
                 table.addCell("Name");
                 table.addCell("Surname");
-                table.addCell("TA?");
+                //table.addCell("TA?");
 
                 for (StudentMiniDto s : roster) {
                     table.addCell(String.valueOf(s.getId()));
                     table.addCell(s.getName());
                     table.addCell(s.getSurname());
-                    table.addCell(
-                            Boolean.TRUE.equals(s.getIsTa()) ? "Yes" : "No"
-                    );
+//                    table.addCell(
+//                            Boolean.TRUE.equals(s.getIsTa()) ? "Yes" : "No"
+//                    );
                 }
 
                 document.add(table);
