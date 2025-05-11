@@ -1,389 +1,167 @@
+/* src/pages/AssignProctorTA.module.css */
+
 .pageWrapper {
-  max-width: 1200px;
+  max-width: 1000px;
   margin: 0 auto;
   padding: 20px;
-  display: flex;
-  flex-direction: column;
-  gap: 24px;
+  font-family: sans-serif;
 }
 
-.header {
+.headerRow {
   display: flex;
   align-items: center;
-  gap: 20px;
-  padding-bottom: 16px;
-  border-bottom: 1px solid #eaeaea;
+  margin-bottom: 20px;
 }
 
 .title {
+  margin-left: 10px;
   font-size: 24px;
-  font-weight: 600;
-  color: #333;
-  margin: 0;
+  font-weight: bold;
   flex-grow: 1;
 }
 
-.stats {
-  display: flex;
-  gap: 16px;
-}
-
-.stats span {
-  padding: 6px 12px;
-  background: #f5f7fa;
-  border-radius: 20px;
-  font-size: 14px;
-  font-weight: 500;
-  color: #4a5568;
-}
-
-.search {
-  display: flex;
-  max-width: 600px;
-}
-
-.search input {
-  width: 100%;
-  padding: 12px 16px;
-  border: 1px solid #e2e8f0;
+.examInfoContainer {
+  background: #fafafa;
+  padding: 15px;
   border-radius: 8px;
-  font-size: 16px;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
-  transition: all 0.2s ease;
-}
-
-.search input:focus {
-  outline: none;
-  border-color: #3182ce;
-  box-shadow: 0 0 0 3px rgba(49, 130, 206, 0.1);
-}
-
-.table {
-  width: 100%;
-  border-collapse: collapse;
-  border-radius: 8px;
-  overflow: hidden;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-  background: white;
-}
-
-.table th {
-  background: #edf2f7;
-  color: #4a5568;
-  font-weight: 600;
-  text-align: left;
-  padding: 14px 20px;
-  border-bottom: 1px solid #e2e8f0;
-}
-
-.taRow {
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.taRow:hover {
-  background-color: #f7fafc;
-}
-
-.taRow td {
-  padding: 14px 20px;
-  border-bottom: 1px solid #e2e8f0;
-  color: #2d3748;
-}
-
-.selectedRow, .selectedRow:hover {
-  background-color: #ebf8ff;
-}
-
-.selectedRow td {
-  color: #2b6cb0;
-}
-
-.selectedSection {
-  background: white;
-  border-radius: 8px;
-  padding: 20px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-}
-
-.selectedSection h2 {
-  margin-top: 0;
-  margin-bottom: 16px;
-  font-size: 18px;
-  color: #2d3748;
-}
-
-.selectedList {
   display: flex;
   flex-wrap: wrap;
-  gap: 10px;
+  gap: 10px 40px;
+  margin-bottom: 20px;
+}
+
+.examInfoContainer p {
+  margin: 5px 0;
+}
+
+.mainContent {
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.availableTAsContainer,
+.selectedTAsContainer {
+  flex: 1;
+  min-width: 300px;
+}
+
+.availableTAsContainer h2,
+.selectedTAsContainer h2 {
+  margin-top: 0;
+}
+
+.taList {
   list-style: none;
   padding: 0;
   margin: 0;
+  max-height: 400px;
+  overflow-y: auto;
 }
 
-.selectedList li {
-  background: #ebf8ff;
-  border: 1px solid #bee3f8;
-  border-radius: 20px;
-  padding: 6px 12px;
+.taItem {
   display: flex;
+  justify-content: space-between;
   align-items: center;
-  font-size: 14px;
+  padding: 10px;
+  border-bottom: 1px solid #ddd;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: background-color 0.2s;
 }
 
-.selectedList li:hover {
-  background: #bee3f8;
+.taItem:hover {
+  background-color: #f5f5f5;
 }
 
-.removeIcon {
-  margin-left: 8px;
-  font-weight: bold;
-  font-size: 16px;
+/* pre-selected or manually selected */
+.selected {
+  background-color: #e0f7fa;
 }
 
-.noAssigned, .noResults {
-  color: #718096;
+/* warning highlight for adjacent-exam TAs */
+.warning {
+  border-left: 4px solid #ffa000;
+}
+
+.taName {
+  font-weight: 500;
+}
+
+.taInfo {
+  display: flex;
+  gap: 10px;
+  font-size: 14px;
+  align-items: center;
+}
+
+.noTAs {
   font-style: italic;
   text-align: center;
-  padding: 20px;
+  color: #666;
+  padding: 10px 0;
 }
 
-.actions {
+.buttonContainer {
   display: flex;
   justify-content: flex-end;
+  gap: 10px;
+  margin-top: 20px;
 }
 
-.info {
-  background: #f8fafc;
-  border-radius: 8px;
-  padding: 16px 20px;
-  font-size: 14px;
-  line-height: 1.6;
-  color: #4a5568;
+.cancelButton {
+  background: #ccc;
+  color: #333;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
 }
 
-.notFound, .errorMessage {
+.cancelButton:hover {
+  background: #bbb;
+}
+
+.saveButton {
+  background: #28a745;
+  color: #fff;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.saveButton:disabled {
+  background: #94d3a2;
+  cursor: not-allowed;
+}
+
+.confirmMessage {
+  margin-top: 15px;
+  padding: 10px;
+  background: #e6ffed;
+  border: 1px solid #a3e9a4;
+  color: #255625;
+  border-radius: 6px;
+}
+
+.errorContainer {
+  padding: 20px;
+  background: #ffe6e6;
+  border: 1px solid #ffb3b3;
+  border-radius: 6px;
   text-align: center;
-  font-size: 18px;
-  color: #e53e3e;
-  margin: 40px 0;
 }
 
 .retryButton {
-  background: #4299e1;
-  color: white;
+  margin: 10px 5px;
+  padding: 8px 16px;
+  background: #007bff;
+  color: #fff;
   border: none;
   border-radius: 6px;
-  padding: 10px 20px;
-  font-size: 16px;
   cursor: pointer;
-  transition: background-color 0.2s;
-  display: block;
-  margin: 0 auto;
 }
 
 .retryButton:hover {
-  background: #3182ce;
+  background: #0069d9;
 }
-
-@media (max-width: 768px) {
-  .header {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 12px;
-  }
-  
-  .stats {
-    align-self: stretch;
-    justify-content: space-between;
-  }
-  
-  .table {
-    display: block;
-    overflow-x: auto;
-    white-space: nowrap;
-  }
-  
-  .actions {
-    justify-content: center;
-  }
-}
-
-
-
-/*
-
-.pageWrapper {
-  display: flex;
-  flex-direction: column;
-  min-height: 100vh;
-  background: #f0faff;
-}
-
-.notFound {
-  text-align: center;
-  margin-top: 2rem;
-  color: #dc2626;
-}
-
-.header {
-  display: flex;
-  align-items: center;
-  padding: 16px;
-  gap: 16px;
-}
-
-.title {
-  flex: 1;
-  font-size: 1.75rem;
-  color: #150063;
-  text-align: center;
-}
-
-.stats {
-  display: flex;
-  gap: 12px;
-  font-weight: 500;
-  font-size: 1.1rem;
-}
-
-.filters {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 16px;
-  justify-content: center;
-  margin-bottom: 16px;
-}
-
-.filters label {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.maxInput {
-  width: 60px;
-  margin-left: 4px;
-  padding: 4px;
-}
-
-.search {
-  display: flex;
-  justify-content: center;
-  margin-bottom: 16px;
-}
-
-.search input {
-  padding: 6px 12px;
-  width: 200px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-}
-
-.table {
-  width: 90%;
-  max-width: 800px;
-  margin: 0 auto;
-  border: 1px solid #000;
-  background-color: #c1ffd6;
-  border-collapse: collapse;
-}
-
-
-.table tbody tr {
-  cursor: pointer;
-  transition: background-color 0.2s;
-}
-.table tbody tr:hover {
-  background-color: rgba(0, 0, 0, 0.05);
-}
-
-.table th,
-.table td {
-  border: 1px solid #e2e8f0;
-  padding: 8px 12px;
-  text-align: center;
-}
-
-.table th {
-  background: #c3d1fc;
-}
-
-.selectedRow {
-  background: rgba(37, 99, 235, 0.1);
-}
-
-.selectedSection {
-  background: #f9fdbb;
-  margin: 16px auto;
-  padding: 12px;
-  max-width: 800px;
-  border-radius: 4px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-}
-
-.selectedList {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-  display: flex;
-  gap: 8px;
-  flex-wrap: wrap;
-}
-
-.selectedList li {
-  background: #e0e7ff;
-  padding: 4px 8px;
-  border-radius: 4px;
-  cursor: pointer;
-  transition: background 0.2s;
-}
-
-.selectedList li:hover {
-  background: #c7d2fe;
-}
-
-.actions {
-  display: flex;
-  justify-content: center;
-  gap: 16px;
-  margin: 24px 0;
-}
-
-.autoButton {
-  padding: 10px 20px;
-  background: #f59e0b;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  transition: background 0.2s;
-}
-
-.autoButton:hover {
-  background: #d97706;
-}
-
-.confirmButton {
-  padding: 10px 20px;
-  background: #2563eb;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  transition: background 0.2s;
-}
-
-.confirmButton:hover {
-  background: #1e40af;
-}
-
-.info{
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  font-size: 1.5rem;
-} */

@@ -58,11 +58,19 @@ public class ProctorTaInDepartmentServImpl implements ProctorTaInDepartmentServ{
         req.setSender(sender);
         req.setReceiver(receiver);
         req.setExam(exam);
-        req.setCourseCode(dto.getCourseCode());
+        req.setCourseCode(dto.getCourseCode() != null ? 
+                     dto.getCourseCode() : 
+                     receiver.getName() + "-464"); // Default course code
+    
         req.setRequiredTas(dto.getRequiredTas());
         req.setTasLeft(dto.getTasLeft());
         notServ.notifyCreation(req);
-        proctorTaInFacultyRepo.save(req);
+         log.info("Creating ProctorTaInDepartment Request", 
+             "Creating request with courseCode: " + req.getCourseCode() + 
+             ", examId: " + dto.getExamId() + 
+             ", requiredTAs: " + dto.getRequiredTas());
+
+    proctorTaInFacultyRepo.save(req);
     }
 
     @Override

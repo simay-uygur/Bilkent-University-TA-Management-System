@@ -14,4 +14,5 @@ public class ProctorTaInDepartmentDto extends RequestDto{
     private int examId;
     private int requiredTas;
     private int tasLeft;
+    private String courseCode;
 }

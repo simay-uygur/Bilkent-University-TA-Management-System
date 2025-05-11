@@ -16,6 +16,7 @@ interface DateInfo {
   hour: number;
   minute: number;
 }
+
 interface CourseInfo {
   courseId: number;
   courseCode: string;
@@ -25,7 +26,6 @@ interface CourseInfo {
   prereqs: string[];
 }
 
-
 interface ProctorTaInDepartmentRequest {
   requestId: number;
   requestType: string;
@@ -33,6 +33,7 @@ interface ProctorTaInDepartmentRequest {
   senderName: string | null;
   receiverName: string;
   sentTime: DateInfo;
+  courseCode: string | null;
   instrId: number;
   examName: string;
   examId: number;
@@ -50,6 +51,40 @@ interface AvailableTA {
   name: string;
   surname: string;
   academicLevel: 'BS' | 'MS' | 'PHD';
+}
+
+interface ExamDetailResponse {
+  examId: number;
+  duration: {
+    start: {
+      day: number;
+      month: number;
+      year: number;
+      hour: number;
+      minute: number;
+    };
+    finish: {
+      day: number;
+      month: number;
+      year: number;
+      hour: number;
+      minute: number;
+    };
+    ongoing: boolean;
+  };
+  courseCode: string;
+  type: string;
+  examRooms: string[];
+  requiredTas: number;
+  workload: number;
+}
+
+// Define the type for course detail results
+interface CourseDetailResult {
+  requestId: number;
+  courseCode: string;
+  courseName: string | null;
+  courseAcademicStatus: string | null;
 }
 
 // Define the TA type as used in the AssignProctorRow component
@@ -78,6 +113,7 @@ export interface Exam {
   potentialTAs: TA[];
   requestId?: number; // Adding this to link back to the original request
   examId?: number;    // Adding this to fetch available TAs
+  examRooms?: string[]; // Add exam rooms from the detailed response
 }
 
 const AssignProctor: React.FC = () => {
@@ -92,26 +128,24 @@ const AssignProctor: React.FC = () => {
   // Confirmation states
   const [confirmId, setConfirmId] = useState<string|null>(null);
   const [confirmMsg, setConfirmMsg] = useState<string|null>(null);
+  
   // Demand TA states
   const [demandId, setDemandId] = useState<string|null>(null);
   const [demandError, setDemandError] = useState<string|null>(null);
   const [demandConfirmMsg, setDemandConfirmMsg] = useState<string|null>(null);
-  const [courseInfo, setCourseInfo] = useState<Record<string, CourseInfo>>({});
-  // Fetch proctoring requests from the API
-  // Add this interface for course data
-interface CourseInfo {
-  courseId: number;
-  courseCode: string;
-  courseName: string;
-  courseAcademicStatus: string;
-  department: string;
-  prereqs: string[];
-}
+  
+  // Delete request states
+  const [deleteId, setDeleteId] = useState<string|null>(null);
+  const [deleteError, setDeleteError] = useState<string|null>(null);
+  const [deleteConfirmMsg, setDeleteConfirmMsg] = useState<string|null>(null);
+
   // Fetch proctoring requests from the API
   useEffect(() => {
     const fetchRequests = async () => {
       try {
         setLoading(true);
+        
+        // Get all department requests
         const response = await axios.get<ProctorTaInDepartmentRequest[]>(
           `/api/department/${departmentCode}/receivedAll`
         );
@@ -121,20 +155,28 @@ interface CourseInfo {
           req => req.requestType === 'ProctorTaInDepartment'
         );
         
-        // Create a set of unique course codes
-        const courseCodes = new Set<string>();
+        console.log('Filtered proctoring requests:', proctoringRequests);
         
-        // This is a temporary array to store exams before we get the course names
+        if (proctoringRequests.length === 0) {
+          setExams([]);
+          setLoading(false);
+          return;
+        }
+        
+        // This is a temporary array to store exams before we get more details
         const tempExams: Exam[] = [];
         
-        // Array to store promises for fetching available TAs
+        // Arrays to store promises for fetching available TAs and exam details
         const taPromises: Promise<{examId: number, tas: AvailableTA[]}>[] = [];
+        const examDetailPromises: Promise<{requestId: number, examId: number, details: ExamDetailResponse | null}>[] = [];
+        const courseDetailPromises: Promise<CourseDetailResult>[] = [];
         
         // For each proctoring request, process it
-        proctoringRequests.forEach(req => {
-          // Extract the course code from the receiverName/department or use default
-          const courseCode = `${req.receiverName || 'CS'}-464`; // Default to CS-464 if missing
-          courseCodes.add(courseCode);
+        for(const req of proctoringRequests) {
+          // Use the courseCode directly from the request if available, otherwise use fallback
+          const courseCode = req.courseCode || `${req.receiverName || 'CS'}-464`;
+          
+          console.log(`Processing request ${req.requestId} with courseCode: ${courseCode}`);
           
           // Add promise to fetch available TAs
           const taPromise = axios.get<AvailableTA[]>(
@@ -154,10 +196,52 @@ interface CourseInfo {
           
           taPromises.push(taPromise);
           
-          // Format date string
+          // Add promise to fetch exam details
+          const examDetailPromise = axios.get<ExamDetailResponse>(
+            `/api/instructors/${courseCode}/exams/${req.examId}`
+          )
+          .then(res => ({
+            requestId: req.requestId,
+            examId: req.examId,
+            details: res.data
+          }))
+          .catch(err => {
+            console.error(`Failed to fetch exam details for ${req.examId}:`, err);
+            return {
+              requestId: req.requestId,
+              examId: req.examId,
+              details: null
+            };
+          });
+          
+          examDetailPromises.push(examDetailPromise);
+          
+          // Add promise to fetch course details
+          const courseDetailPromise = axios.get<{ courseName: string; courseAcademicStatus: string; }>(
+            `/api/course/${courseCode}`
+          )
+          .then(res => ({
+            requestId: req.requestId,
+            courseCode,
+            courseName: res.data.courseName,
+            courseAcademicStatus: res.data.courseAcademicStatus
+          }))
+          .catch(err => {
+            console.error(`Failed to fetch course details for ${courseCode}:`, err);
+            return {
+              requestId: req.requestId,
+              courseCode,
+              courseName: null,
+              courseAcademicStatus: null
+            };
+          });
+          
+          courseDetailPromises.push(courseDetailPromise);
+          
+          // Format date string from request for fallback
           const date = `${req.sentTime.year}-${String(req.sentTime.month).padStart(2, '0')}-${String(req.sentTime.day).padStart(2, '0')}`;
           
-          // Add to temporary exams array
+          // Add to temporary exams array with placeholder data
           tempExams.push({
             id: `e${req.requestId}`, // Generate a unique ID
             requestId: req.requestId, // Store original request ID
@@ -168,107 +252,108 @@ interface CourseInfo {
             examType: req.examName,
             date: date,
             startTime: `${String(req.sentTime.hour).padStart(2, '0')}:${String(req.sentTime.minute).padStart(2, '0')}`,
-            endTime: `${String(req.sentTime.hour + 2).padStart(2, '0')}:${String(req.sentTime.minute).padStart(2, '0')}`, // Assuming 2-hour exams
+            endTime: `${String(req.sentTime.hour + 2).padStart(2, '0')}:${String(req.sentTime.minute).padStart(2, '0')}`,
             needed: req.requiredTas,
             tasLeft: req.tasLeft,
-            assignedTAs: [], // No assigned TAs initially
-            potentialTAs: [] // Will be populated after we get the TA data
+            assignedTAs: [],
+            potentialTAs: []
           });
-        });
-        
-        // Create promises for fetching course info
-       // Update the part that creates promises for fetching course info:
-// Update the part that creates promises for fetching course info:
-const coursePromises = Array.from(courseCodes).map(courseCode => 
-  axios.get<CourseInfo>(`/api/course/${courseCode}`, {
-    // Configure axios to handle 302 response codes
-    validateStatus: function (status) {
-      return (status >= 200 && status < 300) || status === 302; // Accept 2xx and 302 status codes
-    }
-  })
-    .then(res => {
-      // If we got a 302 response, don't use fallback data
-      if (res.status === 302) {
-        console.log(`Received 302 for course ${courseCode}, using original data from the response`);
-        
-        // Try to extract data from the response if available
-        if (res.data) {
-          return {
-            courseCode,
-            courseInfo: res.data
-          };
         }
         
-        // If no data in response, return null to indicate we should use the exam's original data
-        return {
-          courseCode,
-          courseInfo: null
-        };
-      }
-      
-      // Normal success response
-      return {
-        courseCode,
-        courseInfo: res.data
-      };
-    })
-    .catch(err => {
-      // This will only trigger for network errors or status codes not in validateStatus
-      console.error(`Failed to fetch course info for ${courseCode}:`, err);
-      return {
-        courseCode,
-        courseInfo: null // Return null instead of fallback data
-      };
-    })
-);
-        
-        // Wait for all TA and course info promises to resolve
-        const [tasResults, courseResults] = await Promise.all([
+        // Wait for all promises to resolve
+        const [tasResults, courseDetailResults, examDetailResults] = await Promise.all([
           Promise.all(taPromises),
-          Promise.all(coursePromises)
+          Promise.all(courseDetailPromises),
+          Promise.all(examDetailPromises)
         ]);
         
         // Create maps for easy lookup
         const tasByExamId: Record<number, AvailableTA[]> = {};
         tasResults.forEach(result => {
-          tasByExamId[result.examId] = result.tas;
+          // Use Number() to ensure the index is a number
+          tasByExamId[Number(result.examId)] = result.tas;
         });
         
-        const courseInfoMap: Record<string, CourseInfo | null> = {};
-courseResults.forEach(result => {
-  courseInfoMap[result.courseCode] = result.courseInfo;
-});
+        // Create mapping from requestId to course details
+        const courseDetailsById: Record<number, CourseDetailResult> = {};
+        courseDetailResults.forEach(result => {
+          courseDetailsById[result.requestId] = result;
+        });
         
-        setCourseInfo(courseInfoMap as Record<string, CourseInfo>);
-
-// Now update the exams with course names and TAs
-const examsList: Exam[] = tempExams.map(exam => {
-  // Get course info - might be null if we got a 302
-  const course = courseInfoMap[exam.courseId];
-  
-  // Get available TAs for this exam
-  const availableTAs = tasByExamId[exam.examId || 0] || [];
-  
-  // Transform available TAs to the format expected by AssignProctorRow
-  const potentialTAs: TA[] = availableTAs.map(ta => ({
-    id: ta.taId,
-    name: `${ta.name} ${ta.surname}`,
-    level: ta.academicLevel,
-    workload: ta.workload,
-    hasAdjacentExam: ta.hasAdjacentExam,
-    wantedState: 'None' // Default state
-  }));
-  
+        const examDetailsMap: Record<number, ExamDetailResponse> = {};
+        examDetailResults.forEach(result => {
+          if (result.details) {
+            // Use Number() to ensure the index is a number
+            examDetailsMap[Number(result.examId)] = result.details;
+          }
+        });
+        
+        // Format the detailed exams data
+        const examsList: Exam[] = tempExams.map(exam => {
+          // Get course details
+          const courseDetail = courseDetailsById[exam.requestId || 0];
           
-            return {
-    ...exam,
-    // Only update courseName if we have valid course data
-    courseName: course ? course.courseName : exam.courseName,
-    // Only update level if we have valid course data
-    level: course && course.courseAcademicStatus ? course.courseAcademicStatus : exam.level,
-    potentialTAs: potentialTAs
-  };
-});
+          // Get exam details from API response
+          const examDetail = examDetailsMap[exam.examId || 0];
+          
+          // Format date and times from exam details if available
+          let date = exam.date;
+          let startTime = exam.startTime;
+          let endTime = exam.endTime;
+          let examRooms: string[] = [];
+          
+          if (examDetail && examDetail.duration) {
+            // Use the data from the exam details API
+            const start = examDetail.duration.start;
+            const finish = examDetail.duration.finish;
+            
+            date = `${start.year}-${String(start.month).padStart(2, '0')}-${String(start.day).padStart(2, '0')}`;
+            startTime = `${String(start.hour).padStart(2, '0')}:${String(start.minute).padStart(2, '0')}`;
+            endTime = `${String(finish.hour).padStart(2, '0')}:${String(finish.minute).padStart(2, '0')}`;
+            
+            // Store exam rooms
+            examRooms = examDetail.examRooms || [];
+          }
+          
+          // Get available TAs for this exam
+          const availableTAs = tasByExamId[exam.examId || 0] || [];
+          
+          // Transform available TAs
+          const potentialTAs: TA[] = availableTAs.map(ta => ({
+            id: ta.taId,
+            name: `${ta.name} ${ta.surname}`,
+            level: ta.academicLevel,
+            workload: ta.workload,
+            hasAdjacentExam: ta.hasAdjacentExam,
+            wantedState: 'None'
+          }));
+          
+          // Determine the best course name to use
+          let courseName = 'Unknown Course';
+          if (courseDetail && courseDetail.courseName) {
+            courseName = courseDetail.courseName;
+          } else if (examDetail && examDetail.courseCode) {
+            courseName = `Course ${examDetail.courseCode}`;
+          }
+          
+          // Determine the academic level
+          let level = 'BS';
+          if (courseDetail && courseDetail.courseAcademicStatus) {
+            level = courseDetail.courseAcademicStatus;
+          }
+          
+          return {
+            ...exam,
+            courseName: courseName,
+            level: level,
+            date: date,
+            startTime: startTime,
+            endTime: endTime,
+            examType: examDetail?.type || exam.examType,
+            examRooms: examRooms,
+            potentialTAs: potentialTAs
+          };
+        });
         
         setExams(examsList);
       } catch (err) {
@@ -282,7 +367,7 @@ const examsList: Exam[] = tempExams.map(exam => {
     fetchRequests();
   }, [departmentCode]);
   
-  // Fix the handlers to ensure they work correctly
+  // Handler for auto-assign button
   const handleAuto = (id: string) => {
     // Get the exam by ID
     const exam = exams.find(e => e.id === id);
@@ -291,10 +376,18 @@ const examsList: Exam[] = tempExams.map(exam => {
       return;
     }
     
-    // Navigate to the assignment details page with exam and request IDs
-    navigate(`/department-office/assign-proctor/${exam.examId}/${exam.requestId}`);
+    // Make sure we have both IDs before navigating
+    if (exam.examId === undefined || exam.requestId === undefined) {
+      console.error('Missing examId or requestId', exam);
+      setDemandError('Cannot assign TAs: missing exam information');
+      return;
+    }
+    
+    // Navigate to the assignment page with both IDs in the URL
+    navigate(`/department-office/assign-proctor/${exam.courseId}/${exam.examId}/${exam.requestId}`);
   };
 
+  // Handler for finish button
   const handleFinish = (id: string) => {
     const exam = exams.find(e => e.id === id);
     if (!exam) {
@@ -310,6 +403,7 @@ const examsList: Exam[] = tempExams.map(exam => {
     );
   };
 
+  // Handler for finish confirmation
   const handleConfirmFinish = async () => {
     if (!confirmId) return;
     
@@ -336,6 +430,7 @@ const examsList: Exam[] = tempExams.map(exam => {
     }
   };
 
+  // Handler for demand more TAs button
   const handleDemand = (id: string) => {
     const exam = exams.find(e => e.id === id);
     if (!exam) {
@@ -343,6 +438,7 @@ const examsList: Exam[] = tempExams.map(exam => {
       return;
     }
     
+    // Check if more TAs are actually needed
     if (exam.tasLeft === 0) {
       setDemandError('Cannot request more TAs: no additional TAs are needed.');
       return;
@@ -354,6 +450,7 @@ const examsList: Exam[] = tempExams.map(exam => {
     );
   };
 
+  // Handler for demand confirmation
   const handleConfirmDemand = async () => {
     if (!demandId) return;
     
@@ -380,12 +477,63 @@ const examsList: Exam[] = tempExams.map(exam => {
     }
   };
 
-// Rest of your component remains the same...
+  // Handler for delete request button
+  const handleDelete = (id: string) => {
+    const exam = exams.find(e => e.id === id);
+    if (!exam) {
+      console.error(`Exam with ID ${id} not found`);
+      return;
+    }
+    
+    setDeleteId(id);
+    setDeleteConfirmMsg(
+      `Are you sure you want to delete the proctoring request for ${exam.courseName} ${exam.examType}? This action cannot be undone.`
+    );
+  };
 
+  // Handler for delete confirmation
+  // Handler for delete confirmation
+const handleConfirmDelete = async () => {
+  if (!deleteId) return;
+  
+  const exam = exams.find(e => e.id === deleteId);
+  if (!exam || !exam.requestId) {
+    console.error(`Exam with ID ${deleteId} not found or missing requestId`);
+    return;
+  }
+  
+  try {
+    // Get the user ID from localStorage
+    const approverId = localStorage.getItem('userId');
+    
+    if (!approverId) {
+      setDeleteError('User not authenticated. Please log in again.');
+      return;
+    }
+    
+    console.log(`Rejecting request ${exam.requestId} by approver ${approverId}`);
+    
+    // API call to reject the request using the specified endpoint
+    await axios.put(`/api/ta/${approverId}/departmentproctor/${exam.requestId}/reject`);
+    
+    // Remove the exam from the list on success
+    setExams(prev => prev.filter(e => e.id !== deleteId));
+    
+    // Clear states
+    setDeleteId(null);
+    setDeleteConfirmMsg(null);
+  } catch (err) {
+    console.error('Failed to reject request:', err);
+    setDeleteError('Failed to reject request. Please try again.');
+  }
+};
+
+  // Loading state
   if (loading) {
     return <LoadingPage />;
   }
 
+  // Error state
   if (error) {
     return (
       <div className={styles.errorContainer}>
@@ -401,6 +549,7 @@ const examsList: Exam[] = tempExams.map(exam => {
     );
   }
 
+  // Render the component
   return (
     <div className={styles.pageWrapper}>
       <div className={styles.headerRow}>
@@ -437,6 +586,7 @@ const examsList: Exam[] = tempExams.map(exam => {
                   onAuto={handleAuto}
                   onFinish={handleFinish}
                   onDemand={handleDemand}
+                  onDelete={handleDelete}
                 />
               ))}
             </tbody>
@@ -444,11 +594,15 @@ const examsList: Exam[] = tempExams.map(exam => {
         </div>
       )}
 
+      {/* Confirmation dialogs */}
       {confirmMsg && (
         <ConPop 
           message={confirmMsg} 
           onConfirm={handleConfirmFinish}
-          onCancel={() => setConfirmMsg(null)} 
+          onCancel={() => {
+            setConfirmMsg(null);
+            setConfirmId(null);
+          }} 
         />
       )}
       
@@ -463,7 +617,29 @@ const examsList: Exam[] = tempExams.map(exam => {
         <ConPop 
           message={demandConfirmMsg}
           onConfirm={handleConfirmDemand}
-          onCancel={() => setDemandConfirmMsg(null)} 
+          onCancel={() => {
+            setDemandConfirmMsg(null);
+            setDemandId(null);
+          }} 
+        />
+      )}
+      
+      {/* Delete confirmation dialog */}
+      {deleteConfirmMsg && (
+        <ConPop 
+          message={deleteConfirmMsg}
+          onConfirm={handleConfirmDelete}
+          onCancel={() => {
+            setDeleteConfirmMsg(null);
+            setDeleteId(null);
+          }} 
+        />
+      )}
+      
+      {deleteError && (
+        <ErrPopUp 
+          message={deleteError} 
+          onConfirm={() => setDeleteError(null)} 
         />
       )}
     </div>
@@ -471,182 +647,3 @@ const examsList: Exam[] = tempExams.map(exam => {
 };
 
 export default AssignProctor;
-/* // src/pages/AssignProctor/AssignProctor.tsx
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import AssignProctorRow, { Exam } from './AssignProctorRow';
-import ConPop from '../../components/PopUp/ConPop';
-import ErrPopUp from '../../components/PopUp/ErrPopUp';
-import styles from './AssignProctor.module.css';
-import BackBut from '../../components/Buttons/BackBut';
-
-const sampleExams: Exam[] = [
-  {
-    id: 'e1',
-    courseName: 'Algorithms',
-    courseId: 'CS225',
-    level: 'BS',
-    examType: 'Midterm',
-    date: '2025-05-10',
-    startTime: '09:00',
-    endTime: '11:00',
-    needed: 3,
-    tasLeft: 1,
-    assignedTAs: [
-      { id: 'ta1', name: 'Ali Veli',   level: 'BS',  workload: 2, hasAdjacentExam: false, wantedState: 'Prefered' },
-      { id: 'ta2', name: 'Ayşe Fatma', level: 'MS',  workload: 4, hasAdjacentExam: true,  wantedState: 'None'     },
-    ],
-    potentialTAs: [
-      { id: 'ta3', name: 'Mehmet Can', level: 'PhD', workload: 1, hasAdjacentExam: false, wantedState: 'Unprefered' },
-      { id: 'ta4', name: 'Jane Doe',    level: 'BS',  workload: 3, hasAdjacentExam: true,  wantedState: 'None'       },
-    ],
-  },
-  {
-    id: 'e2',
-    courseName: 'Data Structures',
-    courseId: 'CS226',
-    level: 'MS',
-    examType: 'Final',
-    date: '2025-06-01',
-    startTime: '13:00',
-    endTime: '15:00',
-    needed: 4,
-    tasLeft: 0,
-    assignedTAs: [
-      { id: 'ta1', name: 'Ali Veli',   level: 'BS',  workload: 2, hasAdjacentExam: false, wantedState: 'None'     },
-      { id: 'ta2', name: 'Ayşe Fatma', level: 'MS',  workload: 4, hasAdjacentExam: true,  wantedState: 'Prefered' },
-      { id: 'ta3', name: 'Mehmet Can', level: 'PhD', workload: 1, hasAdjacentExam: false, wantedState: 'Unprefered' },
-      { id: 'ta4', name: 'John Smith', level: 'BS',  workload: 3, hasAdjacentExam: true,  wantedState: 'None'       },
-    ],
-    potentialTAs: [
-      { id: 'ta5', name: 'Emily Johnson', level: 'PhD', workload: 5, hasAdjacentExam: true, wantedState: 'None' },
-    ],
-  },
-  {
-    id: 'e3',
-    courseName: 'Machine Learning',
-    courseId: 'CS450',
-    level: 'PhD',
-    examType: 'Midterm',
-    date: '2025-05-20',
-    startTime: '10:00',
-    endTime: '12:00',
-    needed: 2,
-    tasLeft: 2,
-    assignedTAs: [],
-    potentialTAs: [
-      { id: 'ta1', name: 'Ali Veli',        level: 'BS',  workload: 2, hasAdjacentExam: false, wantedState: 'Prefered' },
-      { id: 'ta2', name: 'Ayşe Fatma',     level: 'MS',  workload: 4, hasAdjacentExam: true,  wantedState: 'None'     },
-    ],
-  },
-];
-
-const AssignProctor: React.FC = () => {
-  const navigate = useNavigate();
-  const [exams, setExams] = useState<Exam[]>(sampleExams);
-
-  // finish-assignment popups
-  const [confirmId, setConfirmId]     = useState<string|null>(null);
-  const [confirmMsg, setConfirmMsg]   = useState<string|null>(null);
-  // demand-TA popups
-  const [demandId, setDemandId]         = useState<string|null>(null);
-  const [demandError, setDemandError]   = useState<string|null>(null);
-  const [demandConfirmMsg, setDemandConfirmMsg] = useState<string|null>(null);
-
-  const handleAuto = (id: string) => {
-    navigate(`/department-office/assign-proctor/${id}`);
-  };
-
-  const handleFinish = (id: string) => {
-    const exam = exams.find(e => e.id === id);
-    if (!exam) return;
-    setConfirmMsg(
-      exam.tasLeft > 0
-        ? "You didn't fill needed TAs. Are you sure?"
-        : 'Mark this assignment as finished?'
-    );
-    setConfirmId(id);
-  };
-
-  const handleConfirmFinish = () => {
-    if (confirmId) setExams(prev => prev.filter(e => e.id !== confirmId));
-    setConfirmMsg(null);
-    setConfirmId(null);
-  };
-
-  const handleDemand = (id: string) => {
-    const exam = exams.find(e => e.id === id);
-    if (!exam) return;
-    if (exam.tasLeft === 0) {
-      setDemandError('Cannot request more TAs: none left.');
-      return;
-    }
-    setDemandConfirmMsg(
-      "Requesting from the dean’s office will revoke your current authorizations. Proceed?"
-    );
-    setDemandId(id);
-    setDemandError(null);
-  };
-
-  const handleConfirmDemand = () => {
-    if (demandId) setExams(prev => prev.filter(e => e.id !== demandId));
-    setDemandConfirmMsg(null);
-    setDemandId(null);
-    setDemandError(null);
-  };
-
-  return (
-    <div className={styles.pageWrapper}>
-      <div className={styles.headerRow}>
-        <BackBut to="/department-office" />
-        <h1 className={styles.title}>Course of Exams</h1>
-      </div>
-
-      <div className={styles.container}>
-        <table className={styles.table}>
-          <thead className={styles.headings}>
-            <tr>
-              <th>Course Name</th>
-              <th>Course ID</th>
-              <th>Level</th>
-              <th>Exam Type</th>
-              <th>Date</th>
-              <th>Start</th>
-              <th>End</th>
-              <th>Needed</th>
-              <th>TAs Left</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {exams.map(exam => (
-              <AssignProctorRow
-                key={exam.id}
-                exam={exam}
-                onAuto={handleAuto}
-                onFinish={handleFinish}
-                onDemand={handleDemand}
-              />
-            ))}
-          </tbody>
-        </table>
-      </div>
-
-      {confirmMsg && (
-        <ConPop message={confirmMsg} onConfirm={handleConfirmFinish}
-          onCancel={() => setConfirmMsg(null)} />
-      )}
-      {demandError && (
-        <ErrPopUp message={demandError} onConfirm={() => setDemandError(null)} />
-      )}
-      {demandConfirmMsg && (
-        <ConPop message={demandConfirmMsg}
-          onConfirm={handleConfirmDemand}
-          onCancel={() => setDemandConfirmMsg(null)} />
-      )}
-    </div>
-  );
-};
-
-export default AssignProctor;
- */

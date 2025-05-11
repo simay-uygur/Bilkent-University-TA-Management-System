@@ -177,6 +177,7 @@ public class RequestMapper {
         dto.setExamName(e.getExam().getDescription());
         dto.setRequiredTas(e.getRequiredTas());
         dto.setTasLeft(e.getTasLeft());
+        dto.setCourseCode(e.getCourseCode());
         return dto;
     }
 
