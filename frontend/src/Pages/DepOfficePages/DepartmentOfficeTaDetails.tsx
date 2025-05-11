@@ -71,33 +71,55 @@ const TaDetailedPage: React.FC = () => {
   }, [taId]);
 
   const handleDeleteTask = async (task: TaskDto) => {
+  // Add debugging to verify the task object
+  console.log('Setting task for deletion:', task);
+  console.log('Task ID:', task.taskId);
+  
+  // Ensure we have a valid taskId before setting the confirmation
+  if (task && task.taskId !== undefined) {
     setConfirmDeleteTask(task);
-  };
+  } else {
+    setErrorMessage('Cannot unassign task: missing task ID');
+  }
+};
 
   const confirmTaskDeletion = async () => {
-    if (!confirmDeleteTask) return;
+  if (!confirmDeleteTask) return;
+  
+  try {
+    // Let's add debugging to verify the task data
+    console.log('Task to delete:', confirmDeleteTask);
+    console.log('Task ID:', confirmDeleteTask.taskId);
     
-    try {
-      // Use the correct API endpoint for unassigning from a task
-      if (confirmDeleteTask.sectionCode) {
-        await axios.post(`/api/task/sectionCode/${confirmDeleteTask.sectionCode}/task/${confirmDeleteTask.taskId}/unassign`);
-      } else {
-        // Fallback to the original endpoint if there's no section code
-        await axios.delete(`/api/ta/${taId}/tasks/${confirmDeleteTask.taskId}`);
-      }
-      
-      setTasks(tasks.filter(t => t.taskId !== confirmDeleteTask.taskId));
-      setSuccessMessage('Task has been unassigned successfully.');
-      
-      // Clear confirmation after short delay
-      setTimeout(() => setSuccessMessage(null), 3000);
-    } catch (err) {
-      console.error('Error unassigning task:', err);
-      setErrorMessage('Failed to unassign task. Please try again.');
-    } finally {
-      setConfirmDeleteTask(null);
+    // Use the correct API endpoint for unassigning from a task
+    if (confirmDeleteTask.sectionCode) {
+      await axios.post(
+        `/api/task/sectionCode/${confirmDeleteTask.sectionCode}/task/${confirmDeleteTask.taskId}/unassign`,
+        { taId: taId } // Make sure to include the TA ID in the request body if needed
+      );
+    } else {
+      // Fallback to the original endpoint if there's no section code
+      await axios.delete(`/api/ta/${taId}/tasks/${confirmDeleteTask.taskId}`);
     }
-  };
+    
+    // Update the local state to remove the task
+    setTasks(tasks.filter(t => t.taskId !== confirmDeleteTask.taskId));
+    setSuccessMessage('Task has been unassigned successfully.');
+    
+    // Clear confirmation after short delay
+    setTimeout(() => setSuccessMessage(null), 3000);
+  } catch (err) {
+    console.error('Error unassigning task:', err);
+    // Log the exact error for debugging
+    if (axios.isAxiosError(err) && err.response) {
+      console.error('Error response:', err.response.data);
+      console.error('Status code:', err.response.status);
+    }
+    setErrorMessage('Failed to unassign task. Please try again.');
+  } finally {
+    setConfirmDeleteTask(null);
+  }
+};
 
   const handleUnassignSection = (section: SectionDto) => {
     setConfirmUnassignSection(section);
@@ -123,25 +145,55 @@ const TaDetailedPage: React.FC = () => {
     }
   };
 
-  const handleAssignSection = async () => {
-    if (!newSectionCode) {
-      setErrorMessage('Please enter a section code');
-      return;
+ const handleAssignSection = async () => {
+  if (!newSectionCode) {
+    setErrorMessage('Please enter a section code');
+    return;
+  }
+  
+  try {
+    // Use the correct API endpoint for assigning a TA to a section
+    await axios.post(`/api/sections/${newSectionCode}/tas/${taId}`);
+    
+    // After successful assignment, fetch the section details to add to the list
+    // This is needed because the assignment endpoint might not return the section details
+    try {
+      const sectionResponse = await axios.get(`/api/sections/${newSectionCode}`);
+      const newSection = {
+        sectionId: sectionResponse.data.sectionId || Date.now(), // Fallback ID if none is provided
+        sectionCode: newSectionCode,
+        courseName: sectionResponse.data.courseName || `Course for ${newSectionCode}`
+      };
+      
+      setSections([...sections, newSection]);
+    } catch (sectionErr) {
+      console.warn('Could not fetch section details:', sectionErr);
+      // Add with minimal info if section details fetch fails
+      const newSection = {
+        sectionId: Date.now(),
+        sectionCode: newSectionCode,
+        courseName: 'Unknown Course'
+      };
+      setSections([...sections, newSection]);
     }
     
-    try {
-      const res = await axios.post(`/api/ta/${taId}/sections`, { sectionCode: newSectionCode });
-      setSections([...sections, res.data]);
-      setNewSectionCode('');
-      setSuccessMessage('Section has been assigned successfully.');
-      
-      // Clear message after short delay
-      setTimeout(() => setSuccessMessage(null), 3000);
-    } catch (err) {
-      console.error('Error assigning section:', err);
-      setErrorMessage('Failed to assign section. Please check the section code and try again.');
+    setNewSectionCode('');
+    setSuccessMessage('TA has been assigned to the section successfully.');
+    
+    // Clear message after short delay
+    setTimeout(() => setSuccessMessage(null), 3000);
+  } catch (err) {
+    console.error('Error assigning TA to section:', err);
+    
+    // More detailed error logging
+    if (axios.isAxiosError(err) && err.response) {
+      console.error('Error response:', err.response.data);
+      console.error('Status code:', err.response.status);
     }
-  };
+    
+    setErrorMessage('Failed to assign TA to section. Please check the section code and try again.');
+  }
+};
 
   if (loading) return <LoadingPage />;
   if (error) return (
