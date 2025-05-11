@@ -36,7 +36,7 @@ const TANavBar: React.FC = () => {
         <div className={styles.title}>
           {/* move “TA Management System – Instructor” above the greeting */}
           <div className={styles.mainTitle}>
-            TA Management System – Instructor
+            TA Management System – TA
           </div>
 
           {/* now treat the greeting as a subtitle */}

@@ -1,6 +1,20 @@
 package com.example.service;
 
-import com.example.dto.*;
+import java.time.LocalDate;
+import java.time.Month;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import com.example.dto.CourseDto;
+import com.example.dto.CourseOfferingDto;
+import com.example.dto.DeanOfficeDto;
+import com.example.dto.ExamDto;
+import com.example.dto.FacultyCourseDto;
+import com.example.dto.FacultyCourseOfferingsDto;
 import com.example.entity.Actors.DeanOffice;
 import com.example.entity.Actors.Role;
 import com.example.entity.Courses.Course;
@@ -12,16 +26,13 @@ import com.example.entity.General.Term;
 import com.example.mapper.CourseMapper;
 import com.example.mapper.CourseOfferingMapper;
 import com.example.mapper.DeanOfficeMapper;
-import com.example.repo.*;
-import org.springframework.transaction.annotation.Transactional;
-import lombok.RequiredArgsConstructor;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.stereotype.Service;
-import java.time.Month;
+import com.example.repo.CourseOfferingRepo;
+import com.example.repo.CourseRepo;
+import com.example.repo.DeanOfficeRepo;
+import com.example.repo.ExamRepo;
+import com.example.repo.FacultyRepo;
 
-import java.time.LocalDate;
-import java.util.List;
-import java.util.stream.Collectors;
+import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor

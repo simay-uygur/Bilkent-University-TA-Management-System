@@ -13,8 +13,6 @@ import com.example.dto.TaTaskDto;
 import com.example.dto.TaskDto;
 import com.example.entity.Actors.TA;
 import com.example.entity.General.Date;
-import com.example.entity.Schedule.Schedule;
-import com.example.entity.Schedule.ScheduleItem;
 import com.example.entity.Schedule.ScheduleItemDto;
 import com.example.entity.Tasks.Task;
 

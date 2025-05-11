@@ -1,79 +1,16 @@
-// TAMainPage.tsx  (exactly as you originally sent it)
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styles from './TAMainPage.module.css';
 
-// Interface for the schedule items
-type ScheduleItem = {
-  type: 'COURSE' | 'LAB' | 'RECITATION';
-  name: string;
-  code: string;
-  building: string;
-  section: string;
-  days: number[];   // 1=Monday, 2=Tuesday, etc.
-  hours: number[];  // 1..12 corresponding to timeSlots
-};
-
-type ScheduleTask = {
-  type: 'LAB' | 'RECITATION' | 'OFFICE_HOURS';
-  name: string;
-  code: string;
-  building: string;
-  section: string;
-  days: number[];   // 1=Monday, 2=Tuesday, etc.
-  hours: number[];  // 1..12 corresponding to timeSlots
-};
-
-const schedule: ScheduleItem[] = [
-  {
-    type: 'COURSE',
-    name: 'Math',
-    code: '101',
-    building: 'A-127',
-    section: '1',
-    days: [1, 3, 5],    // Monday, Wednesday, Friday
-    hours: [1, 2],       // 08:30-09:20, 09:30-10:20
-  },
-  {
-    type: 'LAB',
-    name: 'Physics',
-    code: '101',
-    building: 'B-251',
-    section: '2',
-    days: [2, 4],        // Tuesday, Thursday
-    hours: [3, 4, 5, 6], // 10:30-11:20, 11:30-12:20, 12:30-13:20, 13:30-14:20
-  },
-  {
-    type: 'RECITATION',
-    name: 'CS',
-    code: '101',
-    building: 'C-333',
-    section: '1',
-    days: [1, 2, 3],     // Mon, Tue, Wed
-    hours: [8],          // 15:30-16:20
-  },
-];
-
-const scheduleTasks: ScheduleTask[] = [
-  {
-    type: 'LAB',
-    name: 'Chemistry Lab',
-    code: 'CHEM-101',
-    building: 'D-300',
-    section: '1',
-    days: [1, 3],
-    hours: [2, 3],
-  },
-  {
-    type: 'RECITATION',
-    name: 'Math Recitation TA',
-    code: 'MATH-101',
-    building: 'E-210',
-    section: '2',
-    days: [2, 4],
-    hours: [4],
-  },
-];
+// Backend schedule entry
+interface ScheduleEntry {
+  date: string;           // ISO date string
+  slotIndex: number;      // 1..12
+  type: 'Lab' | 'Lesson' | 'Recitation' ;
+  classroom: string | null;
+  code: string | null;
+  referenceId: number;
+}
 
 const timeSlots = [
   '08:30-09:20','09:30-10:20','10:30-11:20','11:30-12:20',
@@ -81,27 +18,36 @@ const timeSlots = [
   '16:30-17:20','17:30-18:20','18:30-19:20','19:30-20:20',
 ];
 
-const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+const daysOfWeek = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
 
-function TAMainPage() {
+const TAMainPage: React.FC = () => {
   const navigate = useNavigate();
+  const [entries, setEntries] = useState<ScheduleEntry[]>([]);
 
-  const renderContent = (day: number, hour: number) => {
-    const items = schedule.filter(item => item.days.includes(day) && item.hours.includes(hour));
-    const tasks = scheduleTasks.filter(task => task.days.includes(day) && task.hours.includes(hour))
-                               .map(t => ({ ...t, isTask: true }));
-    const combined = [...items.map(i => ({ ...i, isTask: false })), ...tasks];
+  useEffect(() => {
+    const taId = localStorage.getItem('userId');
+    if (!taId) return;
+    fetch(`/api/ta/${taId}/schedule`)
+      .then(res => res.json())
+      .then((data: ScheduleEntry[]) => setEntries(data))
+      .catch(err => console.error('Failed to load schedule', err));
+  }, []);
 
-    if (!combined.length) return null;
+  const renderCell = (day: number, hour: number) => {
+    // JS getDay: 0=Sunday,1=Monday... map to 1-7
+    const matched = entries.filter(e => {
+      const jsDay = new Date(e.date).getDay();
+      const entryDay = jsDay === 0 ? 7 : jsDay;
+      return entryDay === day && e.slotIndex === hour;
+    });
+    if (!matched.length) return null;
 
-    return combined.map((item, idx) => (
-      <div key={idx} className={styles[item.type.toLowerCase()]}>
-        <strong>
-          {item.type} {item.isTask ? '(TA)' : '(Student)'}
-        </strong><br />
-        {item.name} - {item.code}<br />
-        Building: {item.building}<br />
-        Section: {item.section}
+    return matched.map((e, i) => (
+      <div key={i} className={styles[e.type.toLowerCase()]}>        
+        <strong>{e.type === 'LESSON' ? 'Lesson' : 'Task'}</strong><br />
+        Code: {e.code || '-'}<br />
+        Room: {e.classroom || '-'}<br />
+        Ref ID: {e.referenceId}
       </div>
     ));
   };
@@ -113,18 +59,18 @@ function TAMainPage() {
           <thead>
             <tr>
               <th className={styles.timeColumn}>Time</th>
-              {days.map((day, i) => (
-                <th key={i} className={styles.dayColumn}>{day}</th>
+              {daysOfWeek.map((d, idx) => (
+                <th key={idx} className={styles.dayColumn}>{d}</th>
               ))}
             </tr>
           </thead>
           <tbody>
-            {timeSlots.map((slot, row) => (
-              <tr key={row}>
+            {timeSlots.map((slot, rowIdx) => (
+              <tr key={rowIdx}>
                 <td className={styles.timeColumn}>{slot}</td>
-                {days.map((_, col) => (
-                  <td key={col} className={styles.cell}>
-                    {renderContent(col + 1, row + 1)}
+                {daysOfWeek.map((_, colIdx) => (
+                  <td key={colIdx} className={styles.cell}>
+                    {renderCell(colIdx + 1, rowIdx + 1)}
                   </td>
                 ))}
               </tr>
@@ -149,6 +95,6 @@ function TAMainPage() {
       </div>
     </div>
   );
-}
+};
 
 export default TAMainPage;
