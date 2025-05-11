@@ -47,12 +47,12 @@ public class CourseServImpl implements CourseServ {
     private final SectionRepo secRepo;
     private final DepartmentRepo departmentRepo;
     private final CourseMapper courseMapper;
-
+    private final LogService log;
     @Override
     public Boolean deleteCourse(String courseCode) {
         Course course = courseRepo.findCourseByCourseCode(courseCode)
                 .orElseThrow(() -> new CourseNotFoundExc(courseCode));
-        
+        log.info("Course deletion", "Hard deletion of course with code: " + courseCode);
         courseRepo.delete(course);
         return true;
     }
@@ -78,7 +78,7 @@ public class CourseServImpl implements CourseServ {
         if (offering.getSections() == null) {
             offering.setSections(new ArrayList<>());
         }
-
+        log.info("Section addition", "New section for course with code: " + courseCode + " is created");
         offering.getSections().add(section);
         section.setOffering(offering); // maintain bidirectional link
         secRepo.saveAndFlush(section);
@@ -99,6 +99,7 @@ public class CourseServImpl implements CourseServ {
                     .orElseThrow(() -> new RuntimeException("Department not found: " + deptName));
             course.setDepartment(dept);
         }
+        log.info("Course creation", "New course with code: " + course.getCourseCode() + " is created.");
         courseRepo.saveAndFlush(course);
         return true;
     }
@@ -325,6 +326,7 @@ public class CourseServImpl implements CourseServ {
     @Override
     public boolean updateTask(String courseCode, int taskId, Task task) {
         if (taskServ.updateTask(taskId, task)) {
+            log.info("Task update", "Task is updated.");
             return true;
         }
         throw new NoPersistExc("Task update failed");
@@ -381,6 +383,7 @@ public class CourseServImpl implements CourseServ {
             courseRepo.saveAll(success);
             courseRepo.flush();
         }
+        log.info("Bulk Course Upload", "");
         Map<String,Object> res = new HashMap<>();
         res.put("successCount", success.size());
         res.put("failedCount", failed.size());

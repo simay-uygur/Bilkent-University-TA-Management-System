@@ -37,7 +37,7 @@ public class InstructorServImpl implements InstructorServ {
     private final InstructorMapper instructorMapper;
     private final CourseOfferingServ courseOfferingServ;
     private final ExamRepo examRepo;
-
+    private final LogService log;
     @Override
     public InstructorDto getInstructorById(Long id) {
         Instructor instructor = instructorRepo.findById(id)
@@ -111,7 +111,7 @@ public class InstructorServImpl implements InstructorServ {
             instructorRepo.saveAll(successfulInstructors);
             instructorRepo.flush();
         }
-
+        log.info("Bulk Instructor Upload", "");
         Map<String, Object> result = new HashMap<>();
         result.put("successCount", successfulInstructors.size());
         result.put("failedCount", failedRows.size());
@@ -138,7 +138,7 @@ public class InstructorServImpl implements InstructorServ {
             throw new IllegalArgumentException("Password cannot be null or empty.");
         }
         instructor.setPassword(encoder.encode(rawPassword));
-
+        log.info("Instructor creation", "New instructor is created.");
         return instructorRepo.save(instructor);
     }
 
@@ -165,6 +165,7 @@ public class InstructorServImpl implements InstructorServ {
         if (!instructorRepo.existsById(id)) {
             throw new RuntimeException("Instructor with id " + id + " not found.");
         }
+        log.info("Instructor deletion", "Instructor with id: " + id + " is deleted from the system.");
         instructorRepo.deleteById(id);
     }
 
@@ -181,7 +182,7 @@ public class InstructorServImpl implements InstructorServ {
 
         //existingInstructor.setDeleted(instructor.g);
         // You can add other fields you want to update here
-
+        log.info("Instructor update", "Instructor with id: " + id + " is updated");
         return instructorRepo.save(existingInstructor);
     }
 

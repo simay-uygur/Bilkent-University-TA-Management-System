@@ -1,6 +1,20 @@
 package com.example.service;
 
-import com.example.dto.*;
+import java.time.LocalDate;
+import java.time.Month;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import com.example.dto.CourseDto;
+import com.example.dto.CourseOfferingDto;
+import com.example.dto.DeanOfficeDto;
+import com.example.dto.ExamDto;
+import com.example.dto.FacultyCourseDto;
+import com.example.dto.FacultyCourseOfferingsDto;
 import com.example.entity.Actors.DeanOffice;
 import com.example.entity.Actors.Role;
 import com.example.entity.Courses.Course;
@@ -12,16 +26,13 @@ import com.example.entity.General.Term;
 import com.example.mapper.CourseMapper;
 import com.example.mapper.CourseOfferingMapper;
 import com.example.mapper.DeanOfficeMapper;
-import com.example.repo.*;
-import org.springframework.transaction.annotation.Transactional;
-import lombok.RequiredArgsConstructor;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.stereotype.Service;
-import java.time.Month;
+import com.example.repo.CourseOfferingRepo;
+import com.example.repo.CourseRepo;
+import com.example.repo.DeanOfficeRepo;
+import com.example.repo.ExamRepo;
+import com.example.repo.FacultyRepo;
 
-import java.time.LocalDate;
-import java.util.List;
-import java.util.stream.Collectors;
+import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
@@ -35,7 +46,7 @@ public class DeanOfficeServImpl implements DeanOfficeServ {
     private final CourseRepo courseRepo;
     private final CourseOfferingMapper courseOfferingMapper;
     private final ExamRepo examRepo;
-    
+    private final LogService log;
 
     @Override
     @Transactional
@@ -51,7 +62,7 @@ public class DeanOfficeServImpl implements DeanOfficeServ {
         // wire up both sides
         deanOffice.setFaculty(faculty);
         faculty.setDeanOffice(deanOffice);
-
+        log.info("New Dean Office Member is created", "");
         // now saving the faculty will cascade to persist the DeanOffice
         return facultyRepo.save(faculty)
                 .getDeanOffice();
@@ -77,6 +88,7 @@ public class DeanOfficeServImpl implements DeanOfficeServ {
 
     @Override
     public void deleteById(Long id) {
+        log.info("Dean Office Member is deleted", "");
         deanOfficeRepo.deleteById(id);
     }
 

@@ -36,44 +36,42 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class TA_controller {
     private final TAServ serv;
-    
+
     private final TaskServ taskServ;
 
     private final TARepo taRepo;
 
     private final TaskRepo taskRepo;
 
-    
-
-
     @GetMapping("/api/ta/all")
-    public List<TaDto> getAllTAs() 
+    public List<TaDto> getAllTAs()
     {
         return serv.getAllTAs();
     } // method should be sent to Admin controller
 
     @GetMapping("/api/ta/{id}")
-    public TaDto getTAById(@PathVariable Long id) 
+    public TaDto getTAById(@PathVariable Long id)
     {
         return serv.getTAByIdDto(id);
     }
-   @GetMapping("/api/ta/{id}/sections")
-public ResponseEntity<List<SectionDto>> getTASections(@PathVariable Long id) {
-    return new ResponseEntity<>(serv.getTASections(id), HttpStatus.OK);
-}
-@GetMapping("/api/ta/{id}/task")
-public ResponseEntity<List<TaTaskDto>> getTATasks(@PathVariable Long id) {
-    return new ResponseEntity<>(serv.getTATasks(id), HttpStatus.OK);
-}
+
+    @GetMapping("/api/ta/{id}/sections")
+    public ResponseEntity<List<SectionDto>> getTASections(@PathVariable Long id) {
+        return new ResponseEntity<>(serv.getTASections(id), HttpStatus.OK);
+    }
+    @GetMapping("/api/ta/{id}/task")
+    public ResponseEntity<List<TaTaskDto>> getTATasks(@PathVariable Long id) {
+        return new ResponseEntity<>(serv.getTATasks(id), HttpStatus.OK);
+    }
 
     @GetMapping("/api/ta/department/{deptName}")
-    public ResponseEntity<List<TaDto>> getTAByDepartment(@PathVariable String deptName) 
+    public ResponseEntity<List<TaDto>> getTAByDepartment(@PathVariable String deptName)
     {
         return new ResponseEntity<>(serv.getTAsByDepartment(deptName), HttpStatus.OK);
     }
 
     @DeleteMapping("/api/ta/{id}")
-    public ResponseEntity<HttpStatus> deleteTAById(@PathVariable Long id) 
+    public ResponseEntity<HttpStatus> deleteTAById(@PathVariable Long id)
     {
         if (serv.getTAByIdDto(id) == null)
             throw new UserNotFoundExc(id);
@@ -82,19 +80,19 @@ public ResponseEntity<List<TaTaskDto>> getTATasks(@PathVariable Long id) {
     } // method should be sent to Admin controller
 
     @GetMapping("/api/ta/{ta_id}/task/{task_id}")
-    public TaTaskDto getTaskById(@PathVariable("ta_id") Long ta_id, @PathVariable("task_id") int task_id) 
+    public TaTaskDto getTaskById(@PathVariable("ta_id") Long ta_id, @PathVariable("task_id") int task_id)
     {
         return serv.getTaskById(task_id, ta_id);
     }
 
     @GetMapping("/api/ta/{id}/tasks")
-    public List<TaTaskDto> getAllTasTasks(@PathVariable Long id) 
+    public List<TaTaskDto> getAllTasTasks(@PathVariable Long id)
     {
         return serv.getAllTasTasks(id);
     }
-    
+
     @PostMapping("/api/ta/{id}/task/{task_id}")
-    public ResponseEntity<?> createTask(@PathVariable Long id, @PathVariable int task_id) 
+    public ResponseEntity<?> createTask(@PathVariable Long id, @PathVariable int task_id)
     {
         Task task = taskRepo.findById(task_id)
                 .orElseThrow(() -> new GeneralExc("Task with ID " + task_id + " not found."));
@@ -106,9 +104,9 @@ public ResponseEntity<List<TaTaskDto>> getTATasks(@PathVariable Long id) {
         }*/
         return new ResponseEntity<>(serv.assignTask(task, id),HttpStatus.CREATED);
     }
-    
+
     @DeleteMapping("/api/ta/{ta_id}/task/{task_id}")
-    public ResponseEntity<?> deleteTaskById(@PathVariable("ta_id") Long ta_id, @PathVariable("task_id") int task_id) 
+    public ResponseEntity<?> deleteTaskById(@PathVariable("ta_id") Long ta_id, @PathVariable("task_id") int task_id)
     {
         return new ResponseEntity<>(serv.deleteTaskById(task_id, ta_id),HttpStatus.OK);
     }
@@ -116,7 +114,7 @@ public ResponseEntity<List<TaTaskDto>> getTATasks(@PathVariable Long id) {
     @PutMapping("/api/ta/{id}")
     public ResponseEntity<?> restoreTA(@PathVariable Long id) {
         return new ResponseEntity<>(serv.restoreTAById(id), HttpStatus.OK);
-    } 
+    }
 
     @GetMapping("/api/ta/{id}/schedule")
     public ResponseEntity<List<ScheduleItemDto>> getWeeklyScheduleForTA(@PathVariable Long id) {
@@ -136,8 +134,8 @@ public ResponseEntity<List<TaTaskDto>> getTATasks(@PathVariable Long id) {
             if (proctoringList == null || proctoringList.isEmpty()) {
                 // nothing found → 400 with empty body (or you could do 204 NO_CONTENT)
                 return ResponseEntity
-                    .badRequest()
-                    .body(Collections.emptyList());
+                        .badRequest()
+                        .body(Collections.emptyList());
             }
             // success → 201 CREATED with the list of TaDto
             return ResponseEntity
@@ -152,8 +150,8 @@ public ResponseEntity<List<TaTaskDto>> getTATasks(@PathVariable Long id) {
             if (gradingList == null || gradingList.isEmpty()) {
                 // nothing found → 400 with empty body (or you could do 204 NO_CONTENT)
                 return ResponseEntity
-                    .badRequest()
-                    .body(Collections.emptyList());
+                        .badRequest()
+                        .body(Collections.emptyList());
             }
             // success → 201 CREATED with the list of TaDto
             return ResponseEntity

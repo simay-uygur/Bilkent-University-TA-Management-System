@@ -70,9 +70,9 @@ public class TAServImpl implements TAServ {
     private final TaTaskMapper taTaskMapper;
     private final ExamRepo examRepo;
     private final ExamMapper examMapper;
-private final SectionMapper sectionMapper;
+    private final SectionMapper sectionMapper;
     private final SectionRepo sectionRepo;
-   
+    private final LogService log;
 
     @Override
 public List<TaTaskDto> getTATasks(Long id) {
@@ -174,7 +174,7 @@ public List<TaTaskDto> getTATasks(Long id) {
         if (!freshTa.isDeleted()) {
             throw new NoPersistExc("Deletion");
         }
-        
+        log.info("TA deletion","TA with id: " + id + " is deleted.");
         return true;
     }
     @Override
@@ -195,7 +195,7 @@ public List<TaTaskDto> getTATasks(Long id) {
         if (freshTa.isDeleted()) {
             throw new NoPersistExc("Restoration");
         }
-        
+        log.info("TA restored","TA with id: " + id + " is restored.");
         return true;
     }
     
@@ -215,6 +215,7 @@ public List<TaTaskDto> getTATasks(Long id) {
         if (!taskServ.checkAndUpdateStatusTask(task)) {
             throw new TaskIsNotActiveExc();
         }
+        log.info("TA to Task assignment","TA with id: " + id + " is assigned to task with id: "+task.getTaskId());
         //taskServ.assignTA(task.getTaskId(), existingTA) ;
         return true ;
     }
@@ -336,7 +337,7 @@ public List<TaTaskDto> getTATasks(Long id) {
             repo.saveAll(successfulTAs);
             repo.flush();
         }
-
+        log.info("TAs Bulk Upload","");
         Map<String, Object> result = new HashMap<>();
         result.put("successCount", successfulTAs.size());
         result.put("failedCount", failedRows.size());

@@ -21,6 +21,7 @@ import com.example.repo.ExamRepo;
 import com.example.repo.RequestRepos.TransferProctoringRepo;
 import com.example.repo.TARepo;
 import com.example.repo.UserRepo;
+import com.example.service.LogService;
 
 import lombok.RequiredArgsConstructor;
 
@@ -32,7 +33,7 @@ public class TransferProctoringServImpl implements TransferProctoringServ {
     private final TARepo taRepo;
     private final ExamRepo examRepo;
     private final TransferProctoringRepo transferRepo;
-
+    private final LogService log;
     @Async("setExecutor")
     @Override
     public void createTransferProctoringReq(TransferProctoringDto dto, Long senderId) {
@@ -53,7 +54,7 @@ public class TransferProctoringServImpl implements TransferProctoringServ {
         req.setSender(sender);
         req.setReceiver(receiver);
         req.setExam(exam);
-
+        log.info("Transfer Proctoring Request Creation","TA with id: " + senderId +" wants to transfer his proctoring duty to another TA with id: " + dto.getReceiverId());
         transferRepo.save(req);
     }
 
@@ -99,6 +100,8 @@ public class TransferProctoringServImpl implements TransferProctoringServ {
 
         req.setApproved(true);
         req.setPending(false);
+        transferRepo.save(req);
+        log.info("Transfer Proctoring Request Approval","TA with id: " + receiverId +" accepted Transfer Proctoring Request with id: "+requestId);
     }
     @Override
     public void rejectRequest(Long requestId, Long receiverId){
@@ -107,6 +110,7 @@ public class TransferProctoringServImpl implements TransferProctoringServ {
         req.setRejected(true);
         req.setPending(false);
         transferRepo.save(req);
+        log.info("Transfer Proctoring Request Rejection","TA with id: " + receiverId +" rejected Transfer Proctoring Request with id: "+requestId);
     }
 
     @Async("setExecutor")

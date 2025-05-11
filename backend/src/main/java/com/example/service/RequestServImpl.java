@@ -44,7 +44,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 @Service 
-@Slf4j
 @RequiredArgsConstructor
 public class RequestServImpl implements RequestServ{
 
@@ -68,7 +67,7 @@ public class RequestServImpl implements RequestServ{
     private final TaMapper taMapper;
     private final CourseOfferingRepo offeringRepo;
     private final TaAvailabilityChecker availabilityChecker;
-
+    private final LogService log;
 
     @Override
     public List<Request> getAllRequests() {
@@ -144,41 +143,18 @@ public class RequestServImpl implements RequestServ{
         RequestType.Swap,
         RequestType.TransferProctoring
     );
-        /*List<Swap> recSwaps = 
-        swapRepo.
-        findAllByReceiverIdAndSentTimeBetweenAndRequestTypeInAndIsPendingTrue
-        (u.getId(), duration.getStart(), duration.getFinish(), want);
-        List<Swap> senSwaps = 
-        swapRepo.
-        findAllBySenderIdAndSentTimeBetweenAndRequestTypeInAndIsPendingTrue
-        (u.getId(), duration.getStart(), duration.getFinish(), want);
-
-        swapRepo.deleteAll(recSwaps);
-        swapRepo.deleteAll(senSwaps);
-
-        List<TransferProctoring> recTransfers = 
-        transRepo.
-        findAllByReceiverIdAndSentTimeBetweenAndRequestTypeInAndIsPendingTrue
-        (u.getId(), duration.getStart(), duration.getFinish(), want);
-        List<TransferProctoring> senTransfers = 
-        transRepo.
-        findAllBySenderIdAndSentTimeBetweenAndRequestTypeInAndIsPendingTrue
-        (u.getId(), duration.getStart(), duration.getFinish(), want);
-
-        transRepo.deleteAll(senTransfers);
-        transRepo.deleteAll(recTransfers);*/
-
         List<Integer> overlapping = examRepo.findOverlappingExamIds(
         duration.getStart(), duration.getFinish());
-        log.info("overlapping exams = {}", overlapping);
         // 2) delete swaps
         int recSwaps = swapRepo.deleteAllSwapsForTaAndExamIds(u.getId(), overlapping);
 
         // 3) delete transfers
         int trans = transRepo.deleteAllSwapsForTaAndExamIds(u.getId(), overlapping);
 
-        log.info("cleanup: recSwaps={}, sentSwaps={}, recTrans={}, sentTrans={}",
-            recSwaps, trans);
+        log.info
+        ("Deletion", "Due to assigning to the ta with id: " + 
+        u.getId() + " new task with duration: " + duration + 
+        " total number of deleted swap requests and transfer requests that collide with the duration is: swaps:" + recSwaps + ", transfers:" + trans);
   }
 
     @Transactional
