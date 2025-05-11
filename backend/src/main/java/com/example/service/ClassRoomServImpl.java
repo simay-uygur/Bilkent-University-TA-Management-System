@@ -21,6 +21,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import com.example.entity.General.Event;
 
 @Service
 @RequiredArgsConstructor
@@ -144,6 +145,7 @@ public class ClassRoomServImpl implements ClassRoomServ {
         }
         return availableRooms;
     }
+
 }
 
 

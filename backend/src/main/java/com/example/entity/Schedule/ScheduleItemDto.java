@@ -8,7 +8,7 @@ import lombok.Data;
 public class ScheduleItemDto {
     private LocalDate date;
     private int slotIndex; // 1 den 12 kadar
-    private ScheduleItemType type;  
+    private String type;  
     private String classroom;      
     private String code; // section veya course code 
     private Long referenceId; 
