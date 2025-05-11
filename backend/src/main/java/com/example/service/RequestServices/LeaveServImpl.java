@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.List;
 
 import org.springframework.scheduling.annotation.Async;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -78,7 +79,6 @@ public class LeaveServImpl implements LeaveServ{
             exam.getAssignedTas().remove(sender);
             examRepo.save(exam);
         }
-        sender.setActive(false);
         req.setRejected(false);
         req.setApproved(true);
         req.setPending(false);
@@ -88,6 +88,20 @@ public class LeaveServImpl implements LeaveServ{
         notServ.notifyApproval(req);
         return true;
     }
+
+    @Async("taskCheckExecutor")
+    @Scheduled(cron = "0 0 0 * * *")
+    public void checkForActivness(){
+        List<Leave> reqs = leaveRepo.findAllByIsApproved(true);
+        Date now = new Date().currenDate();
+        for (Leave l : reqs){
+            if (l.getDuration().getStart().isAfter(now) && l.getDuration().getFinish().isBefore(now))
+                l.getSender().setActive(false);
+            else 
+                l.getSender().setActive(true);
+            taRepo.save(l.getSender());
+        }
+    }   
 
     @Override
     public void rejectLeaveRequest(Long requestId, Long approverId) {

@@ -224,7 +224,7 @@ public class RequestController {
         return new ResponseEntity<>(exists ? HttpStatus.CREATED : HttpStatus.BAD_REQUEST);
     }
 
-    @PostMapping("/department/taInDepRequest/{req_id}")
+    @PostMapping("/department/taInDepRequest/{req_id}/toDean")
     public ResponseEntity<Boolean> sendProctorTaInFacultyRequest(@PathVariable Long req_id){
       return new ResponseEntity<>(proctorTaInFacultyServ.escalateToFaculty(req_id), HttpStatus.ACCEPTED);
     }

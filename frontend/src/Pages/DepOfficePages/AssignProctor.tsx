@@ -463,7 +463,7 @@ const AssignProctor: React.FC = () => {
     try {
       console.log(`Forwarding request ${exam.requestId} to dean's office`);
       // API call to forward the request to dean's office
-      await axios.post(`/api/request/${exam.requestId}/forward-to-dean`);
+      await axios.post(`/api/department/taInDepRequest/${exam.requestId}`);
       
       // Remove the exam from the list on success
       setExams(prev => prev.filter(e => e.id !== demandId));

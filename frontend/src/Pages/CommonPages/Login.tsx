@@ -87,6 +87,9 @@ const Login: React.FC = () => {
         case 'ROLE_DEANS_OFFICE':
           home = '/deans-office';
           break;
+          case 'ROLE_ADMIN':
+          home = '/admin';
+          break;
       }
 
       navigate(referrer || home, { replace: true });

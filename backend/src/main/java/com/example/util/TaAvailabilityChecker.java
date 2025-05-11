@@ -3,22 +3,29 @@ package com.example.util;
 
 import java.time.LocalDateTime;
 import java.util.EnumMap;
+import java.util.List;
 import java.util.Map;
 
 import com.example.entity.Exams.Exam;
 import com.example.entity.Exams.ExamRoom;
 import com.example.entity.General.DayOfWeek;
 import com.example.entity.Tasks.TaTask;
+import com.example.repo.RequestRepos.LeaveRepo;
+
+import lombok.RequiredArgsConstructor;
+
 import org.springframework.stereotype.Component;
 
 import com.example.entity.Actors.TA;
 import com.example.entity.Courses.Lesson;
 import com.example.entity.Courses.Section;
 import com.example.entity.General.Event;
+import com.example.entity.Requests.Leave;
 
 @Component
+@RequiredArgsConstructor
 public class TaAvailabilityChecker {
-
+    private final LeaveRepo leaveRepo;
     /**
      * Returns true if TA has any Lesson in the same weekday + time‐slot
      * as the given exam duration.
@@ -76,12 +83,21 @@ public class TaAvailabilityChecker {
         return false;
     }
 
+    public static boolean isActive(TA ta, Event duration){
+        List<Leave> reqs = ta.getSendedLeaveRequests();
+        for (Leave l : reqs){
+            if (l.getDuration().has(duration))
+                return false;
+        }
+        return true;
+    }
+
     public boolean isAvailable(TA ta, Event event) {
 
         return !hasOverlappingLesson(ta, event)
                 && !hasOverlappingExam(ta, event)
                 && !hasOverlappingExamProctoring(ta, event)
-                && !hasOverlappingTask(ta, event);
+                && !hasOverlappingTask(ta, event)
+                && isActive(ta, event);
     }
-
 }

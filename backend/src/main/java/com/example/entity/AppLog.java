@@ -31,7 +31,7 @@ public class AppLog {
     private String level;
 
     
-    @Column(nullable = false, length = 60)
+    @Column(nullable = false, length = 500)
     private String source;
 
     /** Asıl mesaj – düz string */
