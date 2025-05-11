@@ -10,10 +10,10 @@ interface DeptStats {
 }
 
 const DEPARTMENTS: DeptStats[] = [
-  { dept: 'CS', instructors: 24, courses: 42, tas: 76 },
-  { dept: 'IE', instructors: 18, courses: 35, tas: 52 },
-  { dept: 'EEE', instructors: 29, courses: 48, tas: 87 },
-  { dept: 'ME', instructors: 22, courses: 39, tas: 65 }
+  { dept: 'CS', instructors: 12, courses: 12, tas: 16 },
+  { dept: 'IE', instructors: 12, courses: 15, tas: 12 },
+  { dept: 'EEE', instructors: 6, courses: 8, tas: 7 },
+  { dept: 'ME', instructors: 12, courses: 6, tas: 2 }
 ]
 
 const DeansOfficePage: React.FC = () => {

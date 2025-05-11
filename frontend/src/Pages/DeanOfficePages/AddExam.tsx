@@ -190,7 +190,7 @@ const fetchSlots = () => {
     console.log("Sending exam data:", body);
 
     axios
-      .post(`/api/v1/offerings/${courseCode}/add-exam`, body)
+      .post(`/api/v1/offerings/course/${courseCode}/add-exam`, body)
       .then(() => {
         console.log("Exam added successfully");
         navigate('/deans-office/view-add-exams');

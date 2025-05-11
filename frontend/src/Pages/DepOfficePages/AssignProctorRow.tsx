@@ -33,7 +33,7 @@ export interface Exam {
 interface AssignProctorRowProps {
   exam: Exam;
   onAuto: (id: string) => void;
-  onFinish: (id: string) => void;
+  onFinish: (id: any) => void;
   onDemand: (id: string) => void;
   onDelete: (id: string) => void; // New prop for delete functionality
 }
@@ -89,8 +89,8 @@ const AssignProctorRow: React.FC<AssignProctorRowProps> = ({
         <button
           className={`${styles.btn} ${styles.finishBtn}`}
           onClick={() => {
-            console.log(`Finish button clicked for exam ${exam.id}`);
-            onFinish(exam.id);
+            console.log(`Finish button clicked for exam ${exam.requestId}`);
+            onFinish(exam.requestId);
           }}
           disabled={exam.needed > 0 && exam.assignedTAs.length === 0}
         >

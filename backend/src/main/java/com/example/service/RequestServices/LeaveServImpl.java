@@ -91,7 +91,7 @@ public class LeaveServImpl implements LeaveServ{
 
     @Async("taskCheckExecutor")
     @Scheduled(cron = "0 0 0 * * *")
-    private void checkForActivness(){
+    public void checkForActivness(){
         List<Leave> reqs = leaveRepo.findAllByIsApproved(true);
         Date now = new Date().currenDate();
         for (Leave l : reqs){

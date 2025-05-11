@@ -123,7 +123,7 @@ useEffect(() => {
   };
 
   const handleExam = () => {
-    navigate('/deans-office');
+    navigate('/deans-office/add-exams');
   };
 
   const handleConfirmAdd = async () => {
