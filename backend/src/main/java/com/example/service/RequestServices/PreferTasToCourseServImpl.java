@@ -13,6 +13,7 @@ import com.example.entity.Courses.CourseOffering;
 import com.example.entity.Courses.Department;
 import com.example.entity.Courses.Section;
 import com.example.entity.General.Date;
+import com.example.entity.Requests.Leave;
 import com.example.entity.Requests.PreferTasToCourse;
 import com.example.entity.Requests.PreferTasToCourseDto;
 import com.example.entity.Requests.RequestType;
@@ -24,6 +25,7 @@ import com.example.repo.RequestRepos.PreferTasToCourseRepo;
 import com.example.repo.SectionRepo;
 import com.example.repo.TARepo;
 import com.example.service.CourseOfferingServ;
+import com.example.service.LogService;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -39,7 +41,7 @@ public class PreferTasToCourseServImpl implements PreferTasToCourseServ{
     private final TARepo taRepo;
     private final SectionRepo sectionRepo;
     private final CourseOfferingServ offeringServ;
-    
+    private final LogService log;
 
     @Override
     @Transactional
@@ -66,6 +68,28 @@ public class PreferTasToCourseServImpl implements PreferTasToCourseServ{
                     .stream()
                     .map(mapper::toDto)
                     .collect(Collectors.toList());
+    }
+
+    @Override
+    public boolean approve(Long reqId){
+        PreferTasToCourse req = prefRepo.findById(reqId).orElseThrow(() -> new GeneralExc("There is no such leave request."));
+        req.setApproved(true);
+        req.setRejected(false);
+        req.setPending(false);
+        log.info("Prefer Tas to Course Request Finish","Prefer Tas to Course Request with id: " +reqId+ " is finished by " +req.getReceiver().getName()+ " Department");
+        prefRepo.save(req);
+        return true;
+    }
+
+    @Override
+    public boolean reject(Long reqId){
+        PreferTasToCourse req = prefRepo.findById(reqId).orElseThrow(() -> new GeneralExc("There is no such leave request."));
+        req.setApproved(false);
+        req.setRejected(true);
+        req.setPending(false);
+        log.info("Prefer Tas to Course Request Finish","Prefer Tas to Course Request with id: " +reqId+ " is finished by " +req.getReceiver().getName()+ " Department");
+        prefRepo.save(req);
+        return true;
     }
 
     @Override
@@ -117,7 +141,7 @@ public class PreferTasToCourseServImpl implements PreferTasToCourseServ{
             throw new GeneralExc("Some non-preferred TAs not found");
         }
         req.setNonPreferredTas(nonPreferred);
-
+        log.info("Proctor Tas to the Course Request creation", "Instructor with id: " + instrId + " has sent the request for the " + sectionCode + " section to the " + dept.getName());
         prefRepo.save(req);
         return true;
     }

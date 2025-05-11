@@ -14,7 +14,7 @@ import java.util.List;
 public class DepartmentServImpl implements DepartmentServ {
 
     private final DepartmentRepo departmentRepo;
-
+    private final LogService log;
     @Override
     public List<Department> getAllDepartments() {
         return departmentRepo.findAll();
@@ -23,6 +23,7 @@ public class DepartmentServImpl implements DepartmentServ {
     @Override
     public boolean createDepartment(Department department) {
         departmentRepo.save(department);
+        log.info("Deparment creation", "New Department with name: " +department.getName()+ " is created in the system");
         return true;
     }
 

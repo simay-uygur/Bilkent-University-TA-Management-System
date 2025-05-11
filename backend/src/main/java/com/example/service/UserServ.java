@@ -17,5 +17,5 @@ public interface UserServ {
     
     public User getUserByEmail(String email);
 
-
+    boolean changePasswordById(String password, Long userId);
 }

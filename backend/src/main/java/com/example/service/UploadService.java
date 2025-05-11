@@ -26,7 +26,7 @@ public class UploadService { //can have separate interface
     private final DepartmentStaffRepo departmentStaffRepo;
     private final DepartmentRepo departmentRepo;
     private final PasswordEncoder encoder;
-
+    private final LogService log;
     public Map<String, Object> importInstructorsAndStaffFromExcel(MultipartFile file) throws IOException {
         List<Instructor> successfulInstructors = new ArrayList<>();
         List<DepartmentStaff> successfulStaff = new ArrayList<>();
@@ -133,7 +133,7 @@ public class UploadService { //can have separate interface
             departmentStaffRepo.saveAll(successfulStaff);
             departmentStaffRepo.flush();
         }
-
+        log.info("Instructors and Department Staff Bulk Upload", "");
         Map<String, Object> result = new HashMap<>();
         result.put("instructorsImported", successfulInstructors.size());
         result.put("departmentStaffImported", successfulStaff.size());

@@ -28,6 +28,7 @@ import com.example.entity.General.Event;
 public class ClassRoomServImpl implements ClassRoomServ {
 
     private final ClassRoomRepo classRoomRepo;
+    private final LogService log;
 
     @Override
     public Map<String, Object> importClassRoomsFromExcel(MultipartFile file) throws IOException {
@@ -94,6 +95,7 @@ public class ClassRoomServImpl implements ClassRoomServ {
         if (classRoomRepo.existsById(dto.getClassroomId())) {
             throw new IllegalArgumentException("Classroom with this ID already exists");
         }
+        log.info("Classroom creation", "Classroom with code: " + dto.getClassroomId() + " added to the system.");
         return toDto(classRoomRepo.save(toEntity(dto)));
     }
 
@@ -103,6 +105,7 @@ public class ClassRoomServImpl implements ClassRoomServ {
                 .orElseThrow(() -> new IllegalArgumentException("Classroom not found"));
         existing.setClassCapacity(dto.getClassCapacity());
         existing.setExamCapacity(dto.getExamCapacity());
+        log.info("Classroom updation", "Classroom with code: " + dto.getClassroomId() + " is updated in the system.");
         return toDto(classRoomRepo.save(existing));
     }
 
@@ -111,6 +114,7 @@ public class ClassRoomServImpl implements ClassRoomServ {
         if (!classRoomRepo.existsById(id)) {
             throw new IllegalArgumentException("Classroom not found");
         }
+        log.info("Classroom deletion", "Classroom with code: " + id + " is deleted from the system.");
         classRoomRepo.deleteById(id);
     }
 

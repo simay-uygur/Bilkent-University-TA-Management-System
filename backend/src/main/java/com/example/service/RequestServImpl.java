@@ -1,11 +1,15 @@
 package com.example.service;
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.NoSuchElementException;
+import java.util.*;
 import java.util.stream.Collectors;
 
+import com.example.dto.TaDto;
+import com.example.entity.Courses.CourseOffering;
+import com.example.entity.Exams.Exam;
+import com.example.entity.General.Semester;
+import com.example.mapper.TaMapper;
+import com.example.repo.*;
+import com.example.util.TaAvailabilityChecker;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -25,10 +29,6 @@ import com.example.entity.Requests.RequestType;
 import com.example.exception.Requests.NoSuchRequestExc;
 import com.example.exception.taExc.TaNotFoundExc;
 import com.example.mapper.RequestMapper;
-import com.example.repo.DeanOfficeRepo;
-import com.example.repo.DepartmentRepo;
-import com.example.repo.ExamRepo;
-import com.example.repo.InstructorRepo;
 import com.example.repo.RequestRepos.LeaveRepo;
 import com.example.repo.RequestRepos.PreferTasToCourseRepo;
 import com.example.repo.RequestRepos.ProctorTaFromFacultiesRepo;
@@ -38,25 +38,20 @@ import com.example.repo.RequestRepos.RequestRepo;
 import com.example.repo.RequestRepos.SwapRepo;
 import com.example.repo.RequestRepos.TransferProctoringRepo;
 import com.example.repo.RequestRepos.WorkLoadRepo;
-import com.example.repo.TARepo;
-import com.example.repo.UserRepo;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 @Service 
-@Slf4j
 @RequiredArgsConstructor
 public class RequestServImpl implements RequestServ{
 
     private final DeanOfficeRepo deanOfficeRepo;
-
     private final RequestRepo requestRepo;
     private final UserRepo userRepo;
     private final InstructorRepo instructorRepo;
     private final RequestMapper reqMapper;
-
     private final LeaveRepo leaveRepo;
     private final SwapRepo swapRepo;
     private final TransferProctoringRepo transRepo;
@@ -65,11 +60,14 @@ public class RequestServImpl implements RequestServ{
     private final ProctorTaInDepartmentRepo prTaInDepRepo;
     private final WorkLoadRepo workloadRepo;
     private final PreferTasToCourseRepo prefTasToCourseRepo;
-    
     private final TARepo taRepo;
     private final RequestMapper mapper;
     private final ExamRepo examRepo;
     private final DepartmentRepo deptRepo;
+    private final TaMapper taMapper;
+    private final CourseOfferingRepo offeringRepo;
+    private final TaAvailabilityChecker availabilityChecker;
+    private final LogService log;
 
     @Override
     public List<Request> getAllRequests() {
@@ -145,41 +143,18 @@ public class RequestServImpl implements RequestServ{
         RequestType.Swap,
         RequestType.TransferProctoring
     );
-        /*List<Swap> recSwaps = 
-        swapRepo.
-        findAllByReceiverIdAndSentTimeBetweenAndRequestTypeInAndIsPendingTrue
-        (u.getId(), duration.getStart(), duration.getFinish(), want);
-        List<Swap> senSwaps = 
-        swapRepo.
-        findAllBySenderIdAndSentTimeBetweenAndRequestTypeInAndIsPendingTrue
-        (u.getId(), duration.getStart(), duration.getFinish(), want);
-
-        swapRepo.deleteAll(recSwaps);
-        swapRepo.deleteAll(senSwaps);
-
-        List<TransferProctoring> recTransfers = 
-        transRepo.
-        findAllByReceiverIdAndSentTimeBetweenAndRequestTypeInAndIsPendingTrue
-        (u.getId(), duration.getStart(), duration.getFinish(), want);
-        List<TransferProctoring> senTransfers = 
-        transRepo.
-        findAllBySenderIdAndSentTimeBetweenAndRequestTypeInAndIsPendingTrue
-        (u.getId(), duration.getStart(), duration.getFinish(), want);
-
-        transRepo.deleteAll(senTransfers);
-        transRepo.deleteAll(recTransfers);*/
-
         List<Integer> overlapping = examRepo.findOverlappingExamIds(
         duration.getStart(), duration.getFinish());
-        log.info("overlapping exams = {}", overlapping);
         // 2) delete swaps
         int recSwaps = swapRepo.deleteAllSwapsForTaAndExamIds(u.getId(), overlapping);
 
         // 3) delete transfers
         int trans = transRepo.deleteAllSwapsForTaAndExamIds(u.getId(), overlapping);
 
-        log.info("cleanup: recSwaps={}, sentSwaps={}, recTrans={}, sentTrans={}",
-            recSwaps, trans);
+        log.info
+        ("Deletion", "Due to assigning to the ta with id: " + 
+        u.getId() + " new task with duration: " + duration + 
+        " total number of deleted swap requests and transfer requests that collide with the duration is: swaps:" + recSwaps + ", transfers:" + trans);
   }
 
     @Transactional
@@ -264,5 +239,34 @@ public class RequestServImpl implements RequestServ{
 
         return dtos;
     }
+
+    // for transferring or swapping
+    @Override
+    public List<TaDto> getAvailableTasForExam(Integer examId) {
+        Exam exam = examRepo.findById(examId)
+                .orElseThrow(() -> new NoSuchElementException("Exam not found: " + examId));
+
+        // 1) grab the Semester & Department of this exam
+        CourseOffering myOff = exam.getCourseOffering();
+        Semester semester     = myOff.getSemester();
+        Department dept       = myOff.getCourse().getDepartment();
+
+        // 2) fetch all offerings in that dept & term
+        List<CourseOffering> allOfferings
+                = offeringRepo.findByCourse_Department_NameAndSemester_YearAndSemester_Term(dept.getName(), semester.getYear(), semester.getTerm());
+
+        // 3) collect all assigned TAs, de-duplicate
+        Set<TA> candidates = allOfferings.stream()
+                .flatMap(off -> off.getAssignedTas().stream())
+                .collect(Collectors.toSet());
+
+        // 4) filter out anyone with a duty or lesson conflict
+        return candidates.stream()
+                .filter(ta -> availabilityChecker.isAvailable(ta, exam.getDuration()))
+                .map(taMapper::toDto)
+                .toList();
+    }
+
+
 
 }

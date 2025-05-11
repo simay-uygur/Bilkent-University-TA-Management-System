@@ -3,6 +3,8 @@ package com.example.dto;
 import com.example.entity.General.Event;
 
 public class TaTaskDto {
+    private int taskId;
+    private Long taId;
     private String type;
     private String description;
     private Event duration;
@@ -12,12 +14,30 @@ public class TaTaskDto {
     public TaTaskDto() {
     }
 
-    public TaTaskDto(String type, String description, Event duration, String status, int workload) {
+    public TaTaskDto(int taskId, Long taId, String type, String description, Event duration, String status, int workload) {
+        this.taskId = taskId;
+        this.taId = taId;
         this.type = type;
         this.description = description;
         this.duration = duration;
         this.status = status;
         this.workload = workload;
+    }
+
+    public int getTaskId(){
+        return taskId;
+    }
+
+    public void setTaskId(int taskId){
+        this.taskId = taskId;
+    }
+
+    public Long getTaId(){
+        return taId;
+    }
+
+    public void setTaId(Long taId){
+        this.taId = taId;
     }
 
     public String getType() {

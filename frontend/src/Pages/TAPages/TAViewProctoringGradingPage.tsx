@@ -1,3 +1,184 @@
+import React, { useState, useEffect, useMemo } from 'react';
+import BackBut from '../../components/Buttons/BackBut';
+import styles from './TAViewProctoringGradingPage.module.css';
+
+// Shape of the JSON you get from the backend for proctoring
+interface ExamDto {
+    courseCode: string;
+    start:  { year: number; month: number; day: number; hour: number; minute: number };
+    finish: { year: number; month: number; day: number; hour: number; minute: number };
+    examType: string;
+}
+
+// Shape of the JSON you get from the backend for grading
+interface GradingDto {
+    courseCode: string;
+    endDate: { year: number; month: number; day: number; hour: number; minute: number };
+}
+
+// Row data for proctoring view
+interface ProctoringRow {
+    key: string;
+    date: string;
+    course: string;
+    examType: string;
+    level: 'BS' | 'MS' | 'PhD';
+    time: string;
+}
+
+// Row data for grading view
+interface GradingRow {
+    key: string;
+    courseCode: string;
+    endDate: string;   // 'dd.MM.yyyy'
+    endTime: string;   // 'HH.mm'
+}
+
+const formatDate = (y: number, m: number, d: number) =>
+    `${d.toString().padStart(2,'0')}/${m.toString().padStart(2,'0')}/${y}`;
+
+const TAViewProctoringGradingPage: React.FC = () => {
+    const taId = localStorage.getItem('userId');
+    const [mode, setMode] = useState<'proctorings' | 'gradings'>('proctorings');
+
+    // Proctoring state
+    const [exams, setExams] = useState<ExamDto[]>([]);
+
+    // Grading state
+    const [gradingDtos, setGradingDtos] = useState<GradingDto[]>([]);
+
+    // Fetch proctoring exams
+    useEffect(() => {
+        if (!taId) return;
+        fetch(`/api/ta/${taId}/assignedExams`)
+            .then(res => {
+                if (!res.ok) throw new Error(`HTTP ${res.status}`);
+                return res.json() as Promise<ExamDto[]>;
+            })
+            .then(setExams)
+            .catch(err => console.error('Failed to fetch proctoring exams:', err));
+    }, [taId]);
+
+    // Fetch grading tasks
+    useEffect(() => {
+        if (!taId) return;
+        fetch(`/api/ta/${taId}/assignedGradings`)
+            .then(res => {
+                if (!res.ok) throw new Error(`HTTP ${res.status}`);
+                return res.json() as Promise<GradingDto[]>;
+            })
+            .then(setGradingDtos)
+            .catch(err => console.error('Failed to fetch grading tasks:', err));
+    }, [taId]);
+
+    // Compute proctoring rows
+    const proctoringRows = useMemo<ProctoringRow[]>(() => {
+        const pad = (n: number) => n.toString().padStart(2, '0');
+        return exams.map(exam => {
+            const { start, finish, courseCode, examType } = exam;
+            const date = formatDate(start.year, start.month, start.day);
+            return {
+                key:      `${courseCode}-${date}-${examType}`,
+                date,
+                course:   courseCode,
+                examType,
+                level:    'BS', // adjust based on examType if needed
+                time:     `${pad(start.hour)}:${pad(start.minute)}–${pad(finish.hour)}:${pad(finish.minute)}`
+            };
+        });
+    }, [exams]);
+
+    // Compute grading rows
+    const gradingRows = useMemo<GradingRow[]>(() => {
+        const pad = (n: number) => n.toString().padStart(2, '0');
+        return gradingDtos.map(g => {
+            const { endDate, courseCode } = g;
+            const d = pad(endDate.day), m = pad(endDate.month), y = endDate.year;
+            const dateStr = `${d}.${m}.${y}`;
+            const timeStr = `${pad(endDate.hour)}.${pad(endDate.minute)}`;
+            return {
+                key:         `${courseCode}-${dateStr}`,
+                courseCode,
+                endDate:     dateStr,
+                endTime:     timeStr
+            };
+        });
+    }, [gradingDtos]);
+
+    return (
+        <div className={styles.pageWrapper}>
+            <div className={styles.mainContainer}>
+                <div className={styles.headerRow}>
+                    <BackBut to="/ta" />
+                    <div className={styles.headerCenter}>
+                        <h2>{mode === 'proctorings' ? 'Proctoring Schedule' : 'Grading Schedule'}</h2>
+                        <div className={styles.modeToggle}>
+                            <button
+                                className={`${styles.modeButton} ${mode === 'proctorings' ? styles.active : ''}`}
+                                onClick={() => setMode('proctorings')}
+                            >Proctorings</button>
+                            <button
+                                className={`${styles.modeButton} ${mode === 'gradings' ? styles.active : ''}`}
+                                onClick={() => setMode('gradings')}
+                            >Gradings</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div className={styles.tableWrapper}>
+                    {mode === 'proctorings' ? (
+                        <table className={styles.scheduleTable}>
+                            <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Course</th>
+                                <th>Type</th>
+                                <th>Level</th>
+                                <th>Time</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {proctoringRows.map(row => (
+                                <tr key={row.key}>
+                                    <td>{row.date}</td>
+                                    <td>{row.course}</td>
+                                    <td>{row.examType}</td>
+                                    <td>{row.level}</td>
+                                    <td>{row.time}</td>
+                                </tr>
+                            ))}
+                            </tbody>
+                        </table>
+                    ) : (
+                        <table className={styles.scheduleTable}>
+                            <thead>
+                            <tr>
+                                <th>Course Code</th>
+                                <th>End Date</th>
+                                <th>End Time</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {gradingRows.map(g => (
+                                <tr key={g.key}>
+                                    <td>{g.courseCode}</td>
+                                    <td>{g.endDate}</td>
+                                    <td>{g.endTime}</td>
+                                </tr>
+                            ))}
+                            </tbody>
+                        </table>
+                    )}
+                </div>
+            </div>
+        </div>
+    );
+};
+
+export default TAViewProctoringGradingPage;
+
+
+/*
 // TAViewProctoringPage.tsx
 import React, { useState, useMemo } from 'react';
 import styles from './TAViewProctoringGradingPage.module.css';
@@ -141,3 +322,4 @@ const TAViewProctoringGradingPage: React.FC = () => {
 };
 
 export default TAViewProctoringGradingPage;
+*/

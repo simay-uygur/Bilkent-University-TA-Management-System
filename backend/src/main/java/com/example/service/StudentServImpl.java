@@ -49,8 +49,10 @@ public class StudentServImpl implements com.example.service.StudentServ {
     private final TARepo taRepo;
     private final CourseOfferingRepo offeringRepo;
     private final BCryptPasswordEncoder encoder; //for now it is autowired
+    private final LogService log;
 
     public void saveAll(List<Student> students) {
+        log.info("Students saved","");
         studentRepo.saveAll(students);
     }
 
@@ -223,7 +225,7 @@ public class StudentServImpl implements com.example.service.StudentServ {
 
         if (!successfulStudents.isEmpty()) studentRepo.saveAll(successfulStudents);
         if (!successfulTAs.isEmpty())      taRepo.saveAll(successfulTAs);
-
+        log.info("Students Bulk Upload","");
         Map<String, Object> result = new HashMap<>();
         result.put("successStudentCount", successfulStudents.size());
         result.put("successTACount",      successfulTAs.size());
@@ -246,6 +248,7 @@ public class StudentServImpl implements com.example.service.StudentServ {
     public void deleteStudentById(Long id) {
         Student student = studentRepo.findStudentByStudentId(id)
                 .orElseThrow(() -> new StudentNotFoundExc(id));
+        log.info("Student Deletion","Student with id: " + id + " is deleted from the system.");
         studentRepo.delete(student);
     }
 
@@ -259,7 +262,7 @@ public class StudentServImpl implements com.example.service.StudentServ {
 
         existingStudent.setStudentName(updatedStudent.getStudentName());
         existingStudent.setStudentSurname(updatedStudent.getStudentSurname());
-
+        log.info("Student update","Student with id: " + id + " is updated in the system.");
         return studentRepo.save(existingStudent);
     }
 

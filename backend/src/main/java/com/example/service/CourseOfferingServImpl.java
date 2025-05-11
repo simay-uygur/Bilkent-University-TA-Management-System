@@ -61,7 +61,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class CourseOfferingServImpl implements CourseOfferingServ {
     
-    
+    private final LogService log;
     private final CourseOfferingRepo repo;
     private final SemesterServ semesterServ;
     private final CourseOfferingMapper courseMapper;
@@ -114,7 +114,7 @@ public class CourseOfferingServImpl implements CourseOfferingServ {
         if (existing.isPresent()) {
             throw new IllegalArgumentException("Offering already exists for this course and semester.");
         }
-
+        log.info("Offering creation", "New offering for course with code: " + offering.getCourse().getCourseCode() + " is added to the system.");
         offering.setSemester(semesterServ.getById(semesterId));
 
         return repo.save(offering);
@@ -128,6 +128,7 @@ public class CourseOfferingServImpl implements CourseOfferingServ {
         existing.setSemester(offering.getSemester());
         existing.setCourse(offering.getCourse());
         // you could update other fields here
+        log.info("Offering update", "New offering for course with code: " + offering.getCourse().getCourseCode() + " is added to the system.");
         return repo.save(existing);
     }
 
@@ -236,12 +237,13 @@ public class CourseOfferingServImpl implements CourseOfferingServ {
         exam.setExamRooms(examRooms);
         offering.getExams().add(exam);
         exam.setCourseOffering(offering);
-        examRepo.save(exam);
+        Exam newExam = examRepo.save(exam);
         //int size = offering.getExams().size();
         CourseOffering savedOffering = repo.save(offering);
 //        if (savedOffering.getExams().size() != size) {
 //            throw new NoPersistExc("Exam creation");
 //        }
+        log.info("Exam creation", "Exam with id: " + newExam.getExamId() + " is created with classroom assignment and assigned to course with code: " + savedOffering.getCourse().getCourseCode());
         return CompletableFuture.completedFuture(true);
     }
 
@@ -295,12 +297,12 @@ public class CourseOfferingServImpl implements CourseOfferingServ {
             exam.setWorkload(dto.getWorkload());     // override default if provided
         }
         // 5) save Exam (cascade will persist rooms and join-tables)
-        examRepo.save(exam);
+        Exam newExam = examRepo.save(exam);
 
         // 6) keep your offering in sync
         offering.getExams().add(exam);
-        repo.save(offering);
-
+        CourseOffering savedOffering = repo.save(offering);
+        log.info("Exam creation", "Exam with id: " + newExam.getExamId() + " is created without classroom assignment and assigned to course with code: " + savedOffering.getCourse().getCourseCode());
 //        // 4) attach them and re‐save
 //        exam.setExamRooms(rooms);
 
@@ -471,7 +473,6 @@ public class CourseOfferingServImpl implements CourseOfferingServ {
             // if we’ve assigned everyone, stop
             if (studentIndex >= students.size()) break;
         }
-
         return examRooms;
     }
 
@@ -558,6 +559,7 @@ public class CourseOfferingServImpl implements CourseOfferingServ {
         if (checkExam.getAmountOfAssignedTAs() != prevAmount + tas.size()) {
             throw new GeneralExc("TA assignment to exam failed."); // Ensure GeneralExc is correctly imported
         }
+        log.info("Proctor Assignment", "Proctors were assigned to the exam with id: " + examId);
         return CompletableFuture.completedFuture(true);
     }
 
@@ -692,7 +694,7 @@ public class CourseOfferingServImpl implements CourseOfferingServ {
                 }
             }
         }
-
+        log.info("Bulk Upload of Exams", "");
         return Map.of(
                 "successCount", success,
                 "failedCount",  failed.size(),
@@ -751,7 +753,9 @@ public class CourseOfferingServImpl implements CourseOfferingServ {
         LocalDate today = LocalDate.now();
         if(repo.existsByCourse_CourseCodeAndSemester_YearAndSemester_Term(off.getCourse().getCourseCode(), off.getSemester().getId(), determineTerm(today.getMonth())))
             throw new GeneralExc("Such offering already exists");
+        log.info("Offering creation", "Offering is saved.");
         repo.save(off);
         return repo.existsById(off.getId());
     }
+    
 }

@@ -13,13 +13,14 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class SemesterServImpl implements SemesterServ {
     private final SemesterRepo repo;
-
+    private final LogService log;
     @Override
     public Semester create(Semester semester) {
         Optional<Semester> existing = repo.findByYearAndTerm(semester.getYear(), semester.getTerm());
         if (existing.isPresent()) {
             throw new IllegalArgumentException("Semester for year " + semester.getYear() + " and term " + semester.getTerm() + " already exists.");
         }
+        log.info("Semested is created", "");
         return repo.save(semester);
     }
 
@@ -29,6 +30,7 @@ public class SemesterServImpl implements SemesterServ {
         existing.setTerm(semester.getTerm());
         existing.setYear(semester.getYear());
         existing.setOfferings(semester.getOfferings());
+        log.info("Semested Updation", "Semester with id: " + id + " is updated");
         return repo.save(existing);
     }
 
@@ -45,6 +47,7 @@ public class SemesterServImpl implements SemesterServ {
 
     @Override
     public void delete(Long id) {
+        log.info("Semested Deletion", "Semester with id: " + id + " is deleted");
         repo.deleteById(id);
     }
 

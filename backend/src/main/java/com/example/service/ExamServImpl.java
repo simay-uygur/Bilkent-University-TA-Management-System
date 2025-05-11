@@ -5,10 +5,7 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 import com.example.dto.*;
@@ -33,7 +30,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.lowagie.text.*;
 import com.lowagie.text.pdf.*;
-import com.example.dto.StudentMiniDto;
 
 import java.io.ByteArrayOutputStream;
 import java.util.*;
@@ -46,6 +42,7 @@ public class ExamServImpl implements ExamServ{
     private final ExamRepo examRepo;
     private final CourseOfferingServ courseOfferingServ;
     private final ClassRoomRepo classRoomRepo;
+    private final LogService log;
 
     @Override
     public ExamDto getExam(Exam exam) {
@@ -73,6 +70,7 @@ public class ExamServImpl implements ExamServ{
     @Override
     public boolean createExam(Exam exam) {
         examRepo.save(exam);
+        log.info("Exam creation", "New exam is created.");
         return examRepo.existsById(exam.getExamId());
     }
     
@@ -195,7 +193,7 @@ public class ExamServImpl implements ExamServ{
         if (!toSave.isEmpty()) {
             examRepo.saveAll(toSave);
         }
-
+        log.info("Bulk Exam Creation", "");
         return Map.of(
                 "successCount", toSave.size(),
                 "failedCount",  failed.size(),
@@ -246,7 +244,7 @@ public class ExamServImpl implements ExamServ{
 
             groupedData.put(roomCode, roster);
         }
-
+        log.info("Exam Export", "Exam with id: " +examId+ " is exported in the pdf format.");
         // render PDF via OpenPDF
         return exportStudentsToPdf(groupedData);
     }
@@ -284,7 +282,7 @@ public class ExamServImpl implements ExamServ{
 
             groupedData.put(roomCode, roster);
         }
-
+        log.info("Exam Export", "Exam with id: " +examId+ " is exported in the pdf format.");
         // render PDF via OpenPDF
         return exportStudentsToPdf(groupedData);
     }
@@ -313,21 +311,21 @@ public class ExamServImpl implements ExamServ{
                 table.addCell("ID");
                 table.addCell("Name");
                 table.addCell("Surname");
-                table.addCell("TA?");
+                //table.addCell("TA?");
 
                 for (StudentMiniDto s : roster) {
                     table.addCell(String.valueOf(s.getId()));
                     table.addCell(s.getName());
                     table.addCell(s.getSurname());
-                    table.addCell(
-                            Boolean.TRUE.equals(s.getIsTa()) ? "Yes" : "No"
-                    );
+//                    table.addCell(
+//                            Boolean.TRUE.equals(s.getIsTa()) ? "Yes" : "No"
+//                    );
                 }
 
                 document.add(table);
                 document.newPage();
             }
-
+            log.info("Student Export", "Students were exported in the pdf format.");
             document.close();
             return out.toByteArray();
         } catch (com.lowagie.text.DocumentException e) {

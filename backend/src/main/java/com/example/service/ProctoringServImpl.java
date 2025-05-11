@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 import com.example.entity.General.DayOfWeek;
+import com.example.util.TaAvailabilityChecker;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
@@ -15,6 +16,7 @@ import com.example.entity.Actors.TA;
 import com.example.entity.Courses.Lesson;
 import com.example.entity.Courses.Section;
 import com.example.entity.Exams.Exam;
+import com.example.entity.General.DayOfWeek;
 import com.example.entity.General.Event;
 import com.example.entity.Tasks.TaTask;
 import com.example.repo.ExamRepo;
@@ -31,17 +33,19 @@ public class ProctoringServImpl implements ProctoringServ{
     private final CourseOfferingServ courseOfferingServ;
     private final ExamRepo examRepo;
     private final TARepo taRepo;
+    private final TaAvailabilityChecker availabilityChecker;
     @Override
     @Async("setExecutor")
     public CompletableFuture<List<ProctoringDto>> getProctoringInfo(Integer examId, String courseCode) {
         List<ProctoringDto> availableTas = new ArrayList<>();
         Exam exam = examRepo.findById(examId).orElseThrow(() -> new RuntimeException("Exam not found"));
         Event examDuration = exam.getDuration();
-        //List<TA> tas = offering.getAssignedTas();
-        List<TA> tas = taRepo.findAll();
+        String[] parts = courseCode.split("-");
+        List<TA> tas = taRepo.findAllByDepartment(parts[0]);
+        //List<TA> tas = taRepo.findAll();
         for (TA ta : tas) {
             if (ta.isActive() && !ta.isDeleted() && 
-                !hasAnyDutiesOrLessons(ta, examDuration)) {
+                availabilityChecker.isAvailable(ta, examDuration)) { // should be checked if it works
                 ProctoringDto proctoringDto = new ProctoringDto();
                 proctoringDto.setTaId(ta.getId());
                 proctoringDto.setName(ta.getName());
@@ -56,36 +60,6 @@ public class ProctoringServImpl implements ProctoringServ{
             }
         }
         return CompletableFuture.completedFuture(availableTas);
-    }
-
-    private boolean hasAnyDutiesOrLessons(TA ta, Event examDuration) {
-        // 1) convert the exam's start into a java.time.DayOfWeek
-        LocalDate examDate = examDuration.getStart().toLocalDate();
-        DayOfWeek examDow  = DayOfWeek.valueOf(examDate.getDayOfWeek().name());
-
-        // 2) check all TA‐tasks as before
-        for (TaTask task : ta.getTaTasks()) {
-            if (task.getTask().getDuration().has(examDuration)) {
-                return true;
-            }
-        }
-
-        // 3) for each lesson, first match day‐of‐week, then time‐of‐day
-        for (Section section : ta.getSectionsAsStudent()) {
-            for (Lesson lesson : section.getLessons()) {
-                if (lesson.getDay() != examDow) {
-                    continue; // different weekday → no conflict
-                }
-                /*if (timeOverlap(lesson.getDuration(), examDuration)) {
-                    return true;
-                }*/
-                if(examDuration.hasLesson(getDay(lesson.getDay()), examDuration)){
-                    return true;
-                }
-            }
-        }
-
-        return false;
     }
 
     private int getDay(DayOfWeek day){
@@ -108,31 +82,6 @@ public class ProctoringServImpl implements ProctoringServ{
                 throw new IllegalArgumentException("Invalid day: " + day);
         }
     }
-
-    /*private boolean timeOverlap(Event a, Event b) {
-        int aStart = a.getStart().getHour() * 60 + a.getStart().getMinute();
-        int aEnd   = a.getFinish().getHour() * 60 + a.getFinish().getMinute();
-        int bStart = b.getStart().getHour() * 60 + b.getStart().getMinute();
-        int bEnd   = b.getFinish().getHour() * 60 + b.getFinish().getMinute();
-        return aStart < bEnd && bStart < aEnd;
-    }*/
-
-//    private boolean hasAnyDutiesOrLessons(TA ta, Event examDuration) {
-//        // Check if the TA has any duties or lessons that conflict with the exam duration
-//        for (TaTask task : ta.getTaTasks()) {
-//            if (task.getTask().getDuration().has(examDuration)) {
-//                return true;
-//            }
-//        }
-//        for (Section section : ta.getSectionsAsStudent()) {
-//            for (Lesson lesson : section.getLessons()) {
-//                if (lesson.getDuration().has(examDuration)) {
-//                    return true;
-//                }
-//            }
-//        }
-//        return false;
-//    }
 
     private boolean hasProctoringDayBeforeOrAfter(TA ta, Event examDuration) {
         LocalDate newDate = examDuration

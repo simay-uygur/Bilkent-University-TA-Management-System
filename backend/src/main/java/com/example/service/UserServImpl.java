@@ -3,7 +3,6 @@ package com.example.service;
 import java.util.List;
 import java.util.Optional;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -11,6 +10,8 @@ import com.example.entity.Actors.TA;
 import com.example.entity.Actors.User;
 import com.example.exception.GeneralExc;
 import com.example.exception.UserExistsExc;
+import com.example.exception.UserNotFoundExc;
+import com.example.exception.UserNotFoundExc;
 import com.example.repo.TARepo;
 import com.example.repo.UserRepo;
 
@@ -26,7 +27,6 @@ public class UserServImpl implements UserServ{
     private final UserRepo repo; 
     private final TARepo taRepo;
     private final PasswordEncoder encoder;
-
     
     @Override
     public List<User> getAllUsers(){
@@ -83,6 +83,16 @@ public class UserServImpl implements UserServ{
     @Override
     public User getUserByEmail(String email) {
         return repo.findUserByWebmail(email).orElse(null);
+    }
+    @Override
+    public boolean changePasswordById(String password, Long userId) {
+        User user = repo.findById(userId)
+        .orElseThrow(() -> new UserNotFoundExc(userId));
+
+        String hashed = encoder.encode(password);
+        user.setPassword(hashed);
+        repo.save(user);
+        return true;
     }
     
 }

@@ -46,7 +46,7 @@ public class DeanOfficeServImpl implements DeanOfficeServ {
     private final CourseRepo courseRepo;
     private final CourseOfferingMapper courseOfferingMapper;
     private final ExamRepo examRepo;
-    
+    private final LogService log;
 
     @Override
     @Transactional
@@ -62,7 +62,7 @@ public class DeanOfficeServImpl implements DeanOfficeServ {
         // wire up both sides
         deanOffice.setFaculty(faculty);
         faculty.setDeanOffice(deanOffice);
-
+        log.info("New Dean Office Member is created", "");
         // now saving the faculty will cascade to persist the DeanOffice
         return facultyRepo.save(faculty)
                 .getDeanOffice();
@@ -88,6 +88,7 @@ public class DeanOfficeServImpl implements DeanOfficeServ {
 
     @Override
     public void deleteById(Long id) {
+        log.info("Dean Office Member is deleted", "");
         deanOfficeRepo.deleteById(id);
     }
 

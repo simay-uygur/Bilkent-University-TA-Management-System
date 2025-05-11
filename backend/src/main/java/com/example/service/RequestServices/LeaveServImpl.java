@@ -21,6 +21,7 @@ import com.example.repo.ExamRepo;
 import com.example.repo.RequestRepos.LeaveRepo;
 import com.example.repo.TARepo;
 import com.example.repo.TaTaskRepo;
+import com.example.service.LogService;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -34,7 +35,7 @@ public class LeaveServImpl implements LeaveServ{
     private final TaTaskRepo taTaskRepo;
     private final DepartmentRepo depRepo;
     private final ExamRepo examRepo;
-
+    private final LogService log;
     @Async("setExecutor")
     @Override
     public void createLeaveRequest(LeaveDTO dto, MultipartFile file, Long senderId) throws IOException {
@@ -57,7 +58,7 @@ public class LeaveServImpl implements LeaveServ{
             leaveRequest.setAttachmentFilename(file.getOriginalFilename());
             leaveRequest.setAttachmentContentType(file.getContentType());
         }
-
+        log.info("Leave Request Creation","Leave request is created by TA with id: " + senderId + " and sent to " +dto.getDepName()+ " Department");
         leaveRepo.save(leaveRequest);
     }
 
@@ -74,8 +75,12 @@ public class LeaveServImpl implements LeaveServ{
             examRepo.save(exam);
         }
         sender.setActive(false);
+        req.setRejected(false);
         req.setApproved(true);
+        req.setPending(false);
+        log.info("Leave Request Approval","Leave request with id: " +requestId+ " is approved by " +req.getReceiver().getName()+ " Department");
         taRepo.saveAndFlush(sender);
+        leaveRepo.save(req);
         return true;
     }
 
@@ -85,6 +90,7 @@ public class LeaveServImpl implements LeaveServ{
         req.setApproved(false);
         req.setRejected(true);
         req.setPending(false);
+        log.info("Leave Request Rejection","Leave request with id: " +requestId+ " is rejected by " +req.getReceiver().getName()+ " Department");
         leaveRepo.save(req);
     }
 

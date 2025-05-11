@@ -9,6 +9,7 @@ import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
 import com.example.entity.General.DayOfWeek;
+import com.example.util.TaAvailabilityChecker;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -61,6 +62,9 @@ public class TaskServImpl implements TaskServ {
     private final CourseOfferingServ courseOfferingServ;
     private final RequestServ reqServ;
     private final TaMapper taMapper;
+    private final TaAvailabilityChecker availabilityChecker;
+    private final LogService log;
+
     @Override
     public boolean unassignTasToTaskByTheirId(String sectionCode, int taskId, List<Long> taIds){
         Task task = taskRepo.findById(taskId)
@@ -73,6 +77,7 @@ public class TaskServImpl implements TaskServ {
                         .orElseThrow(() -> new TaNotFoundExc(taId));
                 unassignTA(task, ta, section.getInstructor().getId());
             }
+            log.info("TAs unassignment" ,"TAs were unassigned from the task with id: " + taskId);
             return true;
         } else {
             throw new GeneralExc("Task not found in the specified section!");
@@ -90,6 +95,7 @@ public class TaskServImpl implements TaskServ {
                         .orElseThrow(() -> new TaNotFoundExc(taId));
                 assignTA(task, ta, section.getInstructor().getId());
             }
+            log.info("TAs assignment" ,"TAs were assigned to the task with id: " + taskId);
             return true;
         } else {
             throw new GeneralExc("Task not found in the specified section!");
@@ -124,6 +130,7 @@ public class TaskServImpl implements TaskServ {
         sectionRepo.save(section);
 
         // 7) finally delete the task
+        log.info("Task deletion(hard_delete)" ,"Task with id: " + taskId + "is deleted from the system.");
         taskRepo.delete(task);
         return true;
     }
@@ -132,12 +139,17 @@ public class TaskServImpl implements TaskServ {
         if (taskDto == null) {
             throw new GeneralExc("Task cannot be null!");
         }
+        if (taskDto.getType().equals("Grading")){
+            taskDto.getDuration().setStart(new Date().currenDate());
+        }
+        if (taskDto.getDuration().getStart().isAfter(taskDto.getDuration().getFinish()))
+            throw new GeneralExc("Wrong duration! Start time can not be after the finish time.");
         Section section = sectionRepo.findBySectionCodeIgnoreCase(sectionCode)
                 .orElseThrow(() -> new GeneralExc("Section not found!"));
         Task task = new Task(section, taskDto.getDuration(),taskDto.getDescription(), taskDto.getType(), 0);
         checkAndUpdateStatusTask(task);
         Task newTask = taskRepo.save(task);
-
+        log.info("Task creation" ,"Task with id: " + newTask.getTaskId() + "is created in the system.");
         return taskMapper.toDto(newTask);
     }
 
@@ -156,6 +168,7 @@ public class TaskServImpl implements TaskServ {
         if (!t.getStatus().equals(TaskState.DELETED)) {
             throw new NoPersistExc("Deletion") ;
         }
+        log.info("Task deletion(soft_delete)" ,"Task with id: " + id + "is deleted from the system.");
         return true;
     }
 
@@ -177,7 +190,7 @@ public class TaskServImpl implements TaskServ {
         }
         //sectionRepo.save(parentSection);
         taskRepo.saveAndFlush(task);
-
+        log.info("Task deletion(hard_delete)" ,"Task with id: " + id + "is deleted from the system.");
         // 4) Finally delete the Task
         taskRepo.delete(task);
         return true;
@@ -198,6 +211,7 @@ public class TaskServImpl implements TaskServ {
         if (t.getStatus().equals(TaskState.DELETED)) {
             throw new NoPersistExc("Restoration") ;
         }
+        log.info("Task restoration" ,"Task with id: " + id + "is restored to the system.");
         return true;
     }
 
@@ -223,7 +237,7 @@ public class TaskServImpl implements TaskServ {
         existing.setTaskType(incoming.getTaskType());
         existing.setStatus(incoming.getStatus());
         existing.setSection(incoming.getSection());
-
+        log.info("Task update" ,"Task with id: " + task_id + "is updated in the system.");
         taskRepo.save(existing);
         return taskRepo.existsById(task_id);
     }
@@ -262,6 +276,7 @@ public class TaskServImpl implements TaskServ {
             }
             taTaskRepo.saveAndFlush(taTask);
         }
+        log.info("TAs assignment to the task" ,"TAs are assigned to the task with id: " + task_id);
         return true;
     }
 
@@ -275,6 +290,7 @@ public class TaskServImpl implements TaskServ {
             assignTA(task, ta, instrId);
         }
         taskRepo.saveAndFlush(task);
+        log.info("TAs assignment to the task" ,"TAs are assigned to the task with id: " + taskId);
         return getTAsByTaskId(taskId);
     }
 
@@ -286,12 +302,13 @@ public class TaskServImpl implements TaskServ {
             throw new GeneralExc("TA is already assigned to this task");
         }
 
-        if (hasDutyOrLessonOrExam(ta, task.getDuration()))
+        if (hasDutyOrLessonOrExam(ta, task.getDuration()) && !task.getTaskType().toString().equals("Grading"))
             throw new GeneralExc("TA has a duty or lesson or exam on the same duration as the task");
 
         task.assignTo(ta);
         taskRepo.saveAndFlush(task);
         reqServ.deleteAllReceivedAndSendedSwapAndTransferRequestsBySomeTime(ta, task.getDuration());
+        log.info("TA assignment to the task" ,"TA is assigned to the task with id: " + task.getTaskId());
         return true;
     }
 
@@ -308,7 +325,7 @@ public class TaskServImpl implements TaskServ {
         for (TaTask taTask : snapshot) {
             unassignTA(task, taTask.getTaOwner(), instr_id);
         }
-
+        log.info("TAs unassignment from the task" ,"TAs are unassigned from the task with id: " + task.getTaskId());
         // Persist the removals
         taskRepo.saveAndFlush(task);
         return true;
@@ -328,7 +345,7 @@ public class TaskServImpl implements TaskServ {
         ta.getTaTasks().remove(link);
         task.removeTA();           // decrement your counter
         taTaskRepo.delete(link);   // delete the row
-
+        log.info("TA unassignment from the task" ,"TA is unassigned from the task with id: " + task.getTaskId());
         return true;
     }
     @Override
@@ -483,7 +500,7 @@ public class TaskServImpl implements TaskServ {
     @Override
     public boolean hasDutyOrLessonOrExam(TA ta, Event duration) {
         LocalDate currentDate = duration.getStart().toLocalDate();
-        DayOfWeek currentDow  = DayOfWeek.valueOf(currentDate.getDayOfWeek().name());
+       // DayOfWeek currentDow  = DayOfWeek.valueOf(currentDate.getDayOfWeek().name());
 
         for (TaTask taTask : ta.getTaTasks()) {
             if (taTask.getTask().getDuration().has(duration) && !taTask.getTask().getStatus().equals(TaskState.DELETED)) {
@@ -491,16 +508,11 @@ public class TaskServImpl implements TaskServ {
             }
         }
         // 3) for each lesson, first match day‐of‐week, then time‐of‐day
-        for (Section section : ta.getSectionsAsStudent()) {
-            for (Lesson lesson : section.getLessons()) {
-                if (lesson.getDay() != currentDow) {
-                    continue; // different weekday → no conflict
-                }
-                if(duration.hasLesson(getDay(lesson.getDay()), duration)){
-                    return true;
-                }
-            }
+        boolean hasOverlappingLesson = availabilityChecker.hasOverlappingLesson(ta, duration);
+        if (hasOverlappingLesson) {
+            return true;
         }
+
         for (Exam exam : ta.getExams()){
             if (exam.getDuration().has(duration)) {
                 return true;
@@ -537,6 +549,9 @@ public class TaskServImpl implements TaskServ {
         int bEnd   = b.getFinish().getHour() * 60 + b.getFinish().getMinute();
         return aStart < bEnd && bStart < aEnd;
     }
+
+
+
 }
 /*                if (duration.hasLesson(getDay(lesson.getDay()), lesson.getDuration())) {
                     return true;

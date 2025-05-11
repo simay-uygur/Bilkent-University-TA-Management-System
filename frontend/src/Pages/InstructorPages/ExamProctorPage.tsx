@@ -139,7 +139,7 @@ const handleConfirm = async () => {
       instrId: instrId,
       examId: exam.examId,
       examName: exam.type,
-      
+
       requiredTas: confirmRequest.requiredTas,
       tasLeft: confirmRequest.requiredTas,
 
@@ -193,54 +193,63 @@ const handleConfirm = async () => {
     return <LoadingPage />;
   }
 
-  return (
-    <div className={styles.container}>
-      <div className={styles.headerRow}>
-        <BackBut to="/instructor" />
-        <h1 className={styles.title}>Exam Proctoring for {courseCode}</h1>
+  // Add this wrapper div in the return statement:
+return (
+  <div className={styles.container}>
+    <div className={styles.headerRow}>
+      <BackBut to="/instructor" />
+      <h1 className={styles.title}>Exam Proctoring for {courseCode}</h1>
+    </div>
+
+    {fetchError && (
+      <div className={styles.errorBanner}>
+        <p>{fetchError}</p>
+        <button 
+          onClick={() => window.location.reload()}
+          className={styles.retryButton}
+        >
+          Retry
+        </button>
       </div>
+    )}
 
-      {fetchError && (
-        <div className={styles.errorBanner}>
-          <p>{fetchError}</p>
-          <button 
-            onClick={() => window.location.reload()}
-            className={styles.retryButton}
-          >
-            Retry
-          </button>
-        </div>
-      )}
-
-      {submitSuccess && (
-        <div className={styles.successBanner}>
-          Your proctor request was submitted successfully!
-        </div>
-      )}
-
-      <div className={styles.mainContainer}>
-        <ExamProctorReq
-          exams={exams}
-          onSubmitRequest={handleSubmitRequest}
-          resetExamId={resetExamId}
-          onResetDone={() => setResetExamId(null)}
-          submitting={submitting}
-        />
+    {submitSuccess && (
+      <div className={styles.successBanner}>
+        Your proctor request was submitted successfully!
       </div>
+    )}
 
-      {errorMsg && (
-        <ErrPopUp message={errorMsg} onConfirm={() => setErrorMsg(null)} />
-      )}
-
-      {confirmRequest && (
-        <ConPop
-          message={`Request ${confirmRequest.requiredTas} TAs for this exam?`}
-          onConfirm={handleConfirm}
-          onCancel={() => setConfirmRequest(null)}
-        />
+    <div className={styles.mainContainer}>
+      {exams.length > 0 ? (
+        <div className={styles.examCardsContainer}>
+          <ExamProctorReq
+            exams={exams}
+            onSubmitRequest={handleSubmitRequest}
+            resetExamId={resetExamId}
+            onResetDone={() => setResetExamId(null)}
+            submitting={submitting}
+          />
+        </div>
+      ) : (
+        <div className={styles.noExams}>
+          <p>No exams available for proctor requests.</p>
+        </div>
       )}
     </div>
-  );
+
+    {errorMsg && (
+      <ErrPopUp message={errorMsg} onConfirm={() => setErrorMsg(null)} />
+    )}
+
+    {confirmRequest && (
+      <ConPop
+        message={`Request ${confirmRequest.requiredTas} TAs for this exam?`}
+        onConfirm={handleConfirm}
+        onCancel={() => setConfirmRequest(null)}
+      />
+    )}
+  </div>
+);
 };
 
 export default ExamProctorPage;

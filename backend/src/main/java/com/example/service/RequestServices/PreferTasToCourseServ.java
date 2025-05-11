@@ -9,4 +9,6 @@ public interface PreferTasToCourseServ {
     List<PreferTasToCourseDto> getRequestsOfTheDeparment(String depName);
     List<PreferTasToCourseDto> getRequestsOfTheInstructor(Long instrId);
     PreferTasToCourseDto getRequestById(Long reqId);
+    boolean approve(Long reqId);
+    boolean reject(Long reqId);
 }

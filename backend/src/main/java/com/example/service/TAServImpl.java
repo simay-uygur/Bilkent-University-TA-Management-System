@@ -7,12 +7,14 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.usermodel.WorkbookFactory;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -30,11 +32,13 @@ import com.example.entity.Courses.Section;
 import com.example.entity.Exams.Exam;
 import com.example.entity.General.AcademicLevelType;
 import com.example.entity.General.Date;
-import com.example.entity.Schedule.Schedule;
-import com.example.entity.Schedule.ScheduleItem;
 import com.example.entity.Schedule.ScheduleItemDto;
+import com.example.entity.Tasks.TaGradingDto;
+import com.example.entity.Tasks.TaProctorDto;
 import com.example.entity.Tasks.TaTask;
 import com.example.entity.Tasks.Task;
+import com.example.entity.Tasks.TaskState;
+import com.example.entity.Tasks.TaskType;
 import com.example.exception.GeneralExc;
 import com.example.exception.NoPersistExc;
 import com.example.exception.UserNotFoundExc;
@@ -66,9 +70,9 @@ public class TAServImpl implements TAServ {
     private final TaTaskMapper taTaskMapper;
     private final ExamRepo examRepo;
     private final ExamMapper examMapper;
-private final SectionMapper sectionMapper;
+    private final SectionMapper sectionMapper;
     private final SectionRepo sectionRepo;
-   
+    private final LogService log;
 
     @Override
 public List<TaTaskDto> getTATasks(Long id) {
@@ -170,7 +174,7 @@ public List<TaTaskDto> getTATasks(Long id) {
         if (!freshTa.isDeleted()) {
             throw new NoPersistExc("Deletion");
         }
-        
+        log.info("TA deletion","TA with id: " + id + " is deleted.");
         return true;
     }
     @Override
@@ -191,7 +195,7 @@ public List<TaTaskDto> getTATasks(Long id) {
         if (freshTa.isDeleted()) {
             throw new NoPersistExc("Restoration");
         }
-        
+        log.info("TA restored","TA with id: " + id + " is restored.");
         return true;
     }
     
@@ -211,6 +215,7 @@ public List<TaTaskDto> getTATasks(Long id) {
         if (!taskServ.checkAndUpdateStatusTask(task)) {
             throw new TaskIsNotActiveExc();
         }
+        log.info("TA to Task assignment","TA with id: " + id + " is assigned to task with id: "+task.getTaskId());
         //taskServ.assignTA(task.getTaskId(), existingTA) ;
         return true ;
     }
@@ -332,7 +337,7 @@ public List<TaTaskDto> getTATasks(Long id) {
             repo.saveAll(successfulTAs);
             repo.flush();
         }
-
+        log.info("TAs Bulk Upload","");
         Map<String, Object> result = new HashMap<>();
         result.put("successCount", successfulTAs.size());
         result.put("failedCount", failedRows.size());
@@ -362,14 +367,47 @@ public List<TaTaskDto> getTATasks(Long id) {
             taDtos.add(taDto);
         }
         return taDtos;
-    } */
+    }*/
 
     @Override
-    public List<ExamDto> getAssignedExamsOfTa(Long taId){
-        return examRepo.findAllByTaId(taId)
-                       .stream()
-                       .filter(Exam::getIsActive)   // optional – drop if you want inactive too
-                       .map(examMapper::toDto)
-                       .toList();
+    @Async("setExecutor")
+    @Transactional
+    public CompletableFuture<List<TaProctorDto>> getAssignedExamsOfTa(Long taId){
+        return CompletableFuture.completedFuture(examRepo.findAllByTaId(taId)
+        .stream()
+        .filter(Exam::getIsActive)   // optional – drop if you want inactive too
+        .map(this::toDto)
+        .toList());
+    }
+
+    @Override
+    @Async("setExecutor")
+    @Transactional
+    public CompletableFuture<List<TaGradingDto>> getGradingsOfTheTa(Long taId){
+        List<TaskState> allowed = List.of(TaskState.ACTIVE, TaskState.NOT_ACTIVE);
+        List<TaTask> results =
+            taTaskRepo.findAllByTaOwner_IdAndTask_TaskTypeAndTask_StatusIn(
+                taId,
+                TaskType.Grading,
+                allowed
+            );
+        return CompletableFuture.completedFuture(results.stream().map(this::toDto).toList());
+    }
+
+    private TaGradingDto toDto(TaTask e){
+        TaGradingDto dto = new TaGradingDto();
+        String[] parts = e.getTask().getSection().getSectionCode().split("-");
+        dto.setCourseCode(parts[0]+"-"+parts[1]);
+        dto.setEndDate(e.getTask().getDuration().getFinish());
+        return dto;
+    }
+
+    private TaProctorDto toDto(Exam exam){
+        TaProctorDto dto = new TaProctorDto();
+        dto.setCourseCode(exam.getCourseOffering().getCourse().getCourseCode());
+        dto.setStart(exam.getDuration().getStart());
+        dto.setFinish(exam.getDuration().getFinish());
+        dto.setExamType(exam.getDescription());
+        return dto;
     }
 }
