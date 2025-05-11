@@ -6,6 +6,7 @@ import java.util.List;
 import com.example.entity.General.Faculty;
 import com.example.entity.Requests.PreferTasToCourse;
 import com.example.entity.Requests.ProctorTaInDepartment;
+import com.example.entity.Requests.ProctorTaInFaculty;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
@@ -48,6 +49,14 @@ public class Department {
 
     @OneToMany(mappedBy = "receiver", fetch = FetchType.LAZY, cascade= CascadeType.REMOVE)
     private List<PreferTasToCourse> preferTasRequests = new ArrayList<>();
+
+    @OneToMany(
+        mappedBy = "sender",
+        fetch = FetchType.LAZY,
+        cascade = CascadeType.ALL,
+        orphanRemoval = true
+    )
+    private List<ProctorTaInFaculty> sentToDeanOfficeRequests = new ArrayList<>();
 
     
 }
