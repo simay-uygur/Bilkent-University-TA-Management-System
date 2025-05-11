@@ -1,6 +1,7 @@
 package com.example.service.RequestServices;
 
 import com.example.entity.General.Date;
+import com.example.entity.Requests.RequestType;
 import org.springframework.stereotype.Service;
 
 import com.example.entity.Actors.DeanOffice;
@@ -54,6 +55,15 @@ public class ProctorTaInFacultyServImpl implements ProctorTaInFacultyServ{
         facReq.setCourseCode(depReq.getCourseCode());
         facReq.setExam( depReq.getExam() );
         facReq.setDescription( depReq.getDescription());
+
+        facReq.setRequestType(RequestType.ProctorTaInFaculty);   // pick the enum you use
+        //facReq.setDescription(depReq.getDescription());             // keep the old text
+        facReq.setCourseCode(depReq.getCourseCode());               // e.g.  "CS-464"
+        facReq.setInstrId(depReq.getSender().getId());
+
+        // after you create facReq:
+        facReq.setInstrId(depReq.getSender().getId()); // for now it is null
+
         LocalDateTime now = LocalDateTime.now();
         Date time = new Date();
         time.setYear(now.getYear());
@@ -64,24 +74,49 @@ public class ProctorTaInFacultyServImpl implements ProctorTaInFacultyServ{
         facReq.setSentTime(time);
         //facReq.setApproved(false);
 
-
-
         facRepo.save(facReq);   // persists & assigns ID
-
         depRepo.delete(depReq); // delete from the department
         log.info("Proctor Ta in Department Request with id: "+depReqId+" is Transferred to the Faculty", "");
         return toDto(facReq);
     }
+    private ProctorTaInFacultyDto toDto(ProctorTaInFaculty r) {
 
-    private ProctorTaInFacultyDto toDto(ProctorTaInFaculty facReq) {
         ProctorTaInFacultyDto dto = new ProctorTaInFacultyDto();
-        dto.setDepName(facReq.getSender().getName());
-        dto.setExamName(facReq.getExam().getDescription());
-        dto.setExamId(facReq.getExam().getExamId());
-        dto.setRequiredTas(facReq.getRequiredTas());
-        dto.setTasLeft(facReq.getTasLeft());
+
+
+        dto.setRequestId   (r.getRequestId());
+        dto.setRequestType (r.getRequestType());
+        dto.setDescription (r.getDescription());
+        dto.setSenderName  (r.getSender().getName());                 // department name
+        dto.setReceiverName(r.getReceiver().getName());           // dean-office user’s name, adapt if needed
+        dto.setSentTime    (r.getSentTime());
+        dto.setCourseCode  (r.getCourseCode());
+        dto.setPending     (r.isPending());
+        dto.setApproved    (r.isApproved());
+        dto.setRejected    (r.isRejected());
+
+
+        dto.setDepName     (r.getSender().getName());
+        dto.setFacultyName (r.getSender().getFaculty().getCode());
+        dto.setDean_id     (r.getReceiver().getId());
+        dto.setInstrId     (r.getInstrId());
+        dto.setExamName    (r.getExam().getDescription());
+        dto.setExamId      (r.getExam().getExamId());
+        dto.setRequiredTas (r.getRequiredTas());
+        dto.setTasLeft     (r.getTasLeft());
+
         return dto;
     }
+//
+//    private ProctorTaInFacultyDto toDto(ProctorTaInFaculty facReq) {
+//        ProctorTaInFacultyDto dto = new ProctorTaInFacultyDto();
+//        dto.setDepName(facReq.getSender().getName());
+//        dto.setExamName(facReq.getExam().getDescription());
+//        dto.setExamId(facReq.getExam().getExamId());
+//        dto.setRequiredTas(facReq.getRequiredTas());
+//        dto.setTasLeft(facReq.getTasLeft());
+//        return dto;
+//    }
 
     @Override
     public boolean approve(Long reqId, Long approverId) {
