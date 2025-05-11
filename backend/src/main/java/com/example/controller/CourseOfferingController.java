@@ -154,9 +154,6 @@ public class CourseOfferingController {
     ) {
         return service.getExamSlotInfo(courseCode, duration);
     }
-
-
-
 }
 
 

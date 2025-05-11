@@ -69,7 +69,7 @@ public class CourseOfferingServImpl implements CourseOfferingServ {
     private final TARepo taRepo;
     private final StudentRepo studentRepo;
     private final ExamRepo examRepo;
-
+    private final MailService mail;
     @Override
     public List<CourseOfferingDto> getByTermAndYear(String term, int year) {
         List<CourseOffering> offerings = repo.findBySemester_TermAndSemester_Year(term, year)
@@ -139,14 +139,6 @@ public class CourseOfferingServImpl implements CourseOfferingServ {
 
         return courseMapper.toDto(off);
     }
-    /* public List<CourseOfferingDto> getByCourseCode(String code) {
-        List<CourseOffering> off = repo.findByCourseCode(code)
-                .orElseThrow(() -> new IllegalArgumentException("Offering not found: " + code));
-
-        return off.stream()
-                .map(courseMapper::toDto)
-                .collect(Collectors.toList());
-    } */
 
     @Override
     public List<CourseOffering> getAll() {
@@ -199,20 +191,6 @@ public class CourseOfferingServImpl implements CourseOfferingServ {
                 return Term.FALL;
         }
     }
-//    private Term determineTerm(Month month) {
-//        if (month.getValue() >= Month.MARCH.getValue() &&
-//            month.getValue() <= Month.MAY.getValue()) {
-//            return Term.SPRING;
-//        }
-//        else if (month.getValue() >= Month.JUNE.getValue() &&
-//                 month.getValue() <= Month.AUGUST.getValue()) {
-//            return Term.SUMMER;
-//        }
-//        else {
-//            // September–February (incl. December, January, February) → FALL
-//            return Term.FALL;
-//        }
-//    }
 
     @Transactional
     @Async("setExecutor")
@@ -260,26 +238,10 @@ public class CourseOfferingServImpl implements CourseOfferingServ {
             throw new GeneralExc("No current offering found for course: " + courseCode);
         }
 
-        // 2) build and save only the exam header
         Exam exam = new Exam();
         exam.setDuration(dto.getDuration());         // date & time window
         exam.setDescription(dto.getType());          // e.g. “Midterm 1”
-        exam.setRequiredTAs(dto.getRequiredTas());  // how many TAs you’ll need -  maybe not needed
-
-//        // 3) now map your List<String> → List<ExamRoom>
-//        List<ExamRoom> rooms = dto.getExamRooms().stream()
-//                .map(code -> {
-//                    ClassRoom cr = classRoomRepo
-//                            .findClassRoomByClassroomId(code)
-//                            .orElseThrow(() -> new GeneralExc("Classroom not found: " + code));
-//
-//                    ExamRoom er = new ExamRoom();
-//                    er.setExam(exam);
-//                    er.setExamRoom(cr);
-//                    return er;
-//                })
-//                .collect(Collectors.toList());
-//
+        exam.setRequiredTAs(dto.getRequiredTas());  // how ma
 
         if (dto.getWorkload() != null) {
             exam.setWorkload(dto.getWorkload());
@@ -549,6 +511,7 @@ public class CourseOfferingServImpl implements CourseOfferingServ {
             if (!exam.getAssignedTas().contains(ta)) {
                 exam.getAssignedTas().add(ta);   // owning side ⇒ join-table row
                 ta.getExams().add(exam);         // keep inverse side in sync
+                ta.increaseWorkload(exam.getWorkload());
             }
         }
 
@@ -560,6 +523,10 @@ public class CourseOfferingServImpl implements CourseOfferingServ {
             throw new GeneralExc("TA assignment to exam failed."); // Ensure GeneralExc is correctly imported
         }
         log.info("Proctor Assignment", "Proctors were assigned to the exam with id: " + examId);
+        if (checkExam.getRequiredTAs() == checkExam.getAssignedTas().size())
+        {
+            mail.notifyIfFullyStaffed(checkExam.getExamId());
+        }
         return CompletableFuture.completedFuture(true);
     }
 

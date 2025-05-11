@@ -1,4 +1,4 @@
-/*import React, { useState, useEffect, FocusEvent } from 'react';
+import React, { useState, useEffect, FocusEvent } from 'react';
 import styles from './ExamProctorRequest.module.css';
 import { Exam } from './ExamProctorPage'; // Import the Exam interface from the parent
 
@@ -143,8 +143,8 @@ const ExamProctorRequest: React.FC<ExamProctorReqProps> = ({
   );
 };
 
-export default ExamProctorRequest;*/
- // src/pages/ExamProctor/ExamProctorReq.tsx
+export default ExamProctorRequest;
+/* // src/pages/ExamProctor/ExamProctorReq.tsx
 import React, { useState, FocusEvent, useEffect } from 'react';
 import GreenBut from '../../components/Buttons/GreenBut';
 import styles from './ExamProctorRequest.module.css';
@@ -230,3 +230,4 @@ const ExamProctorRequest: React.FC<ExamProctorReqProps> = ({
 };
 
 export default ExamProctorRequest;
+ */

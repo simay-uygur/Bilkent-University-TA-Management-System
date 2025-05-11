@@ -1,5 +1,6 @@
 package com.example.service;
 
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import com.example.entity.AppLog;
@@ -21,6 +22,7 @@ public class LogService {
     public void warn (String src, String msg) { save("WARN",  src, msg); }
     public void error(String src, String msg) { save("ERROR", src, msg); }
 
+    @Async("setExecutor")
     private void save(String level, String src, String msg) {
         repo.save(AppLog.builder()
                         .level(level)

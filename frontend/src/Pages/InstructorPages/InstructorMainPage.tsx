@@ -43,10 +43,10 @@ type CourseDetails = {
 };
 
 // Utility functions
-const extractCourseCode = (sectionCode: string): string => {
-  const parts = sectionCode.split('-');
-  return parts.length >= 2 ? `${parts[0]}-${parts[1]}` : sectionCode;
-};
+  const extractCourseCode = (sectionCode: string): string => {
+    const parts = sectionCode.split('-');
+    return parts.length >= 2 ? `${parts[0]}-${parts[1]}` : sectionCode;
+  };
 
 const extractSectionNumber = (sectionCode: string): string => {
   const parts = sectionCode.split('-');

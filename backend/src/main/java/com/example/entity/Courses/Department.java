@@ -3,6 +3,7 @@ package com.example.entity.Courses;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.example.entity.Actors.DepartmentStaff;
 import com.example.entity.General.Faculty;
 import com.example.entity.Requests.PreferTasToCourse;
 import com.example.entity.Requests.ProctorTaInDepartment;
@@ -31,6 +32,14 @@ public class Department {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "faculty_code")
     private Faculty faculty;
+
+    @OneToMany(
+        mappedBy = "department",
+        fetch = FetchType.LAZY,
+        cascade = CascadeType.ALL,
+        orphanRemoval = true
+    )
+    private List<DepartmentStaff> staff = new ArrayList<>();
 
     @OneToMany(
         mappedBy = "department",

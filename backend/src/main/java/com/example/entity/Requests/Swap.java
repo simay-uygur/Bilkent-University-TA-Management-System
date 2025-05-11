@@ -29,11 +29,11 @@ public class Swap extends Request {
     @JoinColumn(name = "receiver_ta_id", referencedColumnName = "id")
     private TA receiver;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "sender_exam_id", referencedColumnName = "exam_id")
     private Exam sendersExam;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "receiver_exam_id", referencedColumnName = "exam_id")
     private Exam receiversExam;
 

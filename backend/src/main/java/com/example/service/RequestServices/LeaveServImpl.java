@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.List;
 
 import org.springframework.scheduling.annotation.Async;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -22,6 +23,7 @@ import com.example.repo.RequestRepos.LeaveRepo;
 import com.example.repo.TARepo;
 import com.example.repo.TaTaskRepo;
 import com.example.service.LogService;
+import com.example.service.NotificationService;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -36,6 +38,7 @@ public class LeaveServImpl implements LeaveServ{
     private final DepartmentRepo depRepo;
     private final ExamRepo examRepo;
     private final LogService log;
+    private final NotificationService notServ;
     @Async("setExecutor")
     @Override
     public void createLeaveRequest(LeaveDTO dto, MultipartFile file, Long senderId) throws IOException {
@@ -61,6 +64,7 @@ public class LeaveServImpl implements LeaveServ{
         }
         log.info("Leave Request Creation","Leave request is created by TA with id: " + senderId + " and sent to " +dto.getDepName()+ " Department");
         leaveRepo.save(leaveRequest);
+        notServ.notifyCreation(leaveRequest);
     }
 
     @Override
@@ -75,15 +79,29 @@ public class LeaveServImpl implements LeaveServ{
             exam.getAssignedTas().remove(sender);
             examRepo.save(exam);
         }
-        sender.setActive(false);
         req.setRejected(false);
         req.setApproved(true);
         req.setPending(false);
         log.info("Leave Request Approval","Leave request with id: " +requestId+ " is approved by " +req.getReceiver().getName()+ " Department");
         taRepo.saveAndFlush(sender);
         leaveRepo.save(req);
+        notServ.notifyApproval(req);
         return true;
     }
+
+    @Async("taskCheckExecutor")
+    @Scheduled(cron = "0 0 0 * * *")
+    private void checkForActivness(){
+        List<Leave> reqs = leaveRepo.findAllByIsApproved(true);
+        Date now = new Date().currenDate();
+        for (Leave l : reqs){
+            if (l.getDuration().getStart().isAfter(now) && l.getDuration().getFinish().isBefore(now))
+                l.getSender().setActive(false);
+            else 
+                l.getSender().setActive(true);
+            taRepo.save(l.getSender());
+        }
+    }   
 
     @Override
     public void rejectLeaveRequest(Long requestId, Long approverId) {
@@ -93,6 +111,7 @@ public class LeaveServImpl implements LeaveServ{
         req.setPending(false);
         log.info("Leave Request Rejection","Leave request with id: " +requestId+ " is rejected by " +req.getReceiver().getName()+ " Department");
         leaveRepo.save(req);
+        notServ.notifyRejection(req);
     }
 
     @Override

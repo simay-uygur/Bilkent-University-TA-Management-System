@@ -77,12 +77,12 @@ public class CourseController {
 
     @GetMapping("api/course/{courseCode}")
     public ResponseEntity<CourseDto> getCourse(@PathVariable String courseCode) {
-        return new ResponseEntity<>(courseServ.findCourse(courseCode), HttpStatus.FOUND);
+        return new ResponseEntity<>(courseServ.findCourse(courseCode), HttpStatus.OK);
     }
 
     @GetMapping("api/course/all")
     public ResponseEntity<List<CourseDto>> getCourses() {
-        return new ResponseEntity<>(courseServ.getCourses(),HttpStatus.FOUND);
+        return new ResponseEntity<>(courseServ.getCourses(),HttpStatus.OK);
     }
     
     

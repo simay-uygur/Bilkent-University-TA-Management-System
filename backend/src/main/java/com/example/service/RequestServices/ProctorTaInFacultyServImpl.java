@@ -14,6 +14,7 @@ import com.example.repo.DepartmentRepo;
 import com.example.repo.RequestRepos.ProctorTaInDepartmentRepo;
 import com.example.repo.RequestRepos.ProctorTaInFacultyRepo;
 import com.example.service.LogService;
+import com.example.service.NotificationService;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -27,9 +28,10 @@ public class ProctorTaInFacultyServImpl implements ProctorTaInFacultyServ{
     private final ProctorTaInFacultyRepo     facRepo;
     private final DepartmentRepo             departmentRepo;   // if needed
     private final LogService log;
+    private final NotificationService notServ;
     @Transactional
     @Override
-    public ProctorTaInFacultyDto escalateToFaculty(Long depReqId) {
+    public boolean escalateToFaculty(Long depReqId) {
 
         // 1) fetch the department-level request
         ProctorTaInDepartment depReq = depRepo.findById(depReqId)
@@ -74,10 +76,13 @@ public class ProctorTaInFacultyServImpl implements ProctorTaInFacultyServ{
         facReq.setSentTime(time);
         //facReq.setApproved(false);
 
+        //toDto(facReq)
+
         facRepo.save(facReq);   // persists & assigns ID
         depRepo.delete(depReq); // delete from the department
+        notServ.notifyCreation(facReq);
         log.info("Proctor Ta in Department Request with id: "+depReqId+" is Transferred to the Faculty", "");
-        return toDto(facReq);
+        return true;
     }
     private ProctorTaInFacultyDto toDto(ProctorTaInFaculty r) {
 
@@ -126,6 +131,7 @@ public class ProctorTaInFacultyServImpl implements ProctorTaInFacultyServ{
         req.setPending(false);
         log.info("Proctor TAs In Faculty Request Finish","Proctor TAs in Faculty Request with id: " +reqId+ " is finished by " + " DeanOffice member with id: " + approverId);
         facRepo.save(req);
+        notServ.notifyApproval(req);
         return true;
     }
 
@@ -137,6 +143,7 @@ public class ProctorTaInFacultyServImpl implements ProctorTaInFacultyServ{
         req.setPending(false);
         log.info("Proctor TAs In Faculty Request Finish","Proctor TAs in Faculty Request with id: " +reqId+ " is finished by " + " DeanOffice member with id: " + rejecterId);
         facRepo.save(req);
+        notServ.notifyRejection(req);
         return true;
     }
 }

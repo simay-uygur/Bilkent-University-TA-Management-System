@@ -12,16 +12,15 @@ import com.example.entity.Requests.WorkLoadDto;
 import com.example.entity.Tasks.TaTask;
 import com.example.exception.GeneralExc;
 import com.example.exception.taExc.TaNotFoundExc;
-import com.example.repo.RequestRepos.WorkLoadRepo;
-import com.example.service.LogService;
-
-import jakarta.transaction.Transactional;
-
 import com.example.repo.InstructorRepo;
+import com.example.repo.RequestRepos.WorkLoadRepo;
 import com.example.repo.TARepo;
 import com.example.repo.TaTaskRepo;
 import com.example.repo.UserRepo;
+import com.example.service.LogService;
+import com.example.service.NotificationService;
 
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -34,6 +33,7 @@ public class WorkLoadServImpl implements WorkLoadServ {
     private final TaTaskRepo taTaskRepo;
     private final InstructorRepo instrRepo;
     private final LogService log;
+    private final NotificationService notServ;
     @Override
     public void createWorkLoad(WorkLoadDto dto, Long senderId) {
         TA ta = taRepo.findById(senderId).orElseThrow(() -> new TaNotFoundExc(senderId));
@@ -56,6 +56,7 @@ public class WorkLoadServImpl implements WorkLoadServ {
         ta.getSendedWorkLoadRequests().add(workloadReq);
         instr.getReceivedWorkloadRequests().add(workloadReq);
         log.info("WorkLoad Request Creation","TA with id: "+senderId+" has sent WorkLoad Request for the task with id: "+dto.getTaskId()+" to Instructor with id: "+dto.getReceiverId());
+        notServ.notifyCreation(workloadReq);
         workLoadRepo.save(workloadReq);
     }
 
@@ -107,6 +108,7 @@ public class WorkLoadServImpl implements WorkLoadServ {
         req.setPending(false);
         workLoadRepo.save(req);
         log.info("WorkLoad Request Approval","Instructor with id: " + instrId + " has accepted the WorkLoad Request for the Task with id: " +req.getTask().getTaskId());
+        notServ.notifyApproval(req);
         return true;
     }
 
@@ -119,6 +121,7 @@ public class WorkLoadServImpl implements WorkLoadServ {
         req.setPending(false);
         workLoadRepo.save(req);
         log.info("WorkLoad Request Rejection","Instructor with id: " + instrId + " has rejected the WorkLoad Request for the Task with id: " +req.getTask().getTaskId());
+        notServ.notifyRejection(req);
         return true;
     }
 }

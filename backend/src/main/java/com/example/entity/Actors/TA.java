@@ -12,6 +12,7 @@ import com.example.entity.Exams.Exam;
 import com.example.entity.Exams.ExamRoom;
 import com.example.entity.General.AcademicLevelType;
 import com.example.entity.General.ProctorType;
+import com.example.entity.Requests.Leave;
 import com.example.entity.Requests.Request;
 import com.example.entity.Requests.Swap;
 import com.example.entity.Requests.TransferProctoring;
@@ -155,6 +156,9 @@ public class TA extends User {
     //@JsonManagedReference
     @JsonIgnoreProperties("sender") // Only ignore the back-reference
     private List<WorkLoad> sendedWorkLoadRequests;
+
+    @OneToMany(mappedBy = "sender",fetch= FetchType.LAZY, cascade= {CascadeType.REFRESH,CascadeType.MERGE})
+    private List<Leave> sendedLeaveRequests;
 }
 
 /*

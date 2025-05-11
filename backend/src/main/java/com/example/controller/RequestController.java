@@ -52,6 +52,7 @@ import com.example.service.RequestServices.LeaveServ;
 import com.example.service.RequestServices.PreferTasToCourseServ;
 import com.example.service.RequestServices.ProctorTaFromFacultiesServ;
 import com.example.service.RequestServices.ProctorTaInDepartmentServ;
+import com.example.service.RequestServices.ProctorTaInFacultyServ;
 import com.example.service.RequestServices.SwapServ;
 import com.example.service.RequestServices.TransferProctoringServ;
 import com.example.service.RequestServices.WorkLoadServ;
@@ -80,6 +81,7 @@ public class RequestController {
     private final WorkLoadRepo workLoadRepo;
     private final PreferTasToCourseMapper preferTasToCourseMapper;
     private final PreferTasToCourseServ preferTasToCourseServ;
+    private final ProctorTaInFacultyServ proctorTaInFacultyServ;
     private final RequestServ reqServ;
 
     private final RequestServ requestService;
@@ -199,9 +201,17 @@ public class RequestController {
       return new ResponseEntity<>(swapServ.acceptSwapRequest(swapId, taId),HttpStatus.OK);
     }
 
-    @PutMapping("ta/{approverId}/departmentproctor/{reqID}/approve")
-    public void finishTAInDepRequest(@PathVariable Long reqId,@PathVariable String approverId) {
+    @PutMapping("ta/{approverId}/departmentproctor/{reqId}/approve")
+    public void finishApproveTAInDepRequest(@PathVariable Long reqId,@PathVariable String approverId) {
       proctorTaInDepartmentServ.approveProctorTaInDepartmentRequest(reqId, approverId);
+    }
+    @PutMapping("ta/{approverId}/departmentproctor/{reqId}/reject")
+    public void finishRejectTAInDepRequest(@PathVariable Long reqId,@PathVariable String approverId) {
+      proctorTaInDepartmentServ.rejectProctorTaInDepartmentRequest(reqId, approverId);
+    }
+     @PutMapping("ta/prefertas/{reqId}/approve")
+    public void finishApproveCourseTaRequest(@PathVariable Long reqId) {
+      preferTasToCourseServ.approve(reqId);
     }
 
     @PostMapping("/transfer-proctoring")
@@ -212,6 +222,11 @@ public class RequestController {
         transferProctoringServ.createTransferProctoringReq(dto, taId);
         boolean exists = transferRepo.existsBySenderIdAndReceiverIdAndExamExamIdAndIsRejected(taId, dto.getReceiverId(), dto.getExamId(), false);
         return new ResponseEntity<>(exists ? HttpStatus.CREATED : HttpStatus.BAD_REQUEST);
+    }
+
+    @PostMapping("/department/taInDepRequest/{req_id}/toDean")
+    public ResponseEntity<Boolean> sendProctorTaInFacultyRequest(@PathVariable Long req_id){
+      return new ResponseEntity<>(proctorTaInFacultyServ.escalateToFaculty(req_id), HttpStatus.ACCEPTED);
     }
 
     @PostMapping("/proctor-from-faculties") //Deans to Deans
@@ -321,19 +336,6 @@ public class RequestController {
           }
       });
     }
-
-
-    //to try the
-    @PostMapping("/proctor-ta-in-department/{depReqId}/escalate")
-    public ResponseEntity<ProctorTaInFacultyDto> escalate(
-            @PathVariable Long depReqId
-    ) {
-        ProctorTaInFacultyDto dto = proctorServ.escalateToFaculty(depReqId);
-        return ResponseEntity
-                .status(HttpStatus.CREATED)  // or .ok() if you prefer 200
-                .body(dto);
-    }
-    
 
     // 1) DeanOffice: Proctor‐in‐Faculty
     @GetMapping("/deanOffice/{deanId}/proctor-in-faculty")

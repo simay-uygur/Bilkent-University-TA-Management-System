@@ -101,6 +101,14 @@ public class InstructorController {
         }
         return ResponseEntity.ok(exams);
     }
+     @GetMapping("/{courseCode}/exams/{examId}")
+    public ResponseEntity<ExamDto> getExamIdByCourseCode(
+            @PathVariable String courseCode, @PathVariable Integer examId
+    ) {
+        ExamDto exam = examServ.getExamsIdByCourseCode(courseCode, examId);
+    
+        return ResponseEntity.ok(exam);
+    }
 
 
     @GetMapping("/{instructorId}/courses/{courseCode}/exams/{examId}/export/pdf")

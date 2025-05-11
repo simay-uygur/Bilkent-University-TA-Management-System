@@ -1,22 +1,11 @@
 package com.example.service.RequestServices;
 
-import java.util.List;
-import java.util.NoSuchElementException;
-import java.util.stream.Collectors;
-
 import org.springframework.stereotype.Service;
-import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
-import com.example.dto.TaskDto;
 import com.example.entity.Actors.Instructor;
 import com.example.entity.Courses.Department;
 import com.example.entity.Exams.Exam;
 import com.example.entity.General.Date;
-import com.example.entity.Requests.Leave;
-import com.example.entity.Requests.LeaveDTO;
-import com.example.entity.Requests.PreferTasToCourse;
-import com.example.entity.Requests.PreferTasToCourseDto;
-import com.example.entity.Requests.PreferTasToCourseDto.TaInfo;
 import com.example.entity.Requests.ProctorTaInDepartment;
 import com.example.entity.Requests.ProctorTaInDepartmentDto;
 import com.example.exception.GeneralExc;
@@ -30,6 +19,7 @@ import com.example.repo.RequestRepos.PreferTasToCourseRepo;
 import com.example.repo.RequestRepos.ProctorTaInDepartmentRepo;
 import com.example.repo.TaTaskRepo;
 import com.example.service.LogService;
+import com.example.service.NotificationService;
 
 import lombok.RequiredArgsConstructor;
 
@@ -47,6 +37,7 @@ public class ProctorTaInDepartmentServImpl implements ProctorTaInDepartmentServ{
     private final RequestMapper mapper;
     private final TaTaskRepo taTaskRepo; 
     private final LeaveRepo leaveRepo;
+    private final NotificationService notServ;
     @Override
     public void createProctorTaInDepartmentRequest(ProctorTaInDepartmentDto dto, Long senderId) {
         Instructor sender = instrRepo.findById(dto.getInstrId())
@@ -67,11 +58,19 @@ public class ProctorTaInDepartmentServImpl implements ProctorTaInDepartmentServ{
         req.setSender(sender);
         req.setReceiver(receiver);
         req.setExam(exam);
-        req.setCourseCode(dto.getCourseCode());
+        req.setCourseCode(dto.getCourseCode() != null ? 
+                     dto.getCourseCode() : 
+                     receiver.getName() + "-464"); // Default course code
+    
         req.setRequiredTas(dto.getRequiredTas());
         req.setTasLeft(dto.getTasLeft());
+        notServ.notifyCreation(req);
+         log.info("Creating ProctorTaInDepartment Request", 
+             "Creating request with courseCode: " + req.getCourseCode() + 
+             ", examId: " + dto.getExamId() + 
+             ", requiredTAs: " + dto.getRequiredTas());
 
-        proctorTaInFacultyRepo.save(req);
+    proctorTaInFacultyRepo.save(req);
     }
 
     @Override
@@ -82,6 +81,7 @@ public class ProctorTaInDepartmentServImpl implements ProctorTaInDepartmentServ{
         req.setPending(false);
         log.info("Proctor TAs In Department Request Finish","Proctor TAs In Department Request with id: " +requestId+ " is finished by " + " Department with code: " + approverId);
         proctorTaInFacultyRepo.save(req);
+        notServ.notifyApproval(req);
     }
 
     @Override
@@ -92,6 +92,7 @@ public class ProctorTaInDepartmentServImpl implements ProctorTaInDepartmentServ{
         req.setPending(false);
         log.info("Proctor TAs In Department Request Finish","Proctor TAs In Department Request with id: " +requestId+ " is finished by " + " Department with code: " + approverId);
         proctorTaInFacultyRepo.save(req);
+        notServ.notifyRejection(req);
     }
 
     @Override
