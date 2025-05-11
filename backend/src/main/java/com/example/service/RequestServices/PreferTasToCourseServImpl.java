@@ -13,7 +13,6 @@ import com.example.entity.Courses.CourseOffering;
 import com.example.entity.Courses.Department;
 import com.example.entity.Courses.Section;
 import com.example.entity.General.Date;
-import com.example.entity.Requests.Leave;
 import com.example.entity.Requests.PreferTasToCourse;
 import com.example.entity.Requests.PreferTasToCourseDto;
 import com.example.entity.Requests.RequestType;
@@ -26,6 +25,7 @@ import com.example.repo.SectionRepo;
 import com.example.repo.TARepo;
 import com.example.service.CourseOfferingServ;
 import com.example.service.LogService;
+import com.example.service.NotificationService;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -42,7 +42,7 @@ public class PreferTasToCourseServImpl implements PreferTasToCourseServ{
     private final SectionRepo sectionRepo;
     private final CourseOfferingServ offeringServ;
     private final LogService log;
-
+    private final NotificationService notServ;
     @Override
     @Transactional
     public PreferTasToCourseDto getRequestById(Long reqId) {
@@ -78,6 +78,7 @@ public class PreferTasToCourseServImpl implements PreferTasToCourseServ{
         req.setPending(false);
         log.info("Prefer Tas to Course Request Finish","Prefer Tas to Course Request with id: " +reqId+ " is finished by " +req.getReceiver().getName()+ " Department");
         prefRepo.save(req);
+        notServ.notifyApproval(req);
         return true;
     }
 
@@ -89,6 +90,7 @@ public class PreferTasToCourseServImpl implements PreferTasToCourseServ{
         req.setPending(false);
         log.info("Prefer Tas to Course Request Finish","Prefer Tas to Course Request with id: " +reqId+ " is finished by " +req.getReceiver().getName()+ " Department");
         prefRepo.save(req);
+        notServ.notifyRejection(req);
         return true;
     }
 
@@ -143,6 +145,7 @@ public class PreferTasToCourseServImpl implements PreferTasToCourseServ{
         req.setNonPreferredTas(nonPreferred);
         log.info("Proctor Tas to the Course Request creation", "Instructor with id: " + instrId + " has sent the request for the " + sectionCode + " section to the " + dept.getName());
         prefRepo.save(req);
+        notServ.notifyCreation(req);
         return true;
     }
     

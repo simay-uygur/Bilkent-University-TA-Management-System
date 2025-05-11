@@ -2,10 +2,25 @@ package com.example.service;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.stream.Collectors;
 
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import com.example.entity.Actors.DepartmentStaff;
+import com.example.entity.Courses.Department;
 import com.example.entity.Notification;
+import com.example.entity.Requests.Leave;
+import com.example.entity.Requests.PreferTasToCourse;
+import com.example.entity.Requests.ProctorTaFromFaculties;
+import com.example.entity.Requests.ProctorTaFromOtherFaculty;
+import com.example.entity.Requests.ProctorTaInDepartment;
+import com.example.entity.Requests.ProctorTaInFaculty;
+import com.example.entity.Requests.Request;
+import com.example.entity.Requests.Swap;
+import com.example.entity.Requests.TransferProctoring;
+import com.example.entity.Requests.WorkLoad;
 import com.example.repo.NotificationRepos;
 
 import lombok.AllArgsConstructor;
@@ -17,160 +32,190 @@ public class NotificationService {
     private final NotificationRepos notificationRepos;
     private final LogService log; 
     private final MailService mailService;
-    /**
-     * Creates and saves a new notification for the given receiver.
-     *
-     * Preconditions:
-     * - `receiverName`, `title`, and `text` must not be null or empty.
-     *
-     * Postconditions:
-     * - A new `Notification` entity is saved in the repository.
-     * - The created notification is returned.
-     *
-     * @param receiverName The name or email of the notification receiver.
-     * @param title        The title of the notification.
-     * @param text         The content of the notification.
-     * @return The saved `Notification` entity.
-     */
-    public Notification createNotification(String receiverName, String title, String text) {
-        Notification notification = new Notification(title, text, receiverName, false, false, LocalDateTime.now()
-        );
-        log.info("NotificationService", "Notification created for: " + receiverName); 
-        notificationRepos.save(notification);
-        mailService.sendMail(receiverName, title, text);
-        return notification;
+
+    @Transactional
+    @Async("notificationExecutor")
+    public void sendNotification(String text, Long receiverId) {
+        Notification notif = new Notification(text, receiverId, LocalDateTime.now());
+        notificationRepos.save(notif);
     }
 
-    public Notification createNotificationWithoutMail(String receiverName, String title, String text) {
-        Notification notification = new Notification(title, text, receiverName, false, false, LocalDateTime.now()
-        );
-        log.info("NotificationService", "Notification created for: " + receiverName); 
-        notificationRepos.save(notification);
-        return notification;
+    @Transactional(readOnly = true)
+    public List<String> getNotificationsForUser(Long userId) {
+        return notificationRepos
+            .findAllByReceiverIdOrderByTimestampDesc(userId)
+            .stream()
+            .map(Notification::getText)
+            .collect(Collectors.toList());
     }
 
-    /**
-     * Deletes a notification by its ID.
-     *
-     * Preconditions:
-     * - `notificationId` must correspond to an existing notification.
-     *
-     * Postconditions:
-     * - The notification is removed from the repository if it exists.
-     * - Throws a `RuntimeException` if the notification does not exist.
-     *
-     * @param notificationId The ID of the notification to delete.
-     * @return `true` if the notification was deleted successfully.
-     */
-    public boolean deleteNotification(Long notificationId) {
-        if (notificationRepos.existsById(notificationId)) {
-            notificationRepos.deleteById(notificationId);
-            return true;
+    @Transactional
+    @Async("notificationExecutor")
+    public void sendNotificationWithMail(String text, Long receiverId, String webmail) {
+        Notification notif = new Notification(text, receiverId, LocalDateTime.now());
+        notificationRepos.save(notif);
+    }
+
+    @Async("notificationExecutor")
+    @Transactional
+    public void notifyCreation(Object req) {
+        Long receiverId;
+        String type   = req.getClass().getSimpleName();
+        Long reqId    = extractId(req);
+
+        if (req instanceof WorkLoad r) {
+            receiverId = r.getReceiver().getId();
         }
-        throw new RuntimeException("Notification not found");
+        else if (req instanceof Leave r) {
+            for (DepartmentStaff staff : ((Leave) req).getReceiver().getStaff()){
+                String text = String.format("New %s request (ID=%d) submitted to you.", type, reqId);
+                sendNotification(text, staff.getId());
+            }
+            return;
+        }
+        else if (req instanceof TransferProctoring r) {
+            receiverId = r.getReceiver().getId();
+        }
+        else if (req instanceof Swap r) {
+            receiverId = r.getReceiver().getId();
+        }
+        else if (req instanceof ProctorTaInFaculty r) {
+            receiverId = r.getReceiver().getId();
+        }
+        else if (req instanceof ProctorTaInDepartment r) {
+            // Department has no numeric ID; using hashcode fallback
+            receiverId = (long) r.getReceiver().getName().hashCode();
+        }
+        else if (req instanceof ProctorTaFromOtherFaculty r) {
+            receiverId = r.getReceiver().getId();
+        }
+        else if (req instanceof ProctorTaFromFaculties r) {
+            // notify each sub‐receiver
+            for (var sub : r.getProctorTaFromOtherFacs()) {
+                String msg = String.format("New %s (ID=%d) for exam %d", 
+                    type, reqId, r.getExam().getExamId());
+                sendNotification(msg, sub.getReceiver().getId());
+            }
+            return;
+        }
+        else if (req instanceof PreferTasToCourse r) {
+            receiverId = (long) r.getReceiver().getName().hashCode();
+        }
+        else {
+            throw new IllegalArgumentException("Unsupported request: " + type);
+        }
+
+        String text = String.format("New %s request (ID=%d) submitted to you.", type, reqId);
+        sendNotification(text, receiverId);
     }
 
-    /**
-     * Flags a notification as important.
-     *
-     * Preconditions:
-     * - `notificationId` must correspond to an existing notification.
-     *
-     * Postconditions:
-     * - The `isFlagged` field of the notification is set to `true`.
-     * - The updated notification is saved and returned.
-     *
-     * @param notificationId The ID of the notification to flag.
-     * @return The updated `Notification` entity.
-     */    public Notification flagNotification(Long notificationId) {
-        Notification notification = notificationRepos.findById(notificationId)
-                .orElseThrow(() -> new RuntimeException("Notification not found"));
-        notification.setIsFlagged(true); // Update flagged
-        notificationRepos.save(notification);
-        return notification;
+    @Async("notificationExecutor")
+    @Transactional
+    public void notifyApproval(Object req) {
+        Long senderId;
+        String type = req.getClass().getSimpleName();
+        Long reqId  = extractId(req);
+
+        if (req instanceof WorkLoad r) {
+            senderId = r.getSender().getId();
+        }
+        else if (req instanceof Leave r) {
+            senderId = r.getSender().getId();
+        }
+        else if (req instanceof TransferProctoring r) {
+            senderId = r.getSender().getId();
+        }
+        else if (req instanceof Swap r) {
+            senderId = r.getSender().getId();
+        }
+        else if (req instanceof ProctorTaInFaculty r) {
+            Department dep = r.getSender();
+            for (DepartmentStaff staff: dep.getStaff()) {
+                String msg = String.format("New %s (ID=%d) for exam %d", 
+                    type, reqId, r.getExam().getExamId());
+                sendNotification(msg, staff.getId());
+            }
+            return;
+        }
+        else if (req instanceof ProctorTaInDepartment r) {
+            senderId = r.getSender().getId();
+        }
+        else if (req instanceof ProctorTaFromOtherFaculty r) {
+            senderId = r.getSender().getId();
+        }
+        else if (req instanceof ProctorTaFromFaculties r) {
+            senderId = r.getSender().getId();
+        }
+        else if (req instanceof PreferTasToCourse r) {
+            senderId = r.getSender().getId();
+        }
+        else {
+            throw new IllegalArgumentException("Unsupported request: " + type);
+        }
+
+        String text = String.format("Your %s request (ID=%d) has been approved.", type, reqId);
+        sendNotification(text, senderId);
     }
 
-    /**
-     * Unflags a notification.
-     *
-     * Preconditions:
-     * - `notificationId` must correspond to an existing notification.
-     *
-     * Postconditions:
-     * - The `isFlagged` field of the notification is set to `false`.
-     * - The updated notification is saved and returned.
-     *
-     * @param notificationId The ID of the notification to unflag.
-     * @return The updated `Notification` entity.
-     */    public Notification unflagNotification(Long notificationId) {
-        Notification notification = notificationRepos.findById(notificationId)
-                .orElseThrow(() -> new RuntimeException("Notification not found"));
-        notification.setIsFlagged(false); // Update unflagged
-        notificationRepos.save(notification);
-        return notification;
+    @Async("notificationExecutor")
+    @Transactional
+    public void notifyRejection(Object req) {
+        Long senderId;
+        String type = req.getClass().getSimpleName();
+        Long reqId  = extractId(req);
+        String text;
+        if (req instanceof WorkLoad r) {
+            senderId = r.getSender().getId();
+            text = String.format("Your %s request (ID=%d) has been rejected.", type, reqId);
+        }
+        else if (req instanceof Leave r) {
+            senderId = r.getSender().getId();
+            text = String.format("Your %s request (ID=%d) has been rejected.", type, reqId);
+        }
+        else if (req instanceof TransferProctoring r) {
+            senderId = r.getSender().getId();
+            text = String.format("Your %s request (ID=%d) has been rejected.", type, reqId);
+        }
+        else if (req instanceof Swap r) {
+            senderId = r.getSender().getId();
+            text = String.format("Your %s request (ID=%d) has been rejected.", type, reqId);
+        }
+        else if (req instanceof ProctorTaInFaculty r) {
+            Department dep = r.getSender();
+            for (DepartmentStaff staff: dep.getStaff()) {
+                text = String.format("Your %s request (ID=%d) has been finished.", type, reqId);
+                sendNotification(text, staff.getId());
+            }
+            return;
+        }
+        else if (req instanceof ProctorTaInDepartment r) {
+            text = String.format("Your %s request (ID=%d) has been finished.", type, reqId);
+            senderId = r.getSender().getId();
+        }
+        else if (req instanceof ProctorTaFromOtherFaculty r) {
+            text = String.format("Your %s request (ID=%d) has been finished.", type, reqId);
+            senderId = r.getSender().getId();
+        }
+        else if (req instanceof ProctorTaFromFaculties r) {
+            text = String.format("Your %s request (ID=%d) has been finished.", type, reqId);
+            senderId = r.getSender().getId();
+        }
+        else if (req instanceof PreferTasToCourse r) {
+            text = String.format("Your %s request (ID=%d) has been finished.", type, reqId);
+            senderId = r.getSender().getId();
+        }
+        else {
+            throw new IllegalArgumentException("Unsupported request: " + type);
+        }
+        sendNotification(text, senderId);
     }
 
-    /**
-     * Retrieves all flagged notifications for a specific receiver.
-     *
-     * Preconditions:
-     * - `receiverName` must not be null or empty.
-     *
-     * Postconditions:
-     * - Returns a list of flagged notifications sorted by timestamp in descending order.
-     *
-     * @param receiverName The name or email of the notification receiver.
-     * @return A list of flagged `Notification` entities.
-     */    public List<Notification> getFlaggedNotifications(String receiverName) {
-        return notificationRepos.findByReceiverNameAndIsFlaggedOrderByTimestampDesc(receiverName, true);
-    }
-
-    /**
-     * Retrieves all unread notifications for a specific receiver.
-     *
-     * Preconditions:
-     * - `receiverName` must not be null or empty.
-     *
-     * Postconditions:
-     * - Returns a list of unread notifications sorted by timestamp in descending order.
-     *
-     * @param receiverName The name or email of the notification receiver.
-     * @return A list of unread `Notification` entities.
-     */    public List<Notification> getUnreadNotifications(String receiverName) {
-        return notificationRepos.findByReceiverNameAndIsReadOrderByTimestampDesc(receiverName, false);
-    }
-
-    /**
-     * Retrieves all notifications for a specific receiver.
-     *
-     * Preconditions:
-     * - `receiverName` must not be null or empty.
-     *
-     * Postconditions:
-     * - Returns a list of notifications sorted by timestamp in descending order.
-     *
-     * @param receiverName The name or email of the notification receiver.
-     * @return A list of `Notification` entities.
-     */    public List<Notification> getAllNotifications(String receiverName) {
-        return notificationRepos.findByReceiverNameOrderByTimestampDesc(receiverName);
-    }
-
-    /**
-     * Marks a notification as read.
-     *
-     * Preconditions:
-     * - `notificationId` must correspond to an existing notification.
-     *
-     * Postconditions:
-     * - The `isRead` field of the notification is set to `true`.
-     * - The updated notification is saved and returned.
-     *
-     * @param notificationId The ID of the notification to mark as read.
-     * @return The updated `Notification` entity.
-     */    public Notification markAsRead(Long notificationId) {
-        Notification notification = notificationRepos.findById(notificationId).orElseThrow(() -> new RuntimeException("Notification not found"));
-        notification.setIsRead(true);
-        notificationRepos.save(notification);
-        return notification;
+    private Long extractId(Object req) {
+        if (req instanceof Request r) {
+            return r.getRequestId();
+        }
+        throw new IllegalArgumentException(
+          "Cannot extract ID from non-Request type: " + req.getClass().getName()
+        );
     }
 }

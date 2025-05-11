@@ -22,6 +22,8 @@ import com.example.repo.RequestRepos.SwapRepo;
 import com.example.repo.TARepo;
 import com.example.repo.UserRepo;
 import com.example.service.LogService;
+import com.example.service.MailService;
+import com.example.service.NotificationService;
 import com.example.service.TaskServ;
 
 import lombok.RequiredArgsConstructor;
@@ -36,7 +38,8 @@ public class SwapServImpl implements SwapServ{
     private final TARepo taRepo;
     private final TaskServ taskServ;
     private final LogService log;
-
+    private final NotificationService notServ;
+    private final MailService mailServ;
     @Async("setExecutor")
     @Override
     @Transactional
@@ -63,10 +66,13 @@ public class SwapServImpl implements SwapServ{
         req.setSentTime(new Date().currenDate());
         req.setSender(sender);
         req.setReceiver(receiver);
+        req.setSendersExam(senderExam);
+        req.setReceiversExam(receiverExam);
         req.setCourseCode(dto.getCourseCode());
         //req.setExam(exam);
         log.info("Swap Request Creation","TA with id: " + senderId +" wants to swap proctoring with the another TA with id: " + dto.getReceiverId());
         swapRepo.saveAndFlush(req);
+        notServ.notifyCreation(req);
         return CompletableFuture.completedFuture(true);
     }
 
@@ -110,7 +116,30 @@ public class SwapServImpl implements SwapServ{
         req.setApproved(true);
         req.setPending(false);
         log.info("Swap Request Approval","TA with id: " + receiverId +" accepted Swap Request with id: "+requestId);
+        notServ.notifyApproval(req);
+        String subject = "Swap Request #" + requestId + " Accepted";
+        String bodyToSender = String.format(
+            "Hello %s %s,\n\nYour swap request (ID=%d) to exchange “%s” (Exam #%d) with %s %s has been approved by %s %s.\n\n" +
+            "Your new total workload is %d.\n\nRegards,\nTA Management System",
+            sender.getName(), sender.getSurname(),
+            requestId,
+            senExam.getDescription(), senExam.getExamId(),
+            receiver.getName(), receiver.getSurname(),
+            receiver.getName(), receiver.getSurname(),
+            sender.getTotalWorkload()
+        );
+        mailServ.send(sender.getWebmail(), subject, bodyToSender);
 
+        String bodyToReceiver = String.format(
+            "Hello %s %s,\n\nYou have successfully accepted the swap request (ID=%d) from %s %s.\n" +
+            "They’ve taken over your assignment for “%s” (Exam #%d), and your new total workload is %d.\n\nRegards,\nTA Management System",
+            receiver.getName(), receiver.getSurname(),
+            requestId,
+            sender.getName(), sender.getSurname(),
+            recExam.getDescription(), recExam.getExamId(),
+            receiver.getTotalWorkload()
+        );
+        mailServ.send(receiver.getWebmail(), subject, bodyToReceiver);
         return true;
     }
 
@@ -123,6 +152,7 @@ public class SwapServImpl implements SwapServ{
         req.setPending(false);
         log.info("Swap Request Rejection","TA with id: " + receiverId +" rejected Swap Request with id: "+requestId);
         swapRepo.save(req);
+        notServ.notifyRejection(req);
     }
 
     @Override

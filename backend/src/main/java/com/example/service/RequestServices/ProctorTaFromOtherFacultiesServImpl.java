@@ -6,12 +6,8 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import com.example.entity.Actors.DeanOffice;
-import com.example.entity.Actors.Role;
-import com.example.entity.Actors.User;
 import com.example.entity.Exams.Exam;
 import com.example.entity.General.Date;
-import com.example.entity.General.Faculty;
-import com.example.entity.Requests.PreferTasToCourse;
 import com.example.entity.Requests.ProctorTaFromFaculties;
 import com.example.entity.Requests.ProctorTaFromFacultiesDto;
 import com.example.entity.Requests.ProctorTaFromOtherFaculty;
@@ -23,8 +19,9 @@ import com.example.repo.ExamRepo;
 import com.example.repo.FacultyRepo;
 import com.example.repo.RequestRepos.ProctorTaFromFacultiesRepo;
 import com.example.repo.RequestRepos.ProctorTaFromOtherFacultyRepo;
-import com.example.service.LogService;
 import com.example.repo.UserRepo;
+import com.example.service.LogService;
+import com.example.service.NotificationService;
 
 import lombok.RequiredArgsConstructor;
 
@@ -39,7 +36,7 @@ public class ProctorTaFromOtherFacultiesServImpl implements ProctorTaFromFaculti
     private final ExamRepo examRepo;
     private final DeanOfficeRepo deanRepo;
     private final LogService log;
-
+    private final NotificationService notServ;
     @Async("setExecutor")
     @Override
     public void createProctorTaFromFacultiesRequest(ProctorTaFromFacultiesDto dto, Long senderId) {
@@ -81,6 +78,7 @@ public class ProctorTaFromOtherFacultiesServImpl implements ProctorTaFromFaculti
         }
         log.info("Prefer Tas from other Faculties Request creation","Dean Office member with id: " + senderId + " is sent to other Faculties");
         fromFacRepo.save(parent); // save parent again to update the relationship
+        notServ.notifyCreation(parent);
     }
 
     @Override
@@ -91,6 +89,7 @@ public class ProctorTaFromOtherFacultiesServImpl implements ProctorTaFromFaculti
         req.setPending(false);
         log.info("Proctor TAs from other Faculties Request Finish","Proctor TAs from other Faculties Request with id: " +requestId+ " is finished by " + " Dean Office member with id: " + approverId);
         fromFacRepo.save(req);
+        notServ.notifyApproval(req);
     }
 
     @Override
@@ -101,6 +100,7 @@ public class ProctorTaFromOtherFacultiesServImpl implements ProctorTaFromFaculti
         req.setPending(false);
         log.info("Proctor TAs from other Faculties Request Finish","Proctor TAs from other Faculties Request with id: " +requestId+ " is finished by " + " Dean Office member with id: " + approverId);
         fromFacRepo.save(req);
+        notServ.notifyRejection(req);
     }
 
     @Override
