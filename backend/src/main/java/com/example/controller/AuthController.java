@@ -49,6 +49,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 
 import com.example.exception.GeneralExc;
 import com.example.security.PasswordResetTokenRepo;
+import com.example.service.LogService;
 import com.example.service.MailService;
 
 @RestController
@@ -61,6 +62,7 @@ public class AuthController {
     private final PasswordEncoder passwordEncoder; 
     private final PasswordResetTokenRepo tokenRepo;
     private final MailService mailService;
+    private final LogService log;
 
     @PostMapping("/api/signUp")
     public ResponseEntity<User> createUser(@RequestBody User u) 
@@ -123,6 +125,7 @@ public class AuthController {
             
             
         );
+        log.info("Authentication", "User with id: " + body.getId() + " and ROLE: " + body.getRole() + " entered to the system.");
         return ResponseEntity.ok(body);
     }
 
@@ -139,6 +142,7 @@ public class AuthController {
             throw new UserNotFoundExc(id) ;
         }
         serv.deleteUser(u);
+        log.info("Deletion", "User with id: " + u.getId() + " and ROLE: " + u.getRole() + " is deleted.");
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
@@ -233,6 +237,7 @@ public class AuthController {
     @PutMapping("api/{userId}/changePassword")
     public ResponseEntity<Boolean> changePasswordById(@PathVariable Long userId, @RequestBody ChangePasswordDto body) {
         serv.changePasswordById(body.getPassword(), userId);
+        log.info("Password change", "User with id: " + userId + " changed the password in the system.");
         return ResponseEntity.noContent().build();
     }
 

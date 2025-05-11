@@ -18,7 +18,7 @@ public class DepartmentStaffServImpl implements DepartmentStaffServ {
     private final DepartmentStaffRepo repo;
     private final PasswordEncoder encoder;
     private final DepartmentStaffMapper mapper;
-
+    private final LogService log;
     @Override
     public DepartmentStaffDto getDepartmentStaffById(Long id) {
         DepartmentStaff staff = repo.findById(id)
@@ -33,7 +33,7 @@ public class DepartmentStaffServImpl implements DepartmentStaffServ {
 
         staff.setRole(Role.DEPARTMENT_STAFF);
         staff.setPassword(encoder.encode(staff.getPassword()));
-
+        log.info("Department Staff creation", "New Department Staff with id: " + staff.getId() + " is created");
         return repo.save(staff);
     }
 
@@ -42,6 +42,7 @@ public class DepartmentStaffServImpl implements DepartmentStaffServ {
         if (!repo.existsById(id)) {
             throw new RuntimeException("Staff with id " + id + " not found.");
         }
+        log.info("Department Staff deletion", "Department Staff with id: " +id+ " is deleted from the system.");
         repo.deleteById(id);
         return true;
     }
@@ -56,7 +57,7 @@ public class DepartmentStaffServImpl implements DepartmentStaffServ {
         existing.setWebmail(staff.getWebmail());
         existing.setIsActive(staff.getIsActive());
         existing.setDepartment(staff.getDepartment());
-
+        log.info("Department Staff update", "Department Staff with id: " + id + " is updated.");
         return repo.save(existing);
     }
 

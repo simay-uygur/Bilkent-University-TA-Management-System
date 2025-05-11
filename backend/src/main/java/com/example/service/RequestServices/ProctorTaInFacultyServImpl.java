@@ -11,6 +11,7 @@ import com.example.exception.GeneralExc;
 import com.example.repo.DepartmentRepo;
 import com.example.repo.RequestRepos.ProctorTaInDepartmentRepo;
 import com.example.repo.RequestRepos.ProctorTaInFacultyRepo;
+import com.example.service.LogService;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -21,8 +22,9 @@ public class ProctorTaInFacultyServImpl implements ProctorTaInFacultyServ{
     private final ProctorTaInDepartmentRepo  depRepo;   // existing repo
     private final ProctorTaInFacultyRepo     facRepo;
     private final DepartmentRepo             departmentRepo;   // if needed
-
+    private final LogService log;
     @Transactional
+    @Override
     public ProctorTaInFacultyDto escalateToFaculty(Long depReqId) {
 
         // 1) fetch the department-level request
@@ -50,7 +52,7 @@ public class ProctorTaInFacultyServImpl implements ProctorTaInFacultyServ{
         facRepo.save(facReq);   // persists & assigns ID
 
         depRepo.save(depReq);
-
+        log.info("Proctor Ta in Department Request with id: "+depReqId+" is Transferred to the Faculty", "");
         return toDto(facReq);
     }
 
@@ -62,5 +64,27 @@ public class ProctorTaInFacultyServImpl implements ProctorTaInFacultyServ{
         dto.setRequiredTas(facReq.getRequiredTas());
         dto.setTasLeft(facReq.getTasLeft());
         return dto;
+    }
+
+    @Override
+    public boolean approve(Long reqId, Long approverId) {
+        ProctorTaInFaculty req = facRepo.findById(reqId).orElseThrow(() -> new GeneralExc("There is no such leave request."));
+        req.setApproved(true);
+        req.setRejected(false);
+        req.setPending(false);
+        log.info("Proctor TAs In Faculty Request Finish","Proctor TAs in Faculty Request with id: " +reqId+ " is finished by " + " DeanOffice member with id: " + approverId);
+        facRepo.save(req);
+        return true;
+    }
+
+    @Override
+    public boolean reject(Long reqId, Long rejecterId) {
+        ProctorTaInFaculty req = facRepo.findById(reqId).orElseThrow(() -> new GeneralExc("There is no such leave request."));
+        req.setApproved(false);
+        req.setRejected(true);
+        req.setPending(false);
+        log.info("Proctor TAs In Faculty Request Finish","Proctor TAs in Faculty Request with id: " +reqId+ " is finished by " + " DeanOffice member with id: " + rejecterId);
+        facRepo.save(req);
+        return true;
     }
 }

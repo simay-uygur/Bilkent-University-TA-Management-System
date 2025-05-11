@@ -21,6 +21,7 @@ import com.example.repo.ExamRepo;
 import com.example.repo.RequestRepos.SwapRepo;
 import com.example.repo.TARepo;
 import com.example.repo.UserRepo;
+import com.example.service.LogService;
 import com.example.service.TaskServ;
 
 import lombok.RequiredArgsConstructor;
@@ -34,6 +35,7 @@ public class SwapServImpl implements SwapServ{
     private final ExamRepo examRepo;
     private final TARepo taRepo;
     private final TaskServ taskServ;
+    private final LogService log;
 
     @Async("setExecutor")
     @Override
@@ -62,7 +64,7 @@ public class SwapServImpl implements SwapServ{
         req.setSender(sender);
         req.setReceiver(receiver);
         //req.setExam(exam);
-
+        log.info("Swap Request Creation","TA with id: " + senderId +" wants to swap proctoring with the another TA with id: " + dto.getReceiverId());
         swapRepo.saveAndFlush(req);
         return CompletableFuture.completedFuture(true);
     }
@@ -106,6 +108,7 @@ public class SwapServImpl implements SwapServ{
 
         req.setApproved(true);
         req.setPending(false);
+        log.info("Swap Request Approval","TA with id: " + receiverId +" accepted Swap Request with id: "+requestId);
 
         return true;
     }
@@ -117,6 +120,7 @@ public class SwapServImpl implements SwapServ{
         req.setApproved(false);
         req.setRejected(true);
         req.setPending(false);
+        log.info("Swap Request Rejection","TA with id: " + receiverId +" rejected Swap Request with id: "+requestId);
         swapRepo.save(req);
     }
 

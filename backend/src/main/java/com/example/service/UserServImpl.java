@@ -27,7 +27,6 @@ public class UserServImpl implements UserServ{
     private final UserRepo repo; 
     private final TARepo taRepo;
     private final PasswordEncoder encoder;
-
     
     @Override
     public List<User> getAllUsers(){
@@ -93,7 +92,6 @@ public class UserServImpl implements UserServ{
         String hashed = encoder.encode(password);
         user.setPassword(hashed);
         repo.save(user);
-
         return true;
     }
     

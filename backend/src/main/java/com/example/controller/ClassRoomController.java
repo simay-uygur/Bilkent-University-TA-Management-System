@@ -2,6 +2,8 @@ package com.example.controller;
 
 import com.example.dto.ClassRoomDto;
 import com.example.service.ClassRoomServ;
+import com.example.service.LogService;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -13,7 +15,7 @@ import java.util.List;
 public class ClassRoomController {
 
     private final ClassRoomServ classRoomService;
-
+    
     @PostMapping
     public ResponseEntity<ClassRoomDto> create(@RequestBody ClassRoomDto dto) {
         return ResponseEntity.ok(classRoomService.create(dto));

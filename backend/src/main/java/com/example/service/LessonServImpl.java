@@ -38,7 +38,7 @@ public class LessonServImpl implements LessonServ {
     private final LessonRepo lessonRepo;
     private final SectionRepo sectionRepo;
     private final ClassRoomRepo classRoomRepo;
-
+    private final LogService log;
 // Helper method to convert day string to day index (0-6)
 /* private int mapDayStringToDayIndex(String dayString) {
     switch (dayString.toLowerCase()) {
@@ -206,7 +206,6 @@ while (!cursor.plusMinutes(50).isAfter(endTime)) {
         if (chunks.isEmpty()) {
             throw new IllegalArgumentException("No valid 50-minute lesson chunks could be created");
         }
-
         // 3) persist and return DTOs
         lessonRepo.saveAll(chunks);
         return chunks.stream()
@@ -322,129 +321,13 @@ while (!cursor.plusMinutes(50).isAfter(endTime)) {
         if (!toSave.isEmpty()) {
             lessonRepo.saveAll(toSave);
         }
-
+        log.info("Bulk Lesson Upload", "");
         return Map.of(
                 "successCount", toSave.size(),
                 "failedCount",  failed.size(),
                 "failedRows",   failed
         );
     }
-
-    //old one - not getting the numeric cells (string)
- /*   @Override
-    public Map<String, Object> importLessonsFromExcel(MultipartFile file) throws IOException {
-        List<Lesson> toSave = new ArrayList<>();
-        List<FailedRowInfo> failed = new ArrayList<>();
-
-        try (Workbook wb = new XSSFWorkbook(file.getInputStream())) {
-            Sheet sheet = wb.getSheetAt(0);
-            for (Row row : sheet) {
-                if (row.getRowNum() == 0) continue; // header
-
-                try {
-                    // --- parse row ---
-                    String sectionCode  = row.getCell(0).getStringCellValue().trim();
-                    String dayStr       = row.getCell(1).getStringCellValue().trim().toUpperCase();
-                    String startTimeStr = row.getCell(2).getStringCellValue().trim();
-                    String endTimeStr   = row.getCell(3).getStringCellValue().trim();
-                    String typeStr      = row.getCell(4).getStringCellValue().trim().toUpperCase();
-                    String roomCode     = row.getCell(5).getStringCellValue().trim();
-
-                    Section section = sectionRepo
-                            .findBySectionCodeIgnoreCase(sectionCode)
-                            .orElseThrow(() -> new IllegalArgumentException("Section not found: " + sectionCode));
-                    ClassRoom room = classRoomRepo
-                            .findClassRoomByClassroomIdEqualsIgnoreCase(roomCode)
-                            .orElseThrow(() -> new IllegalArgumentException("Classroom not found: " + roomCode));
-
-                    DayOfWeek day = DayOfWeek.valueOf(dayStr);
-                    Lesson.LessonType type = Lesson.LessonType.valueOf(typeStr);
-
-                    String[] startTokens = startTimeStr.split(":");
-                    String[] endTokens   = endTimeStr.split(":");
-                    LocalTime startTime = LocalTime.of(
-                            Integer.parseInt(startTokens[0]), Integer.parseInt(startTokens[1]));
-                    LocalTime endTime = LocalTime.of(
-                            Integer.parseInt(endTokens[0]),   Integer.parseInt(endTokens[1]));
-
-                    // --- load existing lessons for both section/day and room/day ---
-                    List<Lesson> existingSection = lessonRepo
-                            .findBySection_SectionCodeIgnoreCaseAndDay(sectionCode, day);
-                    List<Lesson> existingRoom = lessonRepo
-                            .findByLessonRoom_ClassroomIdEqualsIgnoreCaseAndDay(roomCode, day);
-
-                    List<Lesson> existing = new ArrayList<>();
-                    existing.addAll(existingSection);
-                    existing.addAll(existingRoom);
-
-                    // --- build and check new chunks in a temp list ---
-                    List<Lesson> rowChunks = new ArrayList<>();
-                    boolean conflict = false;
-                    LocalTime cursor = startTime;
-
-                    while (!cursor.plusMinutes(50).isAfter(endTime)) {
-                        LocalTime slotStart = cursor;
-                        LocalTime slotEnd   = cursor.plusMinutes(50);
-
-                        // conflict if overlaps any existing lesson (section OR room)
-                        if (existing.stream().anyMatch(l -> {
-                            LocalTime exStart = LocalTime.of(
-                                    l.getDuration().getStart().getHour(),
-                                    l.getDuration().getStart().getMinute());
-                            LocalTime exEnd = LocalTime.of(
-                                    l.getDuration().getFinish().getHour(),
-                                    l.getDuration().getFinish().getMinute());
-                            return slotStart.isBefore(exEnd) && exStart.isBefore(slotEnd);
-                        })) {
-                            failed.add(new FailedRowInfo(
-                                    row.getRowNum(),
-                                    "Time conflict on " + slotStart + "–" + slotEnd
-                            ));
-                            conflict = true;
-                            break;
-                        }
-
-                        // no conflict → create chunk
-                        Date s = new Date(null, null, null, slotStart.getHour(), slotStart.getMinute());
-                        Date f = new Date(null, null, null, slotEnd.getHour(),   slotEnd.getMinute());
-                        Lesson lesson = new Lesson();
-                        lesson.setSection(section);
-                        lesson.setLessonRoom(room);
-                        lesson.setLessonType(type);
-                        lesson.setDay(day);
-                        lesson.setDuration(new Event(s, f));
-
-                        rowChunks.add(lesson);
-                        existing.add(lesson);            // so subsequent slots see it
-                        cursor = slotEnd.plusMinutes(10); // advance with break
-                    }
-
-                    // if no conflicts, add this row’s chunks to the master list
-                    if (!conflict) {
-                        toSave.addAll(rowChunks);
-                    }
-
-                } catch (Exception e) {
-                    failed.add(new FailedRowInfo(
-                            row.getRowNum(),
-                            e.getClass().getSimpleName() + ": " + e.getMessage()
-                    ));
-                }
-            }
-        }
-
-        if (!toSave.isEmpty()) {
-            lessonRepo.saveAll(toSave);
-        }
-
-        return Map.of(
-                "successCount", toSave.size(),
-                "failedCount",  failed.size(),
-                "failedRows",   failed
-        );
-    }
-*/
-
     @Override
     public List<LessonDto> getAllLessons() {
         return lessonRepo.findAll().stream()
@@ -464,6 +347,7 @@ while (!cursor.plusMinutes(50).isAfter(endTime)) {
         if (!lessonRepo.existsById(id)) {
             throw new NoSuchElementException("Lesson not found with id: " + id);
         }
+        log.info("Lesson deletion", "Lesson with id: " + id + " is deleted.");
         lessonRepo.deleteById(id);
     }
 
@@ -477,7 +361,7 @@ while (!cursor.plusMinutes(50).isAfter(endTime)) {
                 classRoomRepo.findClassRoomByClassroomIdEqualsIgnoreCase(dto.getClassroomId()).orElse(null)
         );
         lesson.setLessonType(Lesson.LessonType.valueOf(dto.getLessonType()));
-
+        log.info("Lesson update", "Lesson with id: " + id + " is updated");
         return convertToDto(lessonRepo.save(lesson));
     }
 
@@ -519,219 +403,3 @@ while (!cursor.plusMinutes(50).isAfter(endTime)) {
         );
     }
 }
-
-//    @Override
-//    public LessonDto createLesson(LessonDto dto) {
-//        EventDto duration = dto.getDuration();
-//
-//        java.time.LocalTime startTime = java.time.LocalTime.of(
-//                duration.getStart().getHour(),
-//                duration.getStart().getMinute()
-//        );
-//        java.time.LocalTime endTime = java.time.LocalTime.of(
-//                duration.getFinish().getHour(),
-//                duration.getFinish().getMinute()
-//        );
-//
-//        Section section = sectionRepo.findBySectionCodeIgnoreCase(dto.getSectionId())
-//                .orElseThrow(() -> new IllegalArgumentException("Section not found"));
-//        ClassRoom room = classRoomRepo.findClassRoomByClassroomIdEqualsIgnoreCase(dto.getClassroomId())
-//                .orElse(null);
-//        Lesson.LessonType type = Lesson.LessonType.valueOf(dto.getLessonType());
-//        DayOfWeek day = DayOfWeek.valueOf(dto.getDay().toUpperCase());
-//
-//        // Create and store only the first 50-minute lesson
-//        if (startTime.plusMinutes(50).isAfter(endTime)) {
-//            throw new IllegalArgumentException("Duration too short for a 50-minute lesson chunk");
-//        }
-//
-//        java.time.LocalTime chunkEnd = startTime.plusMinutes(50);
-//        Date start = new Date(null, null, null, startTime.getHour(), startTime.getMinute());
-//        Date end = new Date(null, null, null, chunkEnd.getHour(), chunkEnd.getMinute());
-//
-//        Lesson lesson = new Lesson();
-//        lesson.setDuration(new Event(start, end));
-//        lesson.setSection(section);
-//        lesson.setLessonRoom(room);
-//        lesson.setLessonType(type);
-//        lesson.setDay(day);
-//
-//        Lesson saved = lessonRepo.save(lesson);
-//        return convertToDto(saved);
-//    }
-
-//    @Override
-//    public List<LessonDto> createLessonDtoList(LessonDto dto) {
-//        EventDto duration = dto.getDuration();
-//
-//        java.time.LocalTime startTime = java.time.LocalTime.of(
-//                duration.getStart().getHour(),
-//                duration.getStart().getMinute()
-//        );
-//        java.time.LocalTime endTime = java.time.LocalTime.of(
-//                duration.getFinish().getHour(),
-//                duration.getFinish().getMinute()
-//        );
-//
-//        List<Lesson> chunks = new ArrayList<>();
-//
-//        Section section = sectionRepo.findBySectionCodeIgnoreCase(dto.getSectionId())
-//                .orElseThrow(() -> new IllegalArgumentException("Section not found"));
-//        ClassRoom room = classRoomRepo.findClassRoomByClassroomIdEqualsIgnoreCase(dto.getClassroomId())
-//                .orElse(null);
-//        Lesson.LessonType type = Lesson.LessonType.valueOf(dto.getLessonType());
-//        DayOfWeek day = DayOfWeek.valueOf(dto.getDay().toUpperCase());
-//
-//        while (startTime.plusMinutes(50).isBefore(endTime) || startTime.plusMinutes(50).equals(endTime)) {
-//            java.time.LocalTime chunkEnd = startTime.plusMinutes(50);
-//
-//            Date start = new Date(null, null, null, startTime.getHour(), startTime.getMinute());
-//            Date end = new Date(null, null, null, chunkEnd.getHour(), chunkEnd.getMinute());
-//
-//            Lesson lesson = new Lesson();
-//            lesson.setDuration(new Event(start, end));
-//            lesson.setSection(section);
-//            lesson.setLessonRoom(room);
-//            lesson.setLessonType(type);
-//            lesson.setDay(day);
-//
-//            chunks.add(lesson);
-//            startTime = chunkEnd.plusMinutes(10);
-//        }
-//
-//        if (!chunks.isEmpty()) {
-//            lessonRepo.saveAll(chunks);
-//            return chunks.stream().map(this::convertToDto).collect(Collectors.toList());
-//        } else {
-//            throw new IllegalArgumentException("No valid 50-minute lesson chunks could be created");
-//        }
-//    }
-//
-
-/*
-    @Override
-    public Map<String, Object> importLessonsFromExcel(MultipartFile file) throws IOException {
-        List<Lesson> saved = new ArrayList<>();
-        List<FailedRowInfo> failed = new ArrayList<>();
-
-        try (Workbook wb = new XSSFWorkbook(file.getInputStream())) {
-            Sheet sheet = wb.getSheetAt(0);
-            for (Row row : sheet) {
-                if (row.getRowNum() == 0) continue;
-                try {
-                    String sectionCode = row.getCell(0).getStringCellValue().trim();
-                    String dayStr = row.getCell(1).getStringCellValue().trim().toUpperCase();
-                    String startTimeStr = row.getCell(2).getStringCellValue().trim();
-                    String endTimeStr = row.getCell(3).getStringCellValue().trim();
-                    String typeStr = row.getCell(4).getStringCellValue().trim().toUpperCase();
-                    String roomCode = row.getCell(5).getStringCellValue().trim();
-
-                    Section section = sectionRepo.findBySectionCodeIgnoreCase(sectionCode)
-                            .orElseThrow(() -> new IllegalArgumentException("Section not found: " + sectionCode));
-                    ClassRoom room = classRoomRepo.findClassRoomByClassroomIdEqualsIgnoreCase(roomCode).orElse(null);
-                    DayOfWeek day = DayOfWeek.valueOf(dayStr);
-                    Lesson.LessonType type = Lesson.LessonType.valueOf(typeStr);
-
-                    String[] startTokens = startTimeStr.split(":");
-                    String[] endTokens = endTimeStr.split(":");
-                    LocalTime startTime = LocalTime.of(Integer.parseInt(startTokens[0]), Integer.parseInt(startTokens[1]));
-                    LocalTime endTime = LocalTime.of(Integer.parseInt(endTokens[0]), Integer.parseInt(endTokens[1]));
-
-                    LocalDate baseDate = LocalDate.of(2025, 5, 1);
-                    LocalDate lessonDate = baseDate.with(TemporalAdjusters.nextOrSame(java.time.DayOfWeek.valueOf(dayStr)));
-                    int lessonDay = lessonDate.getDayOfMonth();
-
-                    while (!startTime.plusMinutes(50).isAfter(endTime)) {
-                        LocalTime chunkEnd = startTime.plusMinutes(50);
-                        Date start = new Date(lessonDay, 5, 2025, startTime.getHour(), startTime.getMinute());
-                        Date finish = new Date(lessonDay, 5, 2025, chunkEnd.getHour(), chunkEnd.getMinute());
-
-                        Lesson lesson = new Lesson();
-                        lesson.setSection(section);
-                        lesson.setLessonRoom(room);
-                        lesson.setLessonType(type);
-                        lesson.setDay(day);
-                        lesson.setDuration(new Event(start, finish));
-
-                        saved.add(lesson);
-                        startTime = chunkEnd.plusMinutes(10);
-                    }
-
-                } catch (Exception e) {
-                    failed.add(new FailedRowInfo(row.getRowNum(), e.getClass().getSimpleName() + ": " + e.getMessage()));
-                }
-            }
-        }
-
-        if (!saved.isEmpty()) lessonRepo.saveAll(saved);
-
-        return Map.of(
-                "successCount", saved.size(),
-                "failedCount", failed.size(),
-                "failedRows", failed
-        );
-    }*/
-
-//    @Override
-//    public Map<String, Object> importLessonsFromExcel(MultipartFile file) throws IOException {
-//        List<Lesson> saved = new ArrayList<>();
-//        List<FailedRowInfo> failed = new ArrayList<>();
-//
-//        try (Workbook wb = new XSSFWorkbook(file.getInputStream())) {
-//            Sheet sheet = wb.getSheetAt(0);
-//
-//            for (Row row : sheet) {
-//                if (row.getRowNum() == 0) continue;
-//
-//                try {
-//                    String sectionCode = row.getCell(0).getStringCellValue().trim();
-//                    String dayStr = row.getCell(1).getStringCellValue().trim().toUpperCase();
-//                    String startTimeStr = row.getCell(2).getStringCellValue().trim();
-//                    String endTimeStr = row.getCell(3).getStringCellValue().trim();
-//                    String typeStr = row.getCell(4).getStringCellValue().trim().toUpperCase();
-//                    String roomCode = row.getCell(5).getStringCellValue().trim();
-//
-//                    Section section = sectionRepo.findBySectionCodeIgnoreCase(sectionCode)
-//                            .orElseThrow(() -> new IllegalArgumentException("Section not found: " + sectionCode));
-//                    ClassRoom room = classRoomRepo.findClassRoomByClassroomIdEqualsIgnoreCase(roomCode).orElse(null);
-//                    DayOfWeek day = DayOfWeek.valueOf(dayStr);
-//                    Lesson.LessonType type = Lesson.LessonType.valueOf(typeStr);
-//
-//                    String[] startTokens = startTimeStr.split(":");
-//                    String[] endTokens = endTimeStr.split(":");
-//                    java.time.LocalTime startTime = java.time.LocalTime.of(Integer.parseInt(startTokens[0]), Integer.parseInt(startTokens[1]));
-//                    java.time.LocalTime endTime = java.time.LocalTime.of(Integer.parseInt(endTokens[0]), Integer.parseInt(endTokens[1]));
-//
-//                    while (startTime.plusMinutes(50).isBefore(endTime) || startTime.plusMinutes(50).equals(endTime)) {
-//                        java.time.LocalTime chunkEnd = startTime.plusMinutes(50);
-//
-//                        Date start = new Date(null, null, null, startTime.getHour(), startTime.getMinute());
-//                        Date end = new Date(null, null, null, chunkEnd.getHour(), chunkEnd.getMinute());
-//
-//                        Lesson lesson = new Lesson();
-//                        lesson.setSection(section);
-//                        lesson.setLessonRoom(room);
-//                        lesson.setLessonType(type);
-//                        lesson.setDay(day);
-//                        lesson.setDuration(new Event(start, end));
-//
-//                        saved.add(lesson);
-//                        startTime = chunkEnd.plusMinutes(10);
-//                    }
-//
-//                } catch (Exception e) {
-//                    failed.add(new FailedRowInfo(row.getRowNum(), e.getClass().getSimpleName() + ": " + e.getMessage()));
-//                }
-//            }
-//        }
-//
-//        if (!saved.isEmpty()) {
-//            lessonRepo.saveAll(saved);
-//        }
-//
-//        return Map.of(
-//                "successCount", saved.size(),
-//                "failedCount", failed.size(),
-//                "failedRows", failed
-//        );
-//    }

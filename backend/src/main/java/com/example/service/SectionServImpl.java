@@ -56,6 +56,7 @@ public class SectionServImpl implements SectionServ {
     private final TaskMapper taskMapper;
     private final SectionRepo sectionRepo;
     private final CourseOfferingRepo offRepo;
+    private final LogService log;
     @Override
     @Transactional
     public boolean unassignTA(Long taId, String sectionCode) {
@@ -64,21 +65,21 @@ public class SectionServImpl implements SectionServ {
                 .orElseThrow(() -> new IllegalArgumentException("Section not found: " + sectionCode));
 
         TA ta = taService.getTAByIdTa(taId);
-
         if (!section.getAssignedTas().contains(ta)) {
             throw new IllegalStateException(
-                    "TA " + taId + " is not assigned to section " + sectionCode);
-        }
-
+                "TA " + taId + " is not assigned to section " + sectionCode);
+            }
+            
         section.getAssignedTas().remove(ta);
         sectionRepo.save(section);
-
+            
         CourseOffering offering = section.getOffering();
         if (offering.getAssignedTas().contains(ta)) {
-            offering.getAssignedTas().remove(ta);
-            System.out.println("offering.getAssignedTas() = " + offering.getAssignedTas());
+                offering.getAssignedTas().remove(ta);
+                System.out.println("offering.getAssignedTas() = " + offering.getAssignedTas());
         }
-        
+            
+        log.info("TA unassignment", "TA with id: " + taId + " is unassigned from the section:" + sectionCode);
         return true;
     }
     @Override
@@ -153,7 +154,7 @@ public class SectionServImpl implements SectionServ {
             throw new IllegalArgumentException(
                     "Section with code '" + code + "' already exists.");
         }
-
+        log.info("Section creation", "New Section is created.");
         return repo.save(section);
     }
 
@@ -172,10 +173,12 @@ public class SectionServImpl implements SectionServ {
         return repo.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Section not found: " + id));
     }
+
     public Section getBySectionCode(String sectionCode) {
         return repo.findBySectionCodeIgnoreCase(sectionCode)
                 .orElseThrow(() -> new IllegalArgumentException("Section not found: " + sectionCode));
     }
+
     @Override
     public List<Section> getAll() {
         return repo.findAll();
@@ -276,7 +279,7 @@ public class SectionServImpl implements SectionServ {
             repo.saveAll(successful);
             repo.flush();
         }
-
+        log.info("Section Bulk Upload", "");
         Map<String,Object> result = new HashMap<>();
         result.put("successCount", successful.size());
         result.put("failedCount",  failed.size());
@@ -387,7 +390,7 @@ public class SectionServImpl implements SectionServ {
                 }
             }
         }
-
+        log.info("Students of th Section Bulk Upload", "");
         if (!successful.isEmpty()) {
             repo.saveAll(successful);
             repo.flush();
@@ -496,7 +499,7 @@ public class SectionServImpl implements SectionServ {
                 }
             }
         }
-
+        log.info("Instructor and Section Bulk Upload", "");
         if (!successful.isEmpty()) {
             // persist both new sections and any coordinator assignments
             repo.saveAll(successful);
@@ -554,7 +557,7 @@ public class SectionServImpl implements SectionServ {
             offering.getAssignedTas().add(ta);
             System.out.println("offering.getAssignedTas() = " + offering.getAssignedTas());
         }
-        
+        log.info("TA assignment", "TA with id: " + taId + " is assigned to the section:" + sectionCode);
         //offering.setAssignedTas(offering.getAssignedTas());
         return true;
     }

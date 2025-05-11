@@ -8,6 +8,6 @@ import org.springframework.stereotype.Repository;
 import com.example.entity.Requests.ProctorTaInFaculty;
 
 @Repository
-public interface ProctorTaInFacultyRepo extends JpaRepository<ProctorTaInFaculty, Integer>{
+public interface ProctorTaInFacultyRepo extends JpaRepository<ProctorTaInFaculty, Long>{
     List<ProctorTaInFaculty> findByReceiver_IdAndIsPendingTrueAndIsApprovedFalseAndIsRejectedFalse(Long receiverId);
 }
