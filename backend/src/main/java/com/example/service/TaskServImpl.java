@@ -485,7 +485,7 @@ public class TaskServImpl implements TaskServ {
 
         Section section = courseOfferingServ.getSectionByNumber(courseCode, Integer.parseInt(sectionCode));
         for (TA ta : section.getAssignedTas()){
-            if (ta.isActive() && !ta.isDeleted() && !hasDutyOrLessonOrExam(ta, task.getDuration()))
+            if (ta.isActive() && !ta.isDeleted() && availabilityChecker.isAvailable(ta, task.getDuration()))
             {
                 TaDto taDto = new TaDto();
                 taDto.setId(ta.getId());
@@ -503,7 +503,7 @@ public class TaskServImpl implements TaskServ {
        // DayOfWeek currentDow  = DayOfWeek.valueOf(currentDate.getDayOfWeek().name());
 
         for (TaTask taTask : ta.getTaTasks()) {
-            if (taTask.getTask().getDuration().has(duration) && !taTask.getTask().getStatus().equals(TaskState.DELETED)) {
+            if (availabilityChecker.isAvailable(ta, duration) && !taTask.getTask().getStatus().equals(TaskState.DELETED)) {
                 return true;
             }
         }
