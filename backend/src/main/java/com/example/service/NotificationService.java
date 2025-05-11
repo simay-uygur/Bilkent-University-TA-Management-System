@@ -41,6 +41,14 @@ public class NotificationService {
         return notification;
     }
 
+    public Notification createNotificationWithoutMail(String receiverName, String title, String text) {
+        Notification notification = new Notification(title, text, receiverName, false, false, LocalDateTime.now()
+        );
+        log.info("NotificationService", "Notification created for: " + receiverName); 
+        notificationRepos.save(notification);
+        return notification;
+    }
+
     /**
      * Deletes a notification by its ID.
      *

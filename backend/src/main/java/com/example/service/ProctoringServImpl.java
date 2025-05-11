@@ -33,18 +33,19 @@ public class ProctoringServImpl implements ProctoringServ{
     private final CourseOfferingServ courseOfferingServ;
     private final ExamRepo examRepo;
     private final TARepo taRepo;
-    TaAvailabilityChecker availabilityChecker;
+    private final TaAvailabilityChecker availabilityChecker;
     @Override
     @Async("setExecutor")
     public CompletableFuture<List<ProctoringDto>> getProctoringInfo(Integer examId, String courseCode) {
         List<ProctoringDto> availableTas = new ArrayList<>();
         Exam exam = examRepo.findById(examId).orElseThrow(() -> new RuntimeException("Exam not found"));
         Event examDuration = exam.getDuration();
-        //List<TA> tas = offering.getAssignedTas();
-        List<TA> tas = taRepo.findAll();
+        String[] parts = courseCode.split("-");
+        List<TA> tas = taRepo.findAllByDepartment(parts[0]);
+        //List<TA> tas = taRepo.findAll();
         for (TA ta : tas) {
             if (ta.isActive() && !ta.isDeleted() && 
-                !availabilityChecker.isAvailable(ta, examDuration)) { // should be checked if it works
+                availabilityChecker.isAvailable(ta, examDuration)) { // should be checked if it works
                 ProctoringDto proctoringDto = new ProctoringDto();
                 proctoringDto.setTaId(ta.getId());
                 proctoringDto.setName(ta.getName());
