@@ -11,6 +11,7 @@ import com.example.entity.Actors.User;
 import com.example.entity.Exams.Exam;
 import com.example.entity.General.Date;
 import com.example.entity.General.Faculty;
+import com.example.entity.Requests.PreferTasToCourse;
 import com.example.entity.Requests.ProctorTaFromFaculties;
 import com.example.entity.Requests.ProctorTaFromFacultiesDto;
 import com.example.entity.Requests.ProctorTaFromOtherFaculty;
@@ -22,6 +23,7 @@ import com.example.repo.ExamRepo;
 import com.example.repo.FacultyRepo;
 import com.example.repo.RequestRepos.ProctorTaFromFacultiesRepo;
 import com.example.repo.RequestRepos.ProctorTaFromOtherFacultyRepo;
+import com.example.service.LogService;
 import com.example.repo.UserRepo;
 
 import lombok.RequiredArgsConstructor;
@@ -36,6 +38,7 @@ public class ProctorTaFromOtherFacultiesServImpl implements ProctorTaFromFaculti
     private final FacultyRepo facultyRepo;
     private final ExamRepo examRepo;
     private final DeanOfficeRepo deanRepo;
+    private final LogService log;
 
     @Async("setExecutor")
     @Override
@@ -75,20 +78,28 @@ public class ProctorTaFromOtherFacultiesServImpl implements ProctorTaFromFaculti
             child.setProctorTaFromFaculties(parent);
             parent.getProctorTaFromOtherFacs().add(child);
         }
-
+        log.info("Prefer Tas from other Faculties Request creation","Dean Office member with id: " + senderId + " is sent to other Faculties");
         fromFacRepo.save(parent); // save parent again to update the relationship
     }
 
     @Override
     public void approveProctorTaFromFacultiesRequest(Long requestId, Long approverId) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'approveProctorTaFromFacultiesRequest'");
+        ProctorTaFromFaculties req = fromFacRepo.findById(requestId).orElseThrow(() -> new GeneralExc("There is no such leave request."));
+        req.setApproved(true);
+        req.setRejected(false);
+        req.setPending(false);
+        log.info("Proctor TAs from other Faculties Request Finish","Proctor TAs from other Faculties Request with id: " +requestId+ " is finished by " + " Dean Office member with id: " + approverId);
+        fromFacRepo.save(req);
     }
 
     @Override
     public void rejectProctorTaFromFacultiesRequest(Long requestId, Long approverId) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'rejectProctorTaFromFacultiesRequest'");
+        ProctorTaFromFaculties req = fromFacRepo.findById(requestId).orElseThrow(() -> new GeneralExc("There is no such leave request."));
+        req.setApproved(false);
+        req.setRejected(true);
+        req.setPending(false);
+        log.info("Proctor TAs from other Faculties Request Finish","Proctor TAs from other Faculties Request with id: " +requestId+ " is finished by " + " Dean Office member with id: " + approverId);
+        fromFacRepo.save(req);
     }
 
     @Override

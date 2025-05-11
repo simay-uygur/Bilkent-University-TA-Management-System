@@ -9,6 +9,7 @@ import com.example.entity.Courses.Department;
 import com.example.entity.Exams.Exam;
 import com.example.entity.General.Date;
 import com.example.entity.General.Faculty;
+import com.example.entity.Requests.ProctorTaFromFaculties;
 import com.example.entity.Requests.ProctorTaInDepartment;
 import com.example.entity.Requests.ProctorTaInDepartmentDto;
 import com.example.exception.GeneralExc;
@@ -18,6 +19,7 @@ import com.example.repo.FacultyRepo;
 import com.example.repo.InstructorRepo;
 import com.example.repo.UserRepo;
 import com.example.repo.RequestRepos.ProctorTaInDepartmentRepo;
+import com.example.service.LogService;
 
 import lombok.RequiredArgsConstructor;
 
@@ -30,7 +32,7 @@ public class ProctorTaInDepartmentServImpl implements ProctorTaInDepartmentServ{
     private final ExamRepo examRepo;
     private final InstructorRepo instrRepo;
     private final DepartmentRepo depRepo;
-
+    private final LogService log;
     @Override
     public void createProctorTaInDepartmentRequest(ProctorTaInDepartmentDto dto, Long senderId) {
         Instructor sender = instrRepo.findById(dto.getInstrId())
@@ -59,19 +61,27 @@ public class ProctorTaInDepartmentServImpl implements ProctorTaInDepartmentServ{
     }
 
     @Override
-    public void approveProctorTaInDepartmentRequest(Long requestId, Long approverId) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'approveProctorTaInFacultyRequest'");
+    public void approveProctorTaInDepartmentRequest(Long requestId, String approverId) {
+        ProctorTaInDepartment req = proctorTaInFacultyRepo.findById(requestId).orElseThrow(() -> new GeneralExc("There is no such leave request."));
+        req.setApproved(true);
+        req.setRejected(false);
+        req.setPending(false);
+        log.info("Proctor TAs In Department Request Finish","Proctor TAs In Department Request with id: " +requestId+ " is finished by " + " Department with code: " + approverId);
+        proctorTaInFacultyRepo.save(req);
     }
 
     @Override
-    public void rejectProctorTaInDepartmentRequest(Long requestId, Long approverId) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'rejectProctorTaInFacultyRequest'");
+    public void rejectProctorTaInDepartmentRequest(Long requestId, String approverId) {
+        ProctorTaInDepartment req = proctorTaInFacultyRepo.findById(requestId).orElseThrow(() -> new GeneralExc("There is no such leave request."));
+        req.setApproved(false);
+        req.setRejected(true);
+        req.setPending(false);
+        log.info("Proctor TAs In Department Request Finish","Proctor TAs In Department Request with id: " +requestId+ " is finished by " + " Department with code: " + approverId);
+        proctorTaInFacultyRepo.save(req);
     }
 
     @Override
-    public void cancelProctorTaInDepartmentRequest(Long requestId, Long senderId) {
+    public void cancelProctorTaInDepartmentRequest(Long requestId, String senderId) {
         // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'cancelProctorTaInFacultyRequest'");
     }

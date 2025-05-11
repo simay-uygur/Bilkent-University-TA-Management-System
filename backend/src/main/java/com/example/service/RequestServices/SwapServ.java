@@ -1,7 +1,9 @@
 package com.example.service.RequestServices;
 
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
+import com.example.dto.SwapOptionDto;
 import com.example.entity.Requests.SwapDto;
 
 public interface SwapServ {
@@ -11,4 +13,5 @@ public interface SwapServ {
     public void cancelSwapRequest(Long requestId, Long senderId);
     public void updateSwapRequest(SwapDto dto, Long requestId, Long senderId);
     public void getSwapRequestById(Long requestId, Long userId);
+    public CompletableFuture<List<SwapOptionDto>> findSwapCandidates(Long senderId, int senderExamId);
 }

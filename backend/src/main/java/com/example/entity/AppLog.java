@@ -30,7 +30,7 @@ public class AppLog {
     @Column(nullable = false, length = 10)
     private String level;
 
-    /** Log kaynağı: LeaveService, TourController … */
+    
     @Column(nullable = false, length = 60)
     private String source;
 

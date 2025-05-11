@@ -1,13 +1,18 @@
 package com.example.service.RequestServices;
 
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
+import java.util.stream.Collectors;
 
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import com.example.dto.SwapOptionDto;
 import com.example.entity.Actors.TA;
 import com.example.entity.Exams.Exam;
 import com.example.entity.General.Date;
+import com.example.entity.General.Event;
 import com.example.entity.Requests.Swap;
 import com.example.entity.Requests.SwapDto;
 import com.example.exception.GeneralExc;
@@ -16,9 +21,9 @@ import com.example.repo.ExamRepo;
 import com.example.repo.RequestRepos.SwapRepo;
 import com.example.repo.TARepo;
 import com.example.repo.UserRepo;
+import com.example.service.LogService;
 import com.example.service.TaskServ;
 
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -30,6 +35,7 @@ public class SwapServImpl implements SwapServ{
     private final ExamRepo examRepo;
     private final TARepo taRepo;
     private final TaskServ taskServ;
+    private final LogService log;
 
     @Async("setExecutor")
     @Override
@@ -58,7 +64,7 @@ public class SwapServImpl implements SwapServ{
         req.setSender(sender);
         req.setReceiver(receiver);
         //req.setExam(exam);
-
+        log.info("Swap Request Creation","TA with id: " + senderId +" wants to swap proctoring with the another TA with id: " + dto.getReceiverId());
         swapRepo.saveAndFlush(req);
         return CompletableFuture.completedFuture(true);
     }
@@ -102,6 +108,7 @@ public class SwapServImpl implements SwapServ{
 
         req.setApproved(true);
         req.setPending(false);
+        log.info("Swap Request Approval","TA with id: " + receiverId +" accepted Swap Request with id: "+requestId);
 
         return true;
     }
@@ -113,6 +120,7 @@ public class SwapServImpl implements SwapServ{
         req.setApproved(false);
         req.setRejected(true);
         req.setPending(false);
+        log.info("Swap Request Rejection","TA with id: " + receiverId +" rejected Swap Request with id: "+requestId);
         swapRepo.save(req);
     }
 
@@ -134,4 +142,39 @@ public class SwapServImpl implements SwapServ{
         throw new UnsupportedOperationException("Unimplemented method 'getSwapRequestById'");
     }
     
+    @Async("setExecutor")
+    @Override
+    @Transactional(readOnly = true)
+    public CompletableFuture<List<SwapOptionDto>> findSwapCandidates(Long senderId, int senderExamId) {
+        TA sender = taRepo.findById(senderId)
+                          .orElseThrow(() -> new GeneralExc("No such sender TA"));
+        Exam senderExam = examRepo.findById(senderExamId)
+                                  .orElseThrow(() -> new GeneralExc("No such exam"));
+        Event senderDur = senderExam.getDuration();
+
+        return CompletableFuture.completedFuture(taRepo.findByDepartment(sender.getDepartment()).stream()
+        .filter(candidate -> !candidate.getId().equals(senderId))
+        .flatMap(candidate ->
+            candidate.getExams().stream()  // each exam this TA currently proctors
+                .filter(candidateExam -> {
+                    Event candDur = candidateExam.getDuration();
+
+                    // 1) candidate’s duty must NOT overlap sender’s (so candidate free at sender’s time)
+                    boolean candFree = !candDur.has(senderDur);
+                    // 2) sender must NOT have a conflict at candidate’s time
+                    boolean senderFree = !senderDur.has(candDur);
+
+                    return candFree && senderFree;
+                })
+                .map(candidateExam ->
+                    new SwapOptionDto(
+                        candidate.getId(),
+                        candidate.getName() + " " + candidate.getSurname(), 
+                        candidateExam.getExamId(),
+                        candidateExam.getDuration()
+                    )
+                )
+        )
+        .collect(Collectors.toList()));
+    }
 }
