@@ -195,6 +195,11 @@ public class RequestController {
       return new ResponseEntity<>(swapServ.acceptSwapRequest(swapId, taId),HttpStatus.OK);
     }
 
+    @PutMapping("ta/{approverId}/departmentproctor/{reqID}/approve")
+    public void finishTAInDepRequest(@PathVariable Long reqId,@PathVariable String approverId) {
+      proctorTaInDepartmentServ.approveProctorTaInDepartmentRequest(reqId, approverId);
+    }
+
     @PostMapping("/transfer-proctoring")
     public ResponseEntity<Void> sendTransferProctoring(
             @PathVariable Long taId,
