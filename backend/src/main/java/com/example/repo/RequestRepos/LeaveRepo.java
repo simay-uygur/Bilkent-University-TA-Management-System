@@ -14,7 +14,7 @@ public interface LeaveRepo extends JpaRepository<Leave, Long> {
     List<Leave> findAllByReceiverNameAndIsPendingTrue(String id);
     Optional<List<Leave>> findByReceiverName(String name);
     boolean existsBySenderIdAndReceiverNameAndIsRejected(Long senderId, String receiverName, boolean isRejected);
-
+    List<Leave> findByReceiver_NameAndIsPendingTrueAndIsApprovedFalseAndIsRejectedFalse(String depName);
 
 }
 

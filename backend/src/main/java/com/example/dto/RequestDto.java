@@ -20,5 +20,6 @@ public class RequestDto {
     private boolean isApproved = false;
     private boolean isRejected = false;
     private boolean isPending = true;
+    private String courseCode;
     // no TA sender here → breaks recursion
 }
