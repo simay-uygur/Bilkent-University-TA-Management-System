@@ -13,3 +13,39 @@
   .greenButton:hover {
     background-color: #179b20;
   }
+
+  /* Add this to your existing CSS file */
+.button {
+  background-color: #38a169;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 12px 24px;
+  font-size: 16px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 6px rgba(56, 161, 105, 0.2);
+}
+
+.button:hover:not(:disabled) {
+  background-color: #2f855a;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 12px rgba(47, 133, 90, 0.25);
+}
+
+.button:active:not(:disabled) {
+  transform: translateY(1px);
+  box-shadow: 0 2px 4px rgba(47, 133, 90, 0.2);
+}
+
+.disabled {
+  background-color: #a0aec0;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+.disabled:hover {
+  transform: none;
+  box-shadow: none;
+}

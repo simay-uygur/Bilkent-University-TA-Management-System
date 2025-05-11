@@ -201,7 +201,7 @@ public class RequestController {
         return new ResponseEntity<>(exists ? HttpStatus.CREATED : HttpStatus.BAD_REQUEST);
     }
 
-    @PostMapping("/proctor-from-faculties")
+    @PostMapping("/proctor-from-faculties") //Deans to Deans
     public ResponseEntity<Void> sendProctorTaFromFaculties(
             @PathVariable Long taId,
             @RequestBody ProctorTaFromFacultiesDto dto
@@ -211,7 +211,7 @@ public class RequestController {
         return new ResponseEntity<>(exists ? HttpStatus.CREATED : HttpStatus.BAD_REQUEST);
     }
 
-    @PostMapping("/proctor-in-department/{instrId}")
+    @PostMapping("/proctor-in-faculty-department/{instrId}") // Ins to Department
     public ResponseEntity<Void> sendProctorTaInDepartment(
             @PathVariable Long instrId,
             @RequestBody ProctorTaInDepartmentDto dto

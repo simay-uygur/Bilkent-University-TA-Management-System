@@ -1,6 +1,8 @@
 package com.example.controller;
 
+import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -11,12 +13,13 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.example.dto.ExamDto;
+import com.example.dto.SectionDto;
 import com.example.dto.TaDto;
 import com.example.dto.TaTaskDto;
-import com.example.entity.Actors.TA;
 import com.example.entity.General.Date;
 import com.example.entity.Schedule.ScheduleItemDto;
+import com.example.entity.Tasks.TaGradingDto;
+import com.example.entity.Tasks.TaProctorDto;
 import com.example.entity.Tasks.Task;
 import com.example.exception.GeneralExc;
 import com.example.exception.UserNotFoundExc;
@@ -26,6 +29,7 @@ import com.example.service.TAServ;
 import com.example.service.TaskServ;
 
 import lombok.RequiredArgsConstructor;
+
 
 
 @RestController
@@ -53,6 +57,14 @@ public class TA_controller {
     {
         return serv.getTAByIdDto(id);
     }
+   @GetMapping("/api/ta/{id}/sections")
+public ResponseEntity<List<SectionDto>> getTASections(@PathVariable Long id) {
+    return new ResponseEntity<>(serv.getTASections(id), HttpStatus.OK);
+}
+@GetMapping("/api/ta/{id}/task")
+public ResponseEntity<List<TaTaskDto>> getTATasks(@PathVariable Long id) {
+    return new ResponseEntity<>(serv.getTATasks(id), HttpStatus.OK);
+}
 
     @GetMapping("/api/ta/department/{deptName}")
     public ResponseEntity<List<TaDto>> getTAByDepartment(@PathVariable String deptName) 
@@ -111,30 +123,44 @@ public class TA_controller {
         Date date = new Date().currenDate() ;
         return new ResponseEntity<>(serv.getWeeklyScheduleForTA(id, date), HttpStatus.OK);
     }
-    @GetMapping("/api/ta/{taId}/assignedExams")
-    public ResponseEntity<List<ExamDto>> getAssignedExamsOfTa(@PathVariable Long taId) {
-        return new ResponseEntity<>(serv.getAssignedExamsOfTa(taId), HttpStatus.OK);
-    }
 
     @GetMapping("/api/ta/sectionCode/{sectionCode}")
     public ResponseEntity<?> getTAsBySectionCode(@PathVariable String sectionCode) {
         return new ResponseEntity<>(serv.getTAsBySectionCode(sectionCode), HttpStatus.OK);
     }
-}
 
-    /*@GetMapping("/api/ta/{id}/schedule/day") // date in format "yyyy-MM-dd"
-    public ResponseEntity<?> getDaySchedule(@PathVariable Long id, @RequestParam String date) {
-        TA ta = serv.getTAByIdEntity(id);
-        if (ta == null) {
-            throw new TaNotFoundExc(-1l);
-        }
-        date = date.substring(1,date.length()-1) ; // remove quotes
-        return new ResponseEntity<>(serv.getScheduleOfTheDay(ta, date), HttpStatus.OK);
+
+    @GetMapping("api/ta/{taId}/assignedExams")
+    public CompletableFuture<ResponseEntity<List<TaProctorDto>>> getProctoringExams(@PathVariable Long taId) {
+        return serv.getAssignedExamsOfTa(taId).thenApply(proctoringList -> {
+            if (proctoringList == null || proctoringList.isEmpty()) {
+                // nothing found → 400 with empty body (or you could do 204 NO_CONTENT)
+                return ResponseEntity
+                    .badRequest()
+                    .body(Collections.emptyList());
+            }
+            // success → 201 CREATED with the list of TaDto
+            return ResponseEntity
+                    .status(HttpStatus.CREATED)
+                    .body(proctoringList);
+        });
     }
-        
 
-
-
+    @GetMapping("api/ta/{taId}/tasks/grading")
+    public CompletableFuture<ResponseEntity<List<TaGradingDto>>> getGradingOfTheTa(@PathVariable Long taId) {
+        return serv.getGradingsOfTheTa(taId).thenApply(gradingList -> {
+            if (gradingList == null || gradingList.isEmpty()) {
+                // nothing found → 400 with empty body (or you could do 204 NO_CONTENT)
+                return ResponseEntity
+                    .badRequest()
+                    .body(Collections.emptyList());
+            }
+            // success → 201 CREATED with the list of TaDto
+            return ResponseEntity
+                    .status(HttpStatus.CREATED)
+                    .body(gradingList);
+        });
+    }
 }
 /*{
   "task_type" : "Lab",

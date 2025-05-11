@@ -1,4 +1,323 @@
-/* src/pages/TaDetailedPage.module.css */
+.pageWrapper {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 24px;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+}
+
+.headerRow {
+  display: flex;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.heading {
+  font-size: 24px;
+  font-weight: 600;
+  color: #333;
+  margin-left: 16px;
+}
+
+/* Profile card styling */
+.profileCard {
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  padding: 24px;
+  margin-bottom: 24px;
+}
+
+.profileHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.profileName {
+  font-size: 24px;
+  font-weight: 600;
+  margin: 0;
+  color: #1a202c;
+}
+
+.profileBadge {
+  background: #ebf4ff;
+  color: #3182ce;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.profileDetails {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 24px;
+}
+
+.detailItem {
+  display: flex;
+  flex-direction: column;
+}
+
+.detailLabel {
+  font-size: 14px;
+  color: #718096;
+  margin-bottom: 4px;
+}
+
+.detailValue {
+  font-size: 18px;
+  font-weight: 500;
+  color: #2d3748;
+}
+
+/* Card and table styling */
+.card {
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  margin-bottom: 24px;
+  overflow: hidden;
+}
+
+.tableHeading {
+  font-size: 18px;
+  font-weight: 600;
+  padding: 16px 24px;
+  margin: 0;
+  background: #f7fafc;
+  border-bottom: 1px solid #e2e8f0;
+  color: #2d3748;
+}
+
+.tableContainer {
+  overflow-x: auto;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.table th {
+  background: #f7fafc;
+  color: #4a5568;
+  font-weight: 600;
+  text-align: left;
+  padding: 16px 24px;
+  font-size: 14px;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.table td {
+  padding: 16px 24px;
+  border-bottom: 1px solid #edf2f7;
+  color: #4a5568;
+  font-size: 15px;
+}
+
+.table tr:last-child td {
+  border-bottom: none;
+}
+
+.table tr:hover {
+  background-color: #f7fafc;
+}
+
+/* Status badges */
+.status {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.completed {
+  background-color: #e6fffa;
+  color: #2c7a7b;
+}
+
+.pending {
+  background-color: #fefcbf;
+  color: #975a16;
+}
+
+.active, .ongoing {
+  background-color: #ebf8ff;
+  color: #2b6cb0;
+}
+
+.cancelled {
+  background-color: #fed7d7;
+  color: #c53030;
+}
+
+/* Form elements */
+.formGroup {
+  display: flex;
+  padding: 20px 24px;
+  gap: 16px;
+  border-top: 1px solid #edf2f7;
+}
+
+.input {
+  flex-grow: 1;
+  padding: 10px 16px;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  font-size: 15px;
+  transition: all 0.2s;
+}
+
+.input:focus {
+  outline: none;
+  border-color: #4299e1;
+  box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.1);
+}
+
+.assignButton {
+  background-color: #4299e1;
+  color: white;
+  border: none;
+  padding: 10px 24px;
+  border-radius: 6px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.assignButton:hover:not(:disabled) {
+  background-color: #3182ce;
+}
+
+.assignButton:disabled {
+  background-color: #cbd5e0;
+  cursor: not-allowed;
+}
+
+.actionButton {
+  background-color: #f56565;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 4px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.actionButton:hover {
+  background-color: #e53e3e;
+}
+
+/* Empty state */
+.emptyState {
+  text-align: center;
+  color: #718096;
+  font-style: italic;
+  padding: 24px;
+}
+
+/* Error handling */
+.errorContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 48px;
+  text-align: center;
+}
+
+.errorMessage {
+  color: #e53e3e;
+  font-size: 18px;
+  margin-bottom: 24px;
+}
+
+.retryButton {
+  background-color: #4299e1;
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 6px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.retryButton:hover {
+  background-color: #3182ce;
+}
+
+/* Success banner */
+.successBanner {
+  background-color: #c6f6d5;
+  color: #2f855a;
+  padding: 16px 24px;
+  border-radius: 8px;
+  margin-bottom: 24px;
+  font-weight: 500;
+  animation: fadeIn 0.3s, fadeOut 0.5s 2.5s forwards;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes fadeOut {
+  from { opacity: 1; }
+  to { opacity: 0; visibility: hidden; }
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .pageWrapper {
+    padding: 16px;
+  }
+  
+  .profileHeader {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .profileBadge {
+    margin-top: 8px;
+  }
+  
+  .formGroup {
+    flex-direction: column;
+  }
+  
+  .assignButton {
+    width: 100%;
+    margin-top: 10px;
+  }
+  
+  .card {
+    margin-bottom: 16px;
+  }
+  
+  .tableHeading {
+    padding: 12px 16px;
+  }
+  
+  .table th, .table td {
+    padding: 12px 16px;
+  }
+  
+  .actionButton {
+    padding: 6px 12px;
+  }
+}
+
+
+
+/*
 .pageWrapper {
   padding: 2rem;
 }
@@ -76,3 +395,4 @@
   color: red;
   padding: 1rem;
 }
+ */

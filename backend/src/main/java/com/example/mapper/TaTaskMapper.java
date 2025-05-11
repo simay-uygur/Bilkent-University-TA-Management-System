@@ -16,10 +16,11 @@ public class TaTaskMapper {
         TaTaskDto dto = new TaTaskDto();
         // Map the access type of this TA assignment
         dto.setType(entity.getTask().getTaskType().toString());
-        
+        dto.setTaId(entity.getTaOwner().getId());
         // Derive a human-readable description (e.g., task type and section)
         Task task = entity.getTask();
         if (task != null) {
+            dto.setTaskId(task.getTaskId());
             dto.setDescription(
                 task.getTaskType() != null
                     ? task.getTaskType().name() + " (Section " + task.getSection().toString() + ")"
